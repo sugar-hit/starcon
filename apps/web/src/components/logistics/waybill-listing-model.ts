@@ -63,7 +63,9 @@ export interface WaybillListParams {
  * <b>没有</b>隐式索引签名，直接传进去会报「不能赋给 Record<string, ...>」。
  */
 function query(params: object): string {
-  const parts = Object.entries(params as Record<string, string | number | boolean | undefined | null>)
+  const parts = Object.entries(
+    params as Record<string, string | number | boolean | undefined | null>,
+  )
     .filter(([, v]) => v !== undefined && v !== null && `${v}` !== '')
     .map(([k, v]) => `${k}=${encodeURIComponent(String(v))}`);
   return parts.length ? `?${parts.join('&')}` : '';

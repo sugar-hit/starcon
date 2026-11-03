@@ -204,7 +204,10 @@ export function buildPreviewRequest(draft: MigrationDraft): MigrationPreviewRequ
   const filter = buildFilterRequest(draft);
   if (!filter) return null;
   if (draft.targetShopIds.length === 0) return null;
-  return { filter, targets: draft.targetShopIds.map((id) => ({ shopId: id, marketplaceId: null })) };
+  return {
+    filter,
+    targets: draft.targetShopIds.map((id) => ({ shopId: id, marketplaceId: null })),
+  };
 }
 
 /** 草稿 → 搬迁请求。 */
@@ -250,7 +253,9 @@ export function riskLevelLabel(level: string): string {
   }
 }
 
-export function riskLevelTone(level: string): 'neutral' | 'info' | 'warning' | 'danger' | 'success' {
+export function riskLevelTone(
+  level: string,
+): 'neutral' | 'info' | 'warning' | 'danger' | 'success' {
   switch (level) {
     case 'LOW':
       return 'success';
@@ -313,10 +318,7 @@ export function batchStateLabel(state: string): string {
 }
 
 /** 取筛选说明里某一个维度的报告。 */
-export function dimensionReport(
-  explanation: MigrationFilterExplanation | null,
-  dimension: string,
-) {
+export function dimensionReport(explanation: MigrationFilterExplanation | null, dimension: string) {
   if (!explanation) return null;
   return explanation.dimensions.find((d) => d.dimension === dimension) ?? null;
 }
@@ -324,7 +326,8 @@ export function dimensionReport(
 /** 类目选项的显示名（类目路径优先，没有路径时退回平台类目 ID）。 */
 export function categoryOptionLabel(option: MigrationCategoryOption): string {
   if (option.categoryPath && option.categoryPath.trim() !== '') return option.categoryPath;
-  if (option.platformCategoryId && option.platformCategoryId.trim() !== '') return option.platformCategoryId;
+  if (option.platformCategoryId && option.platformCategoryId.trim() !== '')
+    return option.platformCategoryId;
   return '（未登记类目）';
 }
 
@@ -376,11 +379,15 @@ export async function fetchShops(): Promise<ShopView[]> {
   return api<ShopView[]>('channel/shops');
 }
 
-export async function previewMigration(body: MigrationPreviewRequest): Promise<ListingMigrationPreview> {
+export async function previewMigration(
+  body: MigrationPreviewRequest,
+): Promise<ListingMigrationPreview> {
   return api<ListingMigrationPreview>('channel/listing-migrations/preview', 'POST', body);
 }
 
-export async function executeMigration(body: MigrationExecuteRequest): Promise<ListingMigrationBatchRow> {
+export async function executeMigration(
+  body: MigrationExecuteRequest,
+): Promise<ListingMigrationBatchRow> {
   return api<ListingMigrationBatchRow>('channel/listing-migrations', 'POST', body);
 }
 
@@ -388,9 +395,7 @@ export async function fetchMigrationBatches(): Promise<ListingMigrationBatchRow[
   return api<ListingMigrationBatchRow[]>('channel/listing-migrations');
 }
 
-export async function fetchMigrationItems(
-  batchId: string,
-): Promise<ListingMigrationItemRow[]> {
+export async function fetchMigrationItems(batchId: string): Promise<ListingMigrationItemRow[]> {
   return api<ListingMigrationItemRow[]>(`channel/listing-migrations/${batchId}/items`);
 }
 

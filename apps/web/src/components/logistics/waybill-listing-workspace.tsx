@@ -155,9 +155,10 @@ export function WaybillListingWorkspace() {
     void load();
   }, [load]);
 
-  const gaps = useMemo(() => (capabilities ? capabilities.dimensions.filter((d) => !d.available) : []), [
-    capabilities,
-  ]);
+  const gaps = useMemo(
+    () => (capabilities ? capabilities.dimensions.filter((d) => !d.available) : []),
+    [capabilities],
+  );
 
   const missingStatuses = useMemo(
     () => (options ? unavailableStatuses(options.statuses) : []),
@@ -215,8 +216,7 @@ export function WaybillListingWorkspace() {
               {gaps.map((d) => (
                 <Notice key={d.dimension} tone="warning" title={d.description}>
                   {d.source}
-                  <br />
-                  归 <code>{d.ownerModule}</code>；{d.impact}
+                  <br />归 <code>{d.ownerModule}</code>；{d.impact}
                 </Notice>
               ))}
               {gaps.length === 0 && <p className="text-sm">当前没有缺口。</p>}
@@ -531,7 +531,8 @@ export function WaybillListingWorkspace() {
                   上一页
                 </Button>
                 <span className="text-muted-foreground text-xs">
-                  第 {page.page + 1} / {Math.max(page.totalPages, 1)} 页 · 共 {page.totalElements} 张
+                  第 {page.page + 1} / {Math.max(page.totalPages, 1)} 页 · 共 {page.totalElements}{' '}
+                  张
                 </span>
                 <Button
                   variant="outline"
@@ -565,7 +566,7 @@ function Row(props: { row: WaybillListRow; checked: boolean; onToggle: () => voi
       </td>
       <td className="p-2 font-mono">
         {row.waybillNo || <span className="text-muted-foreground">尚未取号</span>}
-        <div className="text-muted-foreground text-xs font-sans">{row.requestNo}</div>
+        <div className="text-muted-foreground font-sans text-xs">{row.requestNo}</div>
       </td>
       <td className="p-2">
         {row.salesOrderNo}

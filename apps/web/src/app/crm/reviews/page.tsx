@@ -30,9 +30,9 @@ export default function CrmReviewsPage() {
       <header className="space-y-1">
         <h1 className="text-copy-20 font-semibold">评价列表</h1>
         <p className="text-muted-foreground text-copy-13">
-          汇总各店铺评价：星级、内容、变体、图片、平台时间、关联订单、是否已回复，
-          并给出<strong>店铺评分汇总</strong>（趋势 · 分布 · 下滑定位），
-          支持按<strong>星级 / 含图 / 含视频 / 未回复 / 时间范围</strong>筛选与导出。
+          汇总各店铺评价：星级、内容、变体、图片、平台时间、关联订单、是否已回复， 并给出
+          <strong>店铺评分汇总</strong>（趋势 · 分布 · 下滑定位）， 支持按
+          <strong>星级 / 含图 / 含视频 / 未回复 / 时间范围</strong>筛选与导出。
           <strong>评分趋势比单条评价更重要</strong>：连续下滑要先查是产品问题还是履约问题 ——
           所以下滑会按<strong>店铺 / 商品 / 变体</strong>三个维度分别列出来。
         </p>

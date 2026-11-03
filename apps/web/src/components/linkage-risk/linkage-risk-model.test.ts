@@ -135,7 +135,11 @@ describe('16.5.2.2 法人绑定：三种情况文案各不相同', () => {
   it('有名字就显示名字', () => {
     expect(
       legalEntityText(
-        shop({ legalEntityId: 'le-1', legalEntityNameAvailable: true, legalEntityName: '测试法人' }),
+        shop({
+          legalEntityId: 'le-1',
+          legalEntityNameAvailable: true,
+          legalEntityName: '测试法人',
+        }),
       ),
     ).toBe('测试法人');
   });

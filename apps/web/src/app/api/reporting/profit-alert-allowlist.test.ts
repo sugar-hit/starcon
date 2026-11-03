@@ -32,7 +32,10 @@ import { proxy } from '../../../lib/api-proxy';
 const SPEC = JSON.parse(
   readFileSync(
     fileURLToPath(
-      new URL('../../../../../../packages/api-contracts/src/reporting.openapi.json', import.meta.url),
+      new URL(
+        '../../../../../../packages/api-contracts/src/reporting.openapi.json',
+        import.meta.url,
+      ),
     ),
     'utf8',
   ),
@@ -58,10 +61,7 @@ function realCallSites(): string[] {
   for (const path of Object.keys(SPEC.paths)) {
     if (!path.startsWith(MODULE)) continue;
     // 只削**开头那一个斜杠**；`reporting/` 这段服务前缀必须保留。
-    const resolved = path
-      .replace(/^\//, '')
-      .replace('{alertType}', ALERT_TYPE)
-      .replace('{id}', ID);
+    const resolved = path.replace(/^\//, '').replace('{alertType}', ALERT_TYPE).replace('{id}', ID);
     if (resolved.includes('{')) continue;
     found.add(resolved);
   }

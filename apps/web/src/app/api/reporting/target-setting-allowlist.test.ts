@@ -33,7 +33,10 @@ import { proxy } from '../../../lib/api-proxy';
 const SPEC = JSON.parse(
   readFileSync(
     fileURLToPath(
-      new URL('../../../../../../packages/api-contracts/src/reporting.openapi.json', import.meta.url),
+      new URL(
+        '../../../../../../packages/api-contracts/src/reporting.openapi.json',
+        import.meta.url,
+      ),
     ),
     'utf8',
   ),

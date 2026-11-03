@@ -66,7 +66,12 @@ const BUCKETS = [
   { code: 'D31_60', label: '31-60 天', overdueFromDays: 31, overdueToDays: 60, sortOrder: 3 },
 ];
 
-function bucketAmount(code: string, label: string, amount: number, count: number): FinanceAgingBucketAmount {
+function bucketAmount(
+  code: string,
+  label: string,
+  amount: number,
+  count: number,
+): FinanceAgingBucketAmount {
   return { code, label, amount, count };
 }
 
@@ -544,9 +549,7 @@ describe('1.1.3.2 逾期应收清单', () => {
 
   it('争议中的单据带出争议说明', () => {
     const view = buildOverdueView(
-      overduePage([
-        overdueRow({ id: 'a', disputeFlag: true, disputeNote: '平台申诉中' }),
-      ]),
+      overduePage([overdueRow({ id: 'a', disputeFlag: true, disputeNote: '平台申诉中' })]),
     );
     const lines = describeOverdue(view.rows[0]!);
     expect(lines.some((line) => line.includes('平台申诉中'))).toBe(true);
@@ -648,7 +651,9 @@ describe('1.1.3.2 即将到期的供应商应付', () => {
 
   it('窗口可调（默认 7 天）', () => {
     // 基准日 2026-10-24 ⇒ 2026-11-05 是 12 天后：7 天窗口装不下，30 天窗口装得下。
-    const list = unpaidList([payableItem({ payableId: 'a', dueDate: '2026-11-05', daysOverdue: 0 })]);
+    const list = unpaidList([
+      payableItem({ payableId: 'a', dueDate: '2026-11-05', daysOverdue: 0 }),
+    ]);
     expect(DEFAULT_DUE_HORIZON_DAYS).toBe(7);
     expect(buildUpcomingPayables(list, 7).rows).toHaveLength(0);
     expect(buildUpcomingPayables(list, 30).rows).toHaveLength(1);
@@ -700,7 +705,12 @@ describe('1.1.3.2 在途资金占用', () => {
   it('在途未结算资金按币种给出，两套口径原样透传', () => {
     const money = buildInTransitMoney(
       transitSummary([
-        transitCurrency({ currency: 'USD', orderBasisAmount: 1000, settledBasisAmount: 400, inTransitAmount: 600 }),
+        transitCurrency({
+          currency: 'USD',
+          orderBasisAmount: 1000,
+          settledBasisAmount: 400,
+          inTransitAmount: 600,
+        }),
       ]),
     );
     expect(money).toHaveLength(1);
@@ -743,9 +753,7 @@ describe('1.1.3.2 在途资金占用', () => {
   });
 
   it('截断说明与货值说明都写进口径文案', () => {
-    const goods = buildInTransitGoods(
-      projectionPage([projectionRow()], { total: 900 }),
-    );
+    const goods = buildInTransitGoods(projectionPage([projectionRow()], { total: 900 }));
     const lines = describeInTransitGoods(goods);
     expect(lines.some((line) => line.includes('不可判定'))).toBe(true);
     expect(lines.some((line) => line.includes('库存成本列'))).toBe(true);

@@ -358,7 +358,12 @@ export function AnalyticsTargetSettingWorkspace() {
               <option value="ARCHIVED">已归档</option>
             </select>
           </label>
-          <Button variant="outline" size="sm" disabled={loading || busy} onClick={() => void load()}>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={loading || busy}
+            onClick={() => void load()}
+          >
             <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
             重读
           </Button>
@@ -369,7 +374,9 @@ export function AnalyticsTargetSettingWorkspace() {
           {metrics.map((metric) => (
             <div key={metric.key} className="border-border rounded-lg border px-4 py-3">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-copy-14 text-foreground font-medium">{metric.displayName}</span>
+                <span className="text-copy-14 text-foreground font-medium">
+                  {metric.displayName}
+                </span>
                 <Badge tone={metricAvailable(metric) ? 'success' : 'neutral'}>
                   {metricAvailable(metric) ? '可设目标' : '未登记口径'}
                 </Badge>
@@ -387,7 +394,9 @@ export function AnalyticsTargetSettingWorkspace() {
                   ))}
                 </ul>
               ) : (
-                <p className="text-copy-13 text-muted-foreground mt-1">{metric.unavailableReason}</p>
+                <p className="text-copy-13 text-muted-foreground mt-1">
+                  {metric.unavailableReason}
+                </p>
               )}
             </div>
           ))}
@@ -544,8 +553,10 @@ export function AnalyticsTargetSettingWorkspace() {
             <p className="text-copy-13 text-muted-foreground mt-1">
               {previewReconciliationText(preview)}
             </p>
-            <p className="text-copy-13 text-muted-foreground mt-1">{previewRemainderText(preview)}</p>
-            <table className="mt-3 w-full text-copy-13">
+            <p className="text-copy-13 text-muted-foreground mt-1">
+              {previewRemainderText(preview)}
+            </p>
+            <table className="text-copy-13 mt-3 w-full">
               <thead>
                 <tr className="text-muted-foreground text-left">
                   <th className="py-1 pr-3 font-medium">分解项</th>
@@ -572,7 +583,12 @@ export function AnalyticsTargetSettingWorkspace() {
             title="目标清单读不到"
             description={`${error}（这是「读不到」，不是「没有目标」）—— 身份服务 / 商品主数据不可达或没有读权限时就会出现。`}
             action={
-              <Button variant="outline" size="sm" disabled={loading || busy} onClick={() => void load()}>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={loading || busy}
+                onClick={() => void load()}
+              >
                 <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
                 重试
               </Button>
@@ -584,7 +600,10 @@ export function AnalyticsTargetSettingWorkspace() {
       {/* ── 加载态 ─────────────────────────────────────────────────────── */}
       {state === 'loading' && (
         <SectionCard>
-          <EmptyState title="正在读取目标清单…" description="读取期间下面的口径纪律提醒仍然有效。" />
+          <EmptyState
+            title="正在读取目标清单…"
+            description="读取期间下面的口径纪律提醒仍然有效。"
+          />
         </SectionCard>
       )}
 
@@ -655,7 +674,11 @@ export function AnalyticsTargetSettingWorkspace() {
                       </Badge>{' '}
                       {target.baseline.value === null
                         ? '—'
-                        : targetValueText(target.unit, target.baseline.value, target.baseline.currency)}{' '}
+                        : targetValueText(
+                            target.unit,
+                            target.baseline.value,
+                            target.baseline.currency,
+                          )}{' '}
                       （{baselineScopeLabel(target.baseline.scope)}）
                     </span>
                   </div>
@@ -691,7 +714,9 @@ export function AnalyticsTargetSettingWorkspace() {
             <p className="text-copy-13 text-muted-foreground mt-3">
               合计：{currencyTotalsText(list.currencyTotals)}
             </p>
-            <p className="text-copy-13 text-muted-foreground">{currencyTotalsNote(list.currencyTotals)}</p>
+            <p className="text-copy-13 text-muted-foreground">
+              {currencyTotalsNote(list.currencyTotals)}
+            </p>
           </SectionCard>
 
           {selected && (
@@ -705,12 +730,18 @@ export function AnalyticsTargetSettingWorkspace() {
               }
             >
               <div className="text-copy-13 text-muted-foreground space-y-1">
-                <p>目标值 {targetValueText(selected.unit, selected.targetValue, selected.currency)}</p>
+                <p>
+                  目标值 {targetValueText(selected.unit, selected.targetValue, selected.currency)}
+                </p>
                 <p>
                   基线：{baselineLabel(selected.baseline.status)} ·{' '}
                   {selected.baseline.value === null
                     ? '—'
-                    : targetValueText(selected.unit, selected.baseline.value, selected.baseline.currency)}{' '}
+                    : targetValueText(
+                        selected.unit,
+                        selected.baseline.value,
+                        selected.baseline.currency,
+                      )}{' '}
                   （{baselineScopeLabel(selected.baseline.scope)}）
                 </p>
                 <p>{selected.baseline.note}</p>
@@ -720,7 +751,7 @@ export function AnalyticsTargetSettingWorkspace() {
                   </p>
                 )}
               </div>
-              <table className="mt-3 w-full text-copy-13">
+              <table className="text-copy-13 mt-3 w-full">
                 <thead>
                   <tr className="text-muted-foreground text-left">
                     <th className="py-1 pr-3 font-medium">分解项</th>

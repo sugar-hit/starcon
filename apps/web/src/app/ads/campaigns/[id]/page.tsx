@@ -27,11 +27,7 @@ import { AdCampaignDetailWorkspace } from '@/components/ads/ad-campaign-detail';
  * <p>与同卷的 14.1.1.1「活动列表」是一对：那边管「按维度把活动列出来并批量操作」，
  * 这一页管「这一条活动到底怎么了、接下来能动什么」。
  */
-export default function AdCampaignDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function AdCampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   return (
     <div className="space-y-4">

@@ -311,22 +311,22 @@ export function ReviewRequestWorkspace() {
   return (
     <div className="space-y-4">
       {error && (
-        <div className="border-destructive/40 bg-destructive/10 text-destructive rounded-md px-3 py-2 text-copy-13">
+        <div className="border-destructive/40 bg-destructive/10 text-destructive text-copy-13 rounded-md px-3 py-2">
           {error}
         </div>
       )}
       {actionError && (
-        <div className="border-destructive/40 bg-destructive/10 text-destructive rounded-md px-3 py-2 text-copy-13">
+        <div className="border-destructive/40 bg-destructive/10 text-destructive text-copy-13 rounded-md px-3 py-2">
           {actionError}
         </div>
       )}
       {notice && (
-        <div className="border-border bg-muted/40 rounded-md px-3 py-2 text-copy-13">{notice}</div>
+        <div className="border-border bg-muted/40 text-copy-13 rounded-md px-3 py-2">{notice}</div>
       )}
 
       {/* ---------------------------------------------------------- 能力声明 */}
       <SectionCard title="能力声明">
-        <ul className="space-y-2 text-copy-13">
+        <ul className="text-copy-13 space-y-2">
           {(capabilities?.dimensions ?? []).map((dimension) => (
             <li key={dimension.dimension} className="flex flex-wrap items-start gap-2">
               <Badge tone={dimension.available ? 'success' : 'warning'}>
@@ -342,7 +342,7 @@ export function ReviewRequestWorkspace() {
           ))}
         </ul>
         {capabilities?.highlight && (
-          <p className="text-muted-foreground mt-3 text-copy-12">{capabilities.highlight}</p>
+          <p className="text-muted-foreground text-copy-12 mt-3">{capabilities.highlight}</p>
         )}
       </SectionCard>
 
@@ -370,10 +370,10 @@ export function ReviewRequestWorkspace() {
           </div>
         ) : (
           policy && (
-            <div className="space-y-2 text-copy-13">
+            <div className="text-copy-13 space-y-2">
               <p>
-                每买家上限 <strong>{policy.maxPerBuyerPerWindow}</strong> 次 / {policy.windowDays} 天 ·
-                每订单上限 <strong>{policy.maxPerOrder}</strong> 次 · 冷却窗口下限{' '}
+                每买家上限 <strong>{policy.maxPerBuyerPerWindow}</strong> 次 / {policy.windowDays}{' '}
+                天 · 每订单上限 <strong>{policy.maxPerOrder}</strong> 次 · 冷却窗口下限{' '}
                 <strong>{policy.minCooldownHours}</strong> 小时 · 时点下限{' '}
                 <strong>{policy.minDelayHours}</strong> 小时 · 单批上限{' '}
                 <strong>{policy.maxBatchSize}</strong> 条。
@@ -469,7 +469,7 @@ export function ReviewRequestWorkspace() {
           </div>
 
           {ruleProblem && (
-            <p className="border-destructive/40 bg-destructive/10 text-destructive rounded-md px-3 py-2 text-copy-13">
+            <p className="border-destructive/40 bg-destructive/10 text-destructive text-copy-13 rounded-md px-3 py-2">
               {ruleProblem}
             </p>
           )}
@@ -486,7 +486,9 @@ export function ReviewRequestWorkspace() {
             </Button>
             <Button
               onClick={() => void submitSingle()}
-              disabled={busy || !writable || !upstreamCaseId || !shopId || !buyerRef || !!ruleProblem}
+              disabled={
+                busy || !writable || !upstreamCaseId || !shopId || !buyerRef || !!ruleProblem
+              }
               size="sm"
             >
               <ShieldCheck className="mr-1 h-4 w-4" />
@@ -497,10 +499,10 @@ export function ReviewRequestWorkspace() {
           {candidates && (
             <div className="space-y-2">
               <p className="text-muted-foreground text-copy-12">
-                上游共 {candidates.totalElements} 件已签收确认单（来源：10.3.2.2 揽收与签收确认，
-                经 channel 授权 API 读取）。挑一件发起索评：
+                上游共 {candidates.totalElements} 件已签收确认单（来源：10.3.2.2 揽收与签收确认， 经
+                channel 授权 API 读取）。挑一件发起索评：
               </p>
-              <ul className="max-h-64 space-y-1 overflow-auto text-copy-12">
+              <ul className="text-copy-12 max-h-64 space-y-1 overflow-auto">
                 {candidates.items.map((item) => (
                   <li key={item.upstreamCaseId}>
                     <button
@@ -509,8 +511,8 @@ export function ReviewRequestWorkspace() {
                       onClick={() => setUpstreamCaseId(item.upstreamCaseId)}
                       disabled={!writable}
                     >
-                      {item.caseNo} · 订单 {item.salesOrderNo || '（无订单号）'} · {item.carrierCode} ·
-                      签收 {item.deliveredAt}
+                      {item.caseNo} · 订单 {item.salesOrderNo || '（无订单号）'} ·{' '}
+                      {item.carrierCode} · 签收 {item.deliveredAt}
                     </button>
                   </li>
                 ))}
@@ -532,7 +534,11 @@ export function ReviewRequestWorkspace() {
               />
             </Field>
             <Field label="交运批次号（留空 = 不限）">
-              <input className={control} value={batchNo} onChange={(e) => setBatchNo(e.target.value)} />
+              <input
+                className={control}
+                value={batchNo}
+                onChange={(e) => setBatchNo(e.target.value)}
+              />
             </Field>
             <Field label="签收时间窗起点（含）">
               <input
@@ -573,7 +579,7 @@ export function ReviewRequestWorkspace() {
           </Button>
 
           {batch && (
-            <div className="space-y-2 text-copy-12">
+            <div className="text-copy-12 space-y-2">
               <p>{batch.boundaryNote}</p>
               <ul className="max-h-64 space-y-1 overflow-auto">
                 {batch.items.map((item, index) => (
@@ -629,7 +635,7 @@ export function ReviewRequestWorkspace() {
             description="发起一次索评后，这里会出现这条任务；被频次规则拒绝的请求也会落在同一张表里。"
           />
         ) : (
-          <ul className="space-y-2 text-copy-13">
+          <ul className="text-copy-13 space-y-2">
             {rows.map((row) => (
               <li key={row.id} className="border-border rounded-md px-3 py-2">
                 <div className="flex flex-wrap items-center gap-2">
@@ -638,7 +644,7 @@ export function ReviewRequestWorkspace() {
                   </Badge>
                   <button
                     type="button"
-                    className="hover:underline font-medium"
+                    className="font-medium hover:underline"
                     onClick={() => void openDetail(row.id)}
                   >
                     {row.requestNo}
@@ -651,7 +657,7 @@ export function ReviewRequestWorkspace() {
                   </span>
                 </div>
                 {row.status === 'REJECTED' && (
-                  <p className="text-destructive mt-1 text-copy-12">
+                  <p className="text-destructive text-copy-12 mt-1">
                     {rejectCodeLabel(row.rejectCode)}：{row.rejectReason}
                   </p>
                 )}
@@ -664,7 +670,7 @@ export function ReviewRequestWorkspace() {
       {/* ---------------------------------------------------------- 详情 */}
       {detail && (
         <SectionCard title={`索评请求详情 · ${detail.request.requestNo}`}>
-          <div className="space-y-3 text-copy-13">
+          <div className="text-copy-13 space-y-3">
             <p className="text-muted-foreground">
               上游确认单 {detail.request.upstreamCaseNo} · 运单 {detail.request.upstreamWaybillNo} ·
               承运商 {detail.request.upstreamCarrierCode} · 签收 {detail.request.deliveredAt}
@@ -677,7 +683,7 @@ export function ReviewRequestWorkspace() {
                   还没有触达记录。平台侧索评接口**未接入**，只允许登记「人工交接」。
                 </p>
               ) : (
-                <ul className="space-y-1 text-copy-12">
+                <ul className="text-copy-12 space-y-1">
                   {detail.sendRecords.map((record) => (
                     <li key={record.id}>
                       {sendOutcomeLabel(record.status)} · {record.transport} ·{' '}
@@ -688,7 +694,12 @@ export function ReviewRequestWorkspace() {
                 </ul>
               )}
               {writable && detail.request.status !== 'REJECTED' && (
-                <Button onClick={() => void markSent()} size="sm" variant="secondary" className="mt-2">
+                <Button
+                  onClick={() => void markSent()}
+                  size="sm"
+                  variant="secondary"
+                  className="mt-2"
+                >
                   <MessageSquarePlus className="mr-1 h-4 w-4" />
                   登记人工交接（已发出）
                 </Button>
@@ -702,7 +713,7 @@ export function ReviewRequestWorkspace() {
                   还没有回收到的评价。下游 15.2.1.1 评价列表未交付，只能人工登记。
                 </p>
               ) : (
-                <ul className="space-y-1 text-copy-12">
+                <ul className="text-copy-12 space-y-1">
                   {detail.recoveries.map((recovery) => (
                     <li key={recovery.id}>
                       <Star className="mr-1 inline h-3 w-3" />
@@ -713,7 +724,11 @@ export function ReviewRequestWorkspace() {
                 </ul>
               )}
               {writable && detail.request.status !== 'REJECTED' && (
-                <RecoveryForm onSubmit={(rating, content, receivedAt) => void recordRecovery(rating, content, receivedAt)} />
+                <RecoveryForm
+                  onSubmit={(rating, content, receivedAt) =>
+                    void recordRecovery(rating, content, receivedAt)
+                  }
+                />
               )}
             </div>
           </div>
@@ -725,13 +740,13 @@ export function ReviewRequestWorkspace() {
         {!stats ? (
           <p className="text-muted-foreground text-copy-13">统计暂不可用。</p>
         ) : (
-          <div className="space-y-2 text-copy-13">
+          <div className="text-copy-13 space-y-2">
             <p>
-              最近 {stats.scopeDays} 天：索评请求 {stats.totalRequests} 条（已排期 {stats.scheduledCount} ·
-              已发出 {stats.sentCount} · 已取消 {stats.cancelledCount} · 被频次规则拒绝{' '}
-              {stats.rejectedCount}），回收 {stats.recoveryRecords} 条、覆盖 {stats.recoveredRequests}{' '}
-              条请求，回收率 {recoveryRateText(stats.recoveryRate)}，平均星级{' '}
-              {stats.averageRating === null ? '暂无' : stats.averageRating}。
+              最近 {stats.scopeDays} 天：索评请求 {stats.totalRequests} 条（已排期{' '}
+              {stats.scheduledCount} · 已发出 {stats.sentCount} · 已取消 {stats.cancelledCount} ·
+              被频次规则拒绝 {stats.rejectedCount}），回收 {stats.recoveryRecords} 条、覆盖{' '}
+              {stats.recoveredRequests} 条请求，回收率 {recoveryRateText(stats.recoveryRate)}
+              ，平均星级 {stats.averageRating === null ? '暂无' : stats.averageRating}。
             </p>
             <p className="text-muted-foreground text-copy-12">
               星级分布：{ratingDistributionText(stats.ratingDistribution)}
@@ -845,7 +860,11 @@ function RecoveryForm({
           <input className={control} value={content} onChange={(e) => setContent(e.target.value)} />
         </Field>
       </div>
-      <Button onClick={() => onSubmit(Number(rating) || 5, content, receivedAt)} size="sm" variant="secondary">
+      <Button
+        onClick={() => onSubmit(Number(rating) || 5, content, receivedAt)}
+        size="sm"
+        variant="secondary"
+      >
         <AlertTriangle className="mr-1 h-4 w-4" />
         登记评价回收
       </Button>

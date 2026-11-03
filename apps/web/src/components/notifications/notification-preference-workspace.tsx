@@ -64,8 +64,7 @@ function messageOf(error: unknown): string {
 }
 
 export function NotificationPreferenceWorkspace() {
-  const [capabilities, setCapabilities] =
-    useState<NotificationPreferenceCapabilities | null>(null);
+  const [capabilities, setCapabilities] = useState<NotificationPreferenceCapabilities | null>(null);
   const [view, setView] = useState<NotificationPreferenceView | null>(null);
   const [selection, setSelection] = useState<ChannelSelection>({});
   const [windows, setWindows] = useState<string[]>([]);
@@ -191,9 +190,7 @@ export function NotificationPreferenceWorkspace() {
   };
 
   if (loading) {
-    return (
-      <p className="text-copy-13 text-muted-foreground p-8 text-center">正在加载通知偏好…</p>
-    );
+    return <p className="text-copy-13 text-muted-foreground p-8 text-center">正在加载通知偏好…</p>;
   }
 
   if (!view) {
@@ -230,8 +227,8 @@ export function NotificationPreferenceWorkspace() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <p className="text-copy-13 text-muted-foreground">
-          通知偏好决定<b>每一类通知走哪些渠道</b>（站内 / 邮件 / 企业 IM），
-          以及<b>什么时段别来打扰我</b>。它是<b>个人设置</b>，按成员存放 ——
+          通知偏好决定<b>每一类通知走哪些渠道</b>（站内 / 邮件 / 企业 IM）， 以及
+          <b>什么时段别来打扰我</b>。它是<b>个人设置</b>，按成员存放 ——
           同事的偏好与你无关，租户与数据范围全部由服务端按已认证的成员关系判定。
         </p>
         <div className="flex gap-2">
@@ -256,8 +253,8 @@ export function NotificationPreferenceWorkspace() {
           role={item.kind === 'error' ? 'alert' : 'status'}
           className={
             item.kind === 'error'
-              ? 'border-destructive/30 bg-destructive/5 text-destructive rounded-md border p-3 text-copy-12'
-              : 'border-warning/40 bg-warning/5 rounded-md border p-3 text-copy-12'
+              ? 'border-destructive/30 bg-destructive/5 text-destructive text-copy-12 rounded-md border p-3'
+              : 'border-warning/40 bg-warning/5 text-copy-12 rounded-md border p-3'
           }
         >
           {item.text}
@@ -265,7 +262,7 @@ export function NotificationPreferenceWorkspace() {
       ))}
 
       {view.fallbackReasons.length > 0 && (
-        <div className="border-warning/40 bg-warning/5 rounded-md border p-3 text-copy-12">
+        <div className="border-warning/40 bg-warning/5 text-copy-12 rounded-md border p-3">
           <b>存下来的偏好有一部分没被采纳，已按下面这样兜底：</b>
           <ul className="mt-1 list-disc pl-5">
             {view.fallbackReasons.map((reason) => (
@@ -279,25 +276,25 @@ export function NotificationPreferenceWorkspace() {
       <section className="space-y-2">
         <h2 className="text-copy-16 font-semibold">当前生效</h2>
         <div className="flex flex-wrap gap-2">
-          <span className="rounded-md border px-3 py-2 text-copy-12">
+          <span className="text-copy-12 rounded-md border px-3 py-2">
             通知类型 <b className="ml-1">{summary?.typeCount ?? 0}</b> 类
           </span>
-          <span className="rounded-md border px-3 py-2 text-copy-12">
+          <span className="text-copy-12 rounded-md border px-3 py-2">
             关键业务通知 <b className="ml-1">{summary?.mandatoryCount ?? 0}</b> 类
             <span className="text-muted-foreground ml-2">（不允许被完全关闭）</span>
           </span>
-          <span className="rounded-md border px-3 py-2 text-copy-12">
+          <span className="text-copy-12 rounded-md border px-3 py-2">
             只留站内 <b className="ml-1">{summary?.inboxOnlyCount ?? 0}</b> 类
             <span className="text-muted-foreground ml-2">（外部渠道全关）</span>
           </span>
-          <span className="rounded-md border px-3 py-2 text-copy-12">
+          <span className="text-copy-12 rounded-md border px-3 py-2">
             免打扰时段 <b className="ml-1">{summary?.quietWindowCount ?? 0}</b> 段
           </span>
           <span
             className={
               quietNow
-                ? 'border-warning/40 bg-warning/5 rounded-md border px-3 py-2 text-copy-12'
-                : 'rounded-md border px-3 py-2 text-copy-12'
+                ? 'border-warning/40 bg-warning/5 text-copy-12 rounded-md border px-3 py-2'
+                : 'text-copy-12 rounded-md border px-3 py-2'
             }
           >
             现在{' '}
@@ -309,13 +306,14 @@ export function NotificationPreferenceWorkspace() {
           </span>
         </div>
         <p className="text-copy-12 text-muted-foreground">
-          免打扰时段按 <b>{view.timezone}</b> 计算（{describeTimezoneSource(view)}）。
-          免打扰<b>只压制外部渠道</b>（邮件 / 企业 IM），
-          站内通知照常进收件箱 —— 半夜一封邮件才是打扰。
+          免打扰时段按 <b>{view.timezone}</b> 计算（{describeTimezoneSource(view)}）。 免打扰
+          <b>只压制外部渠道</b>（邮件 / 企业 IM）， 站内通知照常进收件箱 —— 半夜一封邮件才是打扰。
           {view.stored ? (
             <>最后保存于 {view.updatedAt ? view.updatedAt.replace('T', ' ').slice(0, 19) : '—'}。</>
           ) : (
-            <>你还没保存过通知偏好，当前显示的是<b>默认值</b>。</>
+            <>
+              你还没保存过通知偏好，当前显示的是<b>默认值</b>。
+            </>
           )}
         </p>
       </section>
@@ -338,9 +336,7 @@ export function NotificationPreferenceWorkspace() {
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-copy-13 font-medium">{setting.label}</span>
                     <span className="text-copy-12 text-muted-foreground">{setting.type}</span>
-                    {setting.mandatory && (
-                      <Badge tone="warning">关键业务通知 · 不可完全关闭</Badge>
-                    )}
+                    {setting.mandatory && <Badge tone="warning">关键业务通知 · 不可完全关闭</Badge>}
                   </div>
                   <div className="mt-2 flex flex-wrap gap-4">
                     {PREFERENCE_CHANNELS.map((code) => {
@@ -352,7 +348,9 @@ export function NotificationPreferenceWorkspace() {
                         <label
                           key={code}
                           className={
-                            locked ? 'text-copy-12 text-muted-foreground flex items-center gap-1' : 'flex items-center gap-1 text-copy-12'
+                            locked
+                              ? 'text-copy-12 text-muted-foreground flex items-center gap-1'
+                              : 'text-copy-12 flex items-center gap-1'
                           }
                         >
                           <input
@@ -389,16 +387,16 @@ export function NotificationPreferenceWorkspace() {
       <section className="space-y-2">
         <h2 className="text-copy-16 font-semibold">免打扰时段</h2>
         <p className="text-copy-12 text-muted-foreground">
-          时段是<b>当地时间</b>（按上面那个时区算），写成「当地几点到几点」，
-          例如 <b>22:00-08:00</b> 表示夜里十点到<b>次日</b>早上八点。
-          时段里<b>不推外部渠道</b>，站内通知照常进收件箱。
+          时段是<b>当地时间</b>（按上面那个时区算），写成「当地几点到几点」， 例如{' '}
+          <b>22:00-08:00</b> 表示夜里十点到<b>次日</b>早上八点。 时段里<b>不推外部渠道</b>
+          ，站内通知照常进收件箱。
         </p>
 
         <div className="rounded-md border p-3">
           <label className="text-copy-12 flex flex-wrap items-center gap-2">
             <span>时区</span>
             <select
-              className="rounded-md border px-2 py-1 text-copy-12"
+              className="text-copy-12 rounded-md border px-2 py-1"
               value={timezone}
               onChange={(event) => setTimezone(event.target.value)}
             >
@@ -446,7 +444,7 @@ export function NotificationPreferenceWorkspace() {
 
         <div className="flex flex-wrap items-center gap-2">
           <input
-            className="rounded-md border px-2 py-1 text-copy-12"
+            className="text-copy-12 rounded-md border px-2 py-1"
             placeholder="22:00-08:00"
             value={windowDraft}
             onChange={(event) => setWindowDraft(event.target.value)}
@@ -475,8 +473,8 @@ export function NotificationPreferenceWorkspace() {
             ))}
           </ul>
           <p className="text-copy-12 text-muted-foreground">
-            这条纪律落在<b>服务端</b>：写入时关掉底线渠道会被拒（400），
-            读回来时底线渠道也一定在 —— 不只是把界面上的复选框置灰。
+            这条纪律落在<b>服务端</b>：写入时关掉底线渠道会被拒（400）， 读回来时底线渠道也一定在 ——
+            不只是把界面上的复选框置灰。
           </p>
           <ul className="space-y-1">
             {capabilities.boundaries.map((line) => (

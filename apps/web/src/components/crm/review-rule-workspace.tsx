@@ -126,23 +126,31 @@ export function ReviewRuleWorkspace() {
     setLoading(true);
     setError(null);
     try {
-      const [caps, shopList, rulePage, templatePage, holidayPage, candidatePage, assignmentPage, effect] =
-        await Promise.all([
-          fetchRuleCapabilities(),
-          fetchRuleShops(),
-          fetchRules({
-            shopId: shopFilter || undefined,
-            logisticsMode: modeFilter || undefined,
-            status: statusFilter || undefined,
-            keyword: keyword || undefined,
-            size: 50,
-          }),
-          fetchTemplates({ size: 50 }),
-          fetchHolidays({ year: holidayYear || undefined, size: 50 }),
-          fetchCandidates({ size: 50 }),
-          fetchAssignments({ size: 50 }),
-          fetchEffectComparison({ days: Number(effectDays) || 30 }),
-        ]);
+      const [
+        caps,
+        shopList,
+        rulePage,
+        templatePage,
+        holidayPage,
+        candidatePage,
+        assignmentPage,
+        effect,
+      ] = await Promise.all([
+        fetchRuleCapabilities(),
+        fetchRuleShops(),
+        fetchRules({
+          shopId: shopFilter || undefined,
+          logisticsMode: modeFilter || undefined,
+          status: statusFilter || undefined,
+          keyword: keyword || undefined,
+          size: 50,
+        }),
+        fetchTemplates({ size: 50 }),
+        fetchHolidays({ year: holidayYear || undefined, size: 50 }),
+        fetchCandidates({ size: 50 }),
+        fetchAssignments({ size: 50 }),
+        fetchEffectComparison({ days: Number(effectDays) || 30 }),
+      ]);
       setCapabilities(caps);
       setShops(shopList);
       setRules(rulePage);
@@ -396,22 +404,22 @@ export function ReviewRuleWorkspace() {
   return (
     <div className="space-y-4">
       {error && (
-        <div className="border-destructive/40 bg-destructive/10 text-destructive rounded-md px-3 py-2 text-copy-13">
+        <div className="border-destructive/40 bg-destructive/10 text-destructive text-copy-13 rounded-md px-3 py-2">
           {error}
         </div>
       )}
       {actionError && (
-        <div className="border-destructive/40 bg-destructive/10 text-destructive rounded-md px-3 py-2 text-copy-13">
+        <div className="border-destructive/40 bg-destructive/10 text-destructive text-copy-13 rounded-md px-3 py-2">
           {actionError}
         </div>
       )}
       {notice && (
-        <div className="border-border bg-muted/40 rounded-md px-3 py-2 text-copy-13">{notice}</div>
+        <div className="border-border bg-muted/40 text-copy-13 rounded-md px-3 py-2">{notice}</div>
       )}
 
       {/* ---------------------------------------------------------- 能力声明 */}
       <SectionCard title="能力声明">
-        <ul className="space-y-2 text-copy-13">
+        <ul className="text-copy-13 space-y-2">
           {(capabilities?.dimensions ?? []).map((dimension) => (
             <li key={dimension.dimension} className="flex flex-wrap items-start gap-2">
               <Badge tone={dimension.available ? 'success' : 'warning'}>
@@ -427,10 +435,10 @@ export function ReviewRuleWorkspace() {
           ))}
         </ul>
         {capabilities?.highlight && (
-          <p className="text-muted-foreground mt-3 text-copy-12">{capabilities.highlight}</p>
+          <p className="text-muted-foreground text-copy-12 mt-3">{capabilities.highlight}</p>
         )}
         {capabilities?.boundaryNote && (
-          <p className="text-muted-foreground mt-1 text-copy-12">{capabilities.boundaryNote}</p>
+          <p className="text-muted-foreground text-copy-12 mt-1">{capabilities.boundaryNote}</p>
         )}
       </SectionCard>
 
@@ -481,7 +489,7 @@ export function ReviewRuleWorkspace() {
           </Button>
 
           {policy && (
-            <div className="border-border space-y-2 rounded-md px-3 py-2 text-copy-13">
+            <div className="border-border text-copy-13 space-y-2 rounded-md px-3 py-2">
               <p className="font-medium">{effectiveSummary(policy)}</p>
               {!policy.ruleId ? (
                 <p className="text-muted-foreground text-copy-12">
@@ -497,10 +505,13 @@ export function ReviewRuleWorkspace() {
                     。顺延口径：先按顺延天数往后挪，再往后找**第一个不是节假日的日子**。
                   </p>
                   <p className="text-muted-foreground text-copy-12">
-                    分到的话术臂：{variant ? `变体 ${variant.variantCode} · ${variant.subject}` : '（没有种子 / 没有启用中的变体）'}
+                    分到的话术臂：
+                    {variant
+                      ? `变体 ${variant.variantCode} · ${variant.subject}`
+                      : '（没有种子 / 没有启用中的变体）'}
                   </p>
                   {policy.variants.length > 0 && (
-                    <ul className="text-muted-foreground space-y-1 text-copy-12">
+                    <ul className="text-muted-foreground text-copy-12 space-y-1">
                       {policy.variants.map((item) => (
                         <li key={item.id}>
                           变体 {item.variantCode} · 权重 {item.weight} · {item.subject}
@@ -570,7 +581,7 @@ export function ReviewRuleWorkspace() {
             description="配一条规则之后，索评才有「什么时候问、问哪个话术臂」可依；没有规则时生效策略是空的。"
           />
         ) : (
-          <ul className="space-y-2 text-copy-13">
+          <ul className="text-copy-13 space-y-2">
             {(rules?.items ?? []).map((rule) => (
               <li key={rule.id} className="border-border rounded-md px-3 py-2">
                 <div className="flex flex-wrap items-center gap-2">
@@ -634,9 +645,7 @@ export function ReviewRuleWorkspace() {
 
         {writable && (
           <div className="border-border mt-4 space-y-3 rounded-md px-3 py-3">
-            <h3 className="font-medium">
-              {editingRuleId ? '编辑索评规则' : '新建索评规则'}
-            </h3>
+            <h3 className="font-medium">{editingRuleId ? '编辑索评规则' : '新建索评规则'}</h3>
             <RuleForm
               draft={ruleDraft}
               setDraft={setRuleDraft}
@@ -673,7 +682,7 @@ export function ReviewRuleWorkspace() {
             description="模板是话术的身份（叫什么、什么语言），变体是内容（A / B 两臂 + 权重）。"
           />
         ) : (
-          <ul className="space-y-2 text-copy-13">
+          <ul className="text-copy-13 space-y-2">
             {(templates?.items ?? []).map((template) => (
               <li key={template.id} className="border-border rounded-md px-3 py-2">
                 <div className="flex flex-wrap items-center gap-2">
@@ -685,11 +694,11 @@ export function ReviewRuleWorkspace() {
                     {template.templateNo} · {template.locale}
                   </span>
                 </div>
-                <ul className="text-muted-foreground mt-1 space-y-1 text-copy-12">
+                <ul className="text-muted-foreground text-copy-12 mt-1 space-y-1">
                   {template.variants.map((item) => (
                     <li key={item.id}>
-                      变体 {item.variantCode} · 权重 {item.weight} · {templateStatusLabel(item.status)} ·{' '}
-                      {item.subject || '（无标题）'}
+                      变体 {item.variantCode} · 权重 {item.weight} ·{' '}
+                      {templateStatusLabel(item.status)} · {item.subject || '（无标题）'}
                       {item.body ? ` · ${item.body}` : ''}
                     </li>
                   ))}
@@ -736,9 +745,7 @@ export function ReviewRuleWorkspace() {
 
         {writable && (
           <div className="border-border mt-4 space-y-3 rounded-md px-3 py-3">
-            <h3 className="font-medium">
-              {editingTemplateId ? '编辑话术模板' : '新建话术模板'}
-            </h3>
+            <h3 className="font-medium">{editingTemplateId ? '编辑话术模板' : '新建话术模板'}</h3>
             <TemplateForm draft={templateDraft} setDraft={setTemplateDraft} />
             <div className="flex gap-2">
               <Button onClick={() => void submitTemplate()} size="sm" disabled={busy}>
@@ -782,9 +789,12 @@ export function ReviewRuleWorkspace() {
             description="节假日是日历概念：填日期即可（结束日期留空 = 单日，填了 = 连休）。"
           />
         ) : (
-          <ul className="space-y-2 text-copy-13">
+          <ul className="text-copy-13 space-y-2">
             {(holidays?.items ?? []).map((holiday) => (
-              <li key={holiday.id} className="border-border flex flex-wrap items-center gap-2 rounded-md px-3 py-2">
+              <li
+                key={holiday.id}
+                className="border-border flex flex-wrap items-center gap-2 rounded-md px-3 py-2"
+              >
                 <Badge tone="warning">{holidayKindLabel(holiday.kind)}</Badge>
                 <span className="font-medium">{holiday.holidayName}</span>
                 <span className="text-muted-foreground">
@@ -831,9 +841,7 @@ export function ReviewRuleWorkspace() {
 
         {writable && (
           <div className="border-border mt-4 space-y-3 rounded-md px-3 py-3">
-            <h3 className="font-medium">
-              {editingHolidayId ? '编辑节假日' : '登记节假日'}
-            </h3>
+            <h3 className="font-medium">{editingHolidayId ? '编辑节假日' : '登记节假日'}</h3>
             <HolidayForm draft={holidayDraft} setDraft={setHolidayDraft} />
             <div className="flex gap-2">
               <Button onClick={() => void submitHoliday()} size="sm" disabled={busy}>
@@ -918,7 +926,7 @@ export function ReviewRuleWorkspace() {
               description="落地记录回答「哪条索评请求用了哪个话术臂」—— 没有它，效果对比无从按 A / B 拆开。"
             />
           ) : (
-            <ul className="space-y-2 text-copy-13">
+            <ul className="text-copy-13 space-y-2">
               {(assignments?.items ?? []).map((assignment) => (
                 <li key={assignment.id} className="border-border rounded-md px-3 py-2">
                   <div className="flex flex-wrap items-center gap-2">
@@ -939,8 +947,9 @@ export function ReviewRuleWorkspace() {
                       详情
                     </Button>
                   </div>
-                  <p className="text-muted-foreground mt-1 text-copy-12">
-                    规则 {assignment.ruleNo}（{assignment.ruleName}）· 延后 {assignment.delayHours} 小时
+                  <p className="text-muted-foreground text-copy-12 mt-1">
+                    规则 {assignment.ruleNo}（{assignment.ruleName}）· 延后 {assignment.delayHours}{' '}
+                    小时
                     {assignment.shiftedDays > 0
                       ? ` · 避开节假日「${assignment.holidayName}」顺延 ${assignment.shiftedDays} 天`
                       : ''}
@@ -955,25 +964,27 @@ export function ReviewRuleWorkspace() {
       {/* ---------------------------------------------------------- 落地详情 */}
       {assignmentDetail && (
         <SectionCard title={`生效策略落地详情 · ${assignmentDetail.requestNo}`}>
-          <div className="space-y-2 text-copy-13">
+          <div className="text-copy-13 space-y-2">
             <p className="text-muted-foreground">
               规则 {assignmentDetail.ruleNo}（{assignmentDetail.ruleName}）· 变体{' '}
-              {assignmentDetail.variantCode || '（无）'} · 模板 {assignmentDetail.templateName || '（无）'}
+              {assignmentDetail.variantCode || '（无）'} · 模板{' '}
+              {assignmentDetail.templateName || '（无）'}
             </p>
             <p className="text-muted-foreground">
               目标店铺 {assignmentDetail.shopName} · 物流方式{' '}
-              {logisticsModeLabel(assignmentDetail.logisticsMode)} · 买家 {assignmentDetail.buyerRef} ·
-              订单 {assignmentDetail.salesOrderNo}
+              {logisticsModeLabel(assignmentDetail.logisticsMode)} · 买家{' '}
+              {assignmentDetail.buyerRef} · 订单 {assignmentDetail.salesOrderNo}
             </p>
             <p className="text-muted-foreground">
-              签收 {assignmentDetail.deliveredAt || '（未知）'} · 延后 {assignmentDetail.delayHours} 小时 ·
-              排期 {assignmentDetail.scheduledAt}
+              签收 {assignmentDetail.deliveredAt || '（未知）'} · 延后 {assignmentDetail.delayHours}{' '}
+              小时 · 排期 {assignmentDetail.scheduledAt}
               {assignmentDetail.shiftedDays > 0
                 ? ` · 避开节假日「${assignmentDetail.holidayName}」顺延 ${assignmentDetail.shiftedDays} 天`
                 : ''}
             </p>
             <p className="text-muted-foreground text-copy-12">
-              这一行是**快照**：规则改了也不改写它 —— 改了会让「哪个变体带来了这次回收」在历史上出现两个答案。
+              这一行是**快照**：规则改了也不改写它 ——
+              改了会让「哪个变体带来了这次回收」在历史上出现两个答案。
             </p>
           </div>
         </SectionCard>
@@ -996,7 +1007,7 @@ export function ReviewRuleWorkspace() {
         {!comparison ? (
           <p className="text-muted-foreground text-copy-13">效果对比暂不可用。</p>
         ) : (
-          <div className="space-y-3 text-copy-13">
+          <div className="text-copy-13 space-y-3">
             <p>
               最近 {comparison.scopeDays} 天：落地 {comparison.totalAssignments} 条。
             </p>
@@ -1013,12 +1024,12 @@ export function ReviewRuleWorkspace() {
                     <span className="text-muted-foreground">
                       {row.templateName || '（模板已删）'} · 权重 {row.weight}
                     </span>
-                    <p className="text-muted-foreground mt-1 text-copy-12">
+                    <p className="text-muted-foreground text-copy-12 mt-1">
                       分配 {row.assigned} · 已发出 {row.sent} · 回收 {row.recovered} · 回收率{' '}
                       {recoveryRateText(row.recoveryRate)} · 平均星级{' '}
                       {averageRatingText(row.averageRating)}
                     </p>
-                    <p className="text-muted-foreground mt-1 text-copy-12">{row.note}</p>
+                    <p className="text-muted-foreground text-copy-12 mt-1">{row.note}</p>
                   </li>
                 ))}
               </ul>
@@ -1026,7 +1037,7 @@ export function ReviewRuleWorkspace() {
             {comparison.byRule.length > 0 && (
               <div>
                 <h3 className="font-medium">按规则</h3>
-                <ul className="space-y-1 text-copy-12">
+                <ul className="text-copy-12 space-y-1">
                   {comparison.byRule.map((row) => (
                     <li key={row.ruleId}>
                       {row.ruleNo}（{row.ruleName}）· 分配 {row.assigned} · 已发出 {row.sent} · 回收{' '}
@@ -1254,7 +1265,7 @@ function RuleForm({
         </Field>
       </div>
 
-      <div className="flex flex-wrap gap-4 text-copy-13">
+      <div className="text-copy-13 flex flex-wrap gap-4">
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
@@ -1322,7 +1333,10 @@ function TemplateForm({
       </div>
 
       {draft.variants.map((variant, index) => (
-        <div key={variant.variantCode || index} className="border-border space-y-2 rounded-md px-3 py-2">
+        <div
+          key={variant.variantCode || index}
+          className="border-border space-y-2 rounded-md px-3 py-2"
+        >
           <div className="grid gap-3 md:grid-cols-3">
             <Field label="变体码" hint="只能是 A 或 B。">
               <select

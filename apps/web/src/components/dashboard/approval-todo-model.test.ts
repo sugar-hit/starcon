@@ -90,7 +90,11 @@ function filterCapability(
   return { key, label: `维度 ${key}`, available, reason, source: `source ${key}` };
 }
 
-function action(code: string, available: boolean, target: string | null = null): ApprovalTodoAction {
+function action(
+  code: string,
+  available: boolean,
+  target: string | null = null,
+): ApprovalTodoAction {
   return {
     code,
     label: `动作 ${code}`,
@@ -203,7 +207,11 @@ describe('能力声明：判不了的维度必须单列', () => {
   it('available=false 的筛选维度被如实列出并带原因', () => {
     const caps = capabilities([
       filterCapability('DOCUMENT_TYPE', true),
-      filterCapability('LEGAL_ENTITY_AMOUNT_THRESHOLD', false, '阈值未配置：legal_entity 没有金额阈值列'),
+      filterCapability(
+        'LEGAL_ENTITY_AMOUNT_THRESHOLD',
+        false,
+        '阈值未配置：legal_entity 没有金额阈值列',
+      ),
     ]);
     const blocked = unavailableFilters(caps);
     expect(blocked).toHaveLength(1);
@@ -212,13 +220,16 @@ describe('能力声明：判不了的维度必须单列', () => {
   });
 
   it('审批动作一律不可用（归 17），跳转与复制可用', () => {
-    const caps = capabilities([], [
-      action('OPEN_APPROVAL_DETAIL', true, APPROVAL_DETAIL_ROUTE),
-      action('COPY_INSTANCE_NO', true),
-      action('APPROVE', false),
-      action('REJECT', false),
-      action('TRANSFER', false),
-    ]);
+    const caps = capabilities(
+      [],
+      [
+        action('OPEN_APPROVAL_DETAIL', true, APPROVAL_DETAIL_ROUTE),
+        action('COPY_INSTANCE_NO', true),
+        action('APPROVE', false),
+        action('REJECT', false),
+        action('TRANSFER', false),
+      ],
+    );
     expect(availableActions(caps).map((a) => a.code)).toEqual([
       'OPEN_APPROVAL_DETAIL',
       'COPY_INSTANCE_NO',
@@ -268,7 +279,12 @@ describe('筛选条件 → 查询串', () => {
 
   it('金额区间与停留下限定量下发', () => {
     const parts = new URLSearchParams(
-      buildQuery({ ...EMPTY_FILTERS, minAmount: '100', maxAmount: '2000', minDwellSeconds: '3600' }),
+      buildQuery({
+        ...EMPTY_FILTERS,
+        minAmount: '100',
+        maxAmount: '2000',
+        minDwellSeconds: '3600',
+      }),
     );
     expect(parts.get('minAmount')).toBe('100');
     expect(parts.get('maxAmount')).toBe('2000');
@@ -276,9 +292,9 @@ describe('筛选条件 → 查询串', () => {
   });
 
   it('只看已超时会下发 overdueOnly=true；关掉时不下发', () => {
-    expect(new URLSearchParams(buildQuery({ ...EMPTY_FILTERS, overdueOnly: true })).get('overdueOnly')).toBe(
-      'true',
-    );
+    expect(
+      new URLSearchParams(buildQuery({ ...EMPTY_FILTERS, overdueOnly: true })).get('overdueOnly'),
+    ).toBe('true');
     expect(new URLSearchParams(buildQuery(EMPTY_FILTERS)).get('overdueOnly')).toBeNull();
   });
 });
@@ -316,7 +332,9 @@ describe('分档计数', () => {
 
 describe('节点与交接清单', () => {
   it('当前节点展示链路位置与审批人类型', () => {
-    const text = nodeLabel(item({ currentStageIndex: 1, currentNodeOrder: 2, approverType: 'USER' }));
+    const text = nodeLabel(
+      item({ currentStageIndex: 1, currentNodeOrder: 2, approverType: 'USER' }),
+    );
     expect(text).toContain('第 2 段');
     expect(text).toContain('第 3 个节点');
     expect(text).toContain('指定人');

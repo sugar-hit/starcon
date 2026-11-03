@@ -365,7 +365,12 @@ export const STORE_SITE_COLUMNS: readonly StoreSiteColumn[] = [
   { metricCode: METRIC_AMOUNT_SHARE, label: '成交金额占比', unit: 'PERCENT', perCurrency: true },
   { metricCode: METRIC_QUANTITY_SHARE, label: '销量占比', unit: 'PERCENT', perCurrency: false },
   { metricCode: METRIC_AMOUNT_GROWTH, label: '金额环比增长率', unit: 'PERCENT', perCurrency: true },
-  { metricCode: METRIC_QUANTITY_GROWTH, label: '销量环比增长率', unit: 'PERCENT', perCurrency: false },
+  {
+    metricCode: METRIC_QUANTITY_GROWTH,
+    label: '销量环比增长率',
+    unit: 'PERCENT',
+    perCurrency: false,
+  },
   {
     metricCode: METRIC_AMOUNT_CONTRIBUTION,
     label: '金额增长贡献度',
@@ -452,7 +457,11 @@ export function shareVsContributionNote(): string {
 // ================================================================ 渠道占比
 
 /** 渠道（平台）占比里某个指标的取值文本。 */
-export function channelShareText(share: StoreSiteChannelShare, metricCode: string, unit: string): string {
+export function channelShareText(
+  share: StoreSiteChannelShare,
+  metricCode: string,
+  unit: string,
+): string {
   const matches = share.metrics.filter((m) => m.metricCode === metricCode);
   if (matches.length === 0) return '—';
   return matches.map((metric) => metricValueText(metric, unit)).join(' / ');

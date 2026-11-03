@@ -251,7 +251,9 @@ export function ReceiptWorkspace() {
         format: importFormat as 'CSV' | 'JSON',
         content: importContent,
       });
-      const lines = [`读到 ${result.scanned} 条，新建 ${result.imported} 张，跳过 ${result.skipped} 条`];
+      const lines = [
+        `读到 ${result.scanned} 条，新建 ${result.imported} 张，跳过 ${result.skipped} 条`,
+      ];
       for (const warning of result.warnings) lines.push(`⚠️ ${warning}`);
       setNotice(lines.join('；'));
       await load();
@@ -318,7 +320,8 @@ export function ReceiptWorkspace() {
     }
   }
 
-  const hasFilters = Boolean(status || source || currency || sourceSystem || keyword) || advanceOnly;
+  const hasFilters =
+    Boolean(status || source || currency || sourceSystem || keyword) || advanceOnly;
 
   return (
     <div className="space-y-6 p-6">
@@ -665,7 +668,7 @@ export function ReceiptWorkspace() {
 
                 <div>
                   <h4 className="text-label-13 mb-2 font-semibold">预留核销关系</h4>
-                  <p className="text-muted-foreground mb-2 text-copy-12">
+                  <p className="text-muted-foreground text-copy-12 mb-2">
                     ⚠️ **预留不是核销**：它只登记「这笔钱打算核销到哪几笔应收」，
                     **不减少**未核销余额；实际核销由 12.2.1.2 承担。
                   </p>
@@ -700,11 +703,7 @@ export function ReceiptWorkspace() {
                             </td>
                             <td className="py-1">
                               {a.status === 'RESERVED' && (
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => void doRelease(a)}
-                                >
+                                <Button size="sm" variant="ghost" onClick={() => void doRelease(a)}>
                                   释放
                                 </Button>
                               )}
@@ -737,7 +736,7 @@ export function ReceiptWorkspace() {
                         />
                       </div>
                       {selectableReceivables.length === 0 && (
-                        <p className="text-muted-foreground mt-1 text-copy-12">
+                        <p className="text-muted-foreground text-copy-12 mt-1">
                           没有与本笔收款**同币种**的待核销应收（跨币种核销是硬纪律）。
                         </p>
                       )}
@@ -880,9 +879,9 @@ export function ReceiptWorkspace() {
               value={importContent}
               onChange={(e) => setImportContent(e.target.value)}
             />
-            <p className="text-muted-foreground mt-1 text-copy-12">
-              ⚠️ 到账时间必须带时区偏移（如 2026-10-01T08:30:00+08:00 或 ...Z）：没有偏移的行会被跳过并逐条说明 ——
-              默默按本地时区补齐会让到账时间偏 8 小时。
+            <p className="text-muted-foreground text-copy-12 mt-1">
+              ⚠️ 到账时间必须带时区偏移（如 2026-10-01T08:30:00+08:00 或
+              ...Z）：没有偏移的行会被跳过并逐条说明 —— 默默按本地时区补齐会让到账时间偏 8 小时。
             </p>
             <div className="mt-3">
               <Button onClick={() => void runImport()}>

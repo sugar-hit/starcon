@@ -162,20 +162,20 @@ export function RefundStatusWorkspace() {
       </div>
 
       {warning && (
-        <div className="flex items-start gap-2 rounded-md border border-warning/40 bg-warning-soft px-3 py-2 text-sm text-warning">
+        <div className="border-warning/40 bg-warning-soft text-warning flex items-start gap-2 rounded-md border px-3 py-2 text-sm">
           <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" />
           <span>{warning}</span>
         </div>
       )}
 
       {notice && (
-        <div className="rounded-md border border-destructive/40 bg-destructive-soft px-3 py-2 text-sm text-destructive">
+        <div className="border-destructive/40 bg-destructive-soft text-destructive rounded-md border px-3 py-2 text-sm">
           {notice}
         </div>
       )}
 
       {error && (
-        <div className="rounded-md border border-destructive/40 bg-destructive-soft px-3 py-2 text-sm text-destructive">
+        <div className="border-destructive/40 bg-destructive-soft text-destructive rounded-md border px-3 py-2 text-sm">
           {error}
         </div>
       )}
@@ -183,10 +183,10 @@ export function RefundStatusWorkspace() {
       {/* 筛选 */}
       <SectionCard title="筛选">
         <div className="grid gap-3 md:grid-cols-4 lg:grid-cols-6">
-          <label className="text-xs text-muted-foreground">
+          <label className="text-muted-foreground text-xs">
             执行状态
             <select
-              className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
+              className="bg-background mt-1 w-full rounded-md border px-2 py-1.5 text-sm"
               value={params.executionState}
               onChange={(e) => setParams({ ...params, executionState: e.target.value, page: 0 })}
             >
@@ -198,10 +198,10 @@ export function RefundStatusWorkspace() {
               ))}
             </select>
           </label>
-          <label className="text-xs text-muted-foreground">
+          <label className="text-muted-foreground text-xs">
             平台同步状态
             <select
-              className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
+              className="bg-background mt-1 w-full rounded-md border px-2 py-1.5 text-sm"
               value={params.platformSyncState}
               onChange={(e) => setParams({ ...params, platformSyncState: e.target.value, page: 0 })}
             >
@@ -213,12 +213,14 @@ export function RefundStatusWorkspace() {
               ))}
             </select>
           </label>
-          <label className="text-xs text-muted-foreground">
+          <label className="text-muted-foreground text-xs">
             退款方式
             <select
-              className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
+              className="bg-background mt-1 w-full rounded-md border px-2 py-1.5 text-sm"
               value={params.platformRefundMethod}
-              onChange={(e) => setParams({ ...params, platformRefundMethod: e.target.value, page: 0 })}
+              onChange={(e) =>
+                setParams({ ...params, platformRefundMethod: e.target.value, page: 0 })
+              }
             >
               <option value="">全部</option>
               {(options?.platformRefundMethods ?? []).map((s) => (
@@ -228,7 +230,7 @@ export function RefundStatusWorkspace() {
               ))}
             </select>
           </label>
-          <label className="text-xs text-muted-foreground">
+          <label className="text-muted-foreground text-xs">
             订单号
             <Input
               className="mt-1"
@@ -236,7 +238,7 @@ export function RefundStatusWorkspace() {
               onChange={(e) => setParams({ ...params, orderNo: e.target.value, page: 0 })}
             />
           </label>
-          <label className="text-xs text-muted-foreground">
+          <label className="text-muted-foreground text-xs">
             退款号
             <Input
               className="mt-1"
@@ -244,7 +246,7 @@ export function RefundStatusWorkspace() {
               onChange={(e) => setParams({ ...params, refundNo: e.target.value, page: 0 })}
             />
           </label>
-          <label className="text-xs text-muted-foreground">
+          <label className="text-muted-foreground text-xs">
             金额下限（闭区间）
             <Input
               className="mt-1"
@@ -283,7 +285,7 @@ export function RefundStatusWorkspace() {
       {/* 列表 */}
       <SectionCard title="退款列表（默认：待处置优先）">
         {loading && !page ? (
-          <p className="py-8 text-center text-sm text-muted-foreground">加载中…</p>
+          <p className="text-muted-foreground py-8 text-center text-sm">加载中…</p>
         ) : !page || page.rows.length === 0 ? (
           <EmptyState
             title="没有符合条件的退款"
@@ -293,7 +295,7 @@ export function RefundStatusWorkspace() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b text-left text-xs text-muted-foreground">
+                <tr className="text-muted-foreground border-b text-left text-xs">
                   <th className="p-2">退款号 / 订单</th>
                   <th className="p-2">状态</th>
                   <th className="p-2">金额</th>
@@ -311,14 +313,12 @@ export function RefundStatusWorkspace() {
                     <tr
                       key={r.id}
                       className={
-                        r.executionState === 'UNKNOWN'
-                          ? 'border-b bg-warning-soft/40'
-                          : 'border-b'
+                        r.executionState === 'UNKNOWN' ? 'bg-warning-soft/40 border-b' : 'border-b'
                       }
                     >
                       <td className="p-2">
                         <div className="font-medium">{r.refundNo}</div>
-                        <div className="text-xs text-muted-foreground">
+                        <div className="text-muted-foreground text-xs">
                           {r.orderNo} · {platformMethodLabel(r.platformRefundMethod)} ·{' '}
                           {platformSyncLabel(r.platformSyncState)}
                         </div>
@@ -333,12 +333,14 @@ export function RefundStatusWorkspace() {
                           </Badge>
                         )}
                         {r.attemptCount > 1 && (
-                          <div className="mt-1 text-xs text-muted-foreground">
+                          <div className="text-muted-foreground mt-1 text-xs">
                             已派发 {r.attemptCount} 次
                           </div>
                         )}
                       </td>
-                      <td className="p-2 tabular-nums">{formatAmount(r.refundAmount, r.currency)}</td>
+                      <td className="p-2 tabular-nums">
+                        {formatAmount(r.refundAmount, r.currency)}
+                      </td>
                       <td className="max-w-xs p-2 text-xs">
                         {r.executionState === 'SUCCEEDED' ? (
                           <span className="text-muted-foreground">—</span>
@@ -377,7 +379,7 @@ export function RefundStatusWorkspace() {
           </div>
         )}
         {page && page.rows.length > 0 && (
-          <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
+          <div className="text-muted-foreground mt-3 flex items-center justify-between text-xs">
             <span>
               第 {page.page + 1} 页 · 本页 {totals.attention} 项待处置 · 共 {page.total} 笔
             </span>
@@ -414,7 +416,7 @@ export function RefundStatusWorkspace() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b text-left text-xs text-muted-foreground">
+                <tr className="text-muted-foreground border-b text-left text-xs">
                   <th className="p-2">退款号</th>
                   <th className="p-2">类型</th>
                   <th className="p-2">系统 vs 平台</th>
@@ -448,9 +450,9 @@ export function RefundStatusWorkspace() {
           </div>
         )}
         {discrepancies && (
-          <p className="mt-3 text-xs text-muted-foreground">
-            待裁定 {discrepancies.openCount} · 已确认待处理 {discrepancies.acknowledgedCount} · 已裁定{' '}
-            {discrepancies.resolvedCount}
+          <p className="text-muted-foreground mt-3 text-xs">
+            待裁定 {discrepancies.openCount} · 已确认待处理 {discrepancies.acknowledgedCount} ·
+            已裁定 {discrepancies.resolvedCount}
           </p>
         )}
       </SectionCard>
@@ -465,16 +467,16 @@ export function RefundStatusWorkspace() {
               </Badge>
               <span className="text-xs">{detail.advice.label}</span>
               {detail.advice.blocking && (
-                <span className="text-xs text-destructive">禁止：{detail.advice.blocking}</span>
+                <span className="text-destructive text-xs">禁止：{detail.advice.blocking}</span>
               )}
             </div>
-            <p className="text-xs text-muted-foreground">{detail.idempotencyNote}</p>
-            <p className="text-xs text-muted-foreground">{detail.platformNote}</p>
+            <p className="text-muted-foreground text-xs">{detail.idempotencyNote}</p>
+            <p className="text-muted-foreground text-xs">{detail.platformNote}</p>
 
             <div>
               <h4 className="mb-1 text-xs font-medium">派发历史（每次对外派发一条）</h4>
               {detail.attempts.length === 0 ? (
-                <p className="text-xs text-muted-foreground">尚未发起任何派发。</p>
+                <p className="text-muted-foreground text-xs">尚未发起任何派发。</p>
               ) : (
                 <ul className="space-y-1 text-xs">
                   {detail.attempts.map((a) => (
@@ -492,7 +494,7 @@ export function RefundStatusWorkspace() {
             <div>
               <h4 className="mb-1 text-xs font-medium">查证历史（先查证交易）</h4>
               {detail.verifications.length === 0 ? (
-                <p className="text-xs text-muted-foreground">尚未做过查证。</p>
+                <p className="text-muted-foreground text-xs">尚未做过查证。</p>
               ) : (
                 <ul className="space-y-1 text-xs">
                   {detail.verifications.map((v) => (
@@ -511,7 +513,7 @@ export function RefundStatusWorkspace() {
             <div>
               <h4 className="mb-1 text-xs font-medium">外部执行结果回报</h4>
               {detail.reports.length === 0 ? (
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   还没有回报。12 财务未交付，当前只有平台侧查询与人工登记能写入。
                 </p>
               ) : (
@@ -554,7 +556,7 @@ export function RefundStatusWorkspace() {
         <SectionCard title="能力与缺口（未交付的上下游如实列出）">
           <div className="space-y-3 text-xs">
             <div className="flex items-start gap-2">
-              <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+              <ShieldAlert className="text-muted-foreground mt-0.5 h-4 w-4 shrink-0" />
               <div>
                 <p className="font-medium">上游</p>
                 <p className="text-muted-foreground">
@@ -566,7 +568,9 @@ export function RefundStatusWorkspace() {
                   {caps.upstream.refundRequestDelivered ? '已交付' : '未交付'}（归属{' '}
                   {caps.upstream.refundRequestOwner}）· {caps.upstream.refundRequestNote}
                 </p>
-                <p className="text-muted-foreground">回报落库方式：{caps.upstream.reportLandingNote}</p>
+                <p className="text-muted-foreground">
+                  回报落库方式：{caps.upstream.reportLandingNote}
+                </p>
               </div>
             </div>
             <div>
@@ -584,7 +588,7 @@ export function RefundStatusWorkspace() {
             </div>
             <div>
               <p className="font-medium">幂等保证</p>
-              <ul className="list-disc pl-5 text-muted-foreground">
+              <ul className="text-muted-foreground list-disc pl-5">
                 {caps.idempotencyGuarantees.map((g) => (
                   <li key={g}>{g}</li>
                 ))}
@@ -596,7 +600,7 @@ export function RefundStatusWorkspace() {
             </div>
             <div>
               <p className="font-medium">状态机（后端唯一真身）</p>
-              <ul className="space-y-0.5 text-muted-foreground">
+              <ul className="text-muted-foreground space-y-0.5">
                 {caps.stateMachine.map((t) => (
                   <li key={`${t.from}>${t.to}`}>
                     {t.fromLabel} → {t.toLabel}
@@ -612,7 +616,7 @@ export function RefundStatusWorkspace() {
             </div>
             <div>
               <p className="font-medium">不可用的动作</p>
-              <ul className="space-y-0.5 text-muted-foreground">
+              <ul className="text-muted-foreground space-y-0.5">
                 {caps.actions
                   .filter((a) => !a.available)
                   .map((a) => (
@@ -624,7 +628,14 @@ export function RefundStatusWorkspace() {
             </div>
             <p className="text-muted-foreground">{caps.shopGranularityNote}</p>
             <p className="text-muted-foreground">
-              平台店铺维度：{unavailableCell('', { label: '平台店铺', ownerModule: '2 平台与店铺', reason: caps.shopGranularityNote }).text}
+              平台店铺维度：
+              {
+                unavailableCell('', {
+                  label: '平台店铺',
+                  ownerModule: '2 平台与店铺',
+                  reason: caps.shopGranularityNote,
+                }).text
+              }
             </p>
           </div>
         </SectionCard>

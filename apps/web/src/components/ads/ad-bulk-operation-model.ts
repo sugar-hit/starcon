@@ -446,14 +446,7 @@ export const emptyAdBulkFormInput: AdBulkFormInput = {
  */
 export function validateAdBulkForm(input: AdBulkFormInput): { ok: boolean; errors: string[] } {
   const errors: string[] = [];
-  const operations = [
-    'ADJUST_BUDGET',
-    'SET_BUDGET',
-    'PAUSE',
-    'ENABLE',
-    'SET_END_AT',
-    'ADJUST_BID',
-  ];
+  const operations = ['ADJUST_BUDGET', 'SET_BUDGET', 'PAUSE', 'ENABLE', 'SET_END_AT', 'ADJUST_BID'];
   if (!operations.includes(input.operation)) errors.push('操作类型不合法');
   if (input.targetType === 'AD_GROUP' && input.operation !== 'ADJUST_BID') {
     errors.push('广告组落点只用于竞价调整');

@@ -50,12 +50,7 @@ export type ItemStatus = 'WILL_ADJUST' | 'SKIPPED';
 
 /** 明细排序。与后端 {@code Sort} 逐字对应。 */
 export type AdjustmentSort =
-  | 'DELTA_ASC'
-  | 'DELTA_DESC'
-  | 'OLD_PRICE_ASC'
-  | 'OLD_PRICE_DESC'
-  | 'MARGIN_ASC'
-  | 'MARGIN_DESC';
+  'DELTA_ASC' | 'DELTA_DESC' | 'OLD_PRICE_ASC' | 'OLD_PRICE_DESC' | 'MARGIN_ASC' | 'MARGIN_DESC';
 
 /** 亏损筛选。 */
 export type LossFilter = '' | 'LOSS_AFTER' | 'LOSS_BEFORE';
@@ -273,14 +268,31 @@ export const ADJUSTMENT_SECTION: AdjustmentSectionDescriptor = {
   description:
     '对选中的一批 listing 统一改价（固定金额 / 百分比 / 按模板）：先预览影响范围，再确认执行。预览会告诉你涉及多少店铺、多少商品、预计利润变化，以及改完后预计亏损的商品数。',
   fields: [
-    { id: 'adjustMode', label: '调价方式', hint: '固定金额 / 百分比 / 按模板', kind: 'select', required: true },
-    { id: 'shops', label: '目标店铺', hint: '可以多选 —— 预览里的「涉及多少店铺」', kind: 'select', required: true },
+    {
+      id: 'adjustMode',
+      label: '调价方式',
+      hint: '固定金额 / 百分比 / 按模板',
+      kind: 'select',
+      required: true,
+    },
+    {
+      id: 'shops',
+      label: '目标店铺',
+      hint: '可以多选 —— 预览里的「涉及多少店铺」',
+      kind: 'select',
+      required: true,
+    },
     { id: 'category', label: '分类', hint: 'spu 分类精确匹配，空 = 不限定', kind: 'text' },
     { id: 'brand', label: '品牌', hint: 'spu 品牌精确匹配，空 = 不限定', kind: 'text' },
     { id: 'adjustAmount', label: '固定金额', hint: '可负 = 降价', kind: 'number' },
     { id: 'adjustRate', label: '涨跌幅', hint: '0.1 = +10%，小数口径', kind: 'number' },
     { id: 'platformFeeRate', label: '平台费率（手工假设）', hint: '0.15 = 15%', kind: 'number' },
-    { id: 'logisticsCostPerUnit', label: '物流每单位运费（手工假设）', hint: '每单位尾程运费', kind: 'number' },
+    {
+      id: 'logisticsCostPerUnit',
+      label: '物流每单位运费（手工假设）',
+      hint: '每单位尾程运费',
+      kind: 'number',
+    },
   ],
 };
 
@@ -594,11 +606,7 @@ export function hasShop(shops: ShopRef[], platformCode: string, siteCode: string
 }
 
 /** 增删一个目标店铺。 */
-export function toggleShop(
-  shops: ShopRef[],
-  platformCode: string,
-  siteCode: string,
-): ShopRef[] {
+export function toggleShop(shops: ShopRef[], platformCode: string, siteCode: string): ShopRef[] {
   if (hasShop(shops, platformCode, siteCode)) {
     return shops.filter((s) => !(s.platformCode === platformCode && s.siteCode === siteCode));
   }
@@ -616,9 +624,7 @@ export function scopeSummary(request: BatchPriceAdjustmentRequest): string {
   parts.push(`分类 ${request.category || '不限'}`);
   parts.push(`品牌 ${request.brand || '不限'}`);
   if (request.adjustMode === 'FIXED_AMOUNT') {
-    parts.push(
-      `固定金额 ${deltaText(request.adjustAmount)} ${request.currency}`,
-    );
+    parts.push(`固定金额 ${deltaText(request.adjustAmount)} ${request.currency}`);
   } else if (request.adjustMode === 'PERCENT') {
     parts.push(`涨跌幅 ${percentText(request.adjustRate, '—')}`);
   } else {
@@ -654,11 +660,7 @@ export function executeBatchAdjustment(
   previewToken: string,
 ): Promise<BatchPriceAdjustmentDetail> {
   const payload: BatchPriceAdjustmentExecuteRequest = { request, previewToken };
-  return api<BatchPriceAdjustmentDetail>(
-    'catalog/batch-price-adjustments',
-    'POST',
-    payload,
-  );
+  return api<BatchPriceAdjustmentDetail>('catalog/batch-price-adjustments', 'POST', payload);
 }
 
 export function fetchAdjustments(page = 0, size = 20): Promise<BatchPriceAdjustmentPage> {

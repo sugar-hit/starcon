@@ -47,10 +47,7 @@ const base = 'finance/period-close';
 
 /** 检查项编码（与契约里的枚举一致）。 */
 export type PeriodCloseCheckCodeValue =
-  | 'UNRECONCILED_DIFFERENCE'
-  | 'UNCARRIED_COST'
-  | 'UNSETTLED_PAYMENT'
-  | 'UNPOSTED_VOUCHER';
+  'UNRECONCILED_DIFFERENCE' | 'UNCARRIED_COST' | 'UNSETTLED_PAYMENT' | 'UNPOSTED_VOUCHER';
 
 /** 分类：阻断项 / 可结转未清项。 */
 export type PeriodCloseClassificationValue = 'BLOCKING' | 'CARRYWARD';
@@ -60,10 +57,7 @@ export type PeriodCloseResultValue = 'PASS' | 'FAIL' | 'NOT_DETERMINABLE';
 
 /** 关账执行状态。 */
 export type PeriodCloseExecutionStatusValue =
-  | 'PENDING_APPROVAL'
-  | 'APPROVED'
-  | 'REJECTED'
-  | 'CLOSED';
+  'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED' | 'CLOSED';
 
 /** 提交关账的结局。 */
 export type PeriodCloseSubmitOutcome = 'BLOCKED' | 'PENDING_APPROVAL' | 'CLOSED';

@@ -31,8 +31,8 @@ export default function CrmReviewRulesPage() {
         <p className="text-muted-foreground text-copy-13">
           配置索评策略：按<strong>店铺</strong>、按<strong>物流方式</strong>（自发货 / 平台仓）
           设置不同延后时间，<strong>避开节假日</strong>，支持 <strong>A/B 测试不同话术</strong>。
-          输出是<strong>生效策略</strong>与<strong>效果对比</strong>。
-          下游 15.1.1.2 消息发送未交付，本页只产出话术与策略，<strong>不发送</strong>。
+          输出是<strong>生效策略</strong>与<strong>效果对比</strong>。 下游 15.1.1.2
+          消息发送未交付，本页只产出话术与策略，<strong>不发送</strong>。
         </p>
       </header>
 

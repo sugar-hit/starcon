@@ -429,9 +429,7 @@ export function PlatformDisputeAppealWorkspace() {
                         busy || actionBlockedReason(detail.actions, 'REMOVE_MATERIAL') !== null
                       }
                       onClick={() =>
-                        void run(async () =>
-                          removePlatformDisputeAppealMaterial(head.id, m.id),
-                        )
+                        void run(async () => removePlatformDisputeAppealMaterial(head.id, m.id))
                       }
                     >
                       移除
@@ -467,7 +465,9 @@ export function PlatformDisputeAppealWorkspace() {
             <div className="mt-2 flex items-center gap-2">
               <Button
                 disabled={
-                  busy || !sourceRefId || actionBlockedReason(detail.actions, 'ATTACH_MATERIAL') !== null
+                  busy ||
+                  !sourceRefId ||
+                  actionBlockedReason(detail.actions, 'ATTACH_MATERIAL') !== null
                 }
                 onClick={() =>
                   void run(async () =>
@@ -516,12 +516,10 @@ export function PlatformDisputeAppealWorkspace() {
                       {s.submissionStatusLabel}
                     </Badge>
                     <span className="text-muted-foreground text-xs">
-                      目标 {s.targetSystem} / {s.targetKey} · 尝试 {s.attemptCount} 次 ·
-                      幂等键 {s.idempotencyKey}
+                      目标 {s.targetSystem} / {s.targetKey} · 尝试 {s.attemptCount} 次 · 幂等键{' '}
+                      {s.idempotencyKey}
                     </span>
-                    {s.lastError ? (
-                      <span className="text-xs">上次失败：{s.lastError}</span>
-                    ) : null}
+                    {s.lastError ? <span className="text-xs">上次失败：{s.lastError}</span> : null}
                     {s.nextRetryAt ? (
                       <span className="text-muted-foreground text-xs">
                         下次重试 {formatTime(s.nextRetryAt)}
@@ -657,9 +655,7 @@ export function PlatformDisputeAppealWorkspace() {
             <div className="flex flex-wrap items-end gap-2">
               <Button
                 variant="outline"
-                disabled={
-                  busy || actionBlockedReason(detail.actions, 'UPDATE_TEXT') !== null
-                }
+                disabled={busy || actionBlockedReason(detail.actions, 'UPDATE_TEXT') !== null}
                 onClick={() =>
                   void run(async () =>
                     updatePlatformDisputeAppealText(head.id, {
@@ -673,9 +669,7 @@ export function PlatformDisputeAppealWorkspace() {
                 保存申诉文本
               </Button>
               <Button
-                disabled={
-                  busy || actionBlockedReason(detail.actions, 'SUBMIT') !== null
-                }
+                disabled={busy || actionBlockedReason(detail.actions, 'SUBMIT') !== null}
                 onClick={() =>
                   void run(async () =>
                     submitPlatformDisputeAppeal(head.id, {
@@ -689,9 +683,7 @@ export function PlatformDisputeAppealWorkspace() {
               </Button>
               <Button
                 variant="outline"
-                disabled={
-                  busy || actionBlockedReason(detail.actions, 'PLATFORM_REPLY') !== null
-                }
+                disabled={busy || actionBlockedReason(detail.actions, 'PLATFORM_REPLY') !== null}
                 onClick={() =>
                   void run(async () =>
                     recordPlatformDisputeAppealReply(head.id, {
@@ -710,9 +702,7 @@ export function PlatformDisputeAppealWorkspace() {
               </Button>
               <Button
                 variant="ghost"
-                disabled={
-                  busy || actionBlockedReason(detail.actions, 'WITHDRAW') !== null
-                }
+                disabled={busy || actionBlockedReason(detail.actions, 'WITHDRAW') !== null}
                 onClick={() =>
                   void run(async () =>
                     withdrawPlatformDisputeAppeal(head.id, {

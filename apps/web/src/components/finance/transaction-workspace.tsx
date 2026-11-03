@@ -343,8 +343,9 @@ export function TransactionWorkspace() {
                 </div>
                 <p className="text-muted-foreground text-xs">
                   结算单 {check.settlementNo} · 周期 {formatTransactionDate(check.periodStart)} ~
-                  {formatTransactionDate(check.periodEnd)} · 币种 {check.currency} · 共 {check.lineCount} 行 ·
-                  其中 {check.orderlessLineCount} 行没有订单行（费用类天然如此，**不是异常**）
+                  {formatTransactionDate(check.periodEnd)} · 币种 {check.currency} · 共{' '}
+                  {check.lineCount} 行 · 其中 {check.orderlessLineCount}{' '}
+                  行没有订单行（费用类天然如此，**不是异常**）
                 </p>
                 <table className="text-copy-13 w-full text-left">
                   <thead className="text-muted-foreground">
@@ -361,8 +362,12 @@ export function TransactionWorkspace() {
                     {check.categories.map((c) => (
                       <tr key={c.category} className="border-border border-t">
                         <td className="py-2 font-medium">{c.categoryLabel}</td>
-                        <td className="py-2">{formatTransactionMoney(c.lineAmount, check.currency)}</td>
-                        <td className="py-2">{formatTransactionMoney(c.summaryAmount, check.currency)}</td>
+                        <td className="py-2">
+                          {formatTransactionMoney(c.lineAmount, check.currency)}
+                        </td>
+                        <td className="py-2">
+                          {formatTransactionMoney(c.summaryAmount, check.currency)}
+                        </td>
                         <td className="py-2">{c.lineCount}</td>
                         <td className="py-2">{c.summaryLineCount}</td>
                         <td className="py-2">
@@ -384,7 +389,8 @@ export function TransactionWorkspace() {
                   </Notice>
                 ) : (
                   <p className="text-muted-foreground text-xs">
-                    没有口径问题。「销售额明细没有订单号」**不算问题** —— 蓝图明令不强制每行都有订单。
+                    没有口径问题。「销售额明细没有订单号」**不算问题** ——
+                    蓝图明令不强制每行都有订单。
                   </p>
                 )}
               </div>
@@ -565,7 +571,9 @@ export function TransactionWorkspace() {
                         <td className="py-2 font-medium">
                           {formatTransactionContribution(row.amount)}
                         </td>
-                        <td className="py-2">{formatTransactionMoney(row.rawAmount, row.currency)}</td>
+                        <td className="py-2">
+                          {formatTransactionMoney(row.rawAmount, row.currency)}
+                        </td>
                         <td className="py-2">{row.currency}</td>
                         <td className="py-2">{formatTransactionDate(row.occurredOn)}</td>
                         <td className="py-2">{row.externalReference ?? '—'}</td>
@@ -722,7 +730,8 @@ export function TransactionWorkspace() {
             <div className="mt-3 flex items-center gap-2">
               <Button onClick={() => void runImport()}>导入交易报告</Button>
               <span className="text-muted-foreground text-xs">
-                交易类型认得 {TRANSACTION_TYPES.length} 个词表值及其常见别名；不认识的类型**按行拒收**
+                交易类型认得 {TRANSACTION_TYPES.length}{' '}
+                个词表值及其常见别名；不认识的类型**按行拒收**
                 （猜错类型等于把退款记成销售额）。没有幂等键也没有外部流水号的行同样拒收。
               </span>
             </div>
@@ -730,9 +739,13 @@ export function TransactionWorkspace() {
 
           {/* ---------- 所属结算单状态 ---------- */}
           {check && (
-            <SectionCard title="所属结算单" description="明细行挂在结算单下；结算单是终态后不可再追加明细。">
+            <SectionCard
+              title="所属结算单"
+              description="明细行挂在结算单下；结算单是终态后不可再追加明细。"
+            >
               <p className="text-sm">
-                {check.settlementNo} · 状态 {transactionSettlementStatusLabel(check.settlementStatus ?? '')}
+                {check.settlementNo} · 状态{' '}
+                {transactionSettlementStatusLabel(check.settlementStatus ?? '')}
                 {' · '}
                 结算金额 {formatTransactionMoney(check.settlementAmount, check.currency)}
               </p>

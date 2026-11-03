@@ -242,7 +242,10 @@ export function AnalyticsCostStructureWorkspace() {
 
       {state === 'loading' && (
         <SectionCard>
-          <EmptyState title="正在读取成本结构…" description="读取期间页面上的「数据截至」仍然有效。" />
+          <EmptyState
+            title="正在读取成本结构…"
+            description="读取期间页面上的「数据截至」仍然有效。"
+          />
         </SectionCard>
       )}
 
@@ -288,10 +291,10 @@ export function AnalyticsCostStructureWorkspace() {
                       </td>
                       <td className="py-2 pr-3">{r.dimensionLabel}</td>
                       <td className="py-2 pr-3">{r.currency}</td>
-                      <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                      <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                         {amountText(r.amount, r.currency)}
                       </td>
-                      <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                      <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                         {shareText(r.share)}
                       </td>
                       <td className="py-2 pr-3">
@@ -306,16 +309,16 @@ export function AnalyticsCostStructureWorkspace() {
                           </div>
                         )}
                       </td>
-                      <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                      <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                         {shareText(r.previousShare)}
                       </td>
-                      <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                      <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                         {deltaText(r.deltaVsPrevious)}
                       </td>
-                      <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                      <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                         {shareText(r.yoyShare)}
                       </td>
-                      <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                      <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                         {deltaText(r.deltaVsYoY)}
                       </td>
                       <td className="py-2 pr-3">
@@ -338,7 +341,8 @@ export function AnalyticsCostStructureWorkspace() {
           >
             {data.anomalies.length === 0 ? (
               <p className="text-copy-13 text-muted-foreground">
-                这个窗口里没有达到阈值的成本类别（也可能是历史期数不足而**判不了** —— 判不了不等于正常）。
+                这个窗口里没有达到阈值的成本类别（也可能是历史期数不足而**判不了** ——
+                判不了不等于正常）。
               </p>
             ) : (
               <div className="space-y-3">
@@ -362,7 +366,9 @@ export function AnalyticsCostStructureWorkspace() {
                       </div>
                       <div>
                         <dt className="text-muted-foreground">历史基线占比</dt>
-                        <dd className="text-foreground tabular-nums">{shareText(a.baselineShare)}</dd>
+                        <dd className="text-foreground tabular-nums">
+                          {shareText(a.baselineShare)}
+                        </dd>
                       </div>
                       <div>
                         <dt className="text-muted-foreground">占比变化</dt>
@@ -370,7 +376,9 @@ export function AnalyticsCostStructureWorkspace() {
                       </div>
                       <div>
                         <dt className="text-muted-foreground">生效阈值</dt>
-                        <dd className="text-foreground tabular-nums">{effectiveThresholdText(a)}</dd>
+                        <dd className="text-foreground tabular-nums">
+                          {effectiveThresholdText(a)}
+                        </dd>
                       </div>
                     </dl>
                     <div className="text-copy-13 text-muted-foreground mt-2">
@@ -422,14 +430,13 @@ export function AnalyticsCostStructureWorkspace() {
                   </thead>
                   <tbody>
                     {rules.map((rule) => (
-                      <tr
-                        key={rule.costCategory}
-                        className="border-border border-b"
-                      >
+                      <tr key={rule.costCategory} className="border-border border-b">
                         <td className="py-2 pr-3">{rule.costCategoryLabel}</td>
                         <td className="py-2 pr-3">{thresholdModeLabel(rule.thresholdMode)}</td>
                         <td className="py-2 pr-3 text-right tabular-nums">{rule.thresholdValue}</td>
-                        <td className="py-2 pr-3 text-right tabular-nums">{rule.minHistoryPeriods}</td>
+                        <td className="py-2 pr-3 text-right tabular-nums">
+                          {rule.minHistoryPeriods}
+                        </td>
                         <td className="py-2 pr-3">{anomalyDirectionLabel(rule.direction)}</td>
                         <td className="py-2 pr-3">
                           <Badge tone={rule.enabled ? 'success' : 'neutral'}>
@@ -494,7 +501,10 @@ function StructureTrendLine({
       </div>
       <div className="bg-muted mt-1 flex h-8 items-end gap-1 overflow-hidden rounded-md px-2 py-1">
         {series.points.map((point) => {
-          const ratio = bounds && bounds.max > bounds.min ? (point.share - bounds.min) / (bounds.max - bounds.min) : 0;
+          const ratio =
+            bounds && bounds.max > bounds.min
+              ? (point.share - bounds.min) / (bounds.max - bounds.min)
+              : 0;
           return (
             <div
               key={`${point.periodStart}|${point.periodEnd}`}

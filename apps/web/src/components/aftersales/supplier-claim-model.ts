@@ -85,27 +85,30 @@ export const fetchSupplierClaimCapabilities = () =>
 // 可索赔候选（发起索赔的唯一入口素材）
 // ==========================================================================
 
-export const fetchSupplierClaimCandidates = (params: { keyword?: string; page?: number; size?: number } = {}) =>
-  call<SupplierClaimCandidatePage>(`${base}/candidates${query(params)}`);
+export const fetchSupplierClaimCandidates = (
+  params: { keyword?: string; page?: number; size?: number } = {},
+) => call<SupplierClaimCandidatePage>(`${base}/candidates${query(params)}`);
 
 // ==========================================================================
 // 索赔单
 // ==========================================================================
 
-export const fetchSupplierClaims = (params: {
-  page?: number;
-  size?: number;
-  status?: string;
-  supplierRefId?: string;
-  liabilityStage?: string;
-  offsetStatus?: string;
-  minAmount?: number;
-  maxAmount?: number;
-  from?: string;
-  to?: string;
-  keyword?: string;
-  sort?: string;
-} = {}) => call<SupplierClaimPage>(`${base}${query(params)}`);
+export const fetchSupplierClaims = (
+  params: {
+    page?: number;
+    size?: number;
+    status?: string;
+    supplierRefId?: string;
+    liabilityStage?: string;
+    offsetStatus?: string;
+    minAmount?: number;
+    maxAmount?: number;
+    from?: string;
+    to?: string;
+    keyword?: string;
+    sort?: string;
+  } = {},
+) => call<SupplierClaimPage>(`${base}${query(params)}`);
 
 export const fetchSupplierClaim = (id: string) => call<SupplierClaimDetail>(`${base}/${id}`);
 
@@ -122,7 +125,10 @@ export const addSupplierClaimItem = (id: string, body: SupplierClaimItemCreate) 
 export const removeSupplierClaimItem = (id: string, itemId: string) =>
   call<SupplierClaimDetail>(`${base}/${id}/items/${itemId}`, { method: 'DELETE' });
 
-export const submitSupplierClaim = (id: string, body: { submitNote: string; expectedVersion: number }) =>
+export const submitSupplierClaim = (
+  id: string,
+  body: { submitNote: string; expectedVersion: number },
+) =>
   call<SupplierClaimDetail>(`${base}/${id}/submit`, { method: 'POST', body: JSON.stringify(body) });
 
 export const startSupplierClaimNegotiation = (id: string, expectedVersion: number) =>
@@ -150,7 +156,10 @@ export const withdrawSupplierClaim = (
   id: string,
   body: { withdrawReason: string; expectedVersion: number },
 ) =>
-  call<SupplierClaimDetail>(`${base}/${id}/withdraw`, { method: 'POST', body: JSON.stringify(body) });
+  call<SupplierClaimDetail>(`${base}/${id}/withdraw`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
 
 /**
  * 登记赔付 / 冲减应付。

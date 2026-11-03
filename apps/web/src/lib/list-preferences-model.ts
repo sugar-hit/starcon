@@ -179,7 +179,7 @@ export function resolveListPreferences(
   const sortKey =
     storedSortKey !== '' && knownSorts.includes(storedSortKey)
       ? storedSortKey
-      : knownSorts[0] ?? '';
+      : (knownSorts[0] ?? '');
 
   const storedSize = payload.pageSize;
   const pageSize =

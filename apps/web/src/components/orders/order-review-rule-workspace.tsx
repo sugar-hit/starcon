@@ -179,9 +179,10 @@ export function OrderReviewRuleWorkspace() {
     (mode: 'trial' | 'review') =>
       guard(async () => {
         const input = { evaluatedAt: new Date(run.at).toISOString(), ruleIds: [] as string[] };
-        const result = mode === 'trial'
-          ? await trialOrder(run.orderId, input)
-          : await reviewOrder(run.orderId, input);
+        const result =
+          mode === 'trial'
+            ? await trialOrder(run.orderId, input)
+            : await reviewOrder(run.orderId, input);
         setDetail(result);
         setNotice(
           mode === 'trial'
@@ -229,9 +230,7 @@ export function OrderReviewRuleWorkspace() {
   const submitRule = useCallback(
     (input: ReviewRuleInput, ruleId?: string) =>
       guard(async () => {
-        const saved = ruleId
-          ? await updateRule(ruleId, input)
-          : await createRule(input);
+        const saved = ruleId ? await updateRule(ruleId, input) : await createRule(input);
         setNotice(saved.message);
         setEditing(null);
         await load();
@@ -328,12 +327,12 @@ export function OrderReviewRuleWorkspace() {
             {capabilities.dimensions
               .filter((d) => !d.available && d.unavailableReason)
               .map((d) => (
-                <p key={d.code} className="text-xs text-muted-foreground">
+                <p key={d.code} className="text-muted-foreground text-xs">
                   <strong>{d.label}</strong>：{d.unavailableReason}
                 </p>
               ))}
-            <p className="text-xs text-muted-foreground">{capabilities.notes}</p>
-            <p className="text-xs text-muted-foreground">{capabilities.downstreamGaps}</p>
+            <p className="text-muted-foreground text-xs">{capabilities.notes}</p>
+            <p className="text-muted-foreground text-xs">{capabilities.downstreamGaps}</p>
             <div className="grid gap-3 sm:grid-cols-3">
               <StatCard label="规则总数" value={String(capabilities.ruleCount)} />
               <StatCard label="生效中的规则" value={String(capabilities.activeRuleCount)} />
@@ -364,7 +363,7 @@ export function OrderReviewRuleWorkspace() {
             </FormField>
             <FormField id="filter-status" label="状态">
               <select
-                className="h-9 w-full rounded border bg-background px-2 text-sm"
+                className="bg-background h-9 w-full rounded border px-2 text-sm"
                 value={filters.status}
                 onChange={(e) => {
                   setPage(0);
@@ -464,7 +463,7 @@ export function OrderReviewRuleWorkspace() {
                 <div key={rule.id} className="rounded border p-3">
                   <div className="flex flex-wrap items-center gap-2">
                     <strong className="text-sm">{rule.ruleName}</strong>
-                    <code className="text-xs text-muted-foreground">{rule.ruleCode}</code>
+                    <code className="text-muted-foreground text-xs">{rule.ruleCode}</code>
                     <span className="rounded border px-2 py-0.5 text-xs">
                       优先级 {rule.priority}
                     </span>
@@ -485,8 +484,8 @@ export function OrderReviewRuleWorkspace() {
                       {rule.statusLabel}
                     </span>
                   </div>
-                  <p className="mt-1 text-xs text-muted-foreground">{effectiveText(rule)}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">
+                  <p className="text-muted-foreground mt-1 text-xs">{effectiveText(rule)}</p>
+                  <p className="text-muted-foreground mt-1 text-xs">
                     {rule.conditionCount} 个条件：
                     {rule.dimensionSummary
                       ? rule.dimensionSummary
@@ -516,13 +515,18 @@ export function OrderReviewRuleWorkspace() {
                   </div>
                 </div>
               ))}
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <div className="text-muted-foreground flex items-center justify-between text-xs">
                 <span>
                   共 {rules.total} 条 · 生效中 {rules.activeCount} · 强制 {rules.forcedCount} ·
                   此刻在生效期内 {rules.effectiveNowCount}
                 </span>
                 <span className="flex gap-2">
-                  <Button size="sm" variant="outline" disabled={page === 0} onClick={() => setPage(page - 1)}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={page === 0}
+                    onClick={() => setPage(page - 1)}
+                  >
                     上一页
                   </Button>
                   <Button
@@ -584,7 +588,9 @@ export function OrderReviewRuleWorkspace() {
             </FormField>
           </div>
 
-          {detail ? <ReviewDetailPanel detail={detail} /> : (
+          {detail ? (
+            <ReviewDetailPanel detail={detail} />
+          ) : (
             <EmptyState
               title="还没有判定结果"
               description="填一个本租户的订单 id，点「试跑」看规则会怎么判；确认无误后再点「判定」写入生效记录。"
@@ -627,14 +633,14 @@ export function OrderReviewRuleWorkspace() {
                     {d.decisionLabel}
                   </span>
                   <span className="rounded border px-2 py-0.5 text-xs">{modeText(d)}</span>
-                  <span className="text-xs text-muted-foreground">{d.evaluatedAt}</span>
+                  <span className="text-muted-foreground text-xs">{d.evaluatedAt}</span>
                 </div>
-                <p className="mt-1 text-xs text-muted-foreground">{decisionCounts(d)}</p>
+                <p className="text-muted-foreground mt-1 text-xs">{decisionCounts(d)}</p>
               </button>
             ))}
-            <p className="text-xs text-muted-foreground">
-              其中「无规则命中默认转人工」{evaluations.noRuleMatchedCount} 条 —— 审单不给隐含默认值，
-              自动通过必须由某条规则明确给出。
+            <p className="text-muted-foreground text-xs">
+              其中「无规则命中默认转人工」{evaluations.noRuleMatchedCount} 条 ——
+              审单不给隐含默认值， 自动通过必须由某条规则明确给出。
             </p>
           </div>
         )}
@@ -656,7 +662,7 @@ export function OrderReviewRuleWorkspace() {
             </FormField>
             <FormField id="profile-level" label="买家等级">
               <select
-                className="h-9 w-full rounded border bg-background px-2 text-sm"
+                className="bg-background h-9 w-full rounded border px-2 text-sm"
                 value={profile.buyerLevel}
                 onChange={(e) => setProfile((p) => ({ ...p, buyerLevel: e.target.value }))}
               >
@@ -695,7 +701,7 @@ export function OrderReviewRuleWorkspace() {
           <Button disabled={busy || !!profileBlocked} onClick={() => void submitProfile()}>
             保存画像
           </Button>
-          {profileBlocked && <p className="text-xs text-muted-foreground">{profileBlocked}</p>}
+          {profileBlocked && <p className="text-muted-foreground text-xs">{profileBlocked}</p>}
 
           {profiles && profiles.items.length > 0 && (
             <div className="space-y-2">
@@ -712,15 +718,13 @@ export function OrderReviewRuleWorkspace() {
                       </span>
                     )}
                   </div>
-                  <p className="mt-1 text-xs text-muted-foreground">
+                  <p className="text-muted-foreground mt-1 text-xs">
                     {p.buyerEmail || '（无邮箱）'} · {p.buyerPhone || '（无电话）'}
                   </p>
-                  {p.blacklistReason && (
-                    <p className="mt-1 text-xs">理由：{p.blacklistReason}</p>
-                  )}
+                  {p.blacklistReason && <p className="mt-1 text-xs">理由：{p.blacklistReason}</p>}
                 </div>
               ))}
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 共 {profiles.total} 人 · 黑名单 {profiles.blacklistedCount} 人
               </p>
             </div>
@@ -755,27 +759,27 @@ function ReviewDetailPanel({ detail }: { detail: ReviewDetail }) {
           </span>
           <span className="rounded border px-2 py-0.5 text-xs">{modeText(d)}</span>
           <code className="text-xs">{f.orderNo}</code>
-          <span className="text-xs text-muted-foreground">{d.evaluatedAt}</span>
+          <span className="text-muted-foreground text-xs">{d.evaluatedAt}</span>
         </div>
         <p className="mt-2 text-sm">{decisionHeadline(d)}</p>
-        <p className="mt-1 text-xs text-muted-foreground">{decisionCounts(d)}</p>
+        <p className="text-muted-foreground mt-1 text-xs">{decisionCounts(d)}</p>
       </div>
 
       <div className="rounded border p-3 text-xs">
         <p className="font-medium">判定时用到的订单事实</p>
-        <ul className="mt-1 space-y-0.5 text-muted-foreground">
+        <ul className="text-muted-foreground mt-1 space-y-0.5">
           <li>
-            来源 {f.orderSource} · 币种 {f.currencyCode} · 订单总额 {money(f.orderTotal)} ·
-            折扣 {money(f.discountAmount)} / 小计 {money(f.subtotalAmount)} · 折扣率{' '}
+            来源 {f.orderSource} · 币种 {f.currencyCode} · 订单总额 {money(f.orderTotal)} · 折扣{' '}
+            {money(f.discountAmount)} / 小计 {money(f.subtotalAmount)} · 折扣率{' '}
             {discountRateText(f.discountRatePercent)}
           </li>
           <li>
-            收货国家 {f.shippingCountry || '（未取到）'} · 收件人 {f.recipientName || '（未取到）'} ·{' '}
-            {f.recipientPhone || '（无电话）'} · {f.recipientEmail || '（无邮箱）'}
+            收货国家 {f.shippingCountry || '（未取到）'} · 收件人 {f.recipientName || '（未取到）'}{' '}
+            · {f.recipientPhone || '（无电话）'} · {f.recipientEmail || '（无邮箱）'}
           </li>
           <li>
-            买家等级 {buyerLevelText(f.buyerLevel)} · 黑名单 {blacklistText(f.blacklisted)} ·
-            身份键 {f.buyerKey}
+            买家等级 {buyerLevelText(f.buyerLevel)} · 黑名单 {blacklistText(f.blacklisted)} · 身份键{' '}
+            {f.buyerKey}
           </li>
           <li>地址异常：{anomalyText(f.addressAnomalyCodes)}</li>
           <li>
@@ -786,11 +790,9 @@ function ReviewDetailPanel({ detail }: { detail: ReviewDetail }) {
       </div>
 
       <div className="space-y-2">
-        <p className="text-sm font-medium">
-          命中链（{detail.hits.length} 条参与判定，含未命中）
-        </p>
+        <p className="text-sm font-medium">命中链（{detail.hits.length} 条参与判定，含未命中）</p>
         {detail.hits.length === 0 ? (
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             该时刻没有任何生效中的规则 → 默认转人工。自动通过必须由某条规则明确给出。
           </p>
         ) : (
@@ -817,7 +819,7 @@ function ReviewDetailPanel({ detail }: { detail: ReviewDetail }) {
                         </span>
                         <span>{conditionSummary(c)}</span>
                       </div>
-                      <div className="mt-1 text-muted-foreground">
+                      <div className="text-muted-foreground mt-1">
                         {lines.map((l) => (
                           <span key={l.field} className="mr-3">
                             {l.field} = {l.value}
@@ -834,7 +836,7 @@ function ReviewDetailPanel({ detail }: { detail: ReviewDetail }) {
         )}
       </div>
 
-      <p className="text-xs text-muted-foreground">{detail.notes}</p>
+      <p className="text-muted-foreground text-xs">{detail.notes}</p>
     </div>
   );
 }
@@ -891,7 +893,7 @@ function RuleEditor({
         </FormField>
         <FormField id="rule-action" label="动作">
           <select
-            className="h-9 w-full rounded border bg-background px-2 text-sm"
+            className="bg-background h-9 w-full rounded border px-2 text-sm"
             value={value.action ?? 'MANUAL_REVIEW'}
             onChange={(e) =>
               onChange({ ...value, action: e.target.value as ReviewRuleInput['action'] })
@@ -906,7 +908,7 @@ function RuleEditor({
       <div className="grid gap-3 sm:grid-cols-3">
         <FormField id="rule-match-mode" label="条件组合">
           <select
-            className="h-9 w-full rounded border bg-background px-2 text-sm"
+            className="bg-background h-9 w-full rounded border px-2 text-sm"
             value={value.matchMode ?? 'ALL'}
             onChange={(e) => onChange({ ...value, matchMode: e.target.value })}
           >
@@ -954,7 +956,7 @@ function RuleEditor({
             <div key={index} className="grid gap-2 sm:grid-cols-4">
               <FormField id={`cond-${index}-dimension`} label={`条件 ${index + 1} · 维度`}>
                 <select
-                  className="h-9 w-full rounded border bg-background px-2 text-sm"
+                  className="bg-background h-9 w-full rounded border px-2 text-sm"
                   value={c.dimension}
                   onChange={(e) => {
                     const dim = e.target.value;
@@ -979,7 +981,7 @@ function RuleEditor({
               </FormField>
               <FormField id={`cond-${index}-operator`} label="运算符">
                 <select
-                  className="h-9 w-full rounded border bg-background px-2 text-sm"
+                  className="bg-background h-9 w-full rounded border px-2 text-sm"
                   value={c.operator}
                   onChange={(e) =>
                     setCondition(index, { operator: e.target.value as typeof c.operator })
@@ -1064,7 +1066,10 @@ function RuleEditor({
       </div>
 
       <FormField id="rule-note" label="备注（停用时必填）">
-        <Input value={value.note ?? ''} onChange={(e) => onChange({ ...value, note: e.target.value })} />
+        <Input
+          value={value.note ?? ''}
+          onChange={(e) => onChange({ ...value, note: e.target.value })}
+        />
       </FormField>
 
       <div className="flex gap-2">
@@ -1075,7 +1080,7 @@ function RuleEditor({
           取消
         </Button>
       </div>
-      <p className="flex items-center gap-1 text-xs text-muted-foreground">
+      <p className="text-muted-foreground flex items-center gap-1 text-xs">
         <Filter className="h-3 w-3" />
         草稿不参与判定：保存后先在上方「试跑」里拿真实订单验一遍，再启用。
       </p>

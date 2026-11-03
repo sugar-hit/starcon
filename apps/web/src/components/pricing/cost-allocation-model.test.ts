@@ -162,7 +162,9 @@ describe('本地校验', () => {
       adjustments: [{ skuId: 's1', amount: '0', reason: '' }],
     });
     expect(problems).toContain('人工微调金额不能为 0（金额为 0 的微调行没有信息量）');
-    expect(problems).toContain('人工微调原因必填：没有理由的微调会让「成本为什么突然变了」永远答不上来');
+    expect(problems).toContain(
+      '人工微调原因必填：没有理由的微调会让「成本为什么突然变了」永远答不上来',
+    );
   });
 
   it('应用重算时必须填原因与生效时间', () => {

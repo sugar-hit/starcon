@@ -32,7 +32,9 @@ import { GET as warehouseGet } from './warehouse/[...path]/route';
 
 // 相对**本文件**定位：vitest 从仓库根或 apps/web 跑时 cwd 都不同，用 cwd 会静默读空。
 const SOURCE = readFileSync(
-  fileURLToPath(new URL('../../components/dashboard/fund-payment-risk-workspace.tsx', import.meta.url)),
+  fileURLToPath(
+    new URL('../../components/dashboard/fund-payment-risk-workspace.tsx', import.meta.url),
+  ),
   'utf8',
 );
 

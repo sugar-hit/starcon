@@ -73,10 +73,7 @@ function realCallSites(): string[] {
     //   它的 query 为空时解析成集合路径（如 `/platform-disputes`），非空时多出 `?a=b`，
     //   而把 `${query(params)}` 直接替换成 id 会凭空造出后端根本不存在的形状，
     //   拿它去断言放行等于断言一条假需求。
-    const unresolved = pathPart.replace(
-      /\$\{base\}|\$\{id\}|\$\{itemId\}|\$\{settlementId\}/g,
-      '',
-    );
+    const unresolved = pathPart.replace(/\$\{base\}|\$\{id\}|\$\{itemId\}|\$\{settlementId\}/g, '');
     if (unresolved.includes('${')) continue;
     const cleaned = pathPart
       .replace(/\$\{base\}/g, base)
@@ -152,7 +149,11 @@ it('写形状（POST / PUT / DELETE）被放行，且真的转发到 8085', asyn
   // 移除举证材料项是 DELETE。
   const removed = await DELETE(
     request(`trade/platform-disputes/${ID}/evidence-items/${ITEM}`, 'DELETE'),
-    { params: Promise.resolve({ path: `trade/platform-disputes/${ID}/evidence-items/${ITEM}`.split('/') }) },
+    {
+      params: Promise.resolve({
+        path: `trade/platform-disputes/${ID}/evidence-items/${ITEM}`.split('/'),
+      }),
+    },
   );
   expect(removed.status, 'DELETE 移除举证材料项未被放行').toBe(200);
 

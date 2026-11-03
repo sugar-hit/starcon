@@ -131,10 +131,9 @@ it('写形状（POST / DELETE）被放行，且真的转发到 8085', async () =
   }
 
   // 移除明细是本模块**唯一**允许的 DELETE（且后端只在草稿期放行）。
-  const removed = await DELETE(
-    request(`trade/supplier-claims/${ID}/items/${ID}`, 'DELETE'),
-    { params: Promise.resolve({ path: `trade/supplier-claims/${ID}/items/${ID}`.split('/') }) },
-  );
+  const removed = await DELETE(request(`trade/supplier-claims/${ID}/items/${ID}`, 'DELETE'), {
+    params: Promise.resolve({ path: `trade/supplier-claims/${ID}/items/${ID}`.split('/') }),
+  });
   expect(removed.status, 'DELETE 移除明细未��放行').toBe(200);
 
   expect(fetcher).toHaveBeenCalledWith(

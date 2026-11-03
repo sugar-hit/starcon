@@ -613,10 +613,7 @@ export function saveInfluencerOutreachSegment(input: InfluencerOutreachSegmentIn
   return api<InfluencerOutreachSegmentRow>(`${base}/segments`, 'POST', segmentPayload(input));
 }
 
-export function updateInfluencerOutreachSegment(
-  id: string,
-  input: InfluencerOutreachSegmentInput,
-) {
+export function updateInfluencerOutreachSegment(id: string, input: InfluencerOutreachSegmentInput) {
   return api<InfluencerOutreachSegmentRow>(`${base}/segments/${id}`, 'POST', segmentPayload(input));
 }
 
@@ -636,7 +633,13 @@ export function fetchInfluencerOutreachCandidates(
 // ---- 邀约模板 ----
 
 export function fetchInfluencerOutreachTemplates(
-  query: { platformCode?: string; status?: string; keyword?: string; page?: number; size?: number } = {},
+  query: {
+    platformCode?: string;
+    status?: string;
+    keyword?: string;
+    page?: number;
+    size?: number;
+  } = {},
 ): Promise<InfluencerOutreachTemplatePage> {
   return api<InfluencerOutreachTemplatePage>(`${base}/templates${queryString(query)}`);
 }
@@ -649,7 +652,11 @@ export function updateInfluencerOutreachTemplate(
   id: string,
   input: InfluencerOutreachTemplateInput,
 ) {
-  return api<InfluencerOutreachTemplateRow>(`${base}/templates/${id}`, 'POST', templatePayload(input));
+  return api<InfluencerOutreachTemplateRow>(
+    `${base}/templates/${id}`,
+    'POST',
+    templatePayload(input),
+  );
 }
 
 export function deleteInfluencerOutreachTemplate(id: string): Promise<{ deleted: boolean }> {
@@ -832,7 +839,13 @@ export function fetchInfluencerSampleShipments(
 
 export function createInfluencerSampleShipment(
   sampleOrderId: string,
-  input: { carrierCode: string; trackingNo: string; packageCount: string; shippedAt?: string; note?: string },
+  input: {
+    carrierCode: string;
+    trackingNo: string;
+    packageCount: string;
+    shippedAt?: string;
+    note?: string;
+  },
 ) {
   return api<InfluencerSampleShipmentRow>(`${base}/samples/${sampleOrderId}/shipments`, 'POST', {
     carrierCode: input.carrierCode,
@@ -858,7 +871,13 @@ export function transitionInfluencerSampleShipment(
 // ---- 佣金 ----
 
 export function fetchInfluencerCommissionRules(
-  query: { scopeType?: string; status?: string; keyword?: string; page?: number; size?: number } = {},
+  query: {
+    scopeType?: string;
+    status?: string;
+    keyword?: string;
+    page?: number;
+    size?: number;
+  } = {},
 ): Promise<InfluencerCommissionRulePage> {
   return api<InfluencerCommissionRulePage>(`${base}/commission-rules${queryString(query)}`);
 }
@@ -868,7 +887,11 @@ export function saveInfluencerCommissionRule(input: InfluencerCommissionRuleInpu
 }
 
 export function updateInfluencerCommissionRule(id: string, input: InfluencerCommissionRuleInput) {
-  return api<InfluencerCommissionRuleRow>(`${base}/commission-rules/${id}`, 'POST', rulePayload(input));
+  return api<InfluencerCommissionRuleRow>(
+    `${base}/commission-rules/${id}`,
+    'POST',
+    rulePayload(input),
+  );
 }
 
 export function deleteInfluencerCommissionRule(id: string): Promise<{ deleted: boolean }> {
@@ -903,8 +926,7 @@ function segmentPayload(input: InfluencerOutreachSegmentInput) {
     category: input.category.trim(),
     followerTier: input.followerTier.trim(),
     minFollowerCount: input.minFollowerCount === '' ? undefined : Number(input.minFollowerCount),
-    minEngagementRate:
-      input.minEngagementRate === '' ? undefined : Number(input.minEngagementRate),
+    minEngagementRate: input.minEngagementRate === '' ? undefined : Number(input.minEngagementRate),
     minGmv: input.minGmv === '' ? undefined : Number(input.minGmv),
     ratingTierCode: input.ratingTierCode.trim(),
     tagCodes: input.tagCodes.trim(),
@@ -966,7 +988,10 @@ function rulePayload(input: InfluencerCommissionRuleInput) {
 // ==================================================================
 
 /** 🔴 金额的展示：null 显示「未录入」，不是 0.00。 */
-export function outreachMoney(value: InfluencerOutreachMoney | undefined, currency?: string): string {
+export function outreachMoney(
+  value: InfluencerOutreachMoney | undefined,
+  currency?: string,
+): string {
   if (value === null || value === undefined) return '未录入';
   const fixed = value.toFixed(2);
   return currency ? `${fixed} ${currency}` : fixed;
@@ -1159,7 +1184,9 @@ export function outboundText(row: {
   const ref = row.warehouseOutboundRef
     ? `仓库单号 ${row.warehouseOutboundRef}`
     : `仓库单号待 ${row.warehouseOwnerModule} 交付后回填`;
-  return row.outboundAt ? `${local}（${outreachTimestamp(row.outboundAt)}）· ${ref}` : `${local} · ${ref}`;
+  return row.outboundAt
+    ? `${local}（${outreachTimestamp(row.outboundAt)}）· ${ref}`
+    : `${local} · ${ref}`;
 }
 
 /** 批量建联结果码 → 人话。 */

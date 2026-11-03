@@ -293,9 +293,7 @@ export function ExchangeRateWorkspace() {
       <PageHeader
         title="汇率查询"
         description="各币种对各本位币的汇率：方向显式、生效日与来源可见，支持手工录入与外部拉取。"
-        actions={
-          <Badge tone="brand">5.2.2.1 汇率查询</Badge>
-        }
+        actions={<Badge tone="brand">5.2.2.1 汇率查询</Badge>}
       />
 
       {error && (
@@ -326,20 +324,22 @@ export function ExchangeRateWorkspace() {
               {capabilities.inverseRule}
             </Notice>
             <div className="grid gap-3 md:grid-cols-2">
-              <div className="rounded-md border border-control-border p-3">
+              <div className="border-control-border rounded-md border p-3">
                 <p className="text-label-13 font-semibold">下游状态</p>
                 <p className="text-copy-13 text-muted-foreground mt-1">
                   {capabilities.downstreamNote}
                 </p>
               </div>
-              <div className="rounded-md border border-control-border p-3">
+              <div className="border-control-border rounded-md border p-3">
                 <p className="text-label-13 font-semibold">数据归属</p>
                 <p className="text-copy-13 text-muted-foreground mt-1">
                   {capabilities.ownershipNote}
                 </p>
               </div>
             </div>
-            <p className="text-copy-12 text-muted-foreground">{capabilities.functionalCurrencyNote}</p>
+            <p className="text-copy-12 text-muted-foreground">
+              {capabilities.functionalCurrencyNote}
+            </p>
           </div>
         </SectionCard>
       )}
@@ -367,9 +367,7 @@ export function ExchangeRateWorkspace() {
                 id="filter-base"
                 value={filters.baseCurrency}
                 placeholder="USD"
-                onChange={(e) =>
-                  setFilters({ ...filters, baseCurrency: e.target.value, page: 0 })
-                }
+                onChange={(e) => setFilters({ ...filters, baseCurrency: e.target.value, page: 0 })}
               />
             </FormField>
             <FormField id="filter-quote" label="报价币种">
@@ -377,9 +375,7 @@ export function ExchangeRateWorkspace() {
                 id="filter-quote"
                 value={filters.quoteCurrency}
                 placeholder="CNY"
-                onChange={(e) =>
-                  setFilters({ ...filters, quoteCurrency: e.target.value, page: 0 })
-                }
+                onChange={(e) => setFilters({ ...filters, quoteCurrency: e.target.value, page: 0 })}
               />
             </FormField>
             <FormField id="filter-source" label="来源">
@@ -387,9 +383,7 @@ export function ExchangeRateWorkspace() {
                 id="filter-source"
                 value={filters.sourceCode}
                 placeholder="MANUAL"
-                onChange={(e) =>
-                  setFilters({ ...filters, sourceCode: e.target.value, page: 0 })
-                }
+                onChange={(e) => setFilters({ ...filters, sourceCode: e.target.value, page: 0 })}
               />
             </FormField>
             <FormField id="filter-from" label="生效日（起）">
@@ -431,7 +425,7 @@ export function ExchangeRateWorkspace() {
 
           {page && page.items.length > 0 && (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-copy-13">
+              <table className="text-copy-13 w-full text-left">
                 <thead className="text-muted-foreground">
                   <tr>
                     <th className="py-2 pr-3 font-medium">汇率（方向显式）</th>
@@ -444,9 +438,9 @@ export function ExchangeRateWorkspace() {
                 </thead>
                 <tbody>
                   {page.items.map((row) => (
-                    <tr key={row.id} className="border-t border-control-border">
+                    <tr key={row.id} className="border-control-border border-t">
                       <td className="py-2 pr-3 font-medium">{rateText(row)}</td>
-                      <td className="py-2 pr-3 text-muted-foreground">{inverseText(row)}</td>
+                      <td className="text-muted-foreground py-2 pr-3">{inverseText(row)}</td>
                       <td className="py-2 pr-3">{dayText(row.effectiveDate)}</td>
                       <td className="py-2 pr-3">
                         {row.sourceName || row.sourceCode}
@@ -457,7 +451,7 @@ export function ExchangeRateWorkspace() {
                           {entryModeLabel(row.entryMode)}
                         </Badge>
                       </td>
-                      <td className="py-2 text-muted-foreground">
+                      <td className="text-muted-foreground py-2">
                         {row.sourceRef || '—'}
                         <span className="ml-1">{timeText(row.acquiredAt)}</span>
                       </td>
@@ -572,7 +566,10 @@ export function ExchangeRateWorkspace() {
             </FormField>
           </div>
           <p className="text-copy-12 text-muted-foreground">
-            录进去的方向：<span className="font-medium">1 {form.baseCurrency || '?'} = {form.rate || '?'} {form.quoteCurrency || '?'}</span>
+            录进去的方向：
+            <span className="font-medium">
+              1 {form.baseCurrency || '?'} = {form.rate || '?'} {form.quoteCurrency || '?'}
+            </span>
             　·　反向由正向推导，不另存一条（手工再录一条方向相反的会被数据库拒绝）。
           </p>
           <Button variant="brand" disabled={busy} onClick={() => void submitRate()}>
@@ -600,7 +597,7 @@ export function ExchangeRateWorkspace() {
           )}
           {sources.length > 0 && (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-copy-13">
+              <table className="text-copy-13 w-full text-left">
                 <thead className="text-muted-foreground">
                   <tr>
                     <th className="py-2 pr-3 font-medium">来源</th>
@@ -612,13 +609,13 @@ export function ExchangeRateWorkspace() {
                 </thead>
                 <tbody>
                   {sources.map((source) => (
-                    <tr key={source.id} className="border-t border-control-border">
+                    <tr key={source.id} className="border-control-border border-t">
                       <td className="py-2 pr-3">
                         {source.name}
                         <span className="text-muted-foreground ml-1">({source.code})</span>
                       </td>
                       <td className="py-2 pr-3">{sourceKindLabel(source.kind)}</td>
-                      <td className="py-2 pr-3 text-muted-foreground">
+                      <td className="text-muted-foreground py-2 pr-3">
                         {source.endpoint || '未配置（不可拉取）'}
                       </td>
                       <td className="py-2 pr-3">{source.rateCount}</td>
@@ -777,9 +774,7 @@ export function ExchangeRateWorkspace() {
               <ul className="mt-2 space-y-1">
                 {logs.map((log) => (
                   <li key={log.id} className="text-copy-12 flex items-center gap-2">
-                    <Badge tone={fetchStatusTone(log.status)}>
-                      {fetchStatusLabel(log.status)}
-                    </Badge>
+                    <Badge tone={fetchStatusTone(log.status)}>{fetchStatusLabel(log.status)}</Badge>
                     <span>
                       {log.sourceCode} · {log.baseCurrency ?? '?'} → {log.quoteCurrency ?? '?'} ·{' '}
                       {dayText(log.requestedDate)}
@@ -818,7 +813,7 @@ export function ExchangeRateWorkspace() {
         ) : (
           <div className="space-y-4">
             {panel.rows.map((row) => (
-              <div key={row.legalEntityId} className="rounded-md border border-control-border p-3">
+              <div key={row.legalEntityId} className="border-control-border rounded-md border p-3">
                 <p className="text-label-13 font-semibold">
                   {row.legalEntityName}
                   <span className="text-muted-foreground ml-1">({row.legalEntityCode})</span>
@@ -859,7 +854,7 @@ export function ExchangeRateWorkspace() {
       >
         <div className="space-y-3">
           {RATE_SECTIONS.map((section) => (
-            <div key={section.id} className="rounded-md border border-control-border p-3">
+            <div key={section.id} className="border-control-border rounded-md border p-3">
               <p className="text-label-13 font-semibold">
                 {section.id} {section.title}
                 <Badge tone={section.delivered ? 'success' : 'warning'} className="ml-2">

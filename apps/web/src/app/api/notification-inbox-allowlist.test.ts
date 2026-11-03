@@ -36,7 +36,9 @@ import { GET as warehouseGet } from './warehouse/[...path]/route';
 // 相对**本文件**定位：vitest 从仓库根或 apps/web 跑时 cwd 都不同，用 cwd 会静默读空。
 // 本文件在 `app/api/` 下（比 `app/api/iam/` 浅一层），所以是 `../../components/...`。
 const SOURCE = readFileSync(
-  fileURLToPath(new URL('../../components/notifications/notification-inbox-workspace.tsx', import.meta.url)),
+  fileURLToPath(
+    new URL('../../components/notifications/notification-inbox-workspace.tsx', import.meta.url),
+  ),
   'utf8',
 );
 
@@ -169,9 +171,7 @@ it('查询串不影响放行判定', async () => {
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
   vi.stubGlobal('fetch', fetcher);
 
-  expect(
-    await call('warehouse/inventory/stockout-alerts/stockouts?page=0&size=50'),
-  ).toBe(200);
+  expect(await call('warehouse/inventory/stockout-alerts/stockouts?page=0&size=50')).toBe(200);
   expect(await call('crm/message-inbox/messages?page=1&size=50')).toBe(200);
 });
 

@@ -125,21 +125,27 @@ function eligibility(
 describe('10.7.1.1 转销售的两道否决由服务端给，页面只负责显示', () => {
   it('质检判成残次 ⇒ 转销售被挡住，挡住的理由原样带出来', () => {
     const e = eligibility([
-      { method: 'RESALE', allowed: false, blockingReasons: ['上游 11.2.3.1 判定为「残次」：不允许转销售'] },
+      {
+        method: 'RESALE',
+        allowed: false,
+        blockingReasons: ['上游 11.2.3.1 判定为「残次」：不允许转销售'],
+      },
       { method: 'RETURN_TO_COUNTRY', allowed: true },
       { method: 'DISCARD', allowed: true },
     ]);
     expect(methodAllowed(e, 'RESALE')).toBe(false);
     expect(canSelectMethod(e, 'RESALE')).toBe(false);
-    expect(blockingReasons(e, 'RESALE')).toEqual([
-      '上游 11.2.3.1 判定为「残次」：不允许转销售',
-    ]);
+    expect(blockingReasons(e, 'RESALE')).toEqual(['上游 11.2.3.1 判定为「残次」：不允许转销售']);
     expect(methodAllowed(e, 'RETURN_TO_COUNTRY')).toBe(true);
   });
 
   it('命中再销售限制 ⇒ 转销售被挡住', () => {
     const e = eligibility([
-      { method: 'RESALE', allowed: false, blockingReasons: ['命中本租户再销售限制：BRAND BRAND-A'] },
+      {
+        method: 'RESALE',
+        allowed: false,
+        blockingReasons: ['命中本租户再销售限制：BRAND BRAND-A'],
+      },
       { method: 'RETURN_TO_COUNTRY', allowed: true },
       { method: 'DISCARD', allowed: true },
     ]);

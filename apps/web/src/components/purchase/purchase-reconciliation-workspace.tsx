@@ -183,14 +183,14 @@ export function PurchaseReconciliationWorkspace() {
           <FormField id="recon-supplier" label="供应商">
             <Input
               id="recon-supplier"
-              value={options?.suppliers.find((s) => s.supplierRefId === supplierRefId)
-                ? `${supplierText(options.suppliers.find((s) => s.supplierRefId === supplierRefId)!)}`
-                : ''}
+              value={
+                options?.suppliers.find((s) => s.supplierRefId === supplierRefId)
+                  ? `${supplierText(options.suppliers.find((s) => s.supplierRefId === supplierRefId)!)}`
+                  : ''
+              }
               placeholder={
                 options?.suppliers.length
-                  ? options.suppliers
-                      .map((s) => `${s.supplierCode} ${s.supplierName}`)
-                      .join(' / ')
+                  ? options.suppliers.map((s) => `${s.supplierCode} ${s.supplierName}`).join(' / ')
                   : '暂无可对账的供应商（已交付事实里还没有）'
               }
               onChange={(e) => {
@@ -309,16 +309,14 @@ export function PurchaseReconciliationWorkspace() {
                       )}
                     </td>
                     <td className="p-2">
-                      <Badge tone={statusTone(row.status)}>
-                        {row.statusLabel || row.status}
-                      </Badge>
+                      <Badge tone={statusTone(row.status)}>{row.statusLabel || row.status}</Badge>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <div className="text-muted-foreground mt-3 text-copy-12">
+          <div className="text-muted-foreground text-copy-12 mt-3">
             共 {data?.total ?? 0} 单 · 本页 {rows.length} 单 ·{' '}
             {data?.paginationNote ?? '真分页（LIMIT/OFFSET + 独立 COUNT）'}
           </div>
@@ -332,7 +330,9 @@ export function PurchaseReconciliationWorkspace() {
             </Button>
             <Button
               variant="ghost"
-              disabled={(params.page ?? 0) + 1 >= Math.ceil((data?.total ?? 0) / (params.size ?? 20))}
+              disabled={
+                (params.page ?? 0) + 1 >= Math.ceil((data?.total ?? 0) / (params.size ?? 20))
+              }
               onClick={() => setParams((p) => ({ ...p, page: (p.page ?? 0) + 1 }))}
             >
               下一页
@@ -427,23 +427,26 @@ function StatementDetail({
   const [lines, setLines] = useState<ReconciliationLineRow[]>([]);
   const [discrepancies, setDiscrepancies] = useState<ReconciliationDiscrepancyRow[]>([]);
 
-  const load = useCallback(async (id: string) => {
-    setLoading(true);
-    try {
-      const [d, l, diff] = await Promise.all([
-        fetchReconciliation(id),
-        fetchReconciliationLines(id, { size: 200 }),
-        fetchReconciliationDiscrepancies(id, { size: 200 }),
-      ]);
-      setDetail(d);
-      setLines(l.rows);
-      setDiscrepancies(diff.rows);
-    } catch (e) {
-      onError(e instanceof Error ? e.message : '加载对账单详情失败');
-    } finally {
-      setLoading(false);
-    }
-  }, [onError]);
+  const load = useCallback(
+    async (id: string) => {
+      setLoading(true);
+      try {
+        const [d, l, diff] = await Promise.all([
+          fetchReconciliation(id),
+          fetchReconciliationLines(id, { size: 200 }),
+          fetchReconciliationDiscrepancies(id, { size: 200 }),
+        ]);
+        setDetail(d);
+        setLines(l.rows);
+        setDiscrepancies(diff.rows);
+      } catch (e) {
+        onError(e instanceof Error ? e.message : '加载对账单详情失败');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [onError],
+  );
 
   // 打开哪张单由父组件决定（列表点行 → 父组件记 id）。
   useEffect(() => {
@@ -518,10 +521,7 @@ function StatementDetail({
           )}
 
           {!loading && tab === 'discrepancies' && (
-            <DiscrepancyTable
-              discrepancies={discrepancies}
-              onResolve={(d) => setResolving(d)}
-            />
+            <DiscrepancyTable discrepancies={discrepancies} onResolve={(d) => setResolving(d)} />
           )}
 
           {!loading && tab === 'confirmations' && (
@@ -532,7 +532,7 @@ function StatementDetail({
                 </div>
               ) : (
                 detail.confirmations.map((c) => (
-                  <div key={c.id} className="border-border rounded-md border p-2 text-copy-13">
+                  <div key={c.id} className="border-border text-copy-13 rounded-md border p-2">
                     <div className="font-medium">{confirmationText(c)}</div>
                     <div className="text-muted-foreground">
                       答复时刻 {fmtTime(c.supplierRepliedAt)} · 答复人 {c.supplierRepliedBy || '无'}
@@ -550,9 +550,14 @@ function StatementDetail({
                 <div className="text-muted-foreground text-copy-13">暂无留痕。</div>
               ) : (
                 detail.events.map((e) => (
-                  <div key={e.id} className="border-border border-b py-1.5 text-copy-13 last:border-0">
+                  <div
+                    key={e.id}
+                    className="border-border text-copy-13 border-b py-1.5 last:border-0"
+                  >
                     <div>{eventText(e)}</div>
-                    <div className="text-muted-foreground text-copy-12">{fmtTime(e.occurredAt)}</div>
+                    <div className="text-muted-foreground text-copy-12">
+                      {fmtTime(e.occurredAt)}
+                    </div>
                   </div>
                 ))
               )}
@@ -667,13 +672,7 @@ function StatementDetail({
 }
 
 /** 明细表：数量 / 单位 / 单价 / 币种 / 汇率 / 金额 / 质检扣量状态。 */
-function LinesTable({
-  lines,
-  currency,
-}: {
-  lines: ReconciliationLineRow[];
-  currency: string;
-}) {
+function LinesTable({ lines, currency }: { lines: ReconciliationLineRow[]; currency: string }) {
   if (lines.length === 0) {
     return (
       <div className="text-muted-foreground text-copy-13">
@@ -765,7 +764,7 @@ function DiscrepancyTable({
   return (
     <div className="space-y-2">
       {discrepancies.map((d) => (
-        <div key={d.id} className="border-border rounded-md border p-2 text-copy-13">
+        <div key={d.id} className="border-border text-copy-13 rounded-md border p-2">
           <div className="flex items-center justify-between gap-2">
             <div className="font-medium">
               {d.lineNo !== null && d.lineNo !== undefined ? `第 ${d.lineNo} 行 · ` : ''}
@@ -796,7 +795,7 @@ function DiscrepancyTable({
 /** 对账基数与口径说明。 */
 function BasisBlock({ basis }: { basis: ReconciliationBasis }) {
   return (
-    <div className="space-y-3 text-copy-13">
+    <div className="text-copy-13 space-y-3">
       <div>
         <div className="font-medium">基数来源</div>
         {basis.sources.map((s) => (
@@ -1086,8 +1085,7 @@ function ConfirmationDialog({
         <ModalHeader>
           <ModalTitle>录入供应商确认回执</ModalTitle>
           <ModalDescription>
-            回执要**逐行**给供应商的值：只给一个总额就答不出「差在哪一行」。
-            留空的字段不参与比对。
+            回执要**逐行**给供应商的值：只给一个总额就答不出「差在哪一行」。 留空的字段不参与比对。
           </ModalDescription>
         </ModalHeader>
         <div className="grid gap-3 md:grid-cols-2">
@@ -1297,11 +1295,7 @@ function ReopenDialog({
           </ModalDescription>
         </ModalHeader>
         <FormField id="reopen-reason" label="重开理由">
-          <Input
-            id="reopen-reason"
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-          />
+          <Input id="reopen-reason" value={reason} onChange={(e) => setReason(e.target.value)} />
         </FormField>
         <ModalFooter>
           <Button variant="ghost" onClick={onClose}>

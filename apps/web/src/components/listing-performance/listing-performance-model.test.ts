@@ -236,9 +236,30 @@ describe('趋势序列', () => {
 describe('能力声明与来源标注', () => {
   const caps = {
     dimensions: [
-      { dimension: 'metric_aggregation', description: '', available: true, source: '', ownerModule: '', impact: '' },
-      { dimension: 'product_performance_drilldown', description: '', available: false, source: '', ownerModule: '13 产品表现', impact: '' },
-      { dimension: 'ad_attribution', description: '', available: false, source: '', ownerModule: '14 广告', impact: '' },
+      {
+        dimension: 'metric_aggregation',
+        description: '',
+        available: true,
+        source: '',
+        ownerModule: '',
+        impact: '',
+      },
+      {
+        dimension: 'product_performance_drilldown',
+        description: '',
+        available: false,
+        source: '',
+        ownerModule: '13 产品表现',
+        impact: '',
+      },
+      {
+        dimension: 'ad_attribution',
+        description: '',
+        available: false,
+        source: '',
+        ownerModule: '14 广告',
+        impact: '',
+      },
     ],
     sources: [],
     ingestChannels: [],

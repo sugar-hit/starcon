@@ -293,9 +293,7 @@ export function partyStatusLabel(code: string | null): string {
   }
 }
 
-export function partyStatusTone(
-  code: string | null,
-): 'success' | 'warning' | 'danger' | 'neutral' {
+export function partyStatusTone(code: string | null): 'success' | 'warning' | 'danger' | 'neutral' {
   switch (code) {
     case 'ACTIVE':
       return 'success';
@@ -339,7 +337,9 @@ export function rateLabel(rate: string | number | null | undefined): string {
 }
 
 /** 比率的展示色：低于 90% 标警示。只对**有数据**的比率生效。 */
-export function rateTone(rate: string | number | null | undefined): 'success' | 'warning' | 'neutral' {
+export function rateTone(
+  rate: string | number | null | undefined,
+): 'success' | 'warning' | 'neutral' {
   if (rate === null || rate === undefined || rate === '') return 'neutral';
   const value = typeof rate === 'number' ? rate : Number(rate);
   if (Number.isNaN(value)) return 'neutral';
@@ -430,11 +430,7 @@ export function validateInspection(input: VendorQualityInspectionInput): string[
   if (!input.inspectedAt.trim()) problems.push('检验时间必填');
   const inspected = Number(input.inspectedQuantity.trim());
   const qualified = Number(input.qualifiedQuantity.trim());
-  if (
-    !Number.isNaN(inspected) &&
-    !Number.isNaN(qualified) &&
-    qualified > inspected
-  ) {
+  if (!Number.isNaN(inspected) && !Number.isNaN(qualified) && qualified > inspected) {
     problems.push(
       `合格数量（${input.qualifiedQuantity}）不能超过检验数量（${input.inspectedQuantity}）：抽检数据录错会让合格率算出 100% 以上`,
     );
@@ -510,10 +506,18 @@ export function recordVendorInspection(
   roleId: string,
   input: VendorQualityInspectionInput,
 ): Promise<VendorFactSaved> {
-  return api<VendorFactSaved>(`catalog/supply/vendors/${roleId}/quality-inspections`, 'POST', input);
+  return api<VendorFactSaved>(
+    `catalog/supply/vendors/${roleId}/quality-inspections`,
+    'POST',
+    input,
+  );
 }
 
-export function voidVendorDelivery(roleId: string, recordId: string, reason: string): Promise<unknown> {
+export function voidVendorDelivery(
+  roleId: string,
+  recordId: string,
+  reason: string,
+): Promise<unknown> {
   return api(`catalog/supply/vendors/${roleId}/deliveries/${recordId}/void`, 'POST', { reason });
 }
 

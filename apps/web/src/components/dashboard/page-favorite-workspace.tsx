@@ -3,7 +3,15 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Badge, Button, EmptyState, Input, SectionCard, StatCard } from '@starcon/ui';
-import { ArrowDown, ArrowUp, ExternalLink, RefreshCw, Star, Trash2, TriangleAlert } from 'lucide-react';
+import {
+  ArrowDown,
+  ArrowUp,
+  ExternalLink,
+  RefreshCw,
+  Star,
+  Trash2,
+  TriangleAlert,
+} from 'lucide-react';
 import { api } from '@/lib/api';
 import {
   FAVORITE_PAGES,
@@ -87,27 +95,24 @@ export function PageFavoriteWorkspace() {
 
   // ================================================================ 收藏操作
 
-  const addFavorite = useCallback(
-    async (page: FavoritePage) => {
-      setNotice('');
-      setPending(page.href);
-      try {
-        const raw = await api<unknown>('identity/page-favorites', 'POST', {
-          href: page.href,
-          label: page.label,
-          system: page.system,
-          pageCode: page.pageCode,
-        });
-        setFavorites(parseFavoriteSet(raw));
-        setNotice(`已收藏「${page.label}」。`);
-      } catch (addError) {
-        setNotice(addError instanceof Error ? addError.message : '收藏失败，请重试');
-      } finally {
-        setPending('');
-      }
-    },
-    [],
-  );
+  const addFavorite = useCallback(async (page: FavoritePage) => {
+    setNotice('');
+    setPending(page.href);
+    try {
+      const raw = await api<unknown>('identity/page-favorites', 'POST', {
+        href: page.href,
+        label: page.label,
+        system: page.system,
+        pageCode: page.pageCode,
+      });
+      setFavorites(parseFavoriteSet(raw));
+      setNotice(`已收藏「${page.label}」。`);
+    } catch (addError) {
+      setNotice(addError instanceof Error ? addError.message : '收藏失败，请重试');
+    } finally {
+      setPending('');
+    }
+  }, []);
 
   const removeFavorite = useCallback(async (href: string, label: string) => {
     setNotice('');
@@ -212,7 +217,10 @@ export function PageFavoriteWorkspace() {
       </div>
 
       {notice ? (
-        <p className="border-border bg-muted text-copy-13 rounded-md border px-3 py-2" role="status">
+        <p
+          className="border-border bg-muted text-copy-13 rounded-md border px-3 py-2"
+          role="status"
+        >
           {notice}
         </p>
       ) : null}
@@ -262,7 +270,7 @@ export function PageFavoriteWorkspace() {
                     overIndex === index ? 'bg-muted/40' : ''
                   }`}
                 >
-                  <span className="text-muted-foreground w-6 text-center text-copy-12">
+                  <span className="text-muted-foreground text-copy-12 w-6 text-center">
                     {index + 1}
                   </span>
                   <div className="min-w-0 flex-1">
@@ -275,7 +283,7 @@ export function PageFavoriteWorkspace() {
                       </Link>
                       <Badge tone="neutral">{describeFavoriteSystem(item.system)}</Badge>
                     </div>
-                    <div className="text-muted-foreground mt-1 flex flex-wrap gap-3 text-copy-12">
+                    <div className="text-muted-foreground text-copy-12 mt-1 flex flex-wrap gap-3">
                       <span>{item.href}</span>
                       {item.pageCode ? <span>页面码 {item.pageCode}</span> : null}
                     </div>
@@ -346,14 +354,12 @@ export function PageFavoriteWorkspace() {
           aria-label="筛选可收藏的页面"
         />
         {registryGroups.length === 0 ? (
-          <p className="text-muted-foreground mt-3 text-copy-13">
-            没有匹配「{keyword}」的页面。
-          </p>
+          <p className="text-muted-foreground text-copy-13 mt-3">没有匹配「{keyword}」的页面。</p>
         ) : (
           <div className="mt-4 space-y-4">
             {registryGroups.map((group) => (
               <div key={group.system}>
-                <p className="text-muted-foreground mb-2 text-copy-13">{group.label}</p>
+                <p className="text-muted-foreground text-copy-13 mb-2">{group.label}</p>
                 <ul className="divide-border divide-y">
                   {group.pages.map((page) => {
                     const already = favorited.has(page.href);

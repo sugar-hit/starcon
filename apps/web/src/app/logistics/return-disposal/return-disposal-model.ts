@@ -37,11 +37,7 @@ export type EvidenceKind = 'PHOTO' | 'WEIGHT' | 'CERTIFICATE' | 'EXECUTOR';
 
 /** 销毁费用类型。 */
 export type DisposalCostType =
-  | 'DESTROY_FEE'
-  | 'PICKUP_FEE'
-  | 'TRANSPORT_FEE'
-  | 'LABEL_FEE'
-  | 'OTHER';
+  'DESTROY_FEE' | 'PICKUP_FEE' | 'TRANSPORT_FEE' | 'LABEL_FEE' | 'OTHER';
 
 /** 索赔依据类型。 */
 export type ClaimType = 'BRAND' | 'SUPPLIER';
@@ -399,7 +395,10 @@ export interface DisposalCostPayload {
   note?: string;
 }
 
-export function recordCost(id: string, payload: DisposalCostPayload): Promise<ReturnDisposalDetail> {
+export function recordCost(
+  id: string,
+  payload: DisposalCostPayload,
+): Promise<ReturnDisposalDetail> {
   return api<ReturnDisposalDetail>(`${BASE}/orders/${id}/costs`, 'POST', payload);
 }
 

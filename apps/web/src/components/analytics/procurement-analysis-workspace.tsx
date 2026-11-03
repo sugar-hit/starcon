@@ -110,14 +110,24 @@ export function AnalyticsProcurementAnalysisWorkspace() {
     setError('');
     try {
       const [t, c, pv, ot, pc, cts, sup, dr, caps] = await Promise.all([
-        api<ProcurementTrendResponse>(`reporting/procurement-analysis/trend?${query}&dimension=${dimension}`),
-        api<ProcurementConcentrationResponse>(`reporting/procurement-analysis/concentration?${query}`),
+        api<ProcurementTrendResponse>(
+          `reporting/procurement-analysis/trend?${query}&dimension=${dimension}`,
+        ),
+        api<ProcurementConcentrationResponse>(
+          `reporting/procurement-analysis/concentration?${query}`,
+        ),
         api<ProcurementPriceVarianceResponse>(
           `reporting/procurement-analysis/price-variance?${query}&dimension=${priceDimension}`,
         ),
-        api<ProcurementOnTimeResponse>(`reporting/procurement-analysis/on-time?from=${from}&to=${to}`),
-        api<ProcurementCycleResponse>(`reporting/procurement-analysis/purchase-cycle?from=${from}&to=${to}`),
-        api<ProcurementCostToSalesResponse>(`reporting/procurement-analysis/cost-to-sales?from=${from}&to=${to}`),
+        api<ProcurementOnTimeResponse>(
+          `reporting/procurement-analysis/on-time?from=${from}&to=${to}`,
+        ),
+        api<ProcurementCycleResponse>(
+          `reporting/procurement-analysis/purchase-cycle?from=${from}&to=${to}`,
+        ),
+        api<ProcurementCostToSalesResponse>(
+          `reporting/procurement-analysis/cost-to-sales?from=${from}&to=${to}`,
+        ),
         api<ProcurementSupplierComparisonResponse>(
           `reporting/procurement-analysis/suppliers?from=${from}&to=${to}${currency ? `&currency=${currency}` : ''}&size=20`,
         ),
@@ -304,7 +314,10 @@ export function AnalyticsProcurementAnalysisWorkspace() {
 
       {state === 'loading' && (
         <SectionCard>
-          <EmptyState title="正在读取采购分析…" description="读取期间页面上的「数据截至」仍然有效。" />
+          <EmptyState
+            title="正在读取采购分析…"
+            description="读取期间页面上的「数据截至」仍然有效。"
+          />
         </SectionCard>
       )}
 
@@ -333,7 +346,9 @@ export function AnalyticsProcurementAnalysisWorkspace() {
                       key={total.currency}
                       className="border-border bg-muted/40 rounded-md border px-3 py-2"
                     >
-                      <div className="text-copy-13 text-muted-foreground">{total.currency} 合计</div>
+                      <div className="text-copy-13 text-muted-foreground">
+                        {total.currency} 合计
+                      </div>
                       <div className="text-copy-15 font-medium tabular-nums">
                         {amountText(total.amount, total.currency)}
                       </div>
@@ -368,10 +383,10 @@ export function AnalyticsProcurementAnalysisWorkspace() {
                         >
                           <td className="py-2 pr-3">{periodLabel(point.period, granularity)}</td>
                           <td className="py-2 pr-3">{point.currency}</td>
-                          <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                          <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                             {amountText(point.amount, point.currency)}
                           </td>
-                          <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                          <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                             {quantityText(point.quantity)}
                           </td>
                           <td className="py-2 pr-3 text-right tabular-nums">{point.factCount}</td>
@@ -403,10 +418,10 @@ export function AnalyticsProcurementAnalysisWorkspace() {
                           >
                             <td className="py-2 pr-3">{share.dimensionLabel}</td>
                             <td className="py-2 pr-3">{share.currency}</td>
-                            <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                            <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                               {amountText(share.amount, share.currency)}
                             </td>
-                            <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                            <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                               {percentText(share.share)}
                             </td>
                             <td className="py-2 pr-3">
@@ -453,7 +468,9 @@ export function AnalyticsProcurementAnalysisWorkspace() {
                   {percentText(concentration.topShareThreshold)} ⇒ 中风险
                 </span>
               </div>
-              <p className="text-copy-13 text-foreground mb-3">{concentrationRiskText(concentration)}</p>
+              <p className="text-copy-13 text-foreground mb-3">
+                {concentrationRiskText(concentration)}
+              </p>
               {concentration.buckets.map((bucket) => (
                 <div key={bucket.currency} className="mb-4">
                   <div className="text-copy-13 text-muted-foreground mb-1 flex flex-wrap gap-2">
@@ -485,16 +502,16 @@ export function AnalyticsProcurementAnalysisWorkspace() {
                             className="border-border border-b"
                           >
                             <td className="py-2 pr-3">{supplier.supplierName}</td>
-                            <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                            <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                               {amountText(supplier.amount, bucket.currency)}
                             </td>
-                            <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                            <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                               {percentText(supplier.share)}
                             </td>
-                            <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                            <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                               {percentText(supplier.cumulativeShare)}
                             </td>
-                            <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                            <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                               {percentText(supplier.onTimeRate)}
                             </td>
                             <td className="py-2 pr-3 text-right">
@@ -547,16 +564,16 @@ export function AnalyticsProcurementAnalysisWorkspace() {
                         >
                           <td className="py-2 pr-3">{row.dimensionLabel}</td>
                           <td className="py-2 pr-3">{row.currency}</td>
-                          <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                          <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                             {priceText(row.currentAveragePrice, row.currency)}
                           </td>
-                          <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                          <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                             {priceText(row.previousAveragePrice, row.currency)}
                           </td>
-                          <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                          <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                             {changeText(row.changeRate)}
                           </td>
-                          <td className="text-copy-13 text-muted-foreground py-2 pr-3 max-w-xs">
+                          <td className="text-copy-13 text-muted-foreground max-w-xs py-2 pr-3">
                             {priceStatusLabel(row.status)}
                             {row.note ? ` · ${row.note}` : ''}
                           </td>
@@ -606,18 +623,17 @@ export function AnalyticsProcurementAnalysisWorkspace() {
                     </thead>
                     <tbody>
                       {onTime.suppliers.map((supplier) => (
-                        <tr
-                          key={supplier.supplierId}
-                          className="border-border border-b"
-                        >
+                        <tr key={supplier.supplierId} className="border-border border-b">
                           <td className="py-2 pr-3">{supplier.supplierName}</td>
-                          <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                          <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                             {percentText(supplier.onTimeRate)}
                           </td>
                           <td className="py-2 pr-3 text-right tabular-nums">
                             {supplier.onTimeCount} / {supplier.denominatorCount}
                           </td>
-                          <td className="py-2 pr-3 text-right tabular-nums">{supplier.lateCount}</td>
+                          <td className="py-2 pr-3 text-right tabular-nums">
+                            {supplier.lateCount}
+                          </td>
                           <td className="py-2 pr-3 text-right">
                             {supplier.ratingGrade ? (
                               <Badge tone={ratingTone(supplier.ratingGrade)}>
@@ -652,8 +668,10 @@ export function AnalyticsProcurementAnalysisWorkspace() {
                           <td className="py-2 pr-3">{row.sourceDocNo}</td>
                           <td className="py-2 pr-3">{row.supplierName}</td>
                           <td className="py-2 pr-3">{row.promisedArrivalDate}</td>
-                          <td className="py-2 pr-3 text-right tabular-nums">{row.lateDays ?? '—'}</td>
-                          <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                          <td className="py-2 pr-3 text-right tabular-nums">
+                            {row.lateDays ?? '—'}
+                          </td>
+                          <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                             {amountText(row.amount, row.currency)}
                           </td>
                         </tr>
@@ -700,17 +718,19 @@ export function AnalyticsProcurementAnalysisWorkspace() {
                       {cycle.suppliers.map((supplier) => (
                         <tr key={supplier.supplierId} className="border-border border-b">
                           <td className="py-2 pr-3">{supplier.supplierName}</td>
-                          <td className="py-2 pr-3 text-right tabular-nums">{supplier.sampleCount}</td>
-                          <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                          <td className="py-2 pr-3 text-right tabular-nums">
+                            {supplier.sampleCount}
+                          </td>
+                          <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                             {daysText(supplier.averageCycleDays)}
                           </td>
-                          <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                          <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                             {daysText(supplier.medianCycleDays)}
                           </td>
-                          <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                          <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                             {daysText(supplier.p90CycleDays)}
                           </td>
-                          <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                          <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                             {daysText(supplier.latestCycleDays)}
                             {supplier.latestReceivedDate ? ` · ${supplier.latestReceivedDate}` : ''}
                           </td>
@@ -754,16 +774,18 @@ export function AnalyticsProcurementAnalysisWorkspace() {
                       {costToSales.rows.map((row) => (
                         <tr key={row.currency} className="border-border border-b">
                           <td className="py-2 pr-3">{row.currency}</td>
-                          <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                          <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                             {amountText(row.purchaseAmount, row.currency)}
                           </td>
-                          <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                          <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                             {amountText(row.salesAmount, row.currency)}
                           </td>
-                          <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
-                            <Badge tone={costToSalesTone(row.ratio)}>{percentText(row.ratio)}</Badge>
+                          <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
+                            <Badge tone={costToSalesTone(row.ratio)}>
+                              {percentText(row.ratio)}
+                            </Badge>
                           </td>
-                          <td className="text-copy-13 text-muted-foreground py-2 pr-3 max-w-xs">
+                          <td className="text-copy-13 text-muted-foreground max-w-xs py-2 pr-3">
                             {row.note || '—'}
                           </td>
                         </tr>
@@ -805,16 +827,16 @@ export function AnalyticsProcurementAnalysisWorkspace() {
                         <tr key={row.supplierId} className="border-border border-b">
                           <td className="py-2 pr-3">{row.supplierName}</td>
                           <td className="py-2 pr-3">{row.cooperationLevel || '—'}</td>
-                          <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                          <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                             {amountText(row.purchaseAmount, row.purchaseCurrency)}
                           </td>
-                          <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                          <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                             {percentText(row.purchaseShare)}
                           </td>
-                          <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                          <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                             {percentText(row.onTimeRate)}
                           </td>
-                          <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                          <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                             {daysText(row.averageCycleDays)}
                           </td>
                           <td className="py-2 pr-3 text-right">
@@ -827,7 +849,7 @@ export function AnalyticsProcurementAnalysisWorkspace() {
                               <span className="text-copy-13 text-muted-foreground">未评级</span>
                             )}
                           </td>
-                          <td className="text-copy-13 text-muted-foreground py-2 pr-3 max-w-xs">
+                          <td className="text-copy-13 text-muted-foreground max-w-xs py-2 pr-3">
                             {row.note || '—'}
                           </td>
                         </tr>
@@ -866,18 +888,16 @@ export function AnalyticsProcurementAnalysisWorkspace() {
                         <td className="py-2 pr-3">{row.sourceDocNo}</td>
                         <td className="py-2 pr-3">{row.supplierName}</td>
                         <td className="py-2 pr-3">{row.skuCode}</td>
-                        <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                        <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                           {quantityText(row.quantity)}
                         </td>
-                        <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                        <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                           {priceText(row.unitPrice, row.currency)}
                         </td>
-                        <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                        <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                           {amountText(row.amount, row.currency)}
                         </td>
-                        <td className="py-2 pr-3">
-                          {onTimeStatusLabel(row.onTimeStatus)}
-                        </td>
+                        <td className="py-2 pr-3">{onTimeStatusLabel(row.onTimeStatus)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -911,10 +931,10 @@ export function AnalyticsProcurementAnalysisWorkspace() {
                             {section.available ? '已接通' : unavailableLabel(section.ownerModule)}
                           </Badge>
                         </td>
-                        <td className="text-copy-13 text-muted-foreground py-2 pr-3 max-w-xs">
+                        <td className="text-copy-13 text-muted-foreground max-w-xs py-2 pr-3">
                           {section.caliber}
                         </td>
-                        <td className="text-copy-13 text-muted-foreground py-2 pr-3 max-w-xs">
+                        <td className="text-copy-13 text-muted-foreground max-w-xs py-2 pr-3">
                           {section.available ? section.evidence : section.reason}
                           {section.available ? '' : ` · 影响：${section.impact}`}
                         </td>

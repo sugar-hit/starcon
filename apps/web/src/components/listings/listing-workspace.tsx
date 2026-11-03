@@ -1,14 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  Badge,
-  Button,
-  EmptyState,
-  Input,
-  PageHeader,
-  SectionCard,
-} from '@starcon/ui';
+import { Badge, Button, EmptyState, Input, PageHeader, SectionCard } from '@starcon/ui';
 import { Loader2, PackageSearch, RefreshCw, TriangleAlert } from 'lucide-react';
 import {
   actionLabel,
@@ -164,7 +157,11 @@ export function ListingWorkspace() {
         description="按店铺 / 站点 / 状态 / 负责人 / 类目 / 是否有映射 / 是否缺货筛选平台商品。未映射与缺货是两个独立状态，可分别筛选也可同时命中。"
         actions={
           <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
             刷新
           </Button>
         }
@@ -182,7 +179,10 @@ export function ListingWorkspace() {
 
       {/* 🔴 未接入维度明账：价格 / 销量 / 内部可售量如实列出，不画 0 也不画占位 */}
       {missing.length > 0 && (
-        <SectionCard title="本模块未接入的维度" description="如实列出而不是填 0 或留空：0 会被读成「这个商品卖 0 块」。">
+        <SectionCard
+          title="本模块未接入的维度"
+          description="如实列出而不是填 0 或留空：0 会被读成「这个商品卖 0 块」。"
+        >
           <ul className="space-y-2">
             {missing.map((d) => (
               <li key={d.dimension} className="text-copy-13 flex flex-wrap items-baseline gap-2">
@@ -217,9 +217,7 @@ export function ListingWorkspace() {
           <Field label="店铺编码">
             <Input
               value={filters.shopCode}
-              onChange={(e) =>
-                setFilters(applyFilterChange(filters, { shopCode: e.target.value }))
-              }
+              onChange={(e) => setFilters(applyFilterChange(filters, { shopCode: e.target.value }))}
               placeholder="留空 = 全部店铺"
             />
           </Field>
@@ -267,13 +265,7 @@ export function ListingWorkspace() {
           </Field>
           <Field label="是否缺货（平台侧）">
             <Select
-              value={
-                filters.outOfStock === undefined
-                  ? ''
-                  : filters.outOfStock
-                    ? 'OUT'
-                    : 'IN'
-              }
+              value={filters.outOfStock === undefined ? '' : filters.outOfStock ? 'OUT' : 'IN'}
               onChange={(v) =>
                 setFilters(
                   applyFilterChange(filters, {
@@ -351,17 +343,13 @@ export function ListingWorkspace() {
               />
             </Field>
           )}
-          <Badge tone={support.supported ? 'info' : 'warning'}>
-            已选 {selected.length} 条
-          </Badge>
+          <Badge tone={support.supported ? 'info' : 'warning'}>已选 {selected.length} 条</Badge>
         </div>
 
         {!support.supported && support.reason && (
           <p className="text-copy-13 text-warning mt-3">{support.reason}</p>
         )}
-        {bulkError && (
-          <p className="text-copy-13 text-destructive mt-3">{bulkError}</p>
-        )}
+        {bulkError && <p className="text-copy-13 text-destructive mt-3">{bulkError}</p>}
         {bulkResult && (
           <p
             className={`text-copy-13 mt-3 ${bulkResult.outcome === 'REJECTED' ? 'text-warning' : 'text-success'}`}
@@ -391,7 +379,7 @@ export function ListingWorkspace() {
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-copy-13">
+            <table className="text-copy-13 w-full text-left">
               <thead className="text-muted-foreground border-b">
                 <tr>
                   <th className="w-10 px-3 py-2">
@@ -426,7 +414,7 @@ export function ListingWorkspace() {
                     </td>
                     <td className="px-3 py-2">
                       <div className="text-foreground font-medium">{r.title}</div>
-                      <div className="text-muted-foreground font-mono text-label-12">
+                      <div className="text-muted-foreground text-label-12 font-mono">
                         {r.externalItemId}
                       </div>
                       {r.categoryPath && (
@@ -443,14 +431,16 @@ export function ListingWorkspace() {
                     <td className="px-3 py-2">
                       <Badge tone={statusTone(r.status)}>{statusLabel(r.status)}</Badge>
                       {r.reviewMessage && (
-                        <div className="text-muted-foreground mt-1 text-label-12">
+                        <div className="text-muted-foreground text-label-12 mt-1">
                           {r.reviewMessage}
                         </div>
                       )}
                     </td>
                     <td className="px-3 py-2">
-                      <Badge tone={mappingTone(r.mappingStatus)}>{mappingLabel(r.mappingStatus)}</Badge>
-                      <div className="text-muted-foreground mt-1 text-label-12">
+                      <Badge tone={mappingTone(r.mappingStatus)}>
+                        {mappingLabel(r.mappingStatus)}
+                      </Badge>
+                      <div className="text-muted-foreground text-label-12 mt-1">
                         {r.mappedVariantCount}/{r.variantCount} 变体
                         {r.internalSkuIds.length > 0 && ` · ${r.internalSkuIds.length} 个内部 SKU`}
                       </div>
@@ -460,7 +450,7 @@ export function ListingWorkspace() {
                         {stockLabel(r.platformStockState)}
                       </Badge>
                       {r.platformStockQty !== null && (
-                        <div className="text-muted-foreground mt-1 text-label-12">
+                        <div className="text-muted-foreground text-label-12 mt-1">
                           平台侧 {String(r.platformStockQty)}
                         </div>
                       )}
@@ -492,7 +482,7 @@ export function ListingWorkspace() {
                       ) : (
                         <div>
                           <Badge tone="info">{r.statusChangeCount7d} 次</Badge>
-                          <ul className="text-muted-foreground mt-1 space-y-0.5 text-label-12">
+                          <ul className="text-muted-foreground text-label-12 mt-1 space-y-0.5">
                             {r.recentStatusChanges.slice(0, 3).map((c, i) => (
                               <li key={`${c.occurredAt}-${i}`}>
                                 {statusLabel(c.fromStatus ?? '—')} → {statusLabel(c.toStatus)}
@@ -535,10 +525,13 @@ export function ListingWorkspace() {
 
       {/* 批量任务历史：被拒绝的改价同样可回溯 */}
       {tasks.length > 0 && (
-        <SectionCard title="批量操作历史" description="被拒绝的批量操作同样落库留痕 —— 「点了改价、系统没做」必须可回溯。">
+        <SectionCard
+          title="批量操作历史"
+          description="被拒绝的批量操作同样落库留痕 —— 「点了改价、系统没做」必须可回溯。"
+        >
           <ul className="space-y-2">
             {tasks.slice(0, 10).map((t) => (
-              <li key={t.taskId} className="flex flex-wrap items-center gap-2 text-copy-13">
+              <li key={t.taskId} className="text-copy-13 flex flex-wrap items-center gap-2">
                 <Badge tone={t.outcome === 'REJECTED' ? 'warning' : 'success'}>
                   {t.outcome === 'REJECTED' ? '已拒绝' : '已执行'}
                 </Badge>
@@ -639,7 +632,7 @@ function Select({
 }) {
   return (
     <select
-      className="border-control-border bg-card h-9 rounded-md border px-2 text-copy-13"
+      className="border-control-border bg-card text-copy-13 h-9 rounded-md border px-2"
       value={value}
       onChange={(e) => onChange(e.target.value)}
     >

@@ -30,7 +30,9 @@ import { GET, POST } from './[...path]/route';
 
 // 相对**本文件**定位：vitest 从仓库根或 apps/web 跑时 cwd 都不同，用 cwd 会静默读空。
 const SOURCE = readFileSync(
-  fileURLToPath(new URL('../../../components/aftersales/aftersales-case-detail-model.ts', import.meta.url)),
+  fileURLToPath(
+    new URL('../../../components/aftersales/aftersales-case-detail-model.ts', import.meta.url),
+  ),
   'utf8',
 );
 
@@ -140,7 +142,11 @@ it('11.1.1.1 自己的形状没有被本模块的正则吃走', async () => {
   vi.stubGlobal('fetch', fetcher);
   // 本条元素排在 11.1.1.1 那条**之前**被匹配，形状互不相交是它能并排的前提：
   // `cases`（裸）与 `cases/bulk` 必须仍然放行（它们归 11.1.1.1 的正则）。
-  for (const path of ['trade/aftersales/capabilities', 'trade/aftersales/filters', 'trade/aftersales/cases']) {
+  for (const path of [
+    'trade/aftersales/capabilities',
+    'trade/aftersales/filters',
+    'trade/aftersales/cases',
+  ]) {
     const response = await GET(request(path), {
       params: Promise.resolve({ path: path.split('/') }),
     });

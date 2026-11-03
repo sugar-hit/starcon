@@ -223,8 +223,8 @@ export function AdCampaignDetailWorkspace({ campaignId }: { campaignId: string }
       <header className="space-y-1">
         <h1 className="text-lg font-medium">{campaign.campaignName}</h1>
         <p className="text-muted-foreground text-xs">
-          {campaign.platformName} · {campaign.shopName} · 平台侧 id{' '}
-          {campaign.externalCampaignId} · 状态 {adStatusLabel(campaign.status)}
+          {campaign.platformName} · {campaign.shopName} · 平台侧 id {campaign.externalCampaignId} ·
+          状态 {adStatusLabel(campaign.status)}
         </p>
         <p className="text-muted-foreground text-xs">
           🔴 本地已改、尚未回写平台：
@@ -384,7 +384,9 @@ export function AdCampaignDetailWorkspace({ campaignId }: { campaignId: string }
                   <td className="p-2">{adStatusLabel(g.status)}</td>
                   <td className="p-2">{money(g.defaultBid, g.bidCurrency)}</td>
                   <td className="p-2">
-                    {g.dailyBudget === null ? '继承活动预算' : money(g.dailyBudget, campaign.currency)}
+                    {g.dailyBudget === null
+                      ? '继承活动预算'
+                      : money(g.dailyBudget, campaign.currency)}
                   </td>
                   <td className="p-2">{g.targetingType || '—'}</td>
                   <td className="p-2">
@@ -470,7 +472,9 @@ export function AdCampaignDetailWorkspace({ campaignId }: { campaignId: string }
                   <td className="p-2">{c.externalCreativeId}</td>
                   <td className="p-2">{creativeTypeLabel(c.creativeType)}</td>
                   <td className="p-2">{c.groupName ?? '活动级'}</td>
-                  <td className="p-2">{c.durationSeconds === null ? '—' : `${c.durationSeconds}s`}</td>
+                  <td className="p-2">
+                    {c.durationSeconds === null ? '—' : `${c.durationSeconds}s`}
+                  </td>
                   <td className="p-2">{adStatusLabel(c.status)}</td>
                 </tr>
               ))}
@@ -534,11 +538,11 @@ export function AdCampaignDetailWorkspace({ campaignId }: { campaignId: string }
       <Section title="修改历史">
         {changeHistory ? (
           <>
-            <p className="text-amber-600 text-sm">
+            <p className="text-sm text-amber-600">
               🔴 平台侧修改历史**当前不可得**（{changeHistory.ownerModule}）。
               {changeHistory.impact}
             </p>
-            <p className="text-muted-foreground text-xs whitespace-pre-line">
+            <p className="text-muted-foreground whitespace-pre-line text-xs">
               {changeHistoryText(
                 changeHistory.available,
                 changeHistory.note,
@@ -587,7 +591,7 @@ export function AdCampaignDetailWorkspace({ campaignId }: { campaignId: string }
           ))}
         </ul>
         {capabilities ? (
-          <p className="text-muted-foreground text-xs whitespace-pre-line">
+          <p className="text-muted-foreground whitespace-pre-line text-xs">
             {capabilities.boundaryNote}
           </p>
         ) : null}
@@ -596,9 +600,7 @@ export function AdCampaignDetailWorkspace({ campaignId }: { campaignId: string }
       {/* ================= 改竞价 ================= */}
       <Section title="改竞价（广告组默认竞价）">
         {capabilities ? (
-          <p className="text-muted-foreground text-xs">
-            🔴 {capabilities.bidGuardrails.note}
-          </p>
+          <p className="text-muted-foreground text-xs">🔴 {capabilities.bidGuardrails.note}</p>
         ) : null}
         <div className="flex flex-wrap items-end gap-2">
           <Field label="广告组 id">
@@ -650,7 +652,7 @@ export function AdCampaignDetailWorkspace({ campaignId }: { campaignId: string }
       {/* ================= 复制结构 ================= */}
       <Section title="复制结构到新店铺 / 新 ASIN">
         {capabilities ? (
-          <p className="text-muted-foreground text-xs whitespace-pre-line">
+          <p className="text-muted-foreground whitespace-pre-line text-xs">
             {capabilities.copyStructureNote}
           </p>
         ) : null}

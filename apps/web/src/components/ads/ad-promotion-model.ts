@@ -297,7 +297,10 @@ export function saveAdPromotion(input: SavePromotionInput): Promise<AdPromotionD
   return api<AdPromotionDetail>('channel/ad-promotions/promotions', 'POST', input);
 }
 
-export function updateAdPromotion(id: string, input: SavePromotionInput): Promise<AdPromotionDetail> {
+export function updateAdPromotion(
+  id: string,
+  input: SavePromotionInput,
+): Promise<AdPromotionDetail> {
   return api<AdPromotionDetail>(`channel/ad-promotions/promotions/${id}`, 'POST', input);
 }
 
@@ -318,7 +321,9 @@ export function fetchAdPromotionGuardrails(
   return api<AdPromotionGuardrailPage>(`channel/ad-promotions/guardrails${queryString(query)}`);
 }
 
-export function saveAdPromotionGuardrail(input: SaveGuardrailInput): Promise<AdPromotionGuardrailRow> {
+export function saveAdPromotionGuardrail(
+  input: SaveGuardrailInput,
+): Promise<AdPromotionGuardrailRow> {
   return api<AdPromotionGuardrailRow>('channel/ad-promotions/guardrails', 'POST', input);
 }
 

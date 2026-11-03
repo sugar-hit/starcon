@@ -95,12 +95,18 @@ export function ListingBulkCollectWorkspace() {
     try {
       const [capsResult, page] = await Promise.all([
         fetchBulkCapabilities(),
-        fetchBulkTasks(modeFilter || undefined, stateFilter || undefined, sourceFilter || undefined),
+        fetchBulkTasks(
+          modeFilter || undefined,
+          stateFilter || undefined,
+          sourceFilter || undefined,
+        ),
       ]);
       setCaps(capsResult);
       setTasks(page.items);
       setTotal(page.total);
-      setActiveId((prev) => prev ?? (page.items.length > 0 ? page.items[0]?.taskId ?? null : null));
+      setActiveId(
+        (prev) => prev ?? (page.items.length > 0 ? (page.items[0]?.taskId ?? null) : null),
+      );
     } catch (e) {
       setError(e instanceof Error ? e.message : '加载失败，请重试');
     } finally {
@@ -241,7 +247,7 @@ export function ListingBulkCollectWorkspace() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center gap-2 py-16 text-muted-foreground">
+      <div className="text-muted-foreground flex items-center justify-center gap-2 py-16">
         <Loader2 className="size-4 animate-spin" />
         <span className="text-label-13">正在加载批量采集…</span>
       </div>
@@ -252,7 +258,7 @@ export function ListingBulkCollectWorkspace() {
     return (
       <SectionCard title="批量/插件采集">
         <EmptyState
-          icon={<TriangleAlert className="size-8 text-destructive" />}
+          icon={<TriangleAlert className="text-destructive size-8" />}
           title="批量采集加载失败"
           description={error}
           action={
@@ -294,7 +300,7 @@ export function ListingBulkCollectWorkspace() {
       {/* ---- 🔴 限频打断提示 ---- */}
       {notice && (
         <div className="border-brand/40 bg-brand-soft/40 flex items-start gap-2 rounded-lg border px-4 py-3">
-          <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-brand" />
+          <CheckCircle2 className="text-brand mt-0.5 size-4 shrink-0" />
           <p className="text-label-13 whitespace-pre-wrap">{notice}</p>
         </div>
       )}
@@ -302,22 +308,22 @@ export function ListingBulkCollectWorkspace() {
       {/* ---- 🔴 三条硬边界（后端给原文，前端原样展示） ---- */}
       {caps && (
         <div className="border-brand/40 bg-brand-soft/40 rounded-lg border px-4 py-3">
-          <p className="text-foreground mb-1 text-label-13 font-medium">批量采集的三条硬边界</p>
-          <ul className="text-muted-foreground space-y-1 text-label-12">
+          <p className="text-foreground text-label-13 mb-1 font-medium">批量采集的三条硬边界</p>
+          <ul className="text-muted-foreground text-label-12 space-y-1">
             <li className="flex items-start gap-2">
-              <ShieldCheck className="mt-0.5 size-3.5 shrink-0 text-brand" />
+              <ShieldCheck className="text-brand mt-0.5 size-3.5 shrink-0" />
               <span>{caps.draftNote}</span>
             </li>
             <li className="flex items-start gap-2">
-              <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-brand" />
+              <CheckCircle2 className="text-brand mt-0.5 size-3.5 shrink-0" />
               <span>{caps.dedupNote}</span>
             </li>
             <li className="flex items-start gap-2">
-              <TriangleAlert className="mt-0.5 size-3.5 shrink-0 text-brand" />
+              <TriangleAlert className="text-brand mt-0.5 size-3.5 shrink-0" />
               <span>{caps.rateLimitNote}</span>
             </li>
           </ul>
-          <p className="text-muted-foreground mt-2 text-label-12">
+          <p className="text-muted-foreground text-label-12 mt-2">
             🔴 当前限频策略：{policySummary(caps.policy)}
           </p>
         </div>
@@ -326,8 +332,8 @@ export function ListingBulkCollectWorkspace() {
       {/* ---- 未接入维度明账 ---- */}
       {unavailable.length > 0 && (
         <div className="border-warning/40 bg-warning/5 rounded-lg border px-4 py-3">
-          <p className="text-warning mb-1 text-label-13 font-medium">部分能力未接入</p>
-          <ul className="text-muted-foreground space-y-1 text-label-12">
+          <p className="text-warning text-label-13 mb-1 font-medium">部分能力未接入</p>
+          <ul className="text-muted-foreground text-label-12 space-y-1">
             {unavailable.map((d) => (
               <li key={d.dimension}>
                 <span className="text-foreground">{d.description}</span>
@@ -362,7 +368,7 @@ export function ListingBulkCollectWorkspace() {
           )}
 
           <div className="flex flex-wrap items-center gap-2">
-            <div className="border-control-border bg-card h-9 flex items-center rounded-md border px-2 text-copy-13">
+            <div className="border-control-border bg-card text-copy-13 flex h-9 items-center rounded-md border px-2">
               <button
                 type="button"
                 className={`rounded px-2 py-1 ${mode === 'CATEGORY_PAGE' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}
@@ -381,7 +387,7 @@ export function ListingBulkCollectWorkspace() {
               </button>
             </div>
             <select
-              className="border-control-border bg-card h-9 rounded-md border px-2 text-copy-13"
+              className="border-control-border bg-card text-copy-13 h-9 rounded-md border px-2"
               value={sourceCode}
               onChange={(e) => setSourceCode(e.target.value)}
               disabled={busy}
@@ -463,7 +469,7 @@ export function ListingBulkCollectWorkspace() {
       >
         <div className="flex flex-wrap gap-2 px-4 pt-4">
           <select
-            className="border-control-border bg-card h-9 rounded-md border px-2 text-copy-13"
+            className="border-control-border bg-card text-copy-13 h-9 rounded-md border px-2"
             value={modeFilter}
             onChange={(e) => setModeFilter(e.target.value)}
             aria-label="模式筛选"
@@ -474,7 +480,7 @@ export function ListingBulkCollectWorkspace() {
             <option value="PLUGIN">浏览器插件上报</option>
           </select>
           <select
-            className="border-control-border bg-card h-9 rounded-md border px-2 text-copy-13"
+            className="border-control-border bg-card text-copy-13 h-9 rounded-md border px-2"
             value={stateFilter}
             onChange={(e) => setStateFilter(e.target.value)}
             aria-label="状态筛选"
@@ -488,7 +494,7 @@ export function ListingBulkCollectWorkspace() {
             <option value="RATE_LIMITED">被限频打断</option>
           </select>
           <select
-            className="border-control-border bg-card h-9 rounded-md border px-2 text-copy-13"
+            className="border-control-border bg-card text-copy-13 h-9 rounded-md border px-2"
             value={sourceFilter}
             onChange={(e) => setSourceFilter(e.target.value)}
             aria-label="来源筛选"
@@ -505,7 +511,7 @@ export function ListingBulkCollectWorkspace() {
         {tasks.length === 0 ? (
           <div className="px-4 py-8">
             <EmptyState
-              icon={<TriangleAlert className="size-8 text-muted-foreground" />}
+              icon={<TriangleAlert className="text-muted-foreground size-8" />}
               title="还没有批量采集任务"
               description={emptyTasksMessage()}
             />
@@ -531,7 +537,7 @@ export function ListingBulkCollectWorkspace() {
                   {task.mode === 'KEYWORD' ? (
                     <span className="text-muted-foreground text-label-12">「{task.keyword}」</span>
                   ) : (
-                    <span className="text-muted-foreground truncate text-label-12">
+                    <span className="text-muted-foreground text-label-12 truncate">
                       {task.categoryUrl}
                     </span>
                   )}
@@ -541,7 +547,7 @@ export function ListingBulkCollectWorkspace() {
                   <span className="text-muted-foreground text-label-12">
                     {taskSummaryLabel(task)}
                   </span>
-                  <span className="text-muted-foreground ml-auto text-label-12">
+                  <span className="text-muted-foreground text-label-12 ml-auto">
                     {capturedAtLabel(task.createdAt)}
                   </span>
                 </button>
@@ -567,7 +573,9 @@ export function ListingBulkCollectWorkspace() {
         >
           <div className="space-y-3 px-4 py-4">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge tone={bulkStateTone(activeTask.state)}>{bulkStateLabel(activeTask.state)}</Badge>
+              <Badge tone={bulkStateTone(activeTask.state)}>
+                {bulkStateLabel(activeTask.state)}
+              </Badge>
               <span className="text-muted-foreground text-label-12">
                 {taskSummaryLabel(activeTask)}
               </span>
@@ -600,7 +608,7 @@ export function ListingBulkCollectWorkspace() {
         description="每一条都是「这次批量采集碰到的某个 URL 的结果」。落成草稿的那些，下游 4.4.1.3 采集箱认领的就是它们。"
         extra={
           <select
-            className="border-control-border bg-card h-9 rounded-md border px-2 text-copy-13"
+            className="border-control-border bg-card text-copy-13 h-9 rounded-md border px-2"
             value={resultState}
             onChange={(e) => {
               setResultState(e.target.value);
@@ -620,7 +628,7 @@ export function ListingBulkCollectWorkspace() {
         {!activeTask ? (
           <div className="px-4 py-8">
             <EmptyState
-              icon={<TriangleAlert className="size-8 text-muted-foreground" />}
+              icon={<TriangleAlert className="text-muted-foreground size-8" />}
               title="还没选任务"
               description="先在上面的任务列表里选一个任务，这里会显示它抓到 / 跳过了哪些商品。"
             />
@@ -628,7 +636,7 @@ export function ListingBulkCollectWorkspace() {
         ) : results.length === 0 ? (
           <div className="px-4 py-8">
             <EmptyState
-              icon={<TriangleAlert className="size-8 text-muted-foreground" />}
+              icon={<TriangleAlert className="text-muted-foreground size-8" />}
               title="没有结果"
               description={emptyResultsMessage(activeTask)}
             />
@@ -643,7 +651,9 @@ export function ListingBulkCollectWorkspace() {
                     <span className="text-muted-foreground text-label-12">
                       {originLabel(row.origin)} · 第 {row.pageNo} 页
                     </span>
-                    <span className="text-foreground text-label-13">{row.title || '（无标题）'}</span>
+                    <span className="text-foreground text-label-13">
+                      {row.title || '（无标题）'}
+                    </span>
                     {row.priceAmount !== null && row.priceAmount !== undefined && (
                       <span className="text-muted-foreground text-label-12">
                         {priceLabel(row.priceAmount, row.priceCurrency)}
@@ -659,9 +669,7 @@ export function ListingBulkCollectWorkspace() {
                       <ExternalLink className="size-3" />
                     </a>
                   </div>
-                  {row.skipReason && (
-                    <p className="text-warning text-label-12">{row.skipReason}</p>
-                  )}
+                  {row.skipReason && <p className="text-warning text-label-12">{row.skipReason}</p>}
                   {row.errorMessage && (
                     <p className="text-destructive text-label-12">{row.errorMessage}</p>
                   )}

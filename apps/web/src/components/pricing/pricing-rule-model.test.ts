@@ -42,9 +42,7 @@ import type {
  * 以及它旁边那条隐含纪律：「读不到 ≠ 确实是 0」「建议价 ≠ 生效价」。
  */
 
-function suggestion(
-  overrides: Partial<PricingRuleSuggestionView> = {},
-): PricingRuleSuggestionView {
+function suggestion(overrides: Partial<PricingRuleSuggestionView> = {}): PricingRuleSuggestionView {
   return {
     id: '22222222-2222-2222-2222-222222222222',
     ruleId: '11111111-1111-1111-1111-111111111111',
@@ -210,9 +208,7 @@ describe('🔴 建议价 ≠ 生效价', () => {
   });
 
   it('成本不完整的建议即便降幅很小也不自动放行', () => {
-    expect(requiresConfirmationText(suggestion({ decisionReady: false }))).toContain(
-      '成本不完整',
-    );
+    expect(requiresConfirmationText(suggestion({ decisionReady: false }))).toContain('成本不完整');
   });
 
   it('状态的色调：待确认是警告，驳回是危险', () => {
@@ -248,15 +244,13 @@ describe('表单校验', () => {
 
   it('阈值按触发条件各用各的列', () => {
     const input = { ...emptyRule(), code: 'RULE-1', name: '规则' };
-    expect(validateRule({ ...input, triggerType: 'COST_INCREASE' })?.field).toBe(
-      'thresholdRate',
+    expect(validateRule({ ...input, triggerType: 'COST_INCREASE' })?.field).toBe('thresholdRate');
+    expect(validateRule({ ...input, triggerType: 'MARGIN_BELOW_FLOOR' })?.field).toBe(
+      'marginFloorRate',
     );
-    expect(
-      validateRule({ ...input, triggerType: 'MARGIN_BELOW_FLOOR' })?.field,
-    ).toBe('marginFloorRate');
-    expect(
-      validateRule({ ...input, triggerType: 'AGING_OVER_THRESHOLD' })?.field,
-    ).toBe('agingDaysThreshold');
+    expect(validateRule({ ...input, triggerType: 'AGING_OVER_THRESHOLD' })?.field).toBe(
+      'agingDaysThreshold',
+    );
   });
 
   it('降价 / 涨价必须给幅度，非价格动作不能给幅度', () => {
@@ -291,9 +285,9 @@ describe('表单校验', () => {
 
   it('跨币种必须给汇率（绝不按 1:1 折算）', () => {
     const request = { ...emptyEvaluate(), skuIds: ['44444444-4444-4444-4444-444444444444'] };
-    expect(
-      validateEvaluate({ ...request, currency: 'EUR', costCurrency: 'USD' })?.field,
-    ).toBe('fxRate');
+    expect(validateEvaluate({ ...request, currency: 'EUR', costCurrency: 'USD' })?.field).toBe(
+      'fxRate',
+    );
     expect(
       validateEvaluate({ ...request, currency: 'EUR', costCurrency: 'USD', fxRate: 0.9 }),
     ).toBeNull();

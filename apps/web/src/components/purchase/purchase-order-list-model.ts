@@ -298,8 +298,6 @@ export function batchResultText(result: PurchaseOrderListBatchResult): string {
   if (result.failures.length === 0) {
     return `已处理 ${result.succeeded} 张采购单`;
   }
-  const detail = result.failures
-    .map((f) => `${f.orderNo || f.orderId}：${f.reason}`)
-    .join('；');
+  const detail = result.failures.map((f) => `${f.orderNo || f.orderId}：${f.reason}`).join('；');
   return `成功 ${result.succeeded} 张，失败 ${result.failures.length} 张 —— ${detail}`;
 }

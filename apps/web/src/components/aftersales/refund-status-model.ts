@@ -268,9 +268,11 @@ export function blockingText(row: {
  */
 export function unknownWarning(unknownCount: number): string {
   if (unknownCount <= 0) return '';
-  return `有 ${unknownCount} 笔退款「结果未知」：外部超时不等于失败，`
-    + '这些钱可能已经付出去了。直接重试就是对同一笔退款发起第二次支付（实质资损）——'
-    + '必须先查证交易，确认未付出后才谈得上重试。';
+  return (
+    `有 ${unknownCount} 笔退款「结果未知」：外部超时不等于失败，` +
+    '这些钱可能已经付出去了。直接重试就是对同一笔退款发起第二次支付（实质资损）——' +
+    '必须先查证交易，确认未付出后才谈得上重试。'
+  );
 }
 
 // ================================================================ 展示辅助
@@ -326,8 +328,10 @@ export function formatTime(value: string | null | undefined): string {
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return '—';
   const pad = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} `
-    + `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  return (
+    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ` +
+    `${pad(d.getHours())}:${pad(d.getMinutes())}`
+  );
 }
 
 /** 失败原因：没有就说清楚是「没有失败信息」而不是留空。 */
@@ -339,7 +343,12 @@ export function failureText(row: {
   const reason = row.failureReason?.trim();
   if (!reason) return '无失败信息';
   const code = row.failureCode?.trim();
-  const kind = row.failureClass === 'INDETERMINATE' ? '不确定' : row.failureClass === 'DEFINITIVE' ? '明确' : '';
+  const kind =
+    row.failureClass === 'INDETERMINATE'
+      ? '不确定'
+      : row.failureClass === 'DEFINITIVE'
+        ? '明确'
+        : '';
   return code ? `[${code}${kind ? `·${kind}` : ''}] ${reason}` : reason;
 }
 

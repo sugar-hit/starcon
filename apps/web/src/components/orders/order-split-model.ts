@@ -148,10 +148,7 @@ export function fetchSplit(splitId: string): Promise<SplitDetail> {
   return api<SplitDetail>(`${base}/splits/${splitId}`);
 }
 
-export function advanceSplitStatus(
-  splitId: string,
-  input: SplitStatusInput,
-): Promise<SplitSaved> {
+export function advanceSplitStatus(splitId: string, input: SplitStatusInput): Promise<SplitSaved> {
   return api<SplitSaved>(`${base}/splits/${splitId}/status`, 'POST', input);
 }
 
@@ -170,13 +167,19 @@ export function recordReservation(
   unitId: string,
   input: SplitReservationInput,
 ): Promise<SplitReservationCommand> {
-  return api<SplitReservationCommand>(`${base}/splits/${splitId}/units/${unitId}/reservation`, 'POST', input);
+  return api<SplitReservationCommand>(
+    `${base}/splits/${splitId}/units/${unitId}/reservation`,
+    'POST',
+    input,
+  );
 }
 
 // ------------------------------------------------------------ 发货回传
 
 export function fetchWritebackTasks(params: WritebackListParams): Promise<SplitWritebackPage> {
-  return api<SplitWritebackPage>(`${base}/writeback-tasks${query(params as Record<string, unknown>)}`);
+  return api<SplitWritebackPage>(
+    `${base}/writeback-tasks${query(params as Record<string, unknown>)}`,
+  );
 }
 
 export function recordWriteback(
@@ -184,7 +187,11 @@ export function recordWriteback(
   unitId: string,
   input: SplitWritebackInput,
 ): Promise<SplitWritebackTask> {
-  return api<SplitWritebackTask>(`${base}/splits/${splitId}/units/${unitId}/writeback`, 'POST', input);
+  return api<SplitWritebackTask>(
+    `${base}/splits/${splitId}/units/${unitId}/writeback`,
+    'POST',
+    input,
+  );
 }
 
 // ------------------------------------------------------------ 展示格式化
@@ -320,7 +327,9 @@ export function writebackStatusText(status: string | null | undefined): string {
 export function rejectText(
   candidate: Pick<CandidateRow, 'selected' | 'rejectReasonLabel' | 'rejectReason'>,
 ): string {
-  return candidate.selected ? '已选中' : candidate.rejectReasonLabel || candidate.rejectReason || '未说明';
+  return candidate.selected
+    ? '已选中'
+    : candidate.rejectReasonLabel || candidate.rejectReason || '未说明';
 }
 
 /** 落选原因对应的配色（界面据此把「事实类落选」和「规则类落选」区分开）。 */
@@ -341,10 +350,9 @@ export function rejectTone(candidate: Pick<CandidateRow, 'selected' | 'rejectRea
 }
 
 /** 守恒是否成立（前端独立复算一遍，而不是只信后端给的布尔）。 */
-export function conserved(split: Pick<
-  SplitRow,
-  'orderTotalAmount' | 'allocatedAmountTotal' | 'residualAmountTotal'
->): boolean {
+export function conserved(
+  split: Pick<SplitRow, 'orderTotalAmount' | 'allocatedAmountTotal' | 'residualAmountTotal'>,
+): boolean {
   const total = Number(split.orderTotalAmount);
   const alloc = Number(split.allocatedAmountTotal);
   const resid = Number(split.residualAmountTotal);

@@ -596,8 +596,7 @@ function DetailDialog({
   const [exemptionNote, setExemptionNote] = useState('');
 
   const targets = allowedTargetOptions(options, project.status);
-  const needsExemption =
-    toStatus !== '' && transitionNeedsExemption(project.status, toStatus);
+  const needsExemption = toStatus !== '' && transitionNeedsExemption(project.status, toStatus);
 
   return (
     <Modal open onOpenChange={(open) => !open && onClose()}>
@@ -615,9 +614,7 @@ function DetailDialog({
           {/* 立项记录 */}
           <SectionCard title="立项记录">
             <div className="grid gap-2 text-sm md:grid-cols-2">
-              <p>
-                目标售价：{money(project.targetPrice, project.currency)}
-              </p>
+              <p>目标售价：{money(project.targetPrice, project.currency)}</p>
               <p>
                 目标成本：
                 {costText(project.targetCost, project.costCurrency, project.costAvailable)}
@@ -626,13 +623,14 @@ function DetailDialog({
                 </span>
               </p>
               <p className="md:col-span-2">
-                目标毛利：<span className="font-medium">{marginText(project.targetMarginRate)}</span>
+                目标毛利：
+                <span className="font-medium">{marginText(project.targetMarginRate)}</span>
                 {project.marginBasis && (
                   <span className="text-muted-foreground block text-xs">{project.marginBasis}</span>
                 )}
               </p>
               {caps && (
-                <p className="text-muted-foreground md:col-span-2 text-xs">
+                <p className="text-muted-foreground text-xs md:col-span-2">
                   舍入口径：{caps.marginRoundingNote}
                 </p>
               )}
@@ -644,8 +642,7 @@ function DetailDialog({
           <SectionCard title="推进状态">
             <div className="flex flex-col gap-2 text-sm">
               <p className="text-muted-foreground">
-                {caps?.stateMachineNote ??
-                  '状态只能沿合法迁移推进；终止是终态，不提供恢复。'}
+                {caps?.stateMachineNote ?? '状态只能沿合法迁移推进；终止是终态，不提供恢复。'}
               </p>
               {targets.length === 0 ? (
                 <p className="text-muted-foreground">
@@ -728,7 +725,12 @@ function DetailDialog({
             </div>
           </SectionCard>
 
-          <CostEstimateSection detail={detail} busy={busy} onRefresh={onRefresh} onError={onError} />
+          <CostEstimateSection
+            detail={detail}
+            busy={busy}
+            onRefresh={onRefresh}
+            onError={onError}
+          />
 
           <MilestoneSection detail={detail} busy={busy} onRefresh={onRefresh} onError={onError} />
 
@@ -870,7 +872,9 @@ function MilestoneSection({
     <SectionCard title="里程碑计划（打样 / 试产 / 量产 / 上市）">
       <div className="flex flex-col gap-2 text-sm">
         {detail.milestones.length === 0 ? (
-          <p className="text-muted-foreground">还没有里程碑计划（未排期是真实状态，不是查不到）。</p>
+          <p className="text-muted-foreground">
+            还没有里程碑计划（未排期是真实状态，不是查不到）。
+          </p>
         ) : (
           <table className="w-full text-sm">
             <thead className="text-muted-foreground text-left">
@@ -900,10 +904,7 @@ function MilestoneSection({
                       onClick={() => {
                         void (async () => {
                           try {
-                            await deleteDevelopmentMilestone(
-                              detail.project.id,
-                              milestone.id,
-                            );
+                            await deleteDevelopmentMilestone(detail.project.id, milestone.id);
                             await onRefresh();
                           } catch (e) {
                             onError(errorText(e));
@@ -1132,7 +1133,10 @@ function SpecSection({
         ) : (
           <ul className="flex flex-wrap gap-2">
             {detail.specCandidates.map((spec) => (
-              <li key={spec.id} className="flex items-center gap-2 rounded-md border px-2 py-1 text-xs">
+              <li
+                key={spec.id}
+                className="flex items-center gap-2 rounded-md border px-2 py-1 text-xs"
+              >
                 <span>
                   {spec.specName}：{spec.specValue}
                 </span>
@@ -1228,8 +1232,9 @@ function ObservationSection({
     <SectionCard title="市场数据（手工录入）">
       <div className="flex flex-col gap-2 text-sm">
         <p className="text-muted-foreground text-xs">
-          🔴 系统侧市场数据未交付（14 广告的 reporting 服务不在本仓）。这里只记**人工采集**的观察值，
-          来源与采集时间必填 —— 没有来源的市场数据比没有市场数据更危险。
+          🔴 系统侧市场数据未交付（14 广告的 reporting
+          服务不在本仓）。这里只记**人工采集**的观察值， 来源与采集时间必填 ——
+          没有来源的市场数据比没有市场数据更危险。
         </p>
         {observations.length === 0 ? (
           <p className="text-muted-foreground">还没有录入市场观察。</p>
@@ -1367,7 +1372,7 @@ function TransitionSection({ transitions }: { transitions: DevelopmentTransition
               </p>
               <p className="mt-1">{event.reason}</p>
               {event.exemptionCode && (
-                <p className="text-amber-600 text-xs">
+                <p className="text-xs text-amber-600">
                   豁免：{event.exemptionCode} · {event.exemptionNote}
                 </p>
               )}

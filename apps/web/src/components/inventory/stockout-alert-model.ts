@@ -66,9 +66,7 @@ export function fetchAlertCapabilities(): Promise<StockoutAlertCapabilities> {
 }
 
 /** 店铺饥饿清单（真分页）。 */
-export function fetchStarvations(
-  params: StarvationListParams,
-): Promise<StarvationAlertPage> {
+export function fetchStarvations(params: StarvationListParams): Promise<StarvationAlertPage> {
   return api<StarvationAlertPage>(
     `warehouse/inventory/stockout-alerts/starvations${query(params)}`,
   );
@@ -304,10 +302,7 @@ export function stateTone(state: string | null | undefined): string {
  * <p>这几行必须**单独呈现**：它们既不是「没问题」也不是「有问题」，
  * 而是「我们不知道」—— 处置是去补数据，不是去调优先级或补货。
  */
-export function isUnknownRow(row: {
-  alertState: string;
-  demandState: string;
-}): boolean {
+export function isUnknownRow(row: { alertState: string; demandState: string }): boolean {
   return row.demandState === 'UNKNOWN' || row.alertState === 'NO_LEDGER_RECORD';
 }
 
@@ -355,9 +350,11 @@ export function starvationCoverageText(row: {
     row.maxRunAvailableQuantity === null || row.maxRunAvailableQuantity === undefined
       ? '尚未回填'
       : `${qty(row.maxRunAvailableQuantity)} 件`;
-  return `窗口内 ${row.observedRunCount} 轮有 ${row.zeroRoundCount} 轮分到 0 件；`
-    + `累计分到 ${qty(row.allocatedTotal)} 件，登记需求 ${demand}；`
-    + `同期总可用量最高 ${available}。`;
+  return (
+    `窗口内 ${row.observedRunCount} 轮有 ${row.zeroRoundCount} 轮分到 0 件；` +
+    `累计分到 ${qty(row.allocatedTotal)} 件，登记需求 ${demand}；` +
+    `同期总可用量最高 ${available}。`
+  );
 }
 
 /**

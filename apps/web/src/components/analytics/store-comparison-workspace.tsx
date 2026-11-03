@@ -161,7 +161,12 @@ export function AnalyticsStoreComparisonWorkspace() {
         </div>
         <div className="text-copy-13 text-muted-foreground flex items-center gap-3">
           <span>{rangeText(from, to)}</span>
-          <Button variant="outline" size="sm" disabled={loading || busy} onClick={() => void load()}>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={loading || busy}
+            onClick={() => void load()}
+          >
             <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
             重读
           </Button>
@@ -227,7 +232,12 @@ export function AnalyticsStoreComparisonWorkspace() {
               className="border-border bg-background rounded-md border px-2 py-1.5 text-sm"
             />
           </label>
-          <Button variant="outline" size="sm" disabled={busy} onClick={() => void refreshProjection()}>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={busy}
+            onClick={() => void refreshProjection()}
+          >
             <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
             刷新店铺维度投影
           </Button>
@@ -267,7 +277,12 @@ export function AnalyticsStoreComparisonWorkspace() {
             title="多店对比读不到"
             description={`${error}（这是「读不到」，不是「没有数据」）—— 上游不可达或没有读权限时就会出现。`}
             action={
-              <Button variant="outline" size="sm" disabled={loading || busy} onClick={() => void load()}>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={loading || busy}
+                onClick={() => void load()}
+              >
                 <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
                 重试
               </Button>
@@ -279,7 +294,10 @@ export function AnalyticsStoreComparisonWorkspace() {
       {/* ── 加载态 ─────────────────────────────────────────────────────── */}
       {state === 'loading' && (
         <SectionCard>
-          <EmptyState title="正在读取多店对比…" description="读取期间页面上的「数据截至」仍然有效。" />
+          <EmptyState
+            title="正在读取多店对比…"
+            description="读取期间页面上的「数据截至」仍然有效。"
+          />
         </SectionCard>
       )}
 
@@ -335,10 +353,10 @@ export function AnalyticsStoreComparisonWorkspace() {
                           {row.classificationNote}
                         </div>
                       </td>
-                      <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                      <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                         {rankText(row.scaleRank)}
                       </td>
-                      <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                      <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                         {rankText(row.growthRank)}
                       </td>
                       {columns.map((column) => {
@@ -347,7 +365,7 @@ export function AnalyticsStoreComparisonWorkspace() {
                         return (
                           <td
                             key={column.metricCode}
-                            className="py-2 pr-3 text-right tabular-nums whitespace-nowrap"
+                            className="whitespace-nowrap py-2 pr-3 text-right tabular-nums"
                             title={note}
                           >
                             {cellText(row, column)}
@@ -376,7 +394,10 @@ export function AnalyticsStoreComparisonWorkspace() {
             ) : (
               <div className="space-y-4">
                 {data.platformGroups.map((group) => (
-                  <div key={group.platformCode} className="border-border rounded-lg border px-4 py-3">
+                  <div
+                    key={group.platformCode}
+                    className="border-border rounded-lg border px-4 py-3"
+                  >
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="text-copy-14 text-foreground font-medium">
                         {platformLabel(group.platformCode, group.platformName)}
@@ -385,7 +406,9 @@ export function AnalyticsStoreComparisonWorkspace() {
                         {group.storeCount} 个店铺
                       </span>
                     </div>
-                    <p className="text-copy-13 text-muted-foreground mt-1">{groupCaliberNote(group)}</p>
+                    <p className="text-copy-13 text-muted-foreground mt-1">
+                      {groupCaliberNote(group)}
+                    </p>
                     <div className="text-copy-13 mt-2 space-y-1">
                       {group.stores.map((store) => (
                         <div key={store.shopCode} className="flex flex-wrap items-center gap-2">
@@ -393,7 +416,9 @@ export function AnalyticsStoreComparisonWorkspace() {
                             {classificationLabel(store.classification)}
                           </Badge>
                           <span>{store.shopName || store.shopCode}</span>
-                          <span className="text-muted-foreground">{store.currencies.join(' / ')}</span>
+                          <span className="text-muted-foreground">
+                            {store.currencies.join(' / ')}
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -466,13 +491,13 @@ export function AnalyticsStoreComparisonWorkspace() {
                   ) : (
                     rankingEntries(ranking).map((bucket) => (
                       <div key={bucket.currency} className="mb-2">
-                        <div className="text-copy-13 text-muted-foreground">币种 {bucket.currency}</div>
+                        <div className="text-copy-13 text-muted-foreground">
+                          币种 {bucket.currency}
+                        </div>
                         <ul className="text-copy-13 mt-1 space-y-1">
                           {bucket.entries.map((entry) => (
                             <li key={`${entry.currency}|${entry.shopCode}`} className="flex gap-3">
-                              <span className="text-muted-foreground w-16">
-                                第 {entry.rank} 名
-                              </span>
+                              <span className="text-muted-foreground w-16">第 {entry.rank} 名</span>
                               <span className="font-medium">
                                 {entry.shopName || entry.shopCode}
                               </span>
@@ -557,7 +582,9 @@ export function AnalyticsStoreComparisonWorkspace() {
           >
             <div className="space-y-3">
               <div>
-                <h3 className="text-copy-14 text-foreground mb-1 font-medium">本服务真读过的上游</h3>
+                <h3 className="text-copy-14 text-foreground mb-1 font-medium">
+                  本服务真读过的上游
+                </h3>
                 <ul className="text-copy-13 text-muted-foreground list-disc pl-5">
                   {upstreamModules(capabilities).map((module, index) => (
                     <li key={index}>{module}</li>

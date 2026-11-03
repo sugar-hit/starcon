@@ -355,7 +355,9 @@ export function fetchObservations(params: {
  * ⚠️ 请求体里**没有** `observationStatus`：建行恒为 RECORDED，
  * 作废走 {@link voidObservation} 一个入口。
  */
-export function recordObservation(request: DefectObservationCreate): Promise<DefectObservationRowLike> {
+export function recordObservation(
+  request: DefectObservationCreate,
+): Promise<DefectObservationRowLike> {
   return call(`${base}/defect-observations`, {
     method: 'POST',
     body: JSON.stringify(request),

@@ -92,12 +92,14 @@ export const fetchQualityCapabilities = () =>
 // 质检类目（租户自维护的作业口径，**不是**商品主数据）
 // ==========================================================================
 
-export const fetchQualityCategories = (params: {
-  page?: number;
-  size?: number;
-  status?: string;
-  keyword?: string;
-} = {}) => call<QualityCategoryPage>(`${base}/categories${query(params)}`);
+export const fetchQualityCategories = (
+  params: {
+    page?: number;
+    size?: number;
+    status?: string;
+    keyword?: string;
+  } = {},
+) => call<QualityCategoryPage>(`${base}/categories${query(params)}`);
 
 export const createQualityCategory = (body: QualityCategoryCreate) =>
   call<QualityCategoryRow>(`${base}/categories`, {
@@ -122,14 +124,16 @@ export const mapQualitySku = (id: string, body: QualitySkuMappingCreate) =>
 // 质检模板（按类目取用）
 // ==========================================================================
 
-export const fetchQualityTemplates = (params: {
-  page?: number;
-  size?: number;
-  categoryId?: string;
-  status?: string;
-  keyword?: string;
-  sort?: string;
-} = {}) => call<QualityTemplatePage>(`${base}/templates${query(params)}`);
+export const fetchQualityTemplates = (
+  params: {
+    page?: number;
+    size?: number;
+    categoryId?: string;
+    status?: string;
+    keyword?: string;
+    sort?: string;
+  } = {},
+) => call<QualityTemplatePage>(`${base}/templates${query(params)}`);
 
 export const fetchQualityTemplate = (id: string) =>
   call<QualityTemplateDetail>(`${base}/templates/${id}`);
@@ -159,11 +163,13 @@ export const retireQualityTemplate = (id: string) =>
 // ==========================================================================
 
 /** 待检队列：**现在有多少件货等着我判**，不是「一共入了多少」。 */
-export const fetchQualityQueue = (params: {
-  page?: number;
-  size?: number;
-  skuCode?: string;
-} = {}) => call<QualityPendingPage>(`${base}/queue${query(params)}`);
+export const fetchQualityQueue = (
+  params: {
+    page?: number;
+    size?: number;
+    skuCode?: string;
+  } = {},
+) => call<QualityPendingPage>(`${base}/queue${query(params)}`);
 
 /**
  * 判定预览：提交之前就告诉质检员「能判成什么、不能判成什么、残值大概多少」。
@@ -171,26 +177,26 @@ export const fetchQualityQueue = (params: {
  * ⚠️ 残值是**试算**，最终值以判定那一刻 DB 触发器按同一个式子重算为准。
  */
 export const fetchVerdictPreview = (postingId: string) =>
-  call<QualityVerdictPreview>(
-    `${base}/verdict-preview${query({ postingId })}`,
-  );
+  call<QualityVerdictPreview>(`${base}/verdict-preview${query({ postingId })}`);
 
 // ==========================================================================
 // 质检单
 // ==========================================================================
 
-export const fetchQualityInspections = (params: {
-  page?: number;
-  size?: number;
-  status?: string;
-  verdict?: string;
-  categoryId?: string;
-  templateId?: string;
-  receiptId?: string;
-  skuCode?: string;
-  keyword?: string;
-  sort?: string;
-} = {}) => call<QualityInspectionPage>(`${base}/inspections${query(params)}`);
+export const fetchQualityInspections = (
+  params: {
+    page?: number;
+    size?: number;
+    status?: string;
+    verdict?: string;
+    categoryId?: string;
+    templateId?: string;
+    receiptId?: string;
+    skuCode?: string;
+    keyword?: string;
+    sort?: string;
+  } = {},
+) => call<QualityInspectionPage>(`${base}/inspections${query(params)}`);
 
 export const fetchQualityInspection = (id: string) =>
   call<QualityInspectionDetail>(`${base}/inspections/${id}`);
@@ -294,7 +300,8 @@ export function concludeBlockedReason(detail: {
   verdictOptions?: Array<{ code: string; allowed: boolean }> | null;
 }): string | null {
   const status = detail.head?.inspectionStatus ?? null;
-  if (status === 'CONCLUDED') return '已判定：结论与质量状态指令已生成，是终态不可逆（判错只能作废重判）';
+  if (status === 'CONCLUDED')
+    return '已判定：结论与质量状态指令已生成，是终态不可逆（判错只能作废重判）';
   if (status === 'CANCELLED') return '已撤销：内容与逐项结果是证据不是草稿';
   const missing = Number(detail.mandatoryMissingCount ?? 0);
   if (missing > 0) return `还有 ${missing} 个强制检项没有结果（漏检是质检事故最常见的来源）`;

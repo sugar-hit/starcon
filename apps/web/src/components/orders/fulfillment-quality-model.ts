@@ -117,11 +117,15 @@ export function fetchQualityReport(params: QualityFilter): Promise<QualityReport
   return api<QualityReport>(`${base}/report${query(params)}`);
 }
 
-export function fetchQualityDimensions(params: QualityDimensionParams): Promise<QualityDimensionPage> {
+export function fetchQualityDimensions(
+  params: QualityDimensionParams,
+): Promise<QualityDimensionPage> {
   return api<QualityDimensionPage>(`${base}/dimensions${query(params)}`);
 }
 
-export function fetchQualityDrilldown(params: QualityDrilldownParams): Promise<QualityDrilldownPage> {
+export function fetchQualityDrilldown(
+  params: QualityDrilldownParams,
+): Promise<QualityDrilldownPage> {
   return api<QualityDrilldownPage>(`${base}/drilldown${query(params)}`);
 }
 
@@ -197,7 +201,11 @@ export function upsertAlertRule(metric: string, body: AlertRuleBody): Promise<Al
 }
 
 /** 评估预警。分母为 0 的指标**不会**产生预警 —— 没有样本不是指标变差。 */
-export function evaluateAlerts(body: { from?: string; to?: string; perDimension?: boolean }): Promise<AlertEvaluateResult> {
+export function evaluateAlerts(body: {
+  from?: string;
+  to?: string;
+  perDimension?: boolean;
+}): Promise<AlertEvaluateResult> {
   return api<AlertEvaluateResult>(`${base}/alerts/evaluate`, 'POST', body);
 }
 
@@ -224,7 +232,10 @@ export function formatRate(rate: number | string | null | undefined): string {
 }
 
 /** 指标色调：方向显式 —— 高越好与低越好必须分开判。 */
-export function metricTone(direction: string | undefined, rate: number | string | null | undefined): BucketTone {
+export function metricTone(
+  direction: string | undefined,
+  rate: number | string | null | undefined,
+): BucketTone {
   if (rate === null || rate === undefined || rate === '') return 'neutral';
   const value = typeof rate === 'string' ? Number(rate) : rate;
   if (direction === 'HIGHER_IS_BETTER') {

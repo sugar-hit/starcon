@@ -77,7 +77,9 @@ export function AnalyticsProfitReportWorkspace() {
   const [data, setData] = useState<ProfitReportResponse | null>(null);
   const [capabilities, setCapabilities] = useState<ProfitReportCapabilities | null>(null);
   const [drilldown, setDrilldown] = useState<ProfitDrilldownPage | null>(null);
-  const [drilldownTarget, setDrilldownTarget] = useState<{ code: string; mode: string } | null>(null);
+  const [drilldownTarget, setDrilldownTarget] = useState<{ code: string; mode: string } | null>(
+    null,
+  );
   const [drilldownPageIndex, setDrilldownPageIndex] = useState(0);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
@@ -149,7 +151,12 @@ export function AnalyticsProfitReportWorkspace() {
         </div>
         <div className="text-copy-13 text-muted-foreground flex items-center gap-3">
           <span>{rangeText(from, to)}</span>
-          <Button variant="outline" size="sm" disabled={loading || busy} onClick={() => void load()}>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={loading || busy}
+            onClick={() => void load()}
+          >
             <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
             刷新
           </Button>
@@ -254,7 +261,9 @@ export function AnalyticsProfitReportWorkspace() {
                     {operatingModeLabel(mode.operatingMode, mode.operatingModeLabel)}
                   </span>
                   {isUnattributed(mode.operatingMode) && <Badge tone="warning">未归属</Badge>}
-                  <span className="text-copy-13 text-muted-foreground">{mode.shopCount} 个店铺</span>
+                  <span className="text-copy-13 text-muted-foreground">
+                    {mode.shopCount} 个店铺
+                  </span>
                 </div>
                 <div className="text-copy-13 text-muted-foreground mt-1">
                   {mode.shopCodes.length > 0 ? mode.shopCodes.join('、') : '（没有店铺）'}
@@ -298,7 +307,10 @@ export function AnalyticsProfitReportWorkspace() {
 
       {state === 'loading' && (
         <SectionCard>
-          <EmptyState title="正在读取利润报表…" description="读取期间页面上的「数据截至」仍然有效。" />
+          <EmptyState
+            title="正在读取利润报表…"
+            description="读取期间页面上的「数据截至」仍然有效。"
+          />
         </SectionCard>
       )}
 
@@ -336,10 +348,14 @@ export function AnalyticsProfitReportWorkspace() {
                       key={`${row.operatingMode}|${row.dimensionCode}|${row.periodStart}|${row.currency}|${index}`}
                       className="border-border border-b"
                     >
-                      <td className="py-2 pr-3 whitespace-nowrap">
+                      <td className="whitespace-nowrap py-2 pr-3">
                         <div className="flex items-center gap-2">
-                          <span>{operatingModeLabel(row.operatingMode, row.operatingModeLabel)}</span>
-                          {isUnattributed(row.operatingMode) && <Badge tone="warning">未归属</Badge>}
+                          <span>
+                            {operatingModeLabel(row.operatingMode, row.operatingModeLabel)}
+                          </span>
+                          {isUnattributed(row.operatingMode) && (
+                            <Badge tone="warning">未归属</Badge>
+                          )}
                         </div>
                       </td>
                       <td className="py-2 pr-3">
@@ -347,7 +363,9 @@ export function AnalyticsProfitReportWorkspace() {
                           <button
                             type="button"
                             className="text-primary underline-offset-2 hover:underline"
-                            onClick={() => void loadDrilldown(row.dimensionCode, row.operatingMode, 0)}
+                            onClick={() =>
+                              void loadDrilldown(row.dimensionCode, row.operatingMode, 0)
+                            }
                           >
                             {row.dimensionLabel}
                           </button>
@@ -355,21 +373,21 @@ export function AnalyticsProfitReportWorkspace() {
                           <span className="text-muted-foreground">{row.dimensionLabel}</span>
                         )}
                       </td>
-                      <td className="py-2 pr-3 whitespace-nowrap">{rowPeriodText(row)}</td>
+                      <td className="whitespace-nowrap py-2 pr-3">{rowPeriodText(row)}</td>
                       <td className="py-2 pr-3">{row.currency}</td>
-                      <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                      <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                         {amountText(
                           row.components.find((c) => c.component === 'REVENUE')?.amount ?? null,
                           row.currency,
                         )}
                       </td>
-                      <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                      <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                         {amountText(row.totalCost, row.currency)}
                       </td>
-                      <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                      <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                         {grossProfitText(row.grossProfit, row.currency)}
                       </td>
-                      <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                      <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                         {grossMarginText(row.grossMargin)}
                       </td>
                       <td className="py-2 pr-3">
@@ -405,8 +423,9 @@ export function AnalyticsProfitReportWorkspace() {
                     <span className="text-copy-13 text-muted-foreground">{row.currency}</span>
                     {row.baseCurrency && (
                       <span className="text-copy-13 text-muted-foreground">
-                        本位币 {row.baseCurrency}：收入 {baseAmountText(row.baseRevenue, row.baseCurrency)} ·
-                        毛利 {baseAmountText(row.baseGrossProfit, row.baseCurrency)} · 汇率{' '}
+                        本位币 {row.baseCurrency}：收入{' '}
+                        {baseAmountText(row.baseRevenue, row.baseCurrency)} · 毛利{' '}
+                        {baseAmountText(row.baseGrossProfit, row.baseCurrency)} · 汇率{' '}
                         {baseRateText(row.baseRate, row.baseRateAsOf)}
                       </span>
                     )}
@@ -474,17 +493,17 @@ export function AnalyticsProfitReportWorkspace() {
                             className="border-border border-b"
                           >
                             <td className="py-2 pr-3">{item.componentLabel}</td>
-                            <td className="py-2 pr-3 whitespace-nowrap">
+                            <td className="whitespace-nowrap py-2 pr-3">
                               {periodText(item.periodStart, item.periodEnd)}
                             </td>
                             <td className="py-2 pr-3">{drilldownScopeText(item)}</td>
-                            <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                            <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                               {amountText(item.amount, item.currency)}
                             </td>
                             <td className="py-2 pr-3 text-right tabular-nums">
                               {item.quantity === null ? '—' : item.quantity}
                             </td>
-                            <td className="py-2 pr-3 text-muted-foreground">
+                            <td className="text-muted-foreground py-2 pr-3">
                               {item.sourceService} · {item.sourceReference}
                             </td>
                           </tr>
@@ -537,7 +556,7 @@ export function AnalyticsProfitReportWorkspace() {
               title="能力声明"
               description="哪些上游真接通、哪些确实算不出来、归谁管 —— **「算不出来」与「等于 0」在页面上分开说**。"
             >
-              <div className="space-y-3 text-copy-13">
+              <div className="text-copy-13 space-y-3">
                 <div>
                   <span className="text-muted-foreground">覆盖的成本项：</span>
                   <span className="text-foreground">{capabilities.components.join('、')}</span>

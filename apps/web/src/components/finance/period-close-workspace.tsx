@@ -164,7 +164,9 @@ export function PeriodCloseWorkspace() {
       const loaded = await runPeriodCloseChecklist(periodId, checklistNote.trim());
       setDetail(loaded);
       setChecklistNote('');
-      setNotice(`已跑完检查清单 ${loaded.checklist.checklistNo}（第 ${loaded.checklist.runNo} 次）`);
+      setNotice(
+        `已跑完检查清单 ${loaded.checklist.checklistNo}（第 ${loaded.checklist.runNo} 次）`,
+      );
       await load();
     } catch (e) {
       setActionError(e instanceof Error ? e.message : '跑检查清单失败');
@@ -196,7 +198,11 @@ export function PeriodCloseWorkspace() {
       return;
     }
     try {
-      await carryForwardPeriodCloseCheck(detail?.checklist.id ?? '', checkId, exceptionBasis.trim());
+      await carryForwardPeriodCloseCheck(
+        detail?.checklist.id ?? '',
+        checkId,
+        exceptionBasis.trim(),
+      );
       setNotice('已下调为可结转未清项，例外依据已落库');
       setExceptionTarget('');
       setExceptionBasis('');
@@ -444,7 +450,10 @@ export function PeriodCloseWorkspace() {
                         <p className="text-copy-13 mt-1">
                           金额（按币种）：
                           {check.amounts
-                            .map((amount) => `${amount.currency} ${amount.amount}（${amount.itemCount} 条）`)
+                            .map(
+                              (amount) =>
+                                `${amount.currency} ${amount.amount}（${amount.itemCount} 条）`,
+                            )
                             .join('；')}
                         </p>
                       )}
@@ -469,7 +478,7 @@ export function PeriodCloseWorkspace() {
                         </Button>
                       </div>
                       {!guard.allowed && (
-                        <p className="text-muted-foreground mt-1 text-copy-12">{guard.reason}</p>
+                        <p className="text-muted-foreground text-copy-12 mt-1">{guard.reason}</p>
                       )}
                     </div>
                   );
@@ -479,7 +488,8 @@ export function PeriodCloseWorkspace() {
               {exceptionTargetCheck && (
                 <div className="border-border mt-4 space-y-2 rounded-md border p-3">
                   <p className="text-copy-13">
-                    把「{periodCloseCheckCodeLabel(exceptionTargetCheck.checkCode)}」下调为可结转未清项 ——
+                    把「{periodCloseCheckCodeLabel(exceptionTargetCheck.checkCode)}
+                    」下调为可结转未清项 ——
                     <b>必须写明例外依据</b>（蓝图：例外与结转须保留依据；依据会落库，事后查得到）。
                   </p>
                   <Input
@@ -499,7 +509,8 @@ export function PeriodCloseWorkspace() {
                   <p className="text-label-13 mb-2">可钻取明细</p>
                   {!items || items.items.length === 0 ? (
                     <p className="text-muted-foreground text-sm">
-                      这一项没有未处理明细（{checks.find((c) => c.id === drillCheckId)?.classificationBasis}）
+                      这一项没有未处理明细（
+                      {checks.find((c) => c.id === drillCheckId)?.classificationBasis}）
                     </p>
                   ) : (
                     <table className="text-copy-13 w-full text-left">
@@ -527,7 +538,7 @@ export function PeriodCloseWorkspace() {
                       </tbody>
                     </table>
                   )}
-                  <p className="text-muted-foreground mt-2 text-copy-12">
+                  <p className="text-muted-foreground text-copy-12 mt-2">
                     {periodCloseItemText({
                       sourceModule: '12.5.2.1',
                       sourceType: 'VOUCHER',
@@ -604,7 +615,9 @@ export function PeriodCloseWorkspace() {
               )}
               {submitReport && (
                 <Notice
-                  tone={periodCloseOutcomeTone(submitReport.outcome) === 'danger' ? 'danger' : 'info'}
+                  tone={
+                    periodCloseOutcomeTone(submitReport.outcome) === 'danger' ? 'danger' : 'info'
+                  }
                   title={periodCloseOutcomeText(submitReport.outcome)}
                 >
                   {submitReport.message}
@@ -628,7 +641,10 @@ export function PeriodCloseWorkspace() {
             description="每一次关账执行都留一条：按哪份清单关的、当时有几项阻断 / 几项结转、结转依据、审批实例是哪一条（可钻取）。"
           >
             {!executions || executions.items.length === 0 ? (
-              <EmptyState title="还没有关账执行记录" description="提交关账后，这里会出现可钻取的记录。" />
+              <EmptyState
+                title="还没有关账执行记录"
+                description="提交关账后，这里会出现可钻取的记录。"
+              />
             ) : (
               <table className="text-copy-13 w-full text-left">
                 <thead className="text-muted-foreground">
@@ -651,7 +667,8 @@ export function PeriodCloseWorkspace() {
                         </Badge>
                       </td>
                       <td className="py-2">
-                        {item.blockingCount} / {item.carryforwardCount} / {item.notDeterminableCount}
+                        {item.blockingCount} / {item.carryforwardCount} /{' '}
+                        {item.notDeterminableCount}
                       </td>
                       <td className="py-2">
                         <div className="flex flex-wrap gap-2">

@@ -238,9 +238,7 @@ export function totalQuantity(lines: { quantity: number }[]): number {
 
 /** 处置明细的放行量合计。 */
 export function totalReleased(lines: { releasedQuantity: number }[]): number {
-  return (
-    Math.round(lines.reduce((sum, l) => sum + (l.releasedQuantity ?? 0), 0) * 1e6) / 1e6
-  );
+  return Math.round(lines.reduce((sum, l) => sum + (l.releasedQuantity ?? 0), 0) * 1e6) / 1e6;
 }
 
 /**

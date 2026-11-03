@@ -325,7 +325,9 @@ describe('1.2.2.2 快捷入口配置 —— 前端模型', () => {
         overridden: false,
       };
       expect(describeEffectiveSource(base)).toBe('模板 ops');
-      expect(describeEffectiveSource({ ...base, overridden: true })).toBe('模板 ops（已被个人覆盖）');
+      expect(describeEffectiveSource({ ...base, overridden: true })).toBe(
+        '模板 ops（已被个人覆盖）',
+      );
       expect(describeEffectiveSource({ ...base, sourceTemplateCode: null })).toBe('模板');
     });
 

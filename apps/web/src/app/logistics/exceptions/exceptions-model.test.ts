@@ -170,12 +170,22 @@ describe('10.3.1.2 单据：理赔要有金额与币种，补发要有数量', (
   });
 
   it('理赔单有金额但币种不合法 ⇒ 请求体不成立', () => {
-    const form = { ...emptyClaimForm(), claimType: 'CARRIER_CLAIM', amount: '12.34', currency: 'US' };
+    const form = {
+      ...emptyClaimForm(),
+      claimType: 'CARRIER_CLAIM',
+      amount: '12.34',
+      currency: 'US',
+    };
     expect(validateClaimForm(form)).toContain('币种');
   });
 
   it('理赔单完整 ⇒ 请求体成立', () => {
-    const form = { ...emptyClaimForm(), claimType: 'CARRIER_CLAIM', amount: '12.34', currency: 'usd' };
+    const form = {
+      ...emptyClaimForm(),
+      claimType: 'CARRIER_CLAIM',
+      amount: '12.34',
+      currency: 'usd',
+    };
     const built = buildClaimPayload(form);
     expect('error' in built).toBe(false);
     if (!('error' in built)) {

@@ -144,7 +144,12 @@ export function LinkageRiskWorkspace() {
       const [capsResult, policyResult] = await Promise.all([fetchCapabilities(), fetchPolicy()]);
       setCaps(capsResult);
       setPolicy(policyResult);
-      await Promise.all([loadShops(shopKeyword), loadIdentifiers(), loadAlerts(), loadRemediations()]);
+      await Promise.all([
+        loadShops(shopKeyword),
+        loadIdentifiers(),
+        loadAlerts(),
+        loadRemediations(),
+      ]);
       setGraph(await fetchGraph());
     } catch (e) {
       setError(e instanceof Error ? e.message : '加载失败，请重试');
@@ -365,7 +370,7 @@ export function LinkageRiskWorkspace() {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 text-copy-13 text-muted-foreground">
+      <div className="text-copy-13 text-muted-foreground flex items-center gap-2">
         <Loader2 className="h-4 w-4 animate-spin" />
         正在加载关联风险数据…
       </div>
@@ -462,7 +467,9 @@ export function LinkageRiskWorkspace() {
               </div>
             )}
             <details className="text-copy-12 text-muted-foreground">
-              <summary className="cursor-pointer">口径说明（节点来源 / 维度 / 登记 / 图谱 / 提示 / 整改 / 边界）</summary>
+              <summary className="cursor-pointer">
+                口径说明（节点来源 / 维度 / 登记 / 图谱 / 提示 / 整改 / 边界）
+              </summary>
               <div className="mt-2 space-y-2">
                 <p>{caps.shopSourceNote}</p>
                 <p>{caps.dimensionNote}</p>
@@ -565,11 +572,13 @@ export function LinkageRiskWorkspace() {
                         setDraft({ ...draft, dimensions: next });
                       }}
                     >
-                      {['LEGAL_ENTITY', ...REGISTRABLE_DIMENSIONS.map((d) => d.value)].map((value) => (
-                        <option key={value} value={value}>
-                          {dimensionLabel(value)}
-                        </option>
-                      ))}
+                      {['LEGAL_ENTITY', ...REGISTRABLE_DIMENSIONS.map((d) => d.value)].map(
+                        (value) => (
+                          <option key={value} value={value}>
+                            {dimensionLabel(value)}
+                          </option>
+                        ),
+                      )}
                     </select>
                   </label>
                   <label className="text-copy-13 text-foreground space-y-1">
@@ -676,9 +685,7 @@ export function LinkageRiskWorkspace() {
               <Badge tone={policy.status === 'ACTIVE' ? 'success' : 'neutral'}>
                 {policy.status === 'ACTIVE' ? '生效' : '草稿'}
               </Badge>
-              <Badge tone="info">
-                最少 {policy.minSharedShopCount} 家店铺共享才算关联
-              </Badge>
+              <Badge tone="info">最少 {policy.minSharedShopCount} 家店铺共享才算关联</Badge>
               <Badge tone="neutral">
                 {policy.evaluationScope === 'TENANT' ? '全部店铺之间判' : '仅同平台之间判'}
               </Badge>
@@ -802,18 +809,16 @@ export function LinkageRiskWorkspace() {
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge tone="info">{identifier.dimensionLabel}</Badge>
                     <span className="text-foreground font-medium">{identifier.displayLabel}</span>
-                    <span className="text-muted-foreground text-copy-12">{identifier.identifierKey}</span>
+                    <span className="text-muted-foreground text-copy-12">
+                      {identifier.identifierKey}
+                    </span>
                     <Badge tone={identifier.status === 'ACTIVE' ? 'success' : 'neutral'}>
                       {identifier.status === 'ACTIVE' ? '生效中' : '已停用'}
                     </Badge>
                     <Badge tone={identifier.shopCount >= 2 ? 'warning' : 'neutral'}>
                       {identifier.shopCount} 家店铺共享
                     </Badge>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setLinkTarget(identifier)}
-                    >
+                    <Button size="sm" variant="outline" onClick={() => setLinkTarget(identifier)}>
                       挂店铺
                     </Button>
                     <Button
@@ -830,7 +835,7 @@ export function LinkageRiskWorkspace() {
                       {identifier.shops.map((shop) => (
                         <span
                           key={shop.shopId}
-                          className="border-control-border inline-flex items-center gap-1 rounded-md border px-2 py-1 text-copy-12"
+                          className="border-control-border text-copy-12 inline-flex items-center gap-1 rounded-md border px-2 py-1"
                         >
                           {shop.shopCode}（{shop.platformCode}）
                           <button
@@ -986,7 +991,9 @@ export function LinkageRiskWorkspace() {
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge tone={severityTone(alert.severity)}>{severityLabel(alert.severity)}</Badge>
-                  <Badge tone={alertStatusTone(alert.status)}>{alertStatusLabel(alert.status)}</Badge>
+                  <Badge tone={alertStatusTone(alert.status)}>
+                    {alertStatusLabel(alert.status)}
+                  </Badge>
                   <span className="text-foreground text-copy-13 font-medium">{alert.title}</span>
                   <Badge tone="neutral">{alert.shopCount} 家店铺</Badge>
                   <Button size="sm" variant="outline" onClick={() => void openAlert(alert.alertId)}>
@@ -1011,10 +1018,14 @@ export function LinkageRiskWorkspace() {
                 </p>
               )}
               {selectedAlert.resolvedAt && (
-                <p>· 已整改：{selectedAlert.resolutionNote}（{selectedAlert.resolvedAt}）</p>
+                <p>
+                  · 已整改：{selectedAlert.resolutionNote}（{selectedAlert.resolvedAt}）
+                </p>
               )}
               {selectedAlert.dismissedAt && (
-                <p>· 已忽略：{selectedAlert.dismissReason}（{selectedAlert.dismissedAt}）</p>
+                <p>
+                  · 已忽略：{selectedAlert.dismissReason}（{selectedAlert.dismissedAt}）
+                </p>
               )}
             </div>
             {selectedAlert.remediations.length > 0 && (
@@ -1056,13 +1067,22 @@ export function LinkageRiskWorkspace() {
                   onChange={(e) => setAlertReason(e.target.value)}
                 />
                 <div className="flex gap-2">
-                  <Button size="sm" onClick={() => void disposeAlert('acknowledge')} disabled={busy}>
+                  <Button
+                    size="sm"
+                    onClick={() => void disposeAlert('acknowledge')}
+                    disabled={busy}
+                  >
                     确认
                   </Button>
                   <Button size="sm" onClick={() => void disposeAlert('resolve')} disabled={busy}>
                     已整改
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => void disposeAlert('dismiss')} disabled={busy}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => void disposeAlert('dismiss')}
+                    disabled={busy}
+                  >
                     忽略
                   </Button>
                   <Button size="sm" variant="outline" onClick={() => setSelectedAlert(null)}>
@@ -1098,7 +1118,9 @@ export function LinkageRiskWorkspace() {
                   <Badge tone={remediationStatusTone(remediation.status)}>
                     {remediationStatusLabel(remediation.status)}
                   </Badge>
-                  <span className="text-foreground text-copy-13 font-medium">{remediation.title}</span>
+                  <span className="text-foreground text-copy-13 font-medium">
+                    {remediation.title}
+                  </span>
                   <Badge tone="neutral">{remediation.dimension}</Badge>
                 </div>
                 <p className="text-copy-13 text-muted-foreground">{remediation.detail}</p>
@@ -1138,8 +1160,9 @@ export function LinkageRiskWorkspace() {
 
       {scan && (
         <p className="text-copy-12 text-muted-foreground">
-          上次扫描：{scan.shopsScanned} 家店铺 · {scan.linksFound} 条关联边 · {scan.clustersFound} 个关联组 ·
-          新增提示 {scan.alertsCreated} 条 / 更新 {scan.alertsUpdated} 条 · 新增整改建议 {scan.remediationsCreated} 条
+          上次扫描：{scan.shopsScanned} 家店铺 · {scan.linksFound} 条关联边 · {scan.clustersFound}{' '}
+          个关联组 · 新增提示 {scan.alertsCreated} 条 / 更新 {scan.alertsUpdated} 条 · 新增整改建议{' '}
+          {scan.remediationsCreated} 条
         </p>
       )}
     </div>

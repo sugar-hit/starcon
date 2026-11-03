@@ -149,7 +149,9 @@ describe('对账报告的余额调节表', () => {
     expect(labels).toContain('＝ 调节后余额');
     expect(rows.find((r) => r.label === '加：银行已收、我方账上没有')?.amount).toBe('200.0000 USD');
     expect(rows.find((r) => r.label === '＝ 调节后余额')?.amount).toBe('1400.0000 USD');
-    expect(rows.find((r) => r.label === '差额（调节后余额 − 我方账面余额）')?.amount).toBe('400.0000 USD');
+    expect(rows.find((r) => r.label === '差额（调节后余额 − 我方账面余额）')?.amount).toBe(
+      '400.0000 USD',
+    );
   });
 
   it('账面余额读不到时调节后余额与差额显示破折号，而不是 0', () => {

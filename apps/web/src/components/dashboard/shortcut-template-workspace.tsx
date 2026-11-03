@@ -71,10 +71,14 @@ export function ShortcutTemplateWorkspace() {
     setLoading(true);
     setError('');
     try {
-      const capabilityView = await api<ShortcutCapabilities>('identity/shortcut-templates/capabilities');
+      const capabilityView = await api<ShortcutCapabilities>(
+        'identity/shortcut-templates/capabilities',
+      );
       setCapabilities(capabilityView);
 
-      const effectiveView = await api<EffectiveShortcutSet>('identity/shortcut-templates/effective');
+      const effectiveView = await api<EffectiveShortcutSet>(
+        'identity/shortcut-templates/effective',
+      );
       setEffective(effectiveView);
 
       const overrideView = await api<ShortcutOverride[]>('identity/shortcut-templates/overrides');
@@ -141,9 +145,7 @@ export function ShortcutTemplateWorkspace() {
         await api(`identity/shortcut-templates/overrides/${id}`, 'DELETE');
         await load();
       } catch (overrideError) {
-        setNotice(
-          overrideError instanceof Error ? overrideError.message : '恢复默认失败，请重试',
-        );
+        setNotice(overrideError instanceof Error ? overrideError.message : '恢复默认失败，请重试');
       }
     },
     [load],
@@ -290,7 +292,11 @@ export function ShortcutTemplateWorkspace() {
       </SectionCard>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <StatCard label="生效入口" value={summary.total} icon={<ExternalLink className="h-4 w-4" />} />
+        <StatCard
+          label="生效入口"
+          value={summary.total}
+          icon={<ExternalLink className="h-4 w-4" />}
+        />
         <StatCard label="命中模板" value={summary.templateCount} />
         <StatCard label="被我改过" value={summary.overridden} />
         <StatCard label="被我移除" value={summary.removedByOverride} />
@@ -298,7 +304,7 @@ export function ShortcutTemplateWorkspace() {
       </div>
 
       {notice ? (
-        <div className="border-destructive-soft bg-destructive-soft text-destructive rounded-md border px-4 py-3 text-copy-13">
+        <div className="border-destructive-soft bg-destructive-soft text-destructive text-copy-13 rounded-md border px-4 py-3">
           {notice}
         </div>
       ) : null}
@@ -318,7 +324,7 @@ export function ShortcutTemplateWorkspace() {
                     {renamingThis ? (
                       <div className="flex items-center gap-2">
                         <input
-                          className="border-input bg-background h-8 rounded-md border px-2 text-copy-13"
+                          className="border-input bg-background text-copy-13 h-8 rounded-md border px-2"
                           value={renaming}
                           onChange={(event) => setRenaming(event.target.value)}
                           aria-label={`修改「${entry.label}」的标题`}
@@ -339,14 +345,16 @@ export function ShortcutTemplateWorkspace() {
                       </div>
                     ) : (
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-foreground text-copy-13 font-medium">{entry.label}</span>
+                        <span className="text-foreground text-copy-13 font-medium">
+                          {entry.label}
+                        </span>
                         {entry.overridden ? <Badge tone="info">已改过</Badge> : null}
                         <span className="text-muted-foreground text-copy-13">
                           {describeEffectiveSource(entry)}
                         </span>
                       </div>
                     )}
-                    <div className="text-muted-foreground mt-1 flex flex-wrap gap-3 text-copy-13">
+                    <div className="text-muted-foreground text-copy-13 mt-1 flex flex-wrap gap-3">
                       <span>目标页面 {entry.pageCode}</span>
                       <span>路径 {entry.path}</span>
                       <span>排序位 {entry.position}</span>
@@ -436,7 +444,7 @@ export function ShortcutTemplateWorkspace() {
           <div className="space-y-4">
             {scopeGroups.map((group) => (
               <div key={group.scopeType}>
-                <p className="text-muted-foreground mb-2 text-copy-13">
+                <p className="text-muted-foreground text-copy-13 mb-2">
                   {group.label}（{group.templates.length} 张）
                 </p>
                 <ul className="divide-border divide-y">
@@ -452,8 +460,12 @@ export function ShortcutTemplateWorkspace() {
                             {TEMPLATE_STATUS_LABELS[template.status] ?? template.status}
                           </Badge>
                         </div>
-                        <div className="text-muted-foreground mt-1 flex flex-wrap gap-3 text-copy-13">
-                          <span>适用范围 {SCOPE_TYPE_LABELS[template.scopeType as ScopeType] ?? template.scopeType}</span>
+                        <div className="text-muted-foreground text-copy-13 mt-1 flex flex-wrap gap-3">
+                          <span>
+                            适用范围{' '}
+                            {SCOPE_TYPE_LABELS[template.scopeType as ScopeType] ??
+                              template.scopeType}
+                          </span>
                           <span>优先级 {template.priority}</span>
                           <span>入口 {template.entries.length} 个</span>
                           {template.entries.map((entry) => (
@@ -521,9 +533,7 @@ export function ShortcutTemplateWorkspace() {
                   <input
                     className="border-input bg-background mt-1 h-8 w-full rounded-md border px-2"
                     value={editing.code}
-                    onChange={(event) =>
-                      setEditing({ ...editing, code: event.target.value })
-                    }
+                    onChange={(event) => setEditing({ ...editing, code: event.target.value })}
                   />
                   {draftErrors.code ? (
                     <span className="text-destructive text-copy-13">{draftErrors.code}</span>
@@ -534,9 +544,7 @@ export function ShortcutTemplateWorkspace() {
                   <input
                     className="border-input bg-background mt-1 h-8 w-full rounded-md border px-2"
                     value={editing.name}
-                    onChange={(event) =>
-                      setEditing({ ...editing, name: event.target.value })
-                    }
+                    onChange={(event) => setEditing({ ...editing, name: event.target.value })}
                   />
                   {draftErrors.name ? (
                     <span className="text-destructive text-copy-13">{draftErrors.name}</span>
@@ -578,9 +586,7 @@ export function ShortcutTemplateWorkspace() {
                 <input
                   className="border-input bg-background mt-1 h-8 w-full rounded-md border px-2"
                   value={editing.departmentId}
-                  onChange={(event) =>
-                    setEditing({ ...editing, departmentId: event.target.value })
-                  }
+                  onChange={(event) => setEditing({ ...editing, departmentId: event.target.value })}
                 />
                 {draftErrors.departmentId ? (
                   <span className="text-destructive text-copy-13">{draftErrors.departmentId}</span>
@@ -635,7 +641,7 @@ export function ShortcutTemplateWorkspace() {
                 </Button>
               </div>
               {editing.entries.length === 0 ? (
-                <p className="text-muted-foreground mt-2 text-copy-13">
+                <p className="text-muted-foreground text-copy-13 mt-2">
                   这张模板还没有入口。模板不配任何入口时，命中它的人不会多出任何快捷入口。
                 </p>
               ) : (

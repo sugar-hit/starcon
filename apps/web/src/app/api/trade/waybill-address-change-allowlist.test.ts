@@ -18,7 +18,9 @@ import { GET, POST } from './[...path]/route';
  */
 
 const SOURCE = readFileSync(
-  fileURLToPath(new URL('../../../components/logistics/waybill-redirect-model.ts', import.meta.url)),
+  fileURLToPath(
+    new URL('../../../components/logistics/waybill-redirect-model.ts', import.meta.url),
+  ),
   'utf8',
 );
 
@@ -41,7 +43,8 @@ function request(path: string, method = 'GET') {
 
 /** 从模型源码里反向抽出**真实存在**的路径（写死一份清单只验证「清单与白名单一致」）。 */
 function realCallSites(): string[] {
-  const base = SOURCE.match(/const base = '([^']+)'/)?.[1] ?? 'trade/logistics/waybill-address-change';
+  const base =
+    SOURCE.match(/const base = '([^']+)'/)?.[1] ?? 'trade/logistics/waybill-address-change';
   const found = new Set<string>();
   for (const match of SOURCE.matchAll(/`([^`]*)`/g)) {
     const raw = match[1];

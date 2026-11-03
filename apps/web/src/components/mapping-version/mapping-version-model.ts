@@ -262,7 +262,10 @@ export function effectiveWindow(row: VersionRow): string {
  */
 export function formatMoment(value: string | null | undefined): string {
   if (!value) return '—';
-  return value.replace('T', ' ').replace(/\.\d+/, '').replace(/([+-]\d{2}:\d{2}|Z)$/, ' $1');
+  return value
+    .replace('T', ' ')
+    .replace(/\.\d+/, '')
+    .replace(/([+-]\d{2}:\d{2}|Z)$/, ' $1');
 }
 
 export function pageSummary(page: VersionPage | null): string {

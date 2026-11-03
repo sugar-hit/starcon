@@ -202,8 +202,7 @@ export const HEALTH_LEVEL_LABELS: Record<string, string> = {
  * 「不知道」说成「一切正常」。
  */
 export function describeHealth(row: HealthLike): string {
-  const online =
-    row.online === null ? '在线状态未知' : row.online ? '在线' : '离线';
+  const online = row.online === null ? '在线状态未知' : row.online ? '在线' : '离线';
   const parts = [
     online,
     `错误率 ${formatRatio(row.errorRate)}`,
@@ -346,7 +345,8 @@ export function formatTimestamp(value: string | null | undefined): string {
 
 /** 告警按「未闭环优先、再按严重度、再按时间」排序，顺序固定不随返回顺序漂移。 */
 export function sortAlerts(rows: readonly AlertLike[]): AlertLike[] {
-  const rank = (row: AlertLike) => (row.status === 'RESOLVED' ? 2 : row.status === 'ACKNOWLEDGED' ? 1 : 0);
+  const rank = (row: AlertLike) =>
+    row.status === 'RESOLVED' ? 2 : row.status === 'ACKNOWLEDGED' ? 1 : 0;
   return [...rows].sort((a, b) => {
     const byStatus = rank(a) - rank(b);
     if (byStatus !== 0) return byStatus;

@@ -147,7 +147,11 @@ export function updateDevelopmentProject(id: string, input: DevelopmentProjectUp
 }
 
 export function transitionDevelopmentProject(id: string, input: DevelopmentTransitionInput) {
-  return api<DevelopmentProjectDetail>(`${base}/${encodeURIComponent(id)}/transitions`, 'POST', input);
+  return api<DevelopmentProjectDetail>(
+    `${base}/${encodeURIComponent(id)}/transitions`,
+    'POST',
+    input,
+  );
 }
 
 export function fetchDevelopmentMilestones(projectId: string) {
@@ -186,7 +190,11 @@ export function fetchDevelopmentMarkets(projectId: string) {
 }
 
 export function createDevelopmentMarket(projectId: string, input: DevelopmentMarketInput) {
-  return api<DevelopmentMarketRow[]>(`${base}/${encodeURIComponent(projectId)}/markets`, 'POST', input);
+  return api<DevelopmentMarketRow[]>(
+    `${base}/${encodeURIComponent(projectId)}/markets`,
+    'POST',
+    input,
+  );
 }
 
 export function deleteDevelopmentMarket(projectId: string, marketId: string) {
@@ -286,7 +294,10 @@ export function fmt(value: number | null | undefined): string {
 /** 带币种的金额。币种为空时只显示数字（不补一个猜出来的币种）。 */
 export function money(value: number | null | undefined, currency?: string | null): string {
   if (value === null || value === undefined) return '无数据';
-  const text = value.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+  const text = value.toLocaleString('zh-CN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 4,
+  });
   return currency ? `${text} ${currency}` : text;
 }
 

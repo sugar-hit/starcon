@@ -296,8 +296,9 @@ export function DevelopmentSampleWorkspace() {
         <div className="flex flex-col gap-1">
           <p className="font-medium">打样与营销样品分开：本页只管开发打样</p>
           <p className="text-muted-foreground">
-            达人寄样（14.5.1.2）属 14 卷，是营销样品，**不在本模块** —— 混进来会让营销费用污染开发成本，
-            新品利润就被高估了。来源只有供应商 / 自有产 / 档口，用途只有「开发打样」。
+            达人寄样（14.5.1.2）属 14 卷，是营销样品，**不在本模块** ——
+            混进来会让营销费用污染开发成本， 新品利润就被高估了。来源只有供应商 / 自有产 /
+            档口，用途只有「开发打样」。
           </p>
           {caps && <p className="text-muted-foreground">{caps.sourceUsageNote}</p>}
           {gaps.map((gap) => (
@@ -360,13 +361,14 @@ export function DevelopmentSampleWorkspace() {
               }}
             >
               <option value="">全部</option>
-              {(tab === 'orders' ? (options?.orderStatuses ?? []) : (options?.sampleStatuses ?? [])).map(
-                (item) => (
-                  <option key={item.value} value={item.value}>
-                    {item.label}
-                  </option>
-                ),
-              )}
+              {(tab === 'orders'
+                ? (options?.orderStatuses ?? [])
+                : (options?.sampleStatuses ?? [])
+              ).map((item) => (
+                <option key={item.value} value={item.value}>
+                  {item.label}
+                </option>
+              ))}
             </select>
           </label>
           <label className="flex flex-col gap-1 text-sm">
@@ -398,7 +400,8 @@ export function DevelopmentSampleWorkspace() {
         </div>
         {summary && summary.costByCurrency.length > 0 && (
           <p className="text-muted-foreground mt-2 text-sm">
-            样品成本合计（**按币种分开，不跨币种相加**）：{costByCurrencyText(summary.costByCurrency)}
+            样品成本合计（**按币种分开，不跨币种相加**）：
+            {costByCurrencyText(summary.costByCurrency)}
           </p>
         )}
       </SectionCard>
@@ -519,10 +522,7 @@ export function DevelopmentSampleWorkspace() {
                     </td>
                     <td className="px-2 py-1">{row.latestTrackingNo || '未发货'}</td>
                     <td className="px-2 py-1">
-                      <Button
-                        variant="ghost"
-                        onClick={() => void openSample(row.orderId, row.id)}
-                      >
+                      <Button variant="ghost" onClick={() => void openSample(row.orderId, row.id)}>
                         详情
                       </Button>
                     </td>
@@ -579,7 +579,11 @@ export function DevelopmentSampleWorkspace() {
           }}
           onTransition={async (toStatus, reason) => {
             await run(() =>
-              transitionDevelopmentSampleOrder(orderDetail.order.id, { toStatus, reason, occurredAt: null }),
+              transitionDevelopmentSampleOrder(orderDetail.order.id, {
+                toStatus,
+                reason,
+                occurredAt: null,
+              }),
             );
             setOrderDetail(await fetchDevelopmentSampleOrder(orderDetail.order.id));
           }}
@@ -606,7 +610,9 @@ export function DevelopmentSampleWorkspace() {
           busy={busy}
           onClose={() => setSampleDetail(null)}
           onRefresh={async () => {
-            setSampleDetail(await fetchDevelopmentSample(orderDetail.order.id, sampleDetail.sample.id));
+            setSampleDetail(
+              await fetchDevelopmentSample(orderDetail.order.id, sampleDetail.sample.id),
+            );
           }}
           onAdvance={async (toStatus, reason) => {
             await run(() =>
@@ -732,9 +738,7 @@ function NewOrderModal({
             partyName: row.partyName,
           })),
         );
-        setStalls(
-          stallPage.items.map((row) => ({ id: row.id, code: row.code, name: row.name })),
-        );
+        setStalls(stallPage.items.map((row) => ({ id: row.id, code: row.code, name: row.name })));
       } catch (e) {
         setError(errorText(e));
       } finally {
@@ -798,8 +802,8 @@ function NewOrderModal({
         <ModalHeader>
           <ModalTitle>新建打样单</ModalTitle>
           <ModalDescription>
-            一次打样活动一张单，单下可以挂多件样品（样品台账一件一行）。
-            来源只有供应商 / 自有产 / 档口，**用途固定为「开发打样」** —— 达人寄样不归本模块。
+            一次打样活动一张单，单下可以挂多件样品（样品台账一件一行）。 来源只有供应商 / 自有产 /
+            档口，**用途固定为「开发打样」** —— 达人寄样不归本模块。
           </ModalDescription>
         </ModalHeader>
         <div className="grid gap-3 md:grid-cols-2">
@@ -888,10 +892,7 @@ function NewOrderModal({
           </label>
           <label className="flex flex-col gap-1 text-sm">
             <span className="text-muted-foreground">申请人</span>
-            <Input
-              value={requesterName}
-              onChange={(e) => setRequesterName(e.target.value)}
-            />
+            <Input value={requesterName} onChange={(e) => setRequesterName(e.target.value)} />
           </label>
           <label className="flex flex-col gap-1 text-sm">
             <span className="text-muted-foreground">申请时刻 *</span>
@@ -1194,7 +1195,9 @@ function OrderDetailModal({
             </div>
           </SectionCard>
 
-          <SectionCard title={`样品成本（${money(detail.cost.totalAmount, detail.cost.currency)}）`}>
+          <SectionCard
+            title={`样品成本（${money(detail.cost.totalAmount, detail.cost.currency)}）`}
+          >
             <p className="text-muted-foreground text-sm">
               🔴 {expensePostedText(detail.cost.expensePosted, detail.cost.expenseOwnerModule)}：
               {detail.cost.expenseNote}
@@ -1421,8 +1424,8 @@ function SampleDetailModal({
             {sample.sampleNo} · {sample.projectName}
           </ModalTitle>
           <ModalDescription>
-            来源 {sample.sourceTypeLabel} / 用途 {sample.usageTypeLabel} · 状态 {sample.statusLabel} ·
-            第 {sample.revisionRound} 轮打样 · 数量 {fmt(sample.quantity)} {sample.currency}
+            来源 {sample.sourceTypeLabel} / 用途 {sample.usageTypeLabel} · 状态 {sample.statusLabel}{' '}
+            · 第 {sample.revisionRound} 轮打样 · 数量 {fmt(sample.quantity)} {sample.currency}
           </ModalDescription>
         </ModalHeader>
 
@@ -1522,8 +1525,8 @@ function SampleDetailModal({
 
           <SectionCard title="样品物流快照">
             <p className="text-muted-foreground text-sm">
-              🔴 本模块**只记物流快照**（发货单号 / 承运商 / 物流状态 / 发出时刻）——
-              真实物流轨迹归 10 物流管，轨迹取不到时显示「轨迹不可查」。
+              🔴 本模块**只记物流快照**（发货单号 / 承运商 / 物流状态 / 发出时刻）—— 真实物流轨迹归
+              10 物流管，轨迹取不到时显示「轨迹不可查」。
             </p>
             {detail.shipments.length === 0 ? (
               <p className="text-muted-foreground mt-2 text-sm">还没有登记物流快照。</p>
@@ -1531,8 +1534,8 @@ function SampleDetailModal({
               <ul className="mt-2 flex flex-col gap-1 text-sm">
                 {detail.shipments.map((row) => (
                   <li key={row.id}>
-                    {row.trackingNo} · {row.carrierName || '未填承运商'} · {row.logisticsStatusLabel} ·{' '}
-                    {timeText(row.shippedAt)} ·{' '}
+                    {row.trackingNo} · {row.carrierName || '未填承运商'} ·{' '}
+                    {row.logisticsStatusLabel} · {timeText(row.shippedAt)} ·{' '}
                     {trackingText(row.trackingAvailable, row.trackingOwnerModule)}
                   </li>
                 ))}

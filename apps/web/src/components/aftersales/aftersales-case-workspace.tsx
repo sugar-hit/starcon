@@ -206,13 +206,17 @@ export function AftersalesCaseWorkspace() {
       {page && (
         <p className="text-muted-foreground text-copy-13">
           {summaryLine(page)}
-          <span className="ml-2">
-            排序：{page.timelinessThresholdNote}
-          </span>
+          <span className="ml-2">排序：{page.timelinessThresholdNote}</span>
         </p>
       )}
 
-      <SectionCard title="筛选" description={caps?.filterableNote ?? '多维筛选：类型 / 状态 / 原因 / 平台 / 时效 / 金额 / 责任人 / 关键字。'}>
+      <SectionCard
+        title="筛选"
+        description={
+          caps?.filterableNote ??
+          '多维筛选：类型 / 状态 / 原因 / 平台 / 时效 / 金额 / 责任人 / 关键字。'
+        }
+      >
         <div className="flex flex-wrap items-end gap-3">
           <Input
             className="w-56"
@@ -316,7 +320,7 @@ export function AftersalesCaseWorkspace() {
           </Button>
         </div>
         {page && (
-          <p className="text-muted-foreground mt-3 text-copy-13">{page.amountRangeSemantics}</p>
+          <p className="text-muted-foreground text-copy-13 mt-3">{page.amountRangeSemantics}</p>
         )}
       </SectionCard>
 
@@ -408,7 +412,7 @@ export function AftersalesCaseWorkspace() {
         </div>
 
         {bulkError && (
-          <div className="border-destructive-soft bg-destructive-soft text-destructive mt-3 rounded-lg border px-4 py-3 text-copy-13">
+          <div className="border-destructive-soft bg-destructive-soft text-destructive text-copy-13 mt-3 rounded-lg border px-4 py-3">
             {bulkError}
           </div>
         )}
@@ -417,9 +421,12 @@ export function AftersalesCaseWorkspace() {
           <div className="mt-4 flex flex-col gap-2">
             <p className="text-copy-13 font-medium">{bulkSummaryText(bulkResult)}</p>
             <p className="text-muted-foreground text-copy-13">{bulkResult.note}</p>
-            <ul className="divide-border divide-y text-copy-13 rounded-md border">
+            <ul className="divide-border text-copy-13 divide-y rounded-md border">
               {bulkResult.items.map((item, i) => (
-                <li key={`${item.caseId ?? 'null'}-${i}`} className="flex items-start gap-3 px-3 py-2">
+                <li
+                  key={`${item.caseId ?? 'null'}-${i}`}
+                  className="flex items-start gap-3 px-3 py-2"
+                >
                   <span
                     className={
                       item.success
@@ -441,7 +448,7 @@ export function AftersalesCaseWorkspace() {
       {/* 列表 */}
       <SectionCard title="售后单" description={page?.dataScopeNote ?? ''}>
         {loading && !page ? (
-          <div className="text-muted-foreground p-6 text-center text-copy-13">加载中…</div>
+          <div className="text-muted-foreground text-copy-13 p-6 text-center">加载中…</div>
         ) : (page?.rows.length ?? 0) === 0 ? (
           <EmptyState
             title="没有符合条件的售后单"
@@ -453,7 +460,7 @@ export function AftersalesCaseWorkspace() {
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-copy-13">
+            <table className="text-copy-13 w-full text-left">
               <thead>
                 <tr className="border-border border-b">
                   <th className="w-8 px-2 py-2">
@@ -530,7 +537,7 @@ export function AftersalesCaseWorkspace() {
           title="能力与上下游"
           description="哪些维度真有依据、上游通没通、下游交付没交付，全部显式列出。"
         >
-          <div className="flex flex-col gap-3 text-copy-13">
+          <div className="text-copy-13 flex flex-col gap-3">
             <p>
               <b>时效：</b>
               {caps.timelinessNote}
@@ -545,7 +552,8 @@ export function AftersalesCaseWorkspace() {
             </p>
             <p>
               <b>跨服务读：</b>
-              {caps.crossServiceReadAvailable ? '可用' : '不可用（禁止）'} —— {caps.crossServiceNote}
+              {caps.crossServiceReadAvailable ? '可用' : '不可用（禁止）'} ——{' '}
+              {caps.crossServiceNote}
             </p>
             <p>
               <b>下游：</b>
@@ -565,7 +573,8 @@ export function AftersalesCaseWorkspace() {
                 <li key={op.code} className="px-3 py-2">
                   <b>{op.label}</b>
                   <span className="text-muted-foreground">
-                    （{op.available ? '可用' : '未交付'}，落在 {op.landsIn}，上限 {op.maxBatchSize}）
+                    （{op.available ? '可用' : '未交付'}，落在 {op.landsIn}，上限 {op.maxBatchSize}
+                    ）
                   </span>
                   <div className="text-muted-foreground">{op.reason}</div>
                   <div className="text-muted-foreground">前置条件：{op.precondition}</div>
@@ -599,7 +608,12 @@ function Row({
       className={`border-border border-b ${tone.tone === 'overdue' ? 'bg-destructive-soft/40' : ''}`}
     >
       <td className="px-2 py-2">
-        <input type="checkbox" checked={checked} onChange={onToggle} aria-label={`选择 ${row.caseNo}`} />
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={onToggle}
+          aria-label={`选择 ${row.caseNo}`}
+        />
       </td>
       <td className="px-2 py-2 font-mono">
         {/* 11.1.1.2 详情交付后，售后号成为通往全景页的入口。

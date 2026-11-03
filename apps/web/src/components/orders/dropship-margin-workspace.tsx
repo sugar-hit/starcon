@@ -157,7 +157,12 @@ export function DropshipMarginWorkspace() {
             page,
             size: PAGE_SIZE,
           }),
-          fetchDropshipMarginReport({ groupBy, periodStart, periodEnd, supplierCode: supplierFilter }),
+          fetchDropshipMarginReport({
+            groupBy,
+            periodStart,
+            periodEnd,
+            supplierCode: supplierFilter,
+          }),
           fetchDropshipReconciliations({
             status: statementStatusFilter,
             page: 0,
@@ -228,7 +233,11 @@ export function DropshipMarginWorkspace() {
           {error}
         </Notice>
       )}
-      {note && <Notice tone="success" title="操作结果">{note}</Notice>}
+      {note && (
+        <Notice tone="success" title="操作结果">
+          {note}
+        </Notice>
+      )}
 
       {/* ============================================================ 亏损预警 */}
       <SectionCard
@@ -254,7 +263,11 @@ export function DropshipMarginWorkspace() {
           <StatCard label="已确认亏损" value={counters?.lossConfirmed ?? 0} />
           <StatCard label="平台费未登记 · 无法判定" value={counters?.undetermined ?? 0} />
         </div>
-        {counters && <Notice tone="info" title="两类预警分开计数">{counters.note}</Notice>}
+        {counters && (
+          <Notice tone="info" title="两类预警分开计数">
+            {counters.note}
+          </Notice>
+        )}
 
         <div className="mt-4 grid gap-3 md:grid-cols-2">
           <Field label="结论类型">
@@ -288,7 +301,7 @@ export function DropshipMarginWorkspace() {
         </div>
 
         {loading ? (
-          <div className="py-8 text-center text-sm text-muted">加载中…</div>
+          <div className="text-muted py-8 text-center text-sm">加载中…</div>
         ) : !alerts || alerts.items.length === 0 ? (
           <EmptyState
             title="当前没有预警"
@@ -354,7 +367,7 @@ export function DropshipMarginWorkspace() {
         </div>
 
         {loading ? (
-          <div className="py-8 text-center text-sm text-muted">加载中…</div>
+          <div className="text-muted py-8 text-center text-sm">加载中…</div>
         ) : !facts || facts.items.length === 0 ? (
           <EmptyState
             title="还没有差价数据"
@@ -365,7 +378,7 @@ export function DropshipMarginWorkspace() {
             <div className="mt-4 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-left text-muted">
+                  <tr className="text-muted text-left">
                     <th className="px-2 py-2">代发单</th>
                     <th className="px-2 py-2">口径</th>
                     <th className="px-2 py-2 text-right">售价</th>
@@ -379,10 +392,10 @@ export function DropshipMarginWorkspace() {
                   {facts.items.map((row) => {
                     const cells = spreadCells(row);
                     return (
-                      <tr key={row.id} className="border-t border-border">
+                      <tr key={row.id} className="border-border border-t">
                         <td className="px-2 py-2">
                           <div>{row.orderNo}</div>
-                          <div className="text-xs text-muted">{row.supplierCode}</div>
+                          <div className="text-muted text-xs">{row.supplierCode}</div>
                         </td>
                         <td className="px-2 py-2">
                           <Badge tone="neutral">{basisBadge(row)}</Badge>
@@ -402,10 +415,7 @@ export function DropshipMarginWorkspace() {
                             「差价算不出来」与「差价刚好是 0」必须长得不一样。
                           */}
                           {cells.spreadAfterFee === null ? (
-                            <span
-                              className="text-muted"
-                              title={cells.note}
-                            >
+                            <span className="text-muted" title={cells.note}>
                               —（无法判定）
                             </span>
                           ) : (
@@ -426,7 +436,7 @@ export function DropshipMarginWorkspace() {
                 <Button variant="secondary" disabled={page === 0} onClick={() => setPage(page - 1)}>
                   上一页
                 </Button>
-                <span className="text-sm text-muted">
+                <span className="text-muted text-sm">
                   第 {page + 1} 页 / 共 {Math.ceil(facts.total / PAGE_SIZE)} 页（{facts.total} 行）
                 </span>
                 <Button
@@ -463,13 +473,20 @@ export function DropshipMarginWorkspace() {
           </Field>
         </div>
         {loading ? (
-          <div className="py-8 text-center text-sm text-muted">加载中…</div>
+          <div className="text-muted py-8 text-center text-sm">加载中…</div>
         ) : !report || report.groups.length === 0 ? (
-          <EmptyState title="本周期没有可汇总的差价数据" description="换一个周期区间，或先跑一轮计算。" />
+          <EmptyState
+            title="本周期没有可汇总的差价数据"
+            description="换一个周期区间，或先跑一轮计算。"
+          />
         ) : (
           <>
-            <Notice tone="info" title="口径隔离">{report.basisNote}</Notice>
-            <Notice tone="warning" title="平台费口径">{report.feeNote}</Notice>
+            <Notice tone="info" title="口径隔离">
+              {report.basisNote}
+            </Notice>
+            <Notice tone="warning" title="平台费口径">
+              {report.feeNote}
+            </Notice>
             <div className="mt-4 grid gap-4 md:grid-cols-2">
               {totals.map((t) => (
                 <StatCard
@@ -486,7 +503,7 @@ export function DropshipMarginWorkspace() {
             <div className="mt-4 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-left text-muted">
+                  <tr className="text-muted text-left">
                     <th className="px-2 py-2">{groupByLabel(report.groupBy)}</th>
                     <th className="px-2 py-2">币种</th>
                     <th className="px-2 py-2 text-right">单数</th>
@@ -501,12 +518,15 @@ export function DropshipMarginWorkspace() {
                 </thead>
                 <tbody>
                   {report.groups.map((group) => (
-                    <tr key={`${group.groupKey}:${group.currencyCode}`} className="border-t border-border">
+                    <tr
+                      key={`${group.groupKey}:${group.currencyCode}`}
+                      className="border-border border-t"
+                    >
                       <td className="px-2 py-2">
                         <div>{group.groupLabel}</div>
                         <Badge tone="neutral">{basisBadge(group)}</Badge>
                         {group.groupBy === 'SKU' && (
-                          <div className="mt-1 text-xs text-muted">{skuGroupNote(group)}</div>
+                          <div className="text-muted mt-1 text-xs">{skuGroupNote(group)}</div>
                         )}
                       </td>
                       <td className="px-2 py-2">{group.currencyCode}</td>
@@ -541,7 +561,9 @@ export function DropshipMarginWorkspace() {
                 </tbody>
               </table>
             </div>
-            <Notice tone="info" title="币种口径">{report.currencyNote}</Notice>
+            <Notice tone="info" title="币种口径">
+              {report.currencyNote}
+            </Notice>
           </>
         )}
       </SectionCard>
@@ -594,7 +616,7 @@ export function DropshipMarginWorkspace() {
           >
             生成本期对账单
           </Button>
-          <span className="self-center text-xs text-muted">
+          <span className="text-muted self-center text-xs">
             周期端点由上面显式给出，不由「上个月」这类相对词推导
           </span>
         </div>
@@ -603,9 +625,12 @@ export function DropshipMarginWorkspace() {
           <div>
             <h3 className="text-label-13 text-foreground mb-2">对账单列表</h3>
             {loading ? (
-              <div className="py-6 text-center text-sm text-muted">加载中…</div>
+              <div className="text-muted py-6 text-center text-sm">加载中…</div>
             ) : !statements || statements.items.length === 0 ? (
-              <EmptyState title="还没有对账单" description="选好供应商与结算币种后生成本期对账单。" />
+              <EmptyState
+                title="还没有对账单"
+                description="选好供应商与结算币种后生成本期对账单。"
+              />
             ) : (
               <ul className="space-y-2">
                 {statements.items.map((row: DropshipReconciliationRow) => {
@@ -614,14 +639,14 @@ export function DropshipMarginWorkspace() {
                     <li key={row.id}>
                       <button
                         type="button"
-                        className="w-full rounded-md border border-border px-3 py-2 text-left hover:bg-surface-muted"
+                        className="border-border hover:bg-surface-muted w-full rounded-md border px-3 py-2 text-left"
                         onClick={() => void run(`open-${row.id}`, () => openStatement(row.id))}
                       >
                         <div className="flex items-center justify-between gap-2">
                           <span className="text-sm font-medium">{row.statementNo}</span>
                           <Badge tone="neutral">{statementStatusLabel(row.status)}</Badge>
                         </div>
-                        <div className="text-xs text-muted">
+                        <div className="text-muted text-xs">
                           {row.supplierCode} · {row.currencyCode} · {buckets.included.payableText}
                         </div>
                       </button>
@@ -635,15 +660,18 @@ export function DropshipMarginWorkspace() {
           <div>
             <h3 className="text-label-13 text-foreground mb-2">应付待办（12.1.2.1）</h3>
             {loading ? (
-              <div className="py-6 text-center text-sm text-muted">加载中…</div>
+              <div className="text-muted py-6 text-center text-sm">加载中…</div>
             ) : !tasks || tasks.items.length === 0 ? (
-              <EmptyState title="没有应付待办" description={`生成对账单后会落一条${PAYABLE_PENDING_HINT}的待办。`} />
+              <EmptyState
+                title="没有应付待办"
+                description={`生成对账单后会落一条${PAYABLE_PENDING_HINT}的待办。`}
+              />
             ) : (
               <ul className="space-y-2">
                 {tasks.items.map((task: DropshipPayableTaskRow) => {
                   const badge = payableTaskBadge(task);
                   return (
-                    <li key={task.id} className="rounded-md border border-border px-3 py-2">
+                    <li key={task.id} className="border-border rounded-md border px-3 py-2">
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-sm font-medium">{task.statementNo}</span>
                         <Badge
@@ -658,7 +686,7 @@ export function DropshipMarginWorkspace() {
                           {badge.label}
                         </Badge>
                       </div>
-                      <div className="text-xs text-muted">
+                      <div className="text-muted text-xs">
                         {moneyText(task.payableAmount, task.payableCurrencyCode)} · {badge.hint}
                       </div>
                     </li>
@@ -673,26 +701,33 @@ export function DropshipMarginWorkspace() {
       </SectionCard>
 
       {/* ============================================================ 能力与缺口 */}
-      <SectionCard title="能力与上下游缺口" description="未交付的能力一律显式标为不可用并点名归属，绝不画成已完成。">
+      <SectionCard
+        title="能力与上下游缺口"
+        description="未交付的能力一律显式标为不可用并点名归属，绝不画成已完成。"
+      >
         {loading ? (
-          <div className="py-8 text-center text-sm text-muted">加载中…</div>
+          <div className="text-muted py-8 text-center text-sm">加载中…</div>
         ) : !caps ? (
           <EmptyState title="能力声明不可用" description="后端未返回能力声明。" />
         ) : (
           <>
-            <Notice tone="info" title="本模块能力自述">{caps.summary}</Notice>
-            <Notice tone="warning" title="利润口径隔离">{caps.basisNote}</Notice>
+            <Notice tone="info" title="本模块能力自述">
+              {caps.summary}
+            </Notice>
+            <Notice tone="warning" title="利润口径隔离">
+              {caps.basisNote}
+            </Notice>
             <ul className="mt-4 space-y-2">
               {unavailable.map((dim) => (
-                <li key={dim.code} className="rounded-md border border-border px-3 py-2">
+                <li key={dim.code} className="border-border rounded-md border px-3 py-2">
                   <div className="flex items-center gap-2">
                     <Badge tone="warning">不可用</Badge>
                     <span className="text-sm font-medium">{dim.name}</span>
                     {dim.ownerModule && (
-                      <span className="text-xs text-muted">归属 {dim.ownerModule}</span>
+                      <span className="text-muted text-xs">归属 {dim.ownerModule}</span>
                     )}
                   </div>
-                  {dim.note && <p className="mt-1 text-xs text-muted">{dim.note}</p>}
+                  {dim.note && <p className="text-muted mt-1 text-xs">{dim.note}</p>}
                 </li>
               ))}
             </ul>
@@ -700,7 +735,7 @@ export function DropshipMarginWorkspace() {
         )}
       </SectionCard>
 
-      <p className="text-xs text-muted">
+      <p className="text-muted text-xs">
         提示：{UNDETERMINED_HINT}。把平台费按 0 算会同时漏判真实亏损、并把所有代发单染成亏损。
       </p>
     </div>
@@ -714,7 +749,9 @@ export function DropshipMarginWorkspace() {
 
   async function acknowledge(alertId: string, resolved: boolean): Promise<void> {
     const noteText = window.prompt(
-      resolved ? '处置说明（必填）：已确认亏损的处置动作是什么？' : '处置说明（必填）：打算怎么处理？',
+      resolved
+        ? '处置说明（必填）：已确认亏损的处置动作是什么？'
+        : '处置说明（必填）：打算怎么处理？',
     );
     if (!noteText || noteText.trim() === '') return;
     const { acknowledgeDropshipLossAlert } = await import('./dropship-margin-model');
@@ -734,18 +771,18 @@ function AlertRow({
 }) {
   const badge = lossVerdictBadge(row.alertKind);
   return (
-    <li className="rounded-md border border-border px-3 py-3">
+    <li className="border-border rounded-md border px-3 py-3">
       <div className="flex flex-wrap items-center gap-2">
         <VerdictBadgeView verdict={row.alertKind} />
         <span className="text-sm font-medium">{row.orderNo}</span>
-        <span className="text-xs text-muted">
+        <span className="text-muted text-xs">
           {row.supplierCode} · {row.shopCode || '未登记店铺'} · {row.currencyCode}
         </span>
         <Badge tone="neutral">{alertStatusLabel(row.status)}</Badge>
         <Badge tone="neutral">代发 · 采购差价口径</Badge>
       </div>
-      <p className="mt-2 text-xs text-muted">{badge.hint}</p>
-      <p className="mt-1 text-xs text-foreground-muted">{row.ruleEvidence}</p>
+      <p className="text-muted mt-2 text-xs">{badge.hint}</p>
+      <p className="text-foreground-muted mt-1 text-xs">{row.ruleEvidence}</p>
       {row.status === 'OPEN' && (
         <div className="mt-2 flex gap-2">
           <Button variant="secondary" disabled={busy} onClick={() => onAcknowledge(false)}>
@@ -775,30 +812,33 @@ function StatementDetail({
   const row = detail.statement;
   const buckets = reconciliationBuckets(row);
   return (
-    <div className="mt-6 rounded-md border border-border p-4">
+    <div className="border-border mt-6 rounded-md border p-4">
       <div className="flex flex-wrap items-center gap-2">
         <h3 className="text-sm font-medium">{row.statementNo}</h3>
         <Badge tone="neutral">{statementStatusLabel(row.status)}</Badge>
         <Badge tone="neutral">{basisBadge(row)}</Badge>
       </div>
-      <p className="mt-1 text-xs text-muted">
+      <p className="text-muted mt-1 text-xs">
         {row.supplierCode} · 周期 {row.periodStart} ~ {row.periodEnd} · 结算币种 {row.currencyCode}
       </p>
 
       <div className="mt-3 grid gap-3 md:grid-cols-3">
         <StatCard label="计入合计 · 应付供应商" value={buckets.included.payableText} />
-        <StatCard
-          label="计入合计 · 平台费"
-          value={buckets.included.feeText}
-        />
+        <StatCard label="计入合计 · 平台费" value={buckets.included.feeText} />
         <StatCard label="计入合计 · 单数" value={buckets.included.orderCount} />
       </div>
 
-      <Notice tone="warning" title="汇率未登记桶">{buckets.fxUnset.note}</Notice>
-      <Notice tone="warning" title="平台费未登记桶">{buckets.feeUnregistered.note}</Notice>
-      <Notice tone="info" title="应付单下游状态">{detail.taskNote}</Notice>
+      <Notice tone="warning" title="汇率未登记桶">
+        {buckets.fxUnset.note}
+      </Notice>
+      <Notice tone="warning" title="平台费未登记桶">
+        {buckets.feeUnregistered.note}
+      </Notice>
+      <Notice tone="info" title="应付单下游状态">
+        {detail.taskNote}
+      </Notice>
 
-      {row.ruleEvidence && <p className="mt-2 text-xs text-muted">{row.ruleEvidence}</p>}
+      {row.ruleEvidence && <p className="text-muted mt-2 text-xs">{row.ruleEvidence}</p>}
 
       <div className="mt-3 flex gap-2">
         {row.status === 'DRAFT' && (
@@ -807,7 +847,10 @@ function StatementDetail({
             disabled={busy === `status-${row.id}`}
             onClick={() =>
               void run(`status-${row.id}`, async () => {
-                await changeDropshipReconciliationStatus(row.id, { status: 'FINALIZED', disputeNote: '' });
+                await changeDropshipReconciliationStatus(row.id, {
+                  status: 'FINALIZED',
+                  disputeNote: '',
+                });
                 return `对账单 ${row.statementNo} 已定稿`;
               })
             }
@@ -846,7 +889,7 @@ function StatementDetail({
       <div className="mt-4 overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-muted">
+            <tr className="text-muted text-left">
               <th className="px-2 py-2">代发单</th>
               <th className="px-2 py-2">原币</th>
               <th className="px-2 py-2 text-right">售价</th>
@@ -859,7 +902,7 @@ function StatementDetail({
           </thead>
           <tbody>
             {detail.lines.map((line) => (
-              <tr key={line.id} className="border-t border-border">
+              <tr key={line.id} className="border-border border-t">
                 <td className="px-2 py-2">{line.orderNo}</td>
                 <td className="px-2 py-2">{line.originalCurrencyCode}</td>
                 <td className="px-2 py-2 text-right">
@@ -882,9 +925,9 @@ function StatementDetail({
                   {line.fxStatus === 'UNSET' ? (
                     <Badge tone="warning">未登记，未折算</Badge>
                   ) : line.fxRateValue ? (
-                    <span className="text-xs text-muted">× {line.fxRateValue}</span>
+                    <span className="text-muted text-xs">× {line.fxRateValue}</span>
                   ) : (
-                    <span className="text-xs text-muted">同币</span>
+                    <span className="text-muted text-xs">同币</span>
                   )}
                 </td>
                 <td className="px-2 py-2">

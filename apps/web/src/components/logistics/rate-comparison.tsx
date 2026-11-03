@@ -199,7 +199,7 @@ export function RateComparisonWorkspace() {
             <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
               <Field label="收货国家（两位代码）">
                 <input
-                  className="border rounded px-2 py-1"
+                  className="rounded border px-2 py-1"
                   value={input.destCountry}
                   onChange={(e) => update('destCountry', e.target.value)}
                   placeholder="DE"
@@ -207,7 +207,7 @@ export function RateComparisonWorkspace() {
               </Field>
               <Field label="适用店铺编码（可空）">
                 <input
-                  className="border rounded px-2 py-1"
+                  className="rounded border px-2 py-1"
                   value={input.shopCode}
                   onChange={(e) => update('shopCode', e.target.value)}
                   placeholder="SHOP-DE-1"
@@ -215,14 +215,14 @@ export function RateComparisonWorkspace() {
               </Field>
               <Field label="计费重量（kg）">
                 <input
-                  className="border rounded px-2 py-1"
+                  className="rounded border px-2 py-1"
                   value={input.weightKg}
                   onChange={(e) => update('weightKg', e.target.value)}
                 />
               </Field>
               <Field label="时效上限（天，可空）">
                 <input
-                  className="border rounded px-2 py-1"
+                  className="rounded border px-2 py-1"
                   value={input.maxTransitDays}
                   onChange={(e) => update('maxTransitDays', e.target.value)}
                   placeholder="9"
@@ -230,14 +230,14 @@ export function RateComparisonWorkspace() {
               </Field>
               <Field label="申报价值（可空）">
                 <input
-                  className="border rounded px-2 py-1"
+                  className="rounded border px-2 py-1"
                   value={input.declaredValue}
                   onChange={(e) => update('declaredValue', e.target.value)}
                 />
               </Field>
               <Field label="申报币种（可空）">
                 <input
-                  className="border rounded px-2 py-1"
+                  className="rounded border px-2 py-1"
                   value={input.declaredCurrency}
                   onChange={(e) => update('declaredCurrency', e.target.value)}
                   placeholder="USD"
@@ -245,42 +245,42 @@ export function RateComparisonWorkspace() {
               </Field>
               <Field label="成本权重">
                 <input
-                  className="border rounded px-2 py-1"
+                  className="rounded border px-2 py-1"
                   value={input.costWeight}
                   onChange={(e) => update('costWeight', e.target.value)}
                 />
               </Field>
               <Field label="时效权重">
                 <input
-                  className="border rounded px-2 py-1"
+                  className="rounded border px-2 py-1"
                   value={input.transitWeight}
                   onChange={(e) => update('transitWeight', e.target.value)}
                 />
               </Field>
               <Field label="可靠性权重">
                 <input
-                  className="border rounded px-2 py-1"
+                  className="rounded border px-2 py-1"
                   value={input.reliabilityWeight}
                   onChange={(e) => update('reliabilityWeight', e.target.value)}
                 />
               </Field>
               <Field label="评分新鲜度上限（天）">
                 <input
-                  className="border rounded px-2 py-1"
+                  className="rounded border px-2 py-1"
                   value={input.maxRatingAgeDays}
                   onChange={(e) => update('maxRatingAgeDays', e.target.value)}
                 />
               </Field>
               <Field label="最低可接受综合分（可空）">
                 <input
-                  className="border rounded px-2 py-1"
+                  className="rounded border px-2 py-1"
                   value={input.minCompositeScore}
                   onChange={(e) => update('minCompositeScore', e.target.value)}
                 />
               </Field>
               <Field label="比价时刻（留空取当前）">
                 <input
-                  className="border rounded px-2 py-1"
+                  className="rounded border px-2 py-1"
                   type="datetime-local"
                   value={input.comparedAt}
                   onChange={(e) => update('comparedAt', e.target.value)}
@@ -314,14 +314,14 @@ export function RateComparisonWorkspace() {
             ) : null}
             <div className="flex gap-2">
               <button
-                className="border rounded px-3 py-1 text-sm disabled:opacity-50"
+                className="rounded border px-3 py-1 text-sm disabled:opacity-50"
                 disabled={busy}
                 onClick={onCompare}
               >
                 比价（不落库）
               </button>
               <button
-                className="border rounded px-3 py-1 text-sm disabled:opacity-50"
+                className="rounded border px-3 py-1 text-sm disabled:opacity-50"
                 disabled={busy}
                 onClick={onSave}
               >
@@ -334,7 +334,9 @@ export function RateComparisonWorkspace() {
           <section className="flex flex-col gap-3">
             <h2 className="text-lg font-medium">推荐结果</h2>
             {!result ? (
-              <p className="text-muted-foreground text-sm">尚未比价。填好上面的条件后点「比价」。</p>
+              <p className="text-muted-foreground text-sm">
+                尚未比价。填好上面的条件后点「比价」。
+              </p>
             ) : emptyText ? (
               <p className="text-muted-foreground text-sm">{emptyText}</p>
             ) : (
@@ -391,12 +393,15 @@ export function RateComparisonWorkspace() {
                         {eligibilityLabel(line.eligibility)}
                       </span>
                       {line.selected ? (
-                        <span className="text-emerald-600 text-sm">本次推荐选中</span>
+                        <span className="text-sm text-emerald-600">本次推荐选中</span>
                       ) : null}
                     </div>
                     <div className="text-muted-foreground grid grid-cols-2 gap-2 text-sm md:grid-cols-4">
                       <span>
-                        运费：{line.priced ? moneyText(line.totalCharge, line.currency) : '算不出（不是 0 元）'}
+                        运费：
+                        {line.priced
+                          ? moneyText(line.totalCharge, line.currency)
+                          : '算不出（不是 0 元）'}
                       </span>
                       <span>时效：{transitText(line.transitMinDays, line.transitMaxDays)}</span>
                       <span>成本分：{scoreText(line.costScore)}</span>
@@ -405,8 +410,8 @@ export function RateComparisonWorkspace() {
                       <span>综合分：{scoreText(line.compositeScore)}</span>
                       <span>
                         评分样本：{line.ratingDispatched ?? '—'} 单（成功{' '}
-                        {rateText(line.ratingSuccessRate)} / 达成 {rateText(line.ratingOnTimeRate)} /
-                        投诉 {rateText(line.ratingComplaintRate)}）
+                        {rateText(line.ratingSuccessRate)} / 达成 {rateText(line.ratingOnTimeRate)}{' '}
+                        / 投诉 {rateText(line.ratingComplaintRate)}）
                       </span>
                       <span>评分来源：{scoreSourceLabel(line.ratingSource)}</span>
                     </div>
@@ -418,7 +423,7 @@ export function RateComparisonWorkspace() {
                       </p>
                     ) : null}
                     {blockingReasons(line).length > 0 ? (
-                      <ul className="text-amber-700 list-disc pl-5 text-sm">
+                      <ul className="list-disc pl-5 text-sm text-amber-700">
                         {blockingReasons(line).map((r) => (
                           <li key={r}>{r}</li>
                         ))}
@@ -445,8 +450,8 @@ export function RateComparisonWorkspace() {
           <section className="flex flex-col gap-3">
             <h2 className="text-lg font-medium">渠道评分</h2>
             <p className="text-muted-foreground text-sm">
-              成功率 / 时效达成率 / 投诉率由原始计数在服务端派生，写不进去。
-              10.6.2.1 时效分析<b>尚未交付</b>，当前只能人工登记（来源标记为
+              成功率 / 时效达成率 / 投诉率由原始计数在服务端派生，写不进去。 10.6.2.1 时效分析
+              <b>尚未交付</b>，当前只能人工登记（来源标记为
               <code> MANUAL_ENTERED</code>）。
             </p>
             {ratings ? (
@@ -491,9 +496,9 @@ export function RateComparisonWorkspace() {
                     </tbody>
                   </table>
                   {ratings.unratedChannelCodes.length > 0 ? (
-                    <p className="text-amber-700 text-sm">
-                      以下渠道<b>没有任何评分</b>，比价时它们会以「没有渠道评分」落选（不会拿 0 分参与）：{' '}
-                      {ratings.unratedChannelCodes.join('、')}
+                    <p className="text-sm text-amber-700">
+                      以下渠道<b>没有任何评分</b>，比价时它们会以「没有渠道评分」落选（不会拿 0
+                      分参与）： {ratings.unratedChannelCodes.join('、')}
                     </p>
                   ) : null}
                   <p className="text-muted-foreground text-sm">{ratings.note}</p>
@@ -506,49 +511,49 @@ export function RateComparisonWorkspace() {
               <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                 <Field label="渠道 ID（uuid）">
                   <input
-                    className="border rounded px-2 py-1"
+                    className="rounded border px-2 py-1"
                     value={ratingInput.channelId}
                     onChange={(e) => updateRating('channelId', e.target.value)}
                   />
                 </Field>
                 <Field label="国家">
                   <input
-                    className="border rounded px-2 py-1"
+                    className="rounded border px-2 py-1"
                     value={ratingInput.countryCode}
                     onChange={(e) => updateRating('countryCode', e.target.value)}
                   />
                 </Field>
                 <Field label="已发运">
                   <input
-                    className="border rounded px-2 py-1"
+                    className="rounded border px-2 py-1"
                     value={ratingInput.dispatched}
                     onChange={(e) => updateRating('dispatched', e.target.value)}
                   />
                 </Field>
                 <Field label="已妥投">
                   <input
-                    className="border rounded px-2 py-1"
+                    className="rounded border px-2 py-1"
                     value={ratingInput.delivered}
                     onChange={(e) => updateRating('delivered', e.target.value)}
                   />
                 </Field>
                 <Field label="按时妥投">
                   <input
-                    className="border rounded px-2 py-1"
+                    className="rounded border px-2 py-1"
                     value={ratingInput.onTime}
                     onChange={(e) => updateRating('onTime', e.target.value)}
                   />
                 </Field>
                 <Field label="投诉">
                   <input
-                    className="border rounded px-2 py-1"
+                    className="rounded border px-2 py-1"
                     value={ratingInput.complaint}
                     onChange={(e) => updateRating('complaint', e.target.value)}
                   />
                 </Field>
                 <Field label="统计窗口开始">
                   <input
-                    className="border rounded px-2 py-1"
+                    className="rounded border px-2 py-1"
                     type="datetime-local"
                     value={ratingInput.windowFrom}
                     onChange={(e) => updateRating('windowFrom', e.target.value)}
@@ -556,7 +561,7 @@ export function RateComparisonWorkspace() {
                 </Field>
                 <Field label="统计窗口结束">
                   <input
-                    className="border rounded px-2 py-1"
+                    className="rounded border px-2 py-1"
                     type="datetime-local"
                     value={ratingInput.windowTo}
                     onChange={(e) => updateRating('windowTo', e.target.value)}
@@ -564,7 +569,7 @@ export function RateComparisonWorkspace() {
                 </Field>
                 <Field label="观测时刻">
                   <input
-                    className="border rounded px-2 py-1"
+                    className="rounded border px-2 py-1"
                     type="datetime-local"
                     value={ratingInput.observedAt}
                     onChange={(e) => updateRating('observedAt', e.target.value)}
@@ -572,21 +577,21 @@ export function RateComparisonWorkspace() {
                 </Field>
                 <Field label="投诉率红线（%）">
                   <input
-                    className="border rounded px-2 py-1"
+                    className="rounded border px-2 py-1"
                     value={ratingInput.maxComplaintRatePct}
                     onChange={(e) => updateRating('maxComplaintRatePct', e.target.value)}
                   />
                 </Field>
                 <Field label="最小样本量">
                   <input
-                    className="border rounded px-2 py-1"
+                    className="rounded border px-2 py-1"
                     value={ratingInput.minSampleThreshold}
                     onChange={(e) => updateRating('minSampleThreshold', e.target.value)}
                   />
                 </Field>
                 <Field label="来源凭据">
                   <input
-                    className="border rounded px-2 py-1"
+                    className="rounded border px-2 py-1"
                     value={ratingInput.sourceRef}
                     onChange={(e) => updateRating('sourceRef', e.target.value)}
                   />
@@ -600,7 +605,7 @@ export function RateComparisonWorkspace() {
                 </ul>
               ) : null}
               <button
-                className="border w-fit rounded px-3 py-1 text-sm disabled:opacity-50"
+                className="w-fit rounded border px-3 py-1 text-sm disabled:opacity-50"
                 disabled={busy}
                 onClick={onSaveRating}
               >
@@ -646,28 +651,28 @@ export function RateComparisonWorkspace() {
               <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                 <Field label="店铺编码">
                   <input
-                    className="border rounded px-2 py-1"
+                    className="rounded border px-2 py-1"
                     value={priorityForm.shopCode}
                     onChange={(e) => setPriorityForm((p) => ({ ...p, shopCode: e.target.value }))}
                   />
                 </Field>
                 <Field label="渠道 ID（uuid）">
                   <input
-                    className="border rounded px-2 py-1"
+                    className="rounded border px-2 py-1"
                     value={priorityForm.channelId}
                     onChange={(e) => setPriorityForm((p) => ({ ...p, channelId: e.target.value }))}
                   />
                 </Field>
                 <Field label="位次（从 1 开始，需连续）">
                   <input
-                    className="border rounded px-2 py-1"
+                    className="rounded border px-2 py-1"
                     value={priorityForm.priorityNo}
                     onChange={(e) => setPriorityForm((p) => ({ ...p, priorityNo: e.target.value }))}
                   />
                 </Field>
                 <Field label="最低可接受综合分">
                   <input
-                    className="border rounded px-2 py-1"
+                    className="rounded border px-2 py-1"
                     value={priorityForm.minCompositeScore}
                     onChange={(e) =>
                       setPriorityForm((p) => ({ ...p, minCompositeScore: e.target.value }))
@@ -686,7 +691,7 @@ export function RateComparisonWorkspace() {
                 允许被自动选中（关掉 = 仅兜底候选）
               </label>
               <button
-                className="border w-fit rounded px-3 py-1 text-sm disabled:opacity-50"
+                className="w-fit rounded border px-3 py-1 text-sm disabled:opacity-50"
                 disabled={busy}
                 onClick={onSavePriority}
               >
@@ -704,7 +709,8 @@ export function RateComparisonWorkspace() {
               <>
                 <p className="text-muted-foreground text-sm">
                   共 {history.summary.total} 张，其中 {history.summary.withSelection} 张给出了推荐、
-                  {history.summary.noSelection} 张「无可选渠道」、{history.summary.shopPreset} 张按店铺预设选出；
+                  {history.summary.noSelection} 张「无可选渠道」、{history.summary.shopPreset}{' '}
+                  张按店铺预设选出；
                   {history.summary.riskFlagged} 张命中过风险闸。成本口径恒为{' '}
                   <code>RULE_ESTIMATE</code>。
                 </p>
@@ -749,7 +755,7 @@ export function RateComparisonWorkspace() {
               </p>
               <ul className="flex flex-col gap-2">
                 {detail.lines.map((line) => (
-                  <li key={line.channelId} className="border rounded p-2 text-sm">
+                  <li key={line.channelId} className="rounded border p-2 text-sm">
                     <span className={line.selected ? 'font-medium' : ''}>
                       {line.rankNo !== null ? `#${line.rankNo} ` : ''}
                       {line.channelCode}

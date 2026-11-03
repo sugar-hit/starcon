@@ -265,7 +265,9 @@ export function BatchPriceAdjustmentSection() {
               id="bpa-mode"
               className="border-border bg-background text-copy-13 h-9 w-full rounded-md border px-3"
               value={request.adjustMode}
-              onChange={(e) => patch({ adjustMode: e.target.value as BatchPriceAdjustmentRequest['adjustMode'] })}
+              onChange={(e) =>
+                patch({ adjustMode: e.target.value as BatchPriceAdjustmentRequest['adjustMode'] })
+              }
             >
               <option value="PERCENT">百分比</option>
               <option value="FIXED_AMOUNT">固定金额</option>
@@ -402,7 +404,9 @@ export function BatchPriceAdjustmentSection() {
               step="0.01"
               value={request.logisticsCostPerUnit ?? ''}
               onChange={(e) =>
-                patch({ logisticsCostPerUnit: e.target.value === '' ? null : Number(e.target.value) })
+                patch({
+                  logisticsCostPerUnit: e.target.value === '' ? null : Number(e.target.value),
+                })
               }
             />
           </FormField>
@@ -485,7 +489,10 @@ export function BatchPriceAdjustmentSection() {
             {preview.items.length ? (
               <div className="space-y-2">
                 {preview.items.map((item) => (
-                  <PreviewRow key={`${item.skuId}-${item.platformCode}-${item.siteCode}`} item={item} />
+                  <PreviewRow
+                    key={`${item.skuId}-${item.platformCode}-${item.siteCode}`}
+                    item={item}
+                  />
                 ))}
               </div>
             ) : (

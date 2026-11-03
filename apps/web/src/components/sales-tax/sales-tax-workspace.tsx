@@ -226,21 +226,28 @@ export function SalesTaxWorkspace({ focus }: Props) {
     setLoading(true);
     setError(null);
     try {
-      const [capsResult, stateResult, ruleResult, shopStateResult, scopeResult, reportResult, shopResult] =
-        await Promise.all([
-          fetchCapabilities(),
-          fetchStates({
-            stateCode: stateFilter || undefined,
-            ruleStatus: ruleStatusFilter || undefined,
-            page: statePage,
-            size: PAGE_SIZE,
-          }),
-          fetchRateRules({ stateCode: stateFilter || undefined, page: 0, size: 50 }),
-          fetchShopStates({ stateCode: stateFilter || undefined, page: 0, size: 50 }),
-          fetchFacilitatorScopes({ stateCode: stateFilter || undefined, page: 0, size: 50 }),
-          fetchFacilitatorReports({ page: 0, size: 50 }),
-          fetchShops(),
-        ]);
+      const [
+        capsResult,
+        stateResult,
+        ruleResult,
+        shopStateResult,
+        scopeResult,
+        reportResult,
+        shopResult,
+      ] = await Promise.all([
+        fetchCapabilities(),
+        fetchStates({
+          stateCode: stateFilter || undefined,
+          ruleStatus: ruleStatusFilter || undefined,
+          page: statePage,
+          size: PAGE_SIZE,
+        }),
+        fetchRateRules({ stateCode: stateFilter || undefined, page: 0, size: 50 }),
+        fetchShopStates({ stateCode: stateFilter || undefined, page: 0, size: 50 }),
+        fetchFacilitatorScopes({ stateCode: stateFilter || undefined, page: 0, size: 50 }),
+        fetchFacilitatorReports({ page: 0, size: 50 }),
+        fetchShops(),
+      ]);
       setCaps(capsResult);
       setStates(stateResult);
       setRules(ruleResult.items);
@@ -312,7 +319,8 @@ export function SalesTaxWorkspace({ focus }: Props) {
   );
 
   const filingRequired = useMemo(
-    () => (obligations?.items ?? []).filter((row) => row.filingObligation === 'FILING_REQUIRED').length,
+    () =>
+      (obligations?.items ?? []).filter((row) => row.filingObligation === 'FILING_REQUIRED').length,
     [obligations],
   );
 
@@ -469,7 +477,10 @@ export function SalesTaxWorkspace({ focus }: Props) {
           <ul className="mt-1 list-disc space-y-1 pl-4">
             {caps.gaps.map((gap) => (
               <li key={gap.moduleId}>
-                <strong>{gap.moduleId} {gap.moduleName}</strong>（归 {gap.ownerModule}）未交付：{gap.impact}
+                <strong>
+                  {gap.moduleId} {gap.moduleName}
+                </strong>
+                （归 {gap.ownerModule}）未交付：{gap.impact}
               </li>
             ))}
           </ul>
@@ -479,7 +490,11 @@ export function SalesTaxWorkspace({ focus }: Props) {
       )}
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="销售税州" value={states?.total ?? 0} icon={<Scale className="h-4 w-4" />} />
+        <StatCard
+          label="销售税州"
+          value={states?.total ?? 0}
+          icon={<Scale className="h-4 w-4" />}
+        />
         <StatCard
           label="有差异的州"
           value={varianceStates}
@@ -541,7 +556,7 @@ export function SalesTaxWorkspace({ focus }: Props) {
         }
       >
         {loading && !states ? (
-          <div className="text-muted-foreground flex items-center gap-2 px-5 py-6 text-copy-13">
+          <div className="text-muted-foreground text-copy-13 flex items-center gap-2 px-5 py-6">
             <Loader2 className="h-4 w-4 animate-spin" />
             加载中…
           </div>
@@ -555,7 +570,7 @@ export function SalesTaxWorkspace({ focus }: Props) {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-copy-13">
+            <table className="text-copy-13 w-full text-left">
               <thead className="text-muted-foreground border-border border-b">
                 <tr>
                   <th className="px-5 py-2 font-medium">州</th>
@@ -591,7 +606,8 @@ export function SalesTaxWorkspace({ focus }: Props) {
                             {formatRate(row.baseRate)} · 第 {row.ruleVersion} 版
                           </div>
                           <div className="text-muted-foreground text-copy-12">
-                            阈值 {formatAmount(row.thresholdAmount)} / 免征 {formatAmount(row.exemptionAmount)}
+                            阈值 {formatAmount(row.thresholdAmount)} / 免征{' '}
+                            {formatAmount(row.exemptionAmount)}
                           </div>
                         </>
                       ) : (
@@ -622,7 +638,9 @@ export function SalesTaxWorkspace({ focus }: Props) {
                       )}
                     </td>
                     <td className="px-3 py-2">
-                      <Badge tone={row.filingObligation === 'FILING_REQUIRED' ? 'danger' : 'neutral'}>
+                      <Badge
+                        tone={row.filingObligation === 'FILING_REQUIRED' ? 'danger' : 'neutral'}
+                      >
                         {filingObligationLabel(row.filingObligation)}
                       </Badge>
                     </td>
@@ -646,8 +664,10 @@ export function SalesTaxWorkspace({ focus }: Props) {
               </tbody>
             </table>
             {states.items.length > 0 && (
-              <ul className="text-muted-foreground space-y-1 px-5 py-3 text-copy-12">
-                {states.items.flatMap((row) => row.notes.map((note) => <li key={`${row.stateCode}-${note}`}>· {note}</li>))}
+              <ul className="text-muted-foreground text-copy-12 space-y-1 px-5 py-3">
+                {states.items.flatMap((row) =>
+                  row.notes.map((note) => <li key={`${row.stateCode}-${note}`}>· {note}</li>),
+                )}
               </ul>
             )}
           </div>
@@ -681,7 +701,7 @@ export function SalesTaxWorkspace({ focus }: Props) {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-copy-13">
+            <table className="text-copy-13 w-full text-left">
               <thead className="text-muted-foreground border-border border-b">
                 <tr>
                   <th className="px-5 py-2 font-medium">州</th>
@@ -707,7 +727,11 @@ export function SalesTaxWorkspace({ focus }: Props) {
                     <td className="px-3 py-2">{formatAmount(rule.exemptionAmount)}</td>
                     <td className="px-3 py-2">
                       <Badge tone={rule.status === 'ACTIVE' ? 'success' : 'neutral'}>
-                        {rule.status === 'ACTIVE' ? '当前生效' : rule.status === 'SUPERSEDED' ? '已封版' : '已撤下'}
+                        {rule.status === 'ACTIVE'
+                          ? '当前生效'
+                          : rule.status === 'SUPERSEDED'
+                            ? '已封版'
+                            : '已撤下'}
                       </Badge>
                     </td>
                     <td className="px-3 py-2 text-right">
@@ -734,7 +758,11 @@ export function SalesTaxWorkspace({ focus }: Props) {
                           >
                             发新版本
                           </Button>
-                          <Button size="sm" variant="ghost" onClick={() => void archiveRule(rule.id)}>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => void archiveRule(rule.id)}
+                          >
                             撤下
                           </Button>
                         </div>
@@ -775,14 +803,14 @@ export function SalesTaxWorkspace({ focus }: Props) {
         ) : (
           <ul className="divide-border divide-y">
             {shopStates.map((row) => (
-              <li key={row.id} className="flex flex-wrap items-center justify-between gap-2 px-5 py-2">
+              <li
+                key={row.id}
+                className="flex flex-wrap items-center justify-between gap-2 px-5 py-2"
+              >
                 <div>
                   <span className="font-medium">{row.shopName}</span>
                   <span className="text-muted-foreground text-copy-12">（{row.shopCode}）</span>
-                  <span className="text-muted-foreground text-copy-12">
-                    {' '}
-                    · {row.stateName}
-                  </span>
+                  <span className="text-muted-foreground text-copy-12"> · {row.stateName}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge tone="neutral">{row.nexusType}</Badge>
@@ -823,13 +851,19 @@ export function SalesTaxWorkspace({ focus }: Props) {
         ) : (
           <ul className="divide-border divide-y">
             {scopes.map((row) => (
-              <li key={row.id} className="flex flex-wrap items-center justify-between gap-2 px-5 py-2">
+              <li
+                key={row.id}
+                className="flex flex-wrap items-center justify-between gap-2 px-5 py-2"
+              >
                 <div>
                   <span className="font-medium">
                     {row.stateName} · {row.platformCode}
                   </span>
                   {row.remitTo && (
-                    <span className="text-muted-foreground text-copy-12"> · 汇给 {row.remitTo}</span>
+                    <span className="text-muted-foreground text-copy-12">
+                      {' '}
+                      · 汇给 {row.remitTo}
+                    </span>
                   )}
                 </div>
                 <div className="flex items-center gap-2">
@@ -874,12 +908,16 @@ export function SalesTaxWorkspace({ focus }: Props) {
         ) : (
           <ul className="divide-border divide-y">
             {reports.map((row) => (
-              <li key={row.id} className="flex flex-wrap items-center justify-between gap-2 px-5 py-2">
+              <li
+                key={row.id}
+                className="flex flex-wrap items-center justify-between gap-2 px-5 py-2"
+              >
                 <div>
                   <span className="font-medium">{row.platformCode}</span>
                   <span className="text-muted-foreground text-copy-12"> · {row.fileKey}</span>
                   <div className="text-muted-foreground text-copy-12">
-                    {row.periodStart} → {row.periodEnd} · 第 {row.parseVersion} 版 · {row.lineCount} 行
+                    {row.periodStart} → {row.periodEnd} · 第 {row.parseVersion} 版 · {row.lineCount}{' '}
+                    行
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -917,11 +955,7 @@ export function SalesTaxWorkspace({ focus }: Props) {
               onChange={(e) => setPeriodEnd(e.target.value)}
               aria-label="期间止"
             />
-            <Button
-              size="sm"
-              onClick={() => void refresh()}
-              disabled={!periodStart || !periodEnd}
-            >
+            <Button size="sm" onClick={() => void refresh()} disabled={!periodStart || !periodEnd}>
               查看
             </Button>
             <Button
@@ -953,7 +987,7 @@ export function SalesTaxWorkspace({ focus }: Props) {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-copy-13">
+            <table className="text-copy-13 w-full text-left">
               <thead className="text-muted-foreground border-border border-b">
                 <tr>
                   <th className="px-5 py-2 font-medium">州</th>
@@ -982,7 +1016,9 @@ export function SalesTaxWorkspace({ focus }: Props) {
                     <td className="px-3 py-2">{formatAmount(row.facilitatorTax)}</td>
                     <td className="px-3 py-2">
                       <Badge tone={varianceTone(row.variance)}>{formatAmount(row.variance)}</Badge>
-                      <div className="text-muted-foreground text-copy-12">{varianceMeaning(row.variance)}</div>
+                      <div className="text-muted-foreground text-copy-12">
+                        {varianceMeaning(row.variance)}
+                      </div>
                     </td>
                     <td className="px-3 py-2">{formatAmount(row.settlementTax)}</td>
                     <td className="px-3 py-2">
@@ -990,7 +1026,9 @@ export function SalesTaxWorkspace({ focus }: Props) {
                         {row.statusLabel || reconciliationStatusLabel(row.status)}
                       </Badge>
                       {row.rateChangedInPeriod && (
-                        <div className="text-warning text-copy-12">期间内税率发过新版，需人工复核</div>
+                        <div className="text-warning text-copy-12">
+                          期间内税率发过新版，需人工复核
+                        </div>
                       )}
                     </td>
                   </tr>
@@ -1016,7 +1054,7 @@ export function SalesTaxWorkspace({ focus }: Props) {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-copy-13">
+            <table className="text-copy-13 w-full text-left">
               <thead className="text-muted-foreground border-border border-b">
                 <tr>
                   <th className="px-5 py-2 font-medium">州</th>
@@ -1045,11 +1083,13 @@ export function SalesTaxWorkspace({ focus }: Props) {
                       <Badge tone={varianceTone(row.variance)}>{formatAmount(row.variance)}</Badge>
                     </td>
                     <td className="px-3 py-2">
-                      <Badge tone={row.filingObligation === 'FILING_REQUIRED' ? 'danger' : 'neutral'}>
+                      <Badge
+                        tone={row.filingObligation === 'FILING_REQUIRED' ? 'danger' : 'neutral'}
+                      >
                         {filingObligationLabel(row.filingObligation)}
                       </Badge>
                     </td>
-                    <td className="text-muted-foreground px-3 py-2 text-copy-12">{row.note}</td>
+                    <td className="text-muted-foreground text-copy-12 px-3 py-2">{row.note}</td>
                   </tr>
                 ))}
               </tbody>
@@ -1062,9 +1102,12 @@ export function SalesTaxWorkspace({ focus }: Props) {
       <Modal open={ruleOpen} onOpenChange={setRuleOpen}>
         <ModalContent>
           <ModalHeader>
-            <ModalTitle>{ruleEditing ? '发新版本（封旧版 + 建新版）' : '录入一版税率规则'}</ModalTitle>
+            <ModalTitle>
+              {ruleEditing ? '发新版本（封旧版 + 建新版）' : '录入一版税率规则'}
+            </ModalTitle>
             <ModalDescription>
-              税率 / 阈值 / 免征额是**规则数据**，不是代码常量；改规则 = 发新版本，历史版本内容冻结。
+              税率 / 阈值 / 免征额是**规则数据**，不是代码常量；改规则 =
+              发新版本，历史版本内容冻结。
             </ModalDescription>
           </ModalHeader>
           <div className="grid gap-3 px-5 py-3 sm:grid-cols-2">
@@ -1074,7 +1117,9 @@ export function SalesTaxWorkspace({ focus }: Props) {
                 className="mt-1"
                 value={ruleForm.stateCode}
                 placeholder="US-CA"
-                onChange={(e) => setRuleForm({ ...ruleForm, stateCode: e.target.value.toUpperCase() })}
+                onChange={(e) =>
+                  setRuleForm({ ...ruleForm, stateCode: e.target.value.toUpperCase() })
+                }
               />
             </label>
             <label className="text-label-13 block">
@@ -1239,7 +1284,9 @@ export function SalesTaxWorkspace({ focus }: Props) {
               <input
                 type="checkbox"
                 checked={shopStateForm.registered}
-                onChange={(e) => setShopStateForm({ ...shopStateForm, registered: e.target.checked })}
+                onChange={(e) =>
+                  setShopStateForm({ ...shopStateForm, registered: e.target.checked })
+                }
               />
               已登记销售税账号
             </label>
@@ -1260,7 +1307,9 @@ export function SalesTaxWorkspace({ focus }: Props) {
         <ModalContent>
           <ModalHeader>
             <ModalTitle>登记代扣代缴说明</ModalTitle>
-            <ModalDescription>逐（州 × 平台）：平台代不代收、汇给谁、要不要单独报表。</ModalDescription>
+            <ModalDescription>
+              逐（州 × 平台）：平台代不代收、汇给谁、要不要单独报表。
+            </ModalDescription>
           </ModalHeader>
           <div className="grid gap-3 px-5 py-3 sm:grid-cols-2">
             <label className="text-label-13 block">
@@ -1269,7 +1318,9 @@ export function SalesTaxWorkspace({ focus }: Props) {
                 className="mt-1"
                 value={scopeForm.stateCode}
                 placeholder="US-CA"
-                onChange={(e) => setScopeForm({ ...scopeForm, stateCode: e.target.value.toUpperCase() })}
+                onChange={(e) =>
+                  setScopeForm({ ...scopeForm, stateCode: e.target.value.toUpperCase() })
+                }
               />
             </label>
             <label className="text-label-13 block">
@@ -1293,7 +1344,9 @@ export function SalesTaxWorkspace({ focus }: Props) {
               <input
                 type="checkbox"
                 checked={scopeForm.facilitatorEnabled}
-                onChange={(e) => setScopeForm({ ...scopeForm, facilitatorEnabled: e.target.checked })}
+                onChange={(e) =>
+                  setScopeForm({ ...scopeForm, facilitatorEnabled: e.target.checked })
+                }
               />
               该平台在该州代扣代缴
             </label>
@@ -1331,7 +1384,8 @@ export function SalesTaxWorkspace({ focus }: Props) {
           <ModalHeader>
             <ModalTitle>上传平台代扣代缴报表</ModalTitle>
             <ModalDescription>
-              粘贴平台导出的原文 → 服务端**真解析** → 逐行落库。文件级错误整份失败，行级错误只跳过那一行并写明行号。
+              粘贴平台导出的原文 → 服务端**真解析** →
+              逐行落库。文件级错误整份失败，行级错误只跳过那一行并写明行号。
             </ModalDescription>
           </ModalHeader>
           <div className="grid gap-3 px-5 py-3 sm:grid-cols-2">
@@ -1397,9 +1451,7 @@ export function SalesTaxWorkspace({ focus }: Props) {
               <textarea
                 className="border-control-border bg-card text-copy-13 mt-1 h-32 w-full rounded-md border p-2 font-mono"
                 value={importForm.content}
-                placeholder={
-                  'state_code,tax_collected,currency\nUS-CA,700,USD\nUS-NV,130,USD\n'
-                }
+                placeholder={'state_code,tax_collected,currency\nUS-CA,700,USD\nUS-NV,130,USD\n'}
                 onChange={(e) => setImportForm({ ...importForm, content: e.target.value })}
               />
             </label>
@@ -1441,15 +1493,18 @@ export function SalesTaxWorkspace({ focus }: Props) {
         <ModalContent>
           <ModalHeader>
             <ModalTitle>
-              {reportDetail ? `${reportDetail.report.fileKey} · 第 ${reportDetail.report.parseVersion} 版` : ''}
+              {reportDetail
+                ? `${reportDetail.report.fileKey} · 第 ${reportDetail.report.parseVersion} 版`
+                : ''}
             </ModalTitle>
             <ModalDescription>
-              原文一字不改地留着（指纹 {reportDetail?.report.contentHash?.slice(0, 12)}…）；下面是逐行解析结果。
+              原文一字不改地留着（指纹 {reportDetail?.report.contentHash?.slice(0, 12)}
+              …）；下面是逐行解析结果。
             </ModalDescription>
           </ModalHeader>
           <div className="max-h-80 overflow-auto px-5 py-3">
             {reportDetail && reportDetail.lines.length > 0 ? (
-              <table className="w-full text-left text-copy-13">
+              <table className="text-copy-13 w-full text-left">
                 <thead className="text-muted-foreground border-border border-b">
                   <tr>
                     <th className="px-2 py-1 font-medium">行号</th>

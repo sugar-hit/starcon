@@ -318,9 +318,7 @@ export function statusLabel(status: string): string {
 }
 
 /** 状态的徽章色调。 */
-export function statusTone(
-  status: string,
-): 'neutral' | 'info' | 'success' | 'danger' | 'warning' {
+export function statusTone(status: string): 'neutral' | 'info' | 'success' | 'danger' | 'warning' {
   switch (status) {
     case 'ON_SALE':
       return 'success';

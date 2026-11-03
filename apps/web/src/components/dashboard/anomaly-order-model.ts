@@ -260,7 +260,9 @@ export function mergeCrossService(
     }
     const severity = [...types].reduce((worst, type) => {
       const candidate =
-        type === 'BLACKLIST_BUYER' ? blacklistSeverity(blacklist) : BASE_SEVERITY[type] ?? 'MEDIUM';
+        type === 'BLACKLIST_BUYER'
+          ? blacklistSeverity(blacklist)
+          : (BASE_SEVERITY[type] ?? 'MEDIUM');
       const rank = SEVERITY_RANK[candidate] ?? 1;
       const worstRank = SEVERITY_RANK[worst] ?? 1;
       return rank > worstRank ? candidate : worst;
@@ -297,7 +299,8 @@ export function filterMerged(
     if (filters.shopCode && row.row.shopCode !== filters.shopCode) return false;
     if (filters.minDwellHours > 0 && row.dwellSeconds < filters.minDwellHours * 3600) return false;
     if (keyword) {
-      const haystack = `${row.row.orderNo} ${row.row.shopCode} ${row.row.platformCode}`.toLowerCase();
+      const haystack =
+        `${row.row.orderNo} ${row.row.shopCode} ${row.row.platformCode}`.toLowerCase();
       if (!haystack.includes(keyword)) return false;
     }
     return true;
@@ -360,5 +363,8 @@ export function formatQuantity(value: number | null | undefined): string {
 
 /** 把选中的订单号拼成一段可交接的清单（批量动作落到归属系统时用）。 */
 export function orderNumberDigest(rows: readonly MergedAnomalyOrder[]): string {
-  return rows.map((row) => row.row.orderNo).filter(Boolean).join(', ');
+  return rows
+    .map((row) => row.row.orderNo)
+    .filter(Boolean)
+    .join(', ');
 }

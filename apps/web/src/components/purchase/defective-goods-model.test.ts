@@ -96,18 +96,18 @@ describe('6.4.2.2 不良品处理前端模型', () => {
   });
 
   it('库存状态照实显示 —— 绝不把「没派发」说成「已登记」', () => {
-    expect(inventoryStatusText({ inventoryStatus: 'DISPATCHED', inventoryStatusLabel: '已登记' })).toBe(
-      '库存指令已登记到 warehouse',
-    );
+    expect(
+      inventoryStatusText({ inventoryStatus: 'DISPATCHED', inventoryStatusLabel: '已登记' }),
+    ).toBe('库存指令已登记到 warehouse');
     expect(
       inventoryStatusText({ inventoryStatus: 'UNAVAILABLE', inventoryStatusLabel: '上游无写端点' }),
     ).toContain('上游无写端点');
     expect(
       inventoryStatusText({ inventoryStatus: 'NOT_DISPATCHED', inventoryStatusLabel: '未派发' }),
     ).toContain('待派发');
-    expect(inventoryStatusText({ inventoryStatus: 'FAILED', inventoryStatusLabel: '失败' })).toContain(
-      '失败',
-    );
+    expect(
+      inventoryStatusText({ inventoryStatus: 'FAILED', inventoryStatusLabel: '失败' }),
+    ).toContain('失败');
   });
 
   it('终态不再给动作', () => {
@@ -120,11 +120,7 @@ describe('6.4.2.2 不良品处理前端模型', () => {
   it('索赔动作按状态给出，不给点了 404 的按钮', () => {
     const base = { status: 'DRAFT' } as DefectiveClaimRow;
     expect(claimActions(base)).toEqual(['SUBMIT', 'WITHDRAW']);
-    expect(claimActions({ ...base, status: 'SUBMITTED' })).toEqual([
-      'AGREE',
-      'REJECT',
-      'WITHDRAW',
-    ]);
+    expect(claimActions({ ...base, status: 'SUBMITTED' })).toEqual(['AGREE', 'REJECT', 'WITHDRAW']);
     expect(claimActions({ ...base, status: 'AGREED' })).toEqual([]);
     expect(claimActions({ ...base, status: 'REJECTED' })).toEqual([]);
   });
@@ -150,18 +146,8 @@ describe('6.4.2.2 不良品处理前端模型', () => {
   });
 
   it('明细合计与放行合计按 6 位小数收敛', () => {
-    expect(
-      totalQuantity([
-        { quantity: 12.5 },
-        { quantity: 7.5 },
-      ]),
-    ).toBe(20);
-    expect(
-      totalReleased([
-        { releasedQuantity: 5 },
-        { releasedQuantity: 2.5 },
-      ]),
-    ).toBe(7.5);
+    expect(totalQuantity([{ quantity: 12.5 }, { quantity: 7.5 }])).toBe(20);
+    expect(totalReleased([{ releasedQuantity: 5 }, { releasedQuantity: 2.5 }])).toBe(7.5);
   });
 
   it('可处置质检单的下拉文案带上限', () => {

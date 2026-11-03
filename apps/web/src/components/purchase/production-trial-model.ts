@@ -58,30 +58,17 @@ const base = 'trade/trial-productions';
 
 /** 试产单状态。 */
 export type ProductionTrialStatus =
-  | 'REQUESTED'
-  | 'SCHEDULED'
-  | 'IN_PROGRESS'
-  | 'COMPLETED'
-  | 'CLOSED'
-  | 'CANCELLED';
+  'REQUESTED' | 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CLOSED' | 'CANCELLED';
 
 /** 组件领用需求状态（🔴 需求，不是库存）。 */
-export type ProductionTrialRequirementStatus =
-  | 'DRAFT'
-  | 'SUBMITTED'
-  | 'RELEASED'
-  | 'CANCELLED';
+export type ProductionTrialRequirementStatus = 'DRAFT' | 'SUBMITTED' | 'RELEASED' | 'CANCELLED';
 
 /** 质检判定结果。 */
 export type ProductionTrialJudgment = 'PENDING' | 'PASS' | 'FAIL';
 
 /** 试产成本类型（封闭五值，无「其它」）。 */
 export type ProductionTrialCostType =
-  | 'MATERIAL'
-  | 'PROCESSING'
-  | 'MOLD'
-  | 'INSPECTION'
-  | 'OVERHEAD';
+  'MATERIAL' | 'PROCESSING' | 'MOLD' | 'INSPECTION' | 'OVERHEAD';
 
 /** 转量产建议结论。 */
 export type ProductionTrialMassProductionDecision = 'GO' | 'NO_GO';
@@ -101,8 +88,7 @@ export function productionTrialOrderQuery(params: ProductionTrialOrderParams): s
   const parts: string[] = [];
   if (params.status) parts.push(`status=${encodeURIComponent(params.status)}`);
   if (params.bomVersionId) parts.push(`bomVersionId=${encodeURIComponent(params.bomVersionId)}`);
-  if (params.keyword?.trim())
-    parts.push(`keyword=${encodeURIComponent(params.keyword.trim())}`);
+  if (params.keyword?.trim()) parts.push(`keyword=${encodeURIComponent(params.keyword.trim())}`);
   if (params.page !== undefined) parts.push(`page=${params.page}`);
   if (params.size !== undefined) parts.push(`size=${params.size}`);
   return parts.length ? `?${parts.join('&')}` : '';
@@ -147,9 +133,7 @@ export function formatVarianceRate(rate: number | null | undefined): string {
 export function formatMoney(amount: number | null | undefined, currency?: string): string {
   if (amount === null || amount === undefined) return '—';
   const fixed = amount.toFixed(4);
-  const text = fixed.includes('.')
-    ? fixed.replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '')
-    : fixed;
+  const text = fixed.includes('.') ? fixed.replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '') : fixed;
   return currency ? `${text} ${currency}` : text;
 }
 
@@ -213,15 +197,8 @@ export function fetchProductionTrialOrder(orderId: string) {
   return api<ProductionTrialOrderDetail>(`${base}/${encodeURIComponent(orderId)}`);
 }
 
-export function updateProductionTrialOrder(
-  orderId: string,
-  input: ProductionTrialUpdateInput,
-) {
-  return api<ProductionTrialOrderDetail>(
-    `${base}/${encodeURIComponent(orderId)}`,
-    'PUT',
-    input,
-  );
+export function updateProductionTrialOrder(orderId: string, input: ProductionTrialUpdateInput) {
+  return api<ProductionTrialOrderDetail>(`${base}/${encodeURIComponent(orderId)}`, 'PUT', input);
 }
 
 export function transitionProductionTrialOrder(
@@ -302,17 +279,18 @@ export function fetchProductionTrialResult(orderId: string) {
 
 /** 记录试产结果（**良率不收**：由后端按 合格 ÷ 产出 推导）。 */
 export function recordProductionTrialResult(orderId: string, input: ProductionTrialResultInput) {
-  return api<ProductionTrialResultRow>(`${base}/${encodeURIComponent(orderId)}/result`, 'POST', input);
+  return api<ProductionTrialResultRow>(
+    `${base}/${encodeURIComponent(orderId)}/result`,
+    'POST',
+    input,
+  );
 }
 
 export function fetchProductionTrialCost(orderId: string) {
   return api<ProductionTrialCostView | null>(`${base}/${encodeURIComponent(orderId)}/cost`);
 }
 
-export function addProductionTrialCostLine(
-  orderId: string,
-  input: ProductionTrialCostLineInput,
-) {
+export function addProductionTrialCostLine(orderId: string, input: ProductionTrialCostLineInput) {
   return api<ProductionTrialCostView>(
     `${base}/${encodeURIComponent(orderId)}/cost/lines`,
     'POST',
@@ -351,4 +329,3 @@ export function recordProductionTrialMassProductionRecommendation(
     input,
   );
 }
-

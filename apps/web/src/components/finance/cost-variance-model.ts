@@ -400,9 +400,9 @@ export function sortCostVarianceDrivers(drivers: FinanceCostVarianceDriverRow[])
  * <p>可比较的先看（差异真的算得出来），不可比的排后面并带上原因 ——
  * 页面一眼能看出「哪些 SKU 的差异根本不可计算」。
  */
-export function sortCostVarianceItems<T extends { comparability: string; driver: string; skuCode: string }>(
-  items: T[],
-): T[] {
+export function sortCostVarianceItems<
+  T extends { comparability: string; driver: string; skuCode: string },
+>(items: T[]): T[] {
   return [...items].sort((a, b) => {
     const aBad = a.comparability !== 'COMPARABLE';
     const bBad = b.comparability !== 'COMPARABLE';
@@ -418,9 +418,7 @@ export function sortCostVarianceItems<T extends { comparability: string; driver:
  * <p>🔴 主因 = 该币种内按 |金额| 排名第一**且可计算**的那一类；
  * 全部为 0 或全都不可算时**没有主因** —— 页面不硬凑一个。
  */
-export function costVariancePrimaryDriverLabel(
-  drivers: FinanceCostVarianceDriverRow[],
-): string {
+export function costVariancePrimaryDriverLabel(drivers: FinanceCostVarianceDriverRow[]): string {
   const primary = drivers.find((d) => d.isPrimary);
   if (!primary) return '';
   return `${primary.driverLabel ?? costVarianceDriverLabel(primary.driver)}（${formatCostVarianceMoney(

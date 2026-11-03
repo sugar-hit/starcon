@@ -185,9 +185,8 @@ export function describeWindow(window: string): string {
  * 夏令时规则是同一份 —— 这正是免打扰时段要用的那份。
  */
 export function listTimezones(): string[] {
-  const supported = (
-    Intl as unknown as { supportedValuesOf?: (key: string) => string[] }
-  ).supportedValuesOf;
+  const supported = (Intl as unknown as { supportedValuesOf?: (key: string) => string[] })
+    .supportedValuesOf;
   if (typeof supported === 'function') {
     try {
       return [...supported.call(Intl, 'timeZone')].sort();

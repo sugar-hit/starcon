@@ -157,9 +157,8 @@ export function BankReconciliationWorkspace() {
 
   // 认领草稿
   const [claimTarget, setClaimTarget] = useState<string | null>(null);
-  const [claimDocumentType, setClaimDocumentType] = useState<(typeof DOCUMENT_TYPES)[number]>(
-    'RECEIPT',
-  );
+  const [claimDocumentType, setClaimDocumentType] =
+    useState<(typeof DOCUMENT_TYPES)[number]>('RECEIPT');
   const [claimDocumentId, setClaimDocumentId] = useState('');
   const [claimDocumentNo, setClaimDocumentNo] = useState('');
   const [claimReason, setClaimReason] = useState('');
@@ -178,40 +177,37 @@ export function BankReconciliationWorkspace() {
     setSessions(page);
   }, [params, pageNo]);
 
-  const loadDetail = useCallback(async (sessionId: string) => {
-    setDetailLoading(true);
-    try {
-      const [
-        statementPage,
-        systemPage,
-        matchPage,
-        unmatchedPage,
-        claimPage,
-        eventPage,
-      ] = await Promise.all([
-        fetchBankReconStatementLines(sessionId, 0, 20),
-        fetchBankReconSystemLines(sessionId, 0, 20),
-        fetchBankReconMatches(sessionId, 0, 20),
-        fetchBankReconUnmatched(sessionId, unmatchedStatus, unmatchedSide, 0, 20),
-        fetchBankReconClaims(sessionId, undefined, 0, 20),
-        fetchBankReconEvents(sessionId, 0, 20),
-      ]);
-      setStatementLines(statementPage);
-      setSystemLines(systemPage);
-      setMatches(matchPage);
-      setUnmatched(unmatchedPage);
-      setClaims(claimPage);
-      setEvents(eventPage);
+  const loadDetail = useCallback(
+    async (sessionId: string) => {
+      setDetailLoading(true);
       try {
-        setReport(await fetchBankReconReport(sessionId));
-      } catch {
-        // 还没生成报告 —— 这是**正常状态**（不是错误）。
-        setReport(null);
+        const [statementPage, systemPage, matchPage, unmatchedPage, claimPage, eventPage] =
+          await Promise.all([
+            fetchBankReconStatementLines(sessionId, 0, 20),
+            fetchBankReconSystemLines(sessionId, 0, 20),
+            fetchBankReconMatches(sessionId, 0, 20),
+            fetchBankReconUnmatched(sessionId, unmatchedStatus, unmatchedSide, 0, 20),
+            fetchBankReconClaims(sessionId, undefined, 0, 20),
+            fetchBankReconEvents(sessionId, 0, 20),
+          ]);
+        setStatementLines(statementPage);
+        setSystemLines(systemPage);
+        setMatches(matchPage);
+        setUnmatched(unmatchedPage);
+        setClaims(claimPage);
+        setEvents(eventPage);
+        try {
+          setReport(await fetchBankReconReport(sessionId));
+        } catch {
+          // 还没生成报告 —— 这是**正常状态**（不是错误）。
+          setReport(null);
+        }
+      } finally {
+        setDetailLoading(false);
       }
-    } finally {
-      setDetailLoading(false);
-    }
-  }, [unmatchedStatus, unmatchedSide]);
+    },
+    [unmatchedStatus, unmatchedSide],
+  );
 
   useEffect(() => {
     let alive = true;
@@ -435,7 +431,11 @@ export function BankReconciliationWorkspace() {
       ) : null}
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <SectionCard title="对账批次" description="一个资金账户 × 一个期间" className="lg:col-span-2">
+        <SectionCard
+          title="对账批次"
+          description="一个资金账户 × 一个期间"
+          className="lg:col-span-2"
+        >
           {loading ? (
             <p className="text-muted-foreground text-copy-13">加载中…</p>
           ) : sessions && sessions.items.length === 0 ? (
@@ -478,7 +478,7 @@ export function BankReconciliationWorkspace() {
                 </FormField>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-copy-13">
+                <table className="text-copy-13 w-full">
                   <thead>
                     <tr className="text-muted-foreground border-b text-left">
                       <th className="py-2 pr-3">对账单号</th>
@@ -568,7 +568,7 @@ export function BankReconciliationWorkspace() {
               可对账账户（来自 12.7.1.1 的真实账户档案）：
               {accounts.length === 0 ? '本租户还没有启用中的资金账户。' : ''}
             </p>
-            <ul className="text-muted-foreground space-y-1 text-copy-12">
+            <ul className="text-muted-foreground text-copy-12 space-y-1">
               {accounts.map((a) => (
                 <li key={a.id}>
                   {a.accountNo} · {a.accountName} · {a.currency} · 当前余额{' '}
@@ -642,9 +642,10 @@ export function BankReconciliationWorkspace() {
                 value={String(selected.unmatchedBankCount + selected.unmatchedSystemCount)}
               />
             </div>
-            <p className="text-muted-foreground mt-3 text-copy-12">
+            <p className="text-muted-foreground text-copy-12 mt-3">
               状态：{bankReconStatusLabel(selected.status, selected.statusLabel)}；对账单期末余额{' '}
-              {formatBankReconMoney(selected.statementClosingBalance, selected.currency)}；我方账面期末余额{' '}
+              {formatBankReconMoney(selected.statementClosingBalance, selected.currency)}
+              ；我方账面期末余额{' '}
               {selected.bookClosingBalance === null
                 ? '—（读不到）'
                 : formatBankReconMoney(selected.bookClosingBalance, selected.currency)}
@@ -712,7 +713,7 @@ export function BankReconciliationWorkspace() {
                   />
                 </FormField>
               </div>
-              <div className="mt-2 flex flex-wrap gap-2 text-copy-12">
+              <div className="text-copy-12 mt-2 flex flex-wrap gap-2">
                 {UNMATCHED_FILTERS.map((f) => (
                   <Button
                     key={f.code || 'all'}
@@ -747,9 +748,7 @@ export function BankReconciliationWorkspace() {
                         <Badge tone={u.side === 'BANK' ? 'info' : 'warning'}>
                           {bankReconSideLabel(u.side, u.sideLabel)}
                         </Badge>
-                        <Badge
-                          tone={u.status === 'OPEN' ? 'danger' : 'success'}
-                        >
+                        <Badge tone={u.status === 'OPEN' ? 'danger' : 'success'}>
                           {bankReconUnmatchedStatusLabel(u.status, u.statusLabel)}
                         </Badge>
                         <span className="text-copy-13">
@@ -897,7 +896,7 @@ export function BankReconciliationWorkspace() {
                       value={formatBankReconMoney(report.difference, report.currency)}
                     />
                   </div>
-                  <table className="w-full text-copy-13">
+                  <table className="text-copy-13 w-full">
                     <tbody>
                       {adjustmentRows.map((row) => (
                         <tr key={row.label} className="border-b last:border-0">
@@ -941,7 +940,10 @@ export function BankReconciliationWorkspace() {
 
             <SectionCard title="系统记录快照" description="来自 12.2 收付款与 12.3.1.2 结算明细行">
               {systemLines && systemLines.items.length === 0 ? (
-                <EmptyState title="没有候选记录" description="这个期间内本币种没有可作为候选的系统记录。" />
+                <EmptyState
+                  title="没有候选记录"
+                  description="这个期间内本币种没有可作为候选的系统记录。"
+                />
               ) : (
                 <ul className="space-y-1">
                   {systemLines?.items.map((l) => (
@@ -961,7 +963,10 @@ export function BankReconciliationWorkspace() {
 
             <SectionCard title="认领 / 说明记录" description="append-only 举证">
               {claims && claims.items.length === 0 ? (
-                <EmptyState title="还没有认领记录" description="认领或排除一条未匹配项后，这里会留下举证。" />
+                <EmptyState
+                  title="还没有认领记录"
+                  description="认领或排除一条未匹配项后，这里会留下举证。"
+                />
               ) : (
                 <ul className="space-y-1">
                   {claims?.items.map((c) => (
@@ -984,7 +989,10 @@ export function BankReconciliationWorkspace() {
             </SectionCard>
           </div>
 
-          <SectionCard title="匹配规则" description="🔴 不允许「金额相同即匹配」：三类规则都至少组合两个独立维度">
+          <SectionCard
+            title="匹配规则"
+            description="🔴 不允许「金额相同即匹配」：三类规则都至少组合两个独立维度"
+          >
             {rules && rules.items.length === 0 ? (
               <EmptyState
                 title="还没有匹配规则"
@@ -992,7 +1000,7 @@ export function BankReconciliationWorkspace() {
               />
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-copy-13">
+                <table className="text-copy-13 w-full">
                   <thead>
                     <tr className="text-muted-foreground border-b text-left">
                       <th className="py-2 pr-3">编码</th>
@@ -1009,7 +1017,9 @@ export function BankReconciliationWorkspace() {
                       <tr key={r.id} className="border-b last:border-0">
                         <td className="py-2 pr-3">{r.ruleCode}</td>
                         <td className="py-2 pr-3">{r.ruleName}</td>
-                        <td className="py-2 pr-3">{bankReconRuleTypeLabel(r.ruleType, r.ruleTypeLabel)}</td>
+                        <td className="py-2 pr-3">
+                          {bankReconRuleTypeLabel(r.ruleType, r.ruleTypeLabel)}
+                        </td>
                         <td className="py-2 pr-3">{r.priority}</td>
                         <td className="py-2 pr-3">{r.dateWindowDays} 天</td>
                         <td className="py-2 pr-3">{formatBankReconAmount(r.amountTolerance)}</td>
@@ -1020,15 +1030,18 @@ export function BankReconciliationWorkspace() {
                 </table>
               </div>
             )}
-            <p className="text-muted-foreground mt-3 text-copy-12">
-              规则由服务端按「单号 / 对手方 / 日期窗口」三类受控类型执行，
-              日期窗口上限 31 天（窗口过大等于用「金额相同」冒充匹配）。
+            <p className="text-muted-foreground text-copy-12 mt-3">
+              规则由服务端按「单号 / 对手方 / 日期窗口」三类受控类型执行， 日期窗口上限 31
+              天（窗口过大等于用「金额相同」冒充匹配）。
             </p>
           </SectionCard>
 
           <SectionCard title="事件流" description="append-only 举证：每一步都留痕">
             {events && events.items.length === 0 ? (
-              <EmptyState title="还没有事件" description="建批次、导入、匹配、认领、确认都会在这里留痕。" />
+              <EmptyState
+                title="还没有事件"
+                description="建批次、导入、匹配、认领、确认都会在这里留痕。"
+              />
             ) : (
               <ul className="space-y-1">
                 {events?.items.map((e) => (

@@ -1,7 +1,14 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { AlertTriangle, BellRing, ClipboardCheck, PackageCheck, RefreshCw, ScanSearch } from 'lucide-react';
+import {
+  AlertTriangle,
+  BellRing,
+  ClipboardCheck,
+  PackageCheck,
+  RefreshCw,
+  ScanSearch,
+} from 'lucide-react';
 import {
   Badge,
   Button,
@@ -89,9 +96,7 @@ import {
  * <p>本页**不涉及任何金额**：运费成本归集与结算归 12 财务（未开发）。
  */
 export function PickupSignoffWorkspace() {
-  const [capabilities, setCapabilities] = useState<LogisticsPickupSignoffCapabilities | null>(
-    null,
-  );
+  const [capabilities, setCapabilities] = useState<LogisticsPickupSignoffCapabilities | null>(null);
   const [overview, setOverview] = useState<PickupSignoffSummary | null>(null);
   const [cases, setCases] = useState<PickupSignoffCasePage | null>(null);
   const [reminders, setReminders] = useState<PickupSignoffReminderPage | null>(null);
@@ -244,7 +249,9 @@ export function PickupSignoffWorkspace() {
         action === 'acknowledge'
           ? await acknowledgePickupSignoffReminder(id, note)
           : await resolvePickupSignoffReminder(id, note);
-      setNotice(`提醒 ${row.reminderKindLabel || reminderKindLabel(row.reminderKind)}：${row.statusLabel || reminderStatusLabel(row.status)}`);
+      setNotice(
+        `提醒 ${row.reminderKindLabel || reminderKindLabel(row.reminderKind)}：${row.statusLabel || reminderStatusLabel(row.status)}`,
+      );
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : '提醒处置失败');
@@ -356,7 +363,8 @@ export function PickupSignoffWorkspace() {
         <StatCard label="待处理提醒" value={overview?.reminderPendingCount ?? 0} />
       </div>
 
-      {overview && (overview.noWaybillCount > 0 ||
+      {overview &&
+      (overview.noWaybillCount > 0 ||
         overview.subjectMissingCount > 0 ||
         overview.subjectAmbiguousCount > 0 ||
         overview.slaUnconfiguredCount > 0) ? (
@@ -393,9 +401,7 @@ export function PickupSignoffWorkspace() {
                   id="psCarrier"
                   value={filters.carrierCode}
                   placeholder="SF / FEDEX"
-                  onChange={(e) =>
-                    setFilters({ ...filters, carrierCode: e.target.value, page: 0 })
-                  }
+                  onChange={(e) => setFilters({ ...filters, carrierCode: e.target.value, page: 0 })}
                 />
               </FormField>
               <FormField id="psStatus" label="状态">
@@ -506,9 +512,7 @@ export function PickupSignoffWorkspace() {
                             </Badge>
                             <div className="text-muted-foreground mt-1">{pickupText(row)}</div>
                           </td>
-                          <td className="text-muted-foreground p-2 text-xs">
-                            {deadlineText(row)}
-                          </td>
+                          <td className="text-muted-foreground p-2 text-xs">{deadlineText(row)}</td>
                           <td className="p-2 text-xs">
                             <Badge tone={deliveryStateTone(row.deliveryState)}>
                               {row.deliveryStateLabel || row.deliveryState}
@@ -813,8 +817,7 @@ export function PickupSignoffWorkspace() {
                   onChange={(e) =>
                     setRuleForm({
                       ...ruleForm,
-                      reviewInviteDelayHours:
-                        e.target.value === '' ? null : Number(e.target.value),
+                      reviewInviteDelayHours: e.target.value === '' ? null : Number(e.target.value),
                     })
                   }
                 />
@@ -827,8 +830,7 @@ export function PickupSignoffWorkspace() {
                   onChange={(e) =>
                     setRuleForm({
                       ...ruleForm,
-                      afterSalesWindowHours:
-                        e.target.value === '' ? null : Number(e.target.value),
+                      afterSalesWindowHours: e.target.value === '' ? null : Number(e.target.value),
                     })
                   }
                 />
@@ -966,7 +968,10 @@ export function PickupSignoffWorkspace() {
                 <div className="grid gap-3 sm:grid-cols-2">
                   <StatCard
                     label="状态"
-                    value={detail.signoffCase.statusLabel || signoffStatusLabel(detail.signoffCase.status)}
+                    value={
+                      detail.signoffCase.statusLabel ||
+                      signoffStatusLabel(detail.signoffCase.status)
+                    }
                   />
                   <StatCard label="揽收" value={detail.signoffCase.pickupStateLabel} />
                 </div>
@@ -1041,9 +1046,7 @@ export function PickupSignoffWorkspace() {
                         <li key={event.id} className="border-border rounded-md border p-3">
                           <div className="flex flex-wrap items-center gap-2">
                             <Badge
-                              tone={
-                                event.eventKind === 'PICKUP_OVERDUE' ? 'danger' : 'neutral'
-                              }
+                              tone={event.eventKind === 'PICKUP_OVERDUE' ? 'danger' : 'neutral'}
                             >
                               {event.eventKindLabel || event.eventKind}
                             </Badge>
@@ -1061,7 +1064,10 @@ export function PickupSignoffWorkspace() {
                       ))}
                     </ol>
                   ) : (
-                    <EmptyState title="还没有确认事件" description="建单或巡检后会在这里留下变迁。" />
+                    <EmptyState
+                      title="还没有确认事件"
+                      description="建单或巡检后会在这里留下变迁。"
+                    />
                   )}
                 </SectionCard>
 

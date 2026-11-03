@@ -227,11 +227,7 @@ export function PlatformDisputeWorkspace() {
         <StatCard label="纠纷总数" value={summary?.total ?? 0} polarity="neutral" />
         {/* ⚠️ 这一格是**超期未提交**的件数 —— 超期即自动判负，这一格就是「已经丢掉的」。 */}
         <StatCard label="已超期（自动判负）" value={summary?.overdue ?? 0} polarity="negative" />
-        <StatCard
-          label="举证准备中"
-          value={summary?.evidencePreparing ?? 0}
-          polarity="neutral"
-        />
+        <StatCard label="举证准备中" value={summary?.evidencePreparing ?? 0} polarity="neutral" />
         <StatCard
           label="待财务确认"
           value={summary?.awaitingFinanceConfirm ?? 0}
@@ -288,9 +284,7 @@ export function PlatformDisputeWorkspace() {
             onChange={(e) => {
               const code = e.target.value;
               setNewPlatform(code);
-              setNewPlatformName(
-                PLATFORM_OPTIONS.find((p) => p.code === code)?.label ?? code,
-              );
+              setNewPlatformName(PLATFORM_OPTIONS.find((p) => p.code === code)?.label ?? code);
             }}
           >
             {PLATFORM_OPTIONS.map((p) => (
@@ -342,9 +336,7 @@ export function PlatformDisputeWorkspace() {
             onChange={(e) => setNewReason(e.target.value)}
           />
         </div>
-        {typeMismatch ? (
-          <div className="mt-2 text-xs text-amber-600">{typeMismatch}</div>
-        ) : null}
+        {typeMismatch ? <div className="mt-2 text-xs text-amber-600">{typeMismatch}</div> : null}
         <div className="mt-2 flex items-center gap-2">
           <Button
             disabled={
@@ -532,8 +524,7 @@ export function PlatformDisputeWorkspace() {
                   {formatAmount(head.disputeAmount, head.disputeCurrency)}
                 </div>
                 <div className="text-muted-foreground text-xs">
-                  结算口径 {head.settlementStateLabel} · 已生效{' '}
-                  {formatAmount(head.effectiveAmount)}
+                  结算口径 {head.settlementStateLabel} · 已生效 {formatAmount(head.effectiveAmount)}
                 </div>
               </div>
               <div>
@@ -606,7 +597,7 @@ export function PlatformDisputeWorkspace() {
                         {item.evidenceStateLabel}
                       </Badge>
                       {item.missingReason ? (
-                        <span className="text-xs text-destructive">缺：{item.missingReason}</span>
+                        <span className="text-destructive text-xs">缺：{item.missingReason}</span>
                       ) : null}
                       {item.evidenceNote ? (
                         <span className="text-muted-foreground text-xs">{item.evidenceNote}</span>
@@ -616,8 +607,7 @@ export function PlatformDisputeWorkspace() {
                           size="sm"
                           variant="outline"
                           disabled={
-                            busy ||
-                            actionBlockedReason(detail.actions, 'MARK_EVIDENCE') !== null
+                            busy || actionBlockedReason(detail.actions, 'MARK_EVIDENCE') !== null
                           }
                           onClick={() =>
                             void run(async () =>
@@ -635,8 +625,7 @@ export function PlatformDisputeWorkspace() {
                           size="sm"
                           variant="outline"
                           disabled={
-                            busy ||
-                            actionBlockedReason(detail.actions, 'MARK_EVIDENCE') !== null
+                            busy || actionBlockedReason(detail.actions, 'MARK_EVIDENCE') !== null
                           }
                           onClick={() =>
                             void run(async () =>
@@ -654,8 +643,7 @@ export function PlatformDisputeWorkspace() {
                           size="sm"
                           variant="ghost"
                           disabled={
-                            busy ||
-                            actionBlockedReason(detail.actions, 'MARK_EVIDENCE') !== null
+                            busy || actionBlockedReason(detail.actions, 'MARK_EVIDENCE') !== null
                           }
                           onClick={() =>
                             void run(async () => removePlatformEvidenceItem(head.id, item.id))
@@ -696,7 +684,9 @@ export function PlatformDisputeWorkspace() {
                   必举证项
                 </label>
                 <Button
-                  disabled={busy || actionBlockedReason(detail.actions, 'ADD_EVIDENCE_ITEM') !== null}
+                  disabled={
+                    busy || actionBlockedReason(detail.actions, 'ADD_EVIDENCE_ITEM') !== null
+                  }
                   onClick={() =>
                     void run(async () =>
                       addPlatformEvidenceItem(head.id, {
@@ -752,7 +742,8 @@ export function PlatformDisputeWorkspace() {
                           size="sm"
                           variant="outline"
                           disabled={
-                            busy || actionBlockedReason(detail.actions, 'CONFIRM_SETTLEMENT') !== null
+                            busy ||
+                            actionBlockedReason(detail.actions, 'CONFIRM_SETTLEMENT') !== null
                           }
                           onClick={() =>
                             void run(async () =>
@@ -768,7 +759,8 @@ export function PlatformDisputeWorkspace() {
                           size="sm"
                           variant="ghost"
                           disabled={
-                            busy || actionBlockedReason(detail.actions, 'REJECT_SETTLEMENT') !== null
+                            busy ||
+                            actionBlockedReason(detail.actions, 'REJECT_SETTLEMENT') !== null
                           }
                           onClick={() =>
                             void run(async () =>
@@ -804,9 +796,7 @@ export function PlatformDisputeWorkspace() {
               <Button
                 variant="outline"
                 disabled={busy || actionBlockedReason(detail.actions, 'START_EVIDENCE') !== null}
-                onClick={() =>
-                  void run(async () => startPlatformEvidence(head.id, head.version))
-                }
+                onClick={() => void run(async () => startPlatformEvidence(head.id, head.version))}
               >
                 进入举证准备
               </Button>
@@ -842,7 +832,9 @@ export function PlatformDisputeWorkspace() {
               </Button>
               <Button
                 variant="outline"
-                disabled={busy || actionBlockedReason(detail.actions, 'REGISTER_SETTLEMENT') !== null}
+                disabled={
+                  busy || actionBlockedReason(detail.actions, 'REGISTER_SETTLEMENT') !== null
+                }
                 onClick={() =>
                   void run(async () =>
                     registerPlatformDisputeSettlement(head.id, {

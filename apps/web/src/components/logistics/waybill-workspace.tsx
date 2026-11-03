@@ -144,7 +144,10 @@ export function WaybillWorkspace() {
     void load();
   }, [load]);
 
-  const gaps = useMemo(() => (capabilities ? unavailableDimensions(capabilities) : []), [capabilities]);
+  const gaps = useMemo(
+    () => (capabilities ? unavailableDimensions(capabilities) : []),
+    [capabilities],
+  );
   const items = page?.items ?? [];
   const totalPages = page?.totalPages ?? 0;
   const connectedCount = (carriers?.items ?? []).filter((c) => c.connected).length;
@@ -298,7 +301,9 @@ export function WaybillWorkspace() {
                   <span className="font-medium">{entry.requestNo}</span>
                   <span className="text-muted-foreground">{queuePositionText(entry)}</span>
                   {entry.lastFailureReason ? (
-                    <span className="text-red-600 dark:text-red-400">{entry.lastFailureReason}</span>
+                    <span className="text-red-600 dark:text-red-400">
+                      {entry.lastFailureReason}
+                    </span>
                   ) : null}
                 </li>
               ))}
@@ -308,7 +313,10 @@ export function WaybillWorkspace() {
       </SectionCard>
 
       {/* ④ 申请清单 */}
-      <SectionCard title="运单申请" description="逐包裹一张申请；重复提交同一幂等键不会产生第二张运单">
+      <SectionCard
+        title="运单申请"
+        description="逐包裹一张申请；重复提交同一幂等键不会产生第二张运单"
+      >
         <div className="flex flex-col gap-3">
           <div className="flex flex-wrap items-end gap-3">
             <FormField id="waybill-keyword" label="搜索">
@@ -332,8 +340,16 @@ export function WaybillWorkspace() {
             </Button>
           </div>
 
-          {loadError ? <Notice tone="danger" title="加载失败">{loadError}</Notice> : null}
-          {actionError ? <Notice tone="danger" title="操作失败">{actionError}</Notice> : null}
+          {loadError ? (
+            <Notice tone="danger" title="加载失败">
+              {loadError}
+            </Notice>
+          ) : null}
+          {actionError ? (
+            <Notice tone="danger" title="操作失败">
+              {actionError}
+            </Notice>
+          ) : null}
 
           {loading ? (
             <p className="text-muted-foreground text-sm">加载中…</p>
@@ -412,11 +428,11 @@ function RequestCard(props: {
         重量 {weightText(row)} · 尺寸 {dimensionText(row)} · 申报 {declarationCountText(row)} ·{' '}
         {declaredValueText(row)}
       </p>
-      {warning ? <p className="text-amber-600 dark:text-amber-400 text-xs">{warning}</p> : null}
+      {warning ? <p className="text-xs text-amber-600 dark:text-amber-400">{warning}</p> : null}
 
       {/* 第三行：失败原因与重试入口 */}
       {row.failureReason ? (
-        <p className="text-red-600 dark:text-red-400 text-xs">
+        <p className="text-xs text-red-600 dark:text-red-400">
           失败原因：{row.failureReason}
           {row.notBefore ? `（已排入下一次窗口：${timeText(row.notBefore)}）` : ''}
         </p>
@@ -432,7 +448,13 @@ function RequestCard(props: {
           <span className="text-muted-foreground text-xs">{retryBlockedReason(row)}</span>
         )}
         {row.status !== 'ISSUED' && row.status !== 'CANCELLED' ? (
-          <Button type="button" size="sm" variant="outline" disabled={busy} onClick={props.onCancel}>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            disabled={busy}
+            onClick={props.onCancel}
+          >
             作废
           </Button>
         ) : null}

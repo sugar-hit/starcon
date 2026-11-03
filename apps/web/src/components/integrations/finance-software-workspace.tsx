@@ -208,7 +208,9 @@ export function FinanceSoftwareWorkspace() {
   const [voucherFiles, setVoucherFiles] = useState<FinanceSoftwareVoucherFileRow[]>([]);
   const [fileDetail, setFileDetail] = useState<FinanceSoftwareVoucherFileDetail | null>(null);
   const [reconcileTasks, setReconcileTasks] = useState<FinanceSoftwareReconcileTaskRow[]>([]);
-  const [reconcileDetail, setReconcileDetail] = useState<FinanceSoftwareReconcileDetail | null>(null);
+  const [reconcileDetail, setReconcileDetail] = useState<FinanceSoftwareReconcileDetail | null>(
+    null,
+  );
   const [periods, setPeriods] = useState<FinanceSoftwarePeriodOption[]>([]);
   const [currencies, setCurrencies] = useState<string[]>([]);
 
@@ -262,26 +264,26 @@ export function FinanceSoftwareWorkspace() {
   // 映射 / 凭证文件 / 核对任务：按需加载，切换标签页时再取。
   useEffect(() => {
     if (tab === 'subjects' && subjectMaps.length === 0) {
-      fetchSubjectMaps({ accountId: accountFilter, keyword })
-        .then(setSubjectMaps)
-        .catch(fail);
+      fetchSubjectMaps({ accountId: accountFilter, keyword }).then(setSubjectMaps).catch(fail);
     }
     if (tab === 'masters' && masterMaps.length === 0) {
-      fetchMasterMaps({ accountId: accountFilter })
-        .then(setMasterMaps)
-        .catch(fail);
+      fetchMasterMaps({ accountId: accountFilter }).then(setMasterMaps).catch(fail);
     }
     if (tab === 'files' && voucherFiles.length === 0) {
-      fetchVoucherFiles({ accountId: accountFilter })
-        .then(setVoucherFiles)
-        .catch(fail);
+      fetchVoucherFiles({ accountId: accountFilter }).then(setVoucherFiles).catch(fail);
     }
     if (tab === 'reconcile' && reconcileTasks.length === 0) {
-      fetchReconcileTasks({ accountId: accountFilter })
-        .then(setReconcileTasks)
-        .catch(fail);
+      fetchReconcileTasks({ accountId: accountFilter }).then(setReconcileTasks).catch(fail);
     }
-  }, [tab, accountFilter, keyword, subjectMaps.length, masterMaps.length, voucherFiles.length, reconcileTasks.length]);
+  }, [
+    tab,
+    accountFilter,
+    keyword,
+    subjectMaps.length,
+    masterMaps.length,
+    voucherFiles.length,
+    reconcileTasks.length,
+  ]);
 
   const run = async (work: () => Promise<unknown>, ok: string) => {
     setBusy(true);
@@ -485,7 +487,11 @@ export function FinanceSoftwareWorkspace() {
         description="把本系统的凭证交给外部财务软件（金蝶 / 用友 / SAP / Odoo）：科目映射、主数据映射、标准凭证文件导出、余额核对。直连推送尚未接入。"
         actions={
           <Button onClick={() => void load()} disabled={loading}>
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
             刷新
           </Button>
         }
@@ -506,9 +512,19 @@ export function FinanceSoftwareWorkspace() {
 
       {overview && (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard label="连接档案" value={overview.accounts} unit="个" icon={<Landmark className="h-4 w-4" />} />
+          <StatCard
+            label="连接档案"
+            value={overview.accounts}
+            unit="个"
+            icon={<Landmark className="h-4 w-4" />}
+          />
           <StatCard label="科目映射" value={overview.subjectMaps} unit="条" />
-          <StatCard label="凭证文件" value={overview.voucherFiles} unit="份" icon={<FileSpreadsheet className="h-4 w-4" />} />
+          <StatCard
+            label="凭证文件"
+            value={overview.voucherFiles}
+            unit="份"
+            icon={<FileSpreadsheet className="h-4 w-4" />}
+          />
           <StatCard
             label="核对差异"
             value={overview.reconcileDiffs}
@@ -565,14 +581,19 @@ export function FinanceSoftwareWorkspace() {
                       </div>
                       <div className="text-muted text-xs">
                         账套 {account.bookCode} · 本位币 {account.currency} · 科目映射{' '}
-                        {account.subjectMapCount} 条 · 主数据映射 {account.masterMapCount} 条 · 凭证文件{' '}
-                        {account.voucherFileCount} 份
+                        {account.subjectMapCount} 条 · 主数据映射 {account.masterMapCount} 条 ·
+                        凭证文件 {account.voucherFileCount} 份
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       {/* 🔴 只有后端明确声明可推送时才有这个按钮。 */}
                       {pushAvailable && (
-                        <Button variant="outline" size="sm" disabled={busy} onClick={() => void push(account.id)}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={busy}
+                          onClick={() => void push(account.id)}
+                        >
                           <FileDown className="h-4 w-4" /> 直连推送
                         </Button>
                       )}
@@ -610,7 +631,7 @@ export function FinanceSoftwareWorkspace() {
               <label className="space-y-1 text-sm">
                 <span className="text-muted">厂商</span>
                 <select
-                  className="border-control-border h-9 w-full rounded-md border bg-card px-3 text-sm"
+                  className="border-control-border bg-card h-9 w-full rounded-md border px-3 text-sm"
                   value={accountForm.vendor}
                   onChange={(e) => setAccountForm({ ...accountForm, vendor: e.target.value })}
                 >
@@ -650,7 +671,9 @@ export function FinanceSoftwareWorkspace() {
                 <Input
                   value={accountForm.fiscalStartMonth}
                   placeholder="1"
-                  onChange={(e) => setAccountForm({ ...accountForm, fiscalStartMonth: e.target.value })}
+                  onChange={(e) =>
+                    setAccountForm({ ...accountForm, fiscalStartMonth: e.target.value })
+                  }
                 />
               </label>
             </div>
@@ -696,9 +719,7 @@ export function FinanceSoftwareWorkspace() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() =>
-                    void reloadMappings().catch(fail)
-                  }
+                  onClick={() => void reloadMappings().catch(fail)}
                 >
                   筛选
                 </Button>
@@ -718,7 +739,10 @@ export function FinanceSoftwareWorkspace() {
             ) : (
               <div className="space-y-2">
                 {subjectMaps.map((row) => (
-                  <div key={row.id} className="flex items-center justify-between gap-2 rounded-md border p-3 text-sm">
+                  <div
+                    key={row.id}
+                    className="flex items-center justify-between gap-2 rounded-md border p-3 text-sm"
+                  >
                     <div>
                       <span className="font-medium">{row.localSubjectCode}</span>
                       <span className="text-muted"> {row.localSubjectName}</span>
@@ -751,7 +775,7 @@ export function FinanceSoftwareWorkspace() {
               <label className="space-y-1 text-sm">
                 <span className="text-muted">所属连接</span>
                 <select
-                  className="border-control-border h-9 w-full rounded-md border bg-card px-3 text-sm"
+                  className="border-control-border bg-card h-9 w-full rounded-md border px-3 text-sm"
                   value={subjectForm.accountId}
                   onChange={(e) => setSubjectForm({ ...subjectForm, accountId: e.target.value })}
                 >
@@ -768,7 +792,9 @@ export function FinanceSoftwareWorkspace() {
                 <Input
                   value={subjectForm.localSubjectCode}
                   placeholder="1122"
-                  onChange={(e) => setSubjectForm({ ...subjectForm, localSubjectCode: e.target.value })}
+                  onChange={(e) =>
+                    setSubjectForm({ ...subjectForm, localSubjectCode: e.target.value })
+                  }
                 />
               </label>
               <label className="space-y-1 text-sm">
@@ -776,7 +802,9 @@ export function FinanceSoftwareWorkspace() {
                 <Input
                   value={subjectForm.localSubjectName}
                   placeholder="应收账款"
-                  onChange={(e) => setSubjectForm({ ...subjectForm, localSubjectName: e.target.value })}
+                  onChange={(e) =>
+                    setSubjectForm({ ...subjectForm, localSubjectName: e.target.value })
+                  }
                 />
               </label>
               <label className="space-y-1 text-sm">
@@ -840,7 +868,10 @@ export function FinanceSoftwareWorkspace() {
             ) : (
               <div className="space-y-2">
                 {masterMaps.map((row) => (
-                  <div key={row.id} className="flex items-center justify-between gap-2 rounded-md border p-3 text-sm">
+                  <div
+                    key={row.id}
+                    className="flex items-center justify-between gap-2 rounded-md border p-3 text-sm"
+                  >
                     <div>
                       <Badge tone="info">{row.masterTypeLabel}</Badge>
                       <span className="ml-2 font-medium">{row.localName}</span>
@@ -872,7 +903,7 @@ export function FinanceSoftwareWorkspace() {
               <label className="space-y-1 text-sm">
                 <span className="text-muted">所属连接</span>
                 <select
-                  className="border-control-border h-9 w-full rounded-md border bg-card px-3 text-sm"
+                  className="border-control-border bg-card h-9 w-full rounded-md border px-3 text-sm"
                   value={masterForm.accountId}
                   onChange={(e) => setMasterForm({ ...masterForm, accountId: e.target.value })}
                 >
@@ -887,7 +918,7 @@ export function FinanceSoftwareWorkspace() {
               <label className="space-y-1 text-sm">
                 <span className="text-muted">类型</span>
                 <select
-                  className="border-control-border h-9 w-full rounded-md border bg-card px-3 text-sm"
+                  className="border-control-border bg-card h-9 w-full rounded-md border px-3 text-sm"
                   value={masterForm.masterType}
                   onChange={(e) => setMasterForm({ ...masterForm, masterType: e.target.value })}
                 >
@@ -959,7 +990,7 @@ export function FinanceSoftwareWorkspace() {
               <label className="space-y-1 text-sm">
                 <span className="text-muted">所属连接</span>
                 <select
-                  className="border-control-border h-9 w-full rounded-md border bg-card px-3 text-sm"
+                  className="border-control-border bg-card h-9 w-full rounded-md border px-3 text-sm"
                   value={exportForm.accountId}
                   onChange={(e) => setExportForm({ ...exportForm, accountId: e.target.value })}
                 >
@@ -974,7 +1005,7 @@ export function FinanceSoftwareWorkspace() {
               <label className="space-y-1 text-sm">
                 <span className="text-muted">文件格式</span>
                 <select
-                  className="border-control-border h-9 w-full rounded-md border bg-card px-3 text-sm"
+                  className="border-control-border bg-card h-9 w-full rounded-md border px-3 text-sm"
                   value={exportForm.format}
                   onChange={(e) => setExportForm({ ...exportForm, format: e.target.value })}
                 >
@@ -1021,7 +1052,10 @@ export function FinanceSoftwareWorkspace() {
             ) : (
               <div className="space-y-2">
                 {voucherFiles.map((row) => (
-                  <div key={row.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md border p-3 text-sm">
+                  <div
+                    key={row.id}
+                    className="flex flex-wrap items-center justify-between gap-2 rounded-md border p-3 text-sm"
+                  >
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <span className="font-medium">{row.fileNo}</span>
@@ -1035,10 +1069,16 @@ export function FinanceSoftwareWorkspace() {
                       <div className="text-muted text-xs">
                         {row.filename} · {row.voucherCount} 张凭证 / {row.lineCount} 行 · 借{' '}
                         {formatMoney(row.totalDebit, row.currency)} / 贷{' '}
-                        {formatMoney(row.totalCredit, row.currency)} · sha256 {shortSha(row.contentSha256)}
+                        {formatMoney(row.totalCredit, row.currency)} · sha256{' '}
+                        {shortSha(row.contentSha256)}
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" disabled={busy} onClick={() => void openFile(row.id)}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={busy}
+                      onClick={() => void openFile(row.id)}
+                    >
                       查看内容
                     </Button>
                   </div>
@@ -1057,7 +1097,7 @@ export function FinanceSoftwareWorkspace() {
                 </Button>
               }
             >
-              <pre className="text-muted max-h-96 overflow-auto rounded-md border bg-muted/30 p-3 text-xs">
+              <pre className="text-muted bg-muted/30 max-h-96 overflow-auto rounded-md border p-3 text-xs">
                 {fileDetail.content}
               </pre>
             </SectionCard>
@@ -1086,7 +1126,10 @@ export function FinanceSoftwareWorkspace() {
             ) : (
               <div className="space-y-2">
                 {reconcileTasks.map((task) => (
-                  <div key={task.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md border p-3 text-sm">
+                  <div
+                    key={task.id}
+                    className="flex flex-wrap items-center justify-between gap-2 rounded-md border p-3 text-sm"
+                  >
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <span className="font-medium">{task.reconcileNo}</span>
@@ -1096,15 +1139,25 @@ export function FinanceSoftwareWorkspace() {
                         <span className="text-muted text-xs">{task.accountName}</span>
                       </div>
                       <div className="text-muted text-xs">
-                        {task.currency} · 匹配 {task.matchedCount} · 差异 {task.differenceCount} · 差异合计{' '}
-                        {formatMoney(task.totalDifference, task.currency)}
+                        {task.currency} · 匹配 {task.matchedCount} · 差异 {task.differenceCount} ·
+                        差异合计 {formatMoney(task.totalDifference, task.currency)}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm" disabled={busy} onClick={() => void openTask(task.id)}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={busy}
+                        onClick={() => void openTask(task.id)}
+                      >
                         查看
                       </Button>
-                      <Button variant="outline" size="sm" disabled={busy} onClick={() => void computeTask(task.id)}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={busy}
+                        onClick={() => void computeTask(task.id)}
+                      >
                         计算差异
                       </Button>
                     </div>
@@ -1119,9 +1172,11 @@ export function FinanceSoftwareWorkspace() {
               <label className="space-y-1 text-sm">
                 <span className="text-muted">所属连接</span>
                 <select
-                  className="border-control-border h-9 w-full rounded-md border bg-card px-3 text-sm"
+                  className="border-control-border bg-card h-9 w-full rounded-md border px-3 text-sm"
                   value={reconcileForm.accountId}
-                  onChange={(e) => setReconcileForm({ ...reconcileForm, accountId: e.target.value })}
+                  onChange={(e) =>
+                    setReconcileForm({ ...reconcileForm, accountId: e.target.value })
+                  }
                 >
                   <option value="">请选择</option>
                   {accounts.map((account) => (
@@ -1134,9 +1189,11 @@ export function FinanceSoftwareWorkspace() {
               <label className="space-y-1 text-sm">
                 <span className="text-muted">起始会计期间</span>
                 <select
-                  className="border-control-border h-9 w-full rounded-md border bg-card px-3 text-sm"
+                  className="border-control-border bg-card h-9 w-full rounded-md border px-3 text-sm"
                   value={reconcileForm.periodFromId}
-                  onChange={(e) => setReconcileForm({ ...reconcileForm, periodFromId: e.target.value })}
+                  onChange={(e) =>
+                    setReconcileForm({ ...reconcileForm, periodFromId: e.target.value })
+                  }
                 >
                   <option value="">请选择</option>
                   {periods.map((period) => (
@@ -1149,9 +1206,11 @@ export function FinanceSoftwareWorkspace() {
               <label className="space-y-1 text-sm">
                 <span className="text-muted">截止会计期间</span>
                 <select
-                  className="border-control-border h-9 w-full rounded-md border bg-card px-3 text-sm"
+                  className="border-control-border bg-card h-9 w-full rounded-md border px-3 text-sm"
                   value={reconcileForm.periodToId}
-                  onChange={(e) => setReconcileForm({ ...reconcileForm, periodToId: e.target.value })}
+                  onChange={(e) =>
+                    setReconcileForm({ ...reconcileForm, periodToId: e.target.value })
+                  }
                 >
                   <option value="">请选择</option>
                   {periods.map((period) => (
@@ -1164,7 +1223,7 @@ export function FinanceSoftwareWorkspace() {
               <label className="space-y-1 text-sm">
                 <span className="text-muted">核对币种</span>
                 <select
-                  className="border-control-border h-9 w-full rounded-md border bg-card px-3 text-sm"
+                  className="border-control-border bg-card h-9 w-full rounded-md border px-3 text-sm"
                   value={reconcileForm.currency}
                   onChange={(e) => setReconcileForm({ ...reconcileForm, currency: e.target.value })}
                 >
@@ -1195,7 +1254,7 @@ export function FinanceSoftwareWorkspace() {
             description="每行一条：外部科目编码,币种,D/C,金额。方向必须在行里 —— 方向缺了，同一个余额会差出一倍。"
           >
             <textarea
-              className="border-control-border min-h-28 w-full rounded-md border bg-card p-3 text-sm"
+              className="border-control-border bg-card min-h-28 w-full rounded-md border p-3 text-sm"
               placeholder={'EX-AR-1122,USD,D,1000\nEX-REV-6001,USD,C,1000'}
               value={balanceText}
               onChange={(e) => setBalanceText(e.target.value)}
@@ -1237,7 +1296,9 @@ export function FinanceSoftwareWorkspace() {
                             {code.placeholder ? code.label : diff.externalSubjectCode}
                           </span>
                           {diff.localSubjectCode && (
-                            <span className="text-muted">← 本地 {diff.localSubjectCode} {diff.localSubjectName}</span>
+                            <span className="text-muted">
+                              ← 本地 {diff.localSubjectCode} {diff.localSubjectName}
+                            </span>
                           )}
                         </div>
                         <div className="text-muted mt-1 text-xs">
@@ -1245,7 +1306,9 @@ export function FinanceSoftwareWorkspace() {
                           {formatMoney(diff.localBalance, diff.currency)} · 差额{' '}
                           {formatMoney(diff.difference, diff.currency)}
                         </div>
-                        {diff.detail && <div className="text-muted mt-1 text-xs">{diff.detail}</div>}
+                        {diff.detail && (
+                          <div className="text-muted mt-1 text-xs">{diff.detail}</div>
+                        )}
                       </div>
                     );
                   })}
@@ -1283,7 +1346,9 @@ export function FinanceSoftwareWorkspace() {
                       )}
                     </div>
                     <div className="text-muted mt-1 text-xs">{capability.evidence}</div>
-                    {capability.note && <div className="text-muted mt-1 text-xs">{capability.note}</div>}
+                    {capability.note && (
+                      <div className="text-muted mt-1 text-xs">{capability.note}</div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -1301,7 +1366,8 @@ export function FinanceSoftwareWorkspace() {
                     会让运营以为「点一下就能推」。
                   </div>
                   <div className="text-xs">
-                    今天就能用的是这条完整路径：导出凭证文件 → 导入对方系统 → 把对方的余额表导回来核对。
+                    今天就能用的是这条完整路径：导出凭证文件 → 导入对方系统 →
+                    把对方的余额表导回来核对。
                   </div>
                 </div>
               </div>
@@ -1312,7 +1378,10 @@ export function FinanceSoftwareWorkspace() {
             <SectionCard title="缺口清单" description="本车道不依赖它们，也没有顺手实现它们。">
               <div className="space-y-2">
                 {capabilities.gaps.map((gap) => (
-                  <div key={gap.moduleId} className="flex items-start gap-2 rounded-md border p-3 text-sm">
+                  <div
+                    key={gap.moduleId}
+                    className="flex items-start gap-2 rounded-md border p-3 text-sm"
+                  >
                     <TriangleAlert className="text-muted mt-0.5 h-4 w-4 shrink-0" />
                     <div>
                       <span className="font-medium">{gap.name}</span>

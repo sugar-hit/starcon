@@ -66,7 +66,9 @@ function item(overrides: Partial<BatchPriceAdjustmentItem> = {}): BatchPriceAdju
   };
 }
 
-function preview(overrides: Partial<BatchPriceAdjustmentPreview> = {}): BatchPriceAdjustmentPreview {
+function preview(
+  overrides: Partial<BatchPriceAdjustmentPreview> = {},
+): BatchPriceAdjustmentPreview {
   return {
     previewToken: 'token-1',
     adjustMode: 'PERCENT',
@@ -190,8 +192,9 @@ describe('输入校验', () => {
   });
 
   it('固定金额可以是负数（降价），但不能是 0', () => {
-    expect(validateRequest({ ...base, adjustMode: 'FIXED_AMOUNT', adjustAmount: -5, adjustRate: null }))
-      .toBeNull();
+    expect(
+      validateRequest({ ...base, adjustMode: 'FIXED_AMOUNT', adjustAmount: -5, adjustRate: null }),
+    ).toBeNull();
     expect(
       validateRequest({ ...base, adjustMode: 'FIXED_AMOUNT', adjustAmount: 0, adjustRate: null })
         ?.field,

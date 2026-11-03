@@ -151,7 +151,9 @@ export function AnalyticsStoreSiteWorkspace() {
           page: '0',
           size: '50',
         });
-        setDrilldown(await api<StoreSiteDrilldownResponse>(`reporting/store-site/drilldown?${params}`));
+        setDrilldown(
+          await api<StoreSiteDrilldownResponse>(`reporting/store-site/drilldown?${params}`),
+        );
       } catch (e) {
         setDrilldownError(e instanceof Error ? e.message : '读取构成明细失败，请重试');
       }
@@ -420,7 +422,9 @@ export function AnalyticsStoreSiteWorkspace() {
                             </div>
                           </>
                         ) : (
-                          <span className="text-muted-foreground">{platformLabel(row.platformCode)}</span>
+                          <span className="text-muted-foreground">
+                            {platformLabel(row.platformCode)}
+                          </span>
                         )}
                       </td>
                       <td className="py-2 pr-3">
@@ -477,11 +481,15 @@ export function AnalyticsStoreSiteWorkspace() {
             title="新店 / 老店与增量归属"
             description="新店 / 老店按成交事实判定：当前窗口有成交、基期没有任何成交事实 ⇒ 新店。这正是「这次的增量里有多少来自新店」的答案。"
           >
-            <p className="text-copy-13 text-foreground mb-3">{newVsExistingText(data.newVsExisting)}</p>
+            <p className="text-copy-13 text-foreground mb-3">
+              {newVsExistingText(data.newVsExisting)}
+            </p>
             <p className="text-copy-13 text-muted-foreground mb-3">{data.newVsExisting.note}</p>
             <div className="grid gap-3 md:grid-cols-2">
               <div className="border-border rounded-lg border px-4 py-3">
-                <div className="text-copy-14 text-foreground font-medium">新店（{data.newVsExisting.newShopCount} 个）</div>
+                <div className="text-copy-14 text-foreground font-medium">
+                  新店（{data.newVsExisting.newShopCount} 个）
+                </div>
                 <div className="text-copy-13 text-muted-foreground mt-1">
                   {data.newVsExisting.newStoreMetrics
                     .filter((m) => m.metricCode === 'STORE_SITE_SALES_AMOUNT')
@@ -580,7 +588,10 @@ export function AnalyticsStoreSiteWorkspace() {
                     </thead>
                     <tbody>
                       {drilldown.rows.map((row) => (
-                        <tr key={`${row.referenceId}:${row.metricCode}`} className="border-border border-b">
+                        <tr
+                          key={`${row.referenceId}:${row.metricCode}`}
+                          className="border-border border-b"
+                        >
                           <td className="py-2 pr-3">{drilldownReferenceText(row)}</td>
                           <td className="py-2 pr-3">{drilldownKindLabel(row.sourceKind)}</td>
                           <td className="py-2 pr-3">{row.orderNo || '—'}</td>
@@ -608,7 +619,10 @@ export function AnalyticsStoreSiteWorkspace() {
           >
             <div className="space-y-2">
               {definitions.map((definition) => (
-                <div key={definition.metricCode} className="border-border rounded-lg border px-4 py-3">
+                <div
+                  key={definition.metricCode}
+                  className="border-border rounded-lg border px-4 py-3"
+                >
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-copy-14 text-foreground font-medium">
                       {definition.displayName}
@@ -621,7 +635,9 @@ export function AnalyticsStoreSiteWorkspace() {
                       {metricFormulaText(definition)}
                     </span>
                   </div>
-                  <p className="text-copy-13 text-muted-foreground mt-1">{definition.description}</p>
+                  <p className="text-copy-13 text-muted-foreground mt-1">
+                    {definition.description}
+                  </p>
                 </div>
               ))}
             </div>

@@ -461,9 +461,7 @@ export interface RateRuleFilters {
   size?: number | undefined;
 }
 
-export async function fetchRateRules(
-  filters: RateRuleFilters = {},
-): Promise<SalesTaxRateRulePage> {
+export async function fetchRateRules(filters: RateRuleFilters = {}): Promise<SalesTaxRateRulePage> {
   const query = new URLSearchParams();
   if (filters.stateCode) query.set('stateCode', filters.stateCode);
   if (filters.status) query.set('status', filters.status);
@@ -482,9 +480,7 @@ export async function fetchEffectiveRule(
   return api<SalesTaxEffectiveRule>(`${BASE}/rate-rules/effective?${query.toString()}`);
 }
 
-export async function createRateRule(
-  input: SalesTaxRateRuleInput,
-): Promise<SalesTaxRateRuleView> {
+export async function createRateRule(input: SalesTaxRateRuleInput): Promise<SalesTaxRateRuleView> {
   return api<SalesTaxRateRuleView>(`${BASE}/rate-rules`, 'POST', input);
 }
 
@@ -583,20 +579,14 @@ export async function fetchFacilitatorReports(
   return api<SalesTaxFacilitatorReportPage>(`${BASE}/facilitator-reports?${query.toString()}`);
 }
 
-export async function fetchFacilitatorReport(
-  id: string,
-): Promise<SalesTaxFacilitatorReportDetail> {
+export async function fetchFacilitatorReport(id: string): Promise<SalesTaxFacilitatorReportDetail> {
   return api<SalesTaxFacilitatorReportDetail>(`${BASE}/facilitator-reports/${id}`);
 }
 
 export async function importFacilitatorReport(
   input: SalesTaxFacilitatorImportInput,
 ): Promise<SalesTaxFacilitatorImportResult> {
-  return api<SalesTaxFacilitatorImportResult>(
-    `${BASE}/facilitator-reports/import`,
-    'POST',
-    input,
-  );
+  return api<SalesTaxFacilitatorImportResult>(`${BASE}/facilitator-reports/import`, 'POST', input);
 }
 
 export interface ReconciliationFilters {
@@ -758,7 +748,10 @@ export function formatAmount(value: number | null | undefined): string {
 export function groupTotalsByCurrency(
   rows: { currency: string; expectedTax: number; facilitatorTax: number }[],
 ): { currency: string; expectedTax: number; facilitatorTax: number }[] {
-  const grouped = new Map<string, { currency: string; expectedTax: number; facilitatorTax: number }>();
+  const grouped = new Map<
+    string,
+    { currency: string; expectedTax: number; facilitatorTax: number }
+  >();
   for (const row of rows) {
     const current = grouped.get(row.currency) ?? {
       currency: row.currency,
@@ -775,15 +768,15 @@ export function groupTotalsByCurrency(
 }
 
 /** 三态空态各不相同：「没有州」「筛选无结果」「还没有对账记录」分开说。 */
-export function emptyState(
-  kind: 'NO_STATE' | 'NO_FILTER_MATCH' | 'NO_RECONCILIATION',
-): { title: string; description: string } {
+export function emptyState(kind: 'NO_STATE' | 'NO_FILTER_MATCH' | 'NO_RECONCILIATION'): {
+  title: string;
+  description: string;
+} {
   switch (kind) {
     case 'NO_STATE':
       return {
         title: '还没有销售税州',
-        description:
-          '先登记「店铺所在州」，再录该州的税率规则 —— 没有规则的话应缴是判不了的。',
+        description: '先登记「店铺所在州」，再录该州的税率规则 —— 没有规则的话应缴是判不了的。',
       };
     case 'NO_FILTER_MATCH':
       return {
@@ -811,9 +804,7 @@ export function emptyStateKind(
   total: number,
 ): 'NO_STATE' | 'NO_FILTER_MATCH' | 'NO_RECONCILIATION' {
   const hasFilter =
-    Boolean(filters.stateCode) ||
-    filters.registered !== undefined ||
-    Boolean(filters.ruleStatus);
+    Boolean(filters.stateCode) || filters.registered !== undefined || Boolean(filters.ruleStatus);
   if (hasFilter) return 'NO_FILTER_MATCH';
   return total === 0 ? 'NO_STATE' : 'NO_RECONCILIATION';
 }

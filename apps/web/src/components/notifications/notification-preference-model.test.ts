@@ -42,7 +42,13 @@ import {
 const view: NotificationPreferenceView = {
   stored: true,
   types: [
-    { type: 'STOCKOUT', label: '库存缺货', channels: ['IN_APP', 'EMAIL'], mandatory: false, baselineChannel: null },
+    {
+      type: 'STOCKOUT',
+      label: '库存缺货',
+      channels: ['IN_APP', 'EMAIL'],
+      mandatory: false,
+      baselineChannel: null,
+    },
     {
       type: 'TIMELINESS_OVERDUE',
       label: '履约超时',
@@ -50,7 +56,13 @@ const view: NotificationPreferenceView = {
       mandatory: true,
       baselineChannel: 'IN_APP',
     },
-    { type: 'SYNC_FAILURE', label: '同步失败', channels: ['IN_APP', 'EMAIL', 'IM'], mandatory: false, baselineChannel: null },
+    {
+      type: 'SYNC_FAILURE',
+      label: '同步失败',
+      channels: ['IN_APP', 'EMAIL', 'IM'],
+      mandatory: false,
+      baselineChannel: null,
+    },
     {
       type: 'RECONCILIATION_DIFF',
       label: '对账差异',
@@ -58,7 +70,13 @@ const view: NotificationPreferenceView = {
       mandatory: true,
       baselineChannel: 'IN_APP',
     },
-    { type: 'MESSAGE', label: '站内信', channels: ['IN_APP'], mandatory: false, baselineChannel: null },
+    {
+      type: 'MESSAGE',
+      label: '站内信',
+      channels: ['IN_APP'],
+      mandatory: false,
+      baselineChannel: null,
+    },
   ],
   windows: ['22:00-08:00'],
   timezone: 'Asia/Shanghai',
@@ -77,7 +95,13 @@ const capabilities: NotificationPreferenceCapabilities = {
     { code: 'IM', label: '企业 IM', note: '外部渠道，依赖 1.3.2.2 的投递通道' },
   ],
   types: [
-    { code: 'STOCKOUT', label: '库存缺货', mandatory: false, baselineChannel: null, rule: '可以只留一个渠道' },
+    {
+      code: 'STOCKOUT',
+      label: '库存缺货',
+      mandatory: false,
+      baselineChannel: null,
+      rule: '可以只留一个渠道',
+    },
     {
       code: 'TIMELINESS_OVERDUE',
       label: '履约超时',
@@ -85,7 +109,13 @@ const capabilities: NotificationPreferenceCapabilities = {
       baselineChannel: 'IN_APP',
       rule: '关键业务通知：不允许被完全关闭',
     },
-    { code: 'SYNC_FAILURE', label: '同步失败', mandatory: false, baselineChannel: null, rule: '可以只留一个渠道' },
+    {
+      code: 'SYNC_FAILURE',
+      label: '同步失败',
+      mandatory: false,
+      baselineChannel: null,
+      rule: '可以只留一个渠道',
+    },
     {
       code: 'RECONCILIATION_DIFF',
       label: '对账差异',
@@ -93,7 +123,13 @@ const capabilities: NotificationPreferenceCapabilities = {
       baselineChannel: 'IN_APP',
       rule: '关键业务通知：不允许被完全关闭',
     },
-    { code: 'MESSAGE', label: '站内信', mandatory: false, baselineChannel: null, rule: '可以只留一个渠道' },
+    {
+      code: 'MESSAGE',
+      label: '站内信',
+      mandatory: false,
+      baselineChannel: null,
+      rule: '可以只留一个渠道',
+    },
   ],
   baselineChannel: 'IN_APP',
   maxWindows: MAX_QUIET_WINDOWS,
@@ -113,7 +149,15 @@ describe('渠道勾选态', () => {
   it('服务端词表外的渠道码不渲染成可点的复选框', () => {
     const dirty: NotificationPreferenceView = {
       ...view,
-      types: [{ type: 'MESSAGE', label: '站内信', channels: ['SMS'], mandatory: false, baselineChannel: null }],
+      types: [
+        {
+          type: 'MESSAGE',
+          label: '站内信',
+          channels: ['SMS'],
+          mandatory: false,
+          baselineChannel: null,
+        },
+      ],
     };
     expect(selectionOf(dirty).MESSAGE).toEqual([]);
   });

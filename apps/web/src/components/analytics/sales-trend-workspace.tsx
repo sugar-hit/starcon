@@ -193,7 +193,12 @@ export function AnalyticsSalesTrendWorkspace() {
         </div>
         <div className="text-copy-13 text-muted-foreground flex items-center gap-3">
           <span>{rangeText(from, to)}</span>
-          <Button variant="outline" size="sm" disabled={loading || busy} onClick={() => void load()}>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={loading || busy}
+            onClick={() => void load()}
+          >
             <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
             重读
           </Button>
@@ -295,7 +300,12 @@ export function AnalyticsSalesTrendWorkspace() {
               className="border-border bg-background rounded-md border px-2 py-1.5 text-sm"
             />
           </label>
-          <Button variant="outline" size="sm" disabled={busy} onClick={() => void refreshProjection()}>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={busy}
+            onClick={() => void refreshProjection()}
+          >
             <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
             刷新销量趋势投影
           </Button>
@@ -335,7 +345,12 @@ export function AnalyticsSalesTrendWorkspace() {
             title="销量趋势读不到"
             description={`${error}（这是「读不到」，不是「没有数据」）—— 上游不可达或没有读权限时就会出现。`}
             action={
-              <Button variant="outline" size="sm" disabled={loading || busy} onClick={() => void load()}>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={loading || busy}
+                onClick={() => void load()}
+              >
                 <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
                 重试
               </Button>
@@ -347,7 +362,10 @@ export function AnalyticsSalesTrendWorkspace() {
       {/* ── 加载态 ─────────────────────────────────────────────────────── */}
       {state === 'loading' && (
         <SectionCard>
-          <EmptyState title="正在读取销量趋势…" description="读取期间页面上的「数据截至」仍然有效。" />
+          <EmptyState
+            title="正在读取销量趋势…"
+            description="读取期间页面上的「数据截至」仍然有效。"
+          />
         </SectionCard>
       )}
 
@@ -395,13 +413,13 @@ export function AnalyticsSalesTrendWorkspace() {
                       <tbody>
                         {series.points.map((point) => (
                           <tr key={point.bucketStart} className="border-border border-b">
-                            <td className="py-2 pr-3 whitespace-nowrap">{bucketLabel(point)}</td>
-                            <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                            <td className="whitespace-nowrap py-2 pr-3">{bucketLabel(point)}</td>
+                            <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                               {formatDecimal(point.value ?? 0, 2)}
                               {point.value === null ? '' : ` ${series.currency}`}
                             </td>
                             <td
-                              className="py-2 pr-3 text-right tabular-nums whitespace-nowrap"
+                              className="whitespace-nowrap py-2 pr-3 text-right tabular-nums"
                               title={periodOverPeriodNote(point)}
                             >
                               {point.periodOverPeriodRate === null
@@ -414,7 +432,7 @@ export function AnalyticsSalesTrendWorkspace() {
                               )}
                             </td>
                             <td
-                              className="py-2 pr-3 text-right tabular-nums whitespace-nowrap"
+                              className="whitespace-nowrap py-2 pr-3 text-right tabular-nums"
                               title={yearOverYearNote(point)}
                             >
                               {point.yearOverYearRate === null
@@ -436,7 +454,10 @@ export function AnalyticsSalesTrendWorkspace() {
                                 </div>
                               )}
                               {eventsOf(point).map((event) => (
-                                <div key={event.eventCode} className="mt-1 flex flex-wrap items-center gap-1">
+                                <div
+                                  key={event.eventCode}
+                                  className="mt-1 flex flex-wrap items-center gap-1"
+                                >
                                   <Badge tone={severityTone(event.severity)}>
                                     {eventTypeLabel(event.eventType)}
                                   </Badge>
@@ -471,7 +492,10 @@ export function AnalyticsSalesTrendWorkspace() {
             ) : (
               <div className="space-y-3">
                 {anomalies.map((anomaly) => (
-                  <div key={`${anomaly.metricCode}-${anomaly.currency}-${anomaly.bucketStart}`} className="border-border rounded-lg border px-4 py-3">
+                  <div
+                    key={`${anomaly.metricCode}-${anomaly.currency}-${anomaly.bucketStart}`}
+                    className="border-border rounded-lg border px-4 py-3"
+                  >
                     <div className="flex flex-wrap items-center gap-2">
                       <Badge tone={anomalyTone(anomaly.direction)}>
                         {anomalyDirectionLabel(anomaly.direction)}
@@ -530,16 +554,15 @@ export function AnalyticsSalesTrendWorkspace() {
                       {comparison.metricDefinitions
                         .filter((definition) => definition.aggregation === 'SUM')
                         .map((definition) => (
-                          <th key={definition.metricCode} className="py-2 pr-3 text-right font-medium">
+                          <th
+                            key={definition.metricCode}
+                            className="py-2 pr-3 text-right font-medium"
+                          >
                             {definition.displayName}
                           </th>
                         ))}
-                      <th className="py-2 pr-3 text-right font-medium">
-                        环比（成交金额）
-                      </th>
-                      <th className="py-2 pr-3 text-right font-medium">
-                        同比（成交金额）
-                      </th>
+                      <th className="py-2 pr-3 text-right font-medium">环比（成交金额）</th>
+                      <th className="py-2 pr-3 text-right font-medium">同比（成交金额）</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -555,15 +578,15 @@ export function AnalyticsSalesTrendWorkspace() {
                           .map((definition) => (
                             <td
                               key={definition.metricCode}
-                              className="py-2 pr-3 text-right tabular-nums whitespace-nowrap"
+                              className="whitespace-nowrap py-2 pr-3 text-right tabular-nums"
                             >
                               {comparisonCellText(row, definition.metricCode, definition.unit)}
                             </td>
                           ))}
-                        <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                        <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                           {comparisonGrowthText(row, 'SALES_AMOUNT')}
                         </td>
-                        <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                        <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                           {comparisonYearText(row, 'SALES_AMOUNT')}
                         </td>
                       </tr>
@@ -591,7 +614,9 @@ export function AnalyticsSalesTrendWorkspace() {
                       <Badge tone={severityTone(event.severity)}>
                         {eventTypeLabel(event.eventType)}
                       </Badge>
-                      <span className="text-copy-14 text-foreground font-medium">{event.title}</span>
+                      <span className="text-copy-14 text-foreground font-medium">
+                        {event.title}
+                      </span>
                     </div>
                     <p className="text-copy-13 text-muted-foreground mt-1">{eventText(event)}</p>
                     {event.detail && (
@@ -632,10 +657,10 @@ export function AnalyticsSalesTrendWorkspace() {
                       <td className="py-2 pr-3">{dimensionLabel(definition.dimensionType)}</td>
                       <td className="py-2 pr-3">{metricUnitLabel(definition.unit)}</td>
                       <td className="py-2 pr-3">{metricFormulaText(definition)}</td>
-                      <td className="py-2 pr-3 max-w-md text-copy-13 text-muted-foreground">
+                      <td className="text-copy-13 text-muted-foreground max-w-md py-2 pr-3">
                         {definition.description}
                       </td>
-                      <td className="py-2 pr-3 text-copy-13 text-muted-foreground">
+                      <td className="text-copy-13 text-muted-foreground py-2 pr-3">
                         {definition.ownerModule || '本服务'}
                       </td>
                     </tr>
@@ -675,7 +700,8 @@ export function AnalyticsSalesTrendWorkspace() {
                 <ul className="text-copy-13 text-muted-foreground list-disc space-y-1 pl-5">
                   {ruleNotes(capabilities).map((rule) => (
                     <li key={rule.ruleCode}>
-                      <span className="text-foreground font-medium">{rule.ruleCode}</span>：{rule.description}
+                      <span className="text-foreground font-medium">{rule.ruleCode}</span>：
+                      {rule.description}
                     </li>
                   ))}
                 </ul>

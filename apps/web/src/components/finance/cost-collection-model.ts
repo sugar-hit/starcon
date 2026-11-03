@@ -119,11 +119,7 @@ export function fetchCostCollectionPool(id: string) {
 }
 
 /** 归集明细列表（真分页 + 真筛选 + 汇总覆盖整个筛选结果集）。 */
-export function fetchCostCollectionEntries(
-  params: CostCollectionParams = {},
-  page = 0,
-  size = 50,
-) {
+export function fetchCostCollectionEntries(params: CostCollectionParams = {}, page = 0, size = 50) {
   return api<FinanceCostCollectionEntryPage>(
     `${base}/entries${query({
       poolId: params.poolId,
@@ -311,7 +307,10 @@ export function formatCostMoney(
  *
  * <p>⚠️ 只做**拼接**不做日期差计算 —— 期间边界是服务端给的日历区间。
  */
-export function formatCostPeriod(start: string | null | undefined, end: string | null | undefined): string {
+export function formatCostPeriod(
+  start: string | null | undefined,
+  end: string | null | undefined,
+): string {
   if (!start || !end) return '—';
   return `${start} ~ ${end}`;
 }

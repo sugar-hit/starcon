@@ -87,7 +87,9 @@ export function fetchApps(
   size: number,
   params: AppParams,
 ): Promise<IntegrationAppPage> {
-  return api<IntegrationAppPage>(`${base}?${query({ ...params, page: String(page), size: String(size) })}`);
+  return api<IntegrationAppPage>(
+    `${base}?${query({ ...params, page: String(page), size: String(size) })}`,
+  );
 }
 
 /** 应用档案详情（凭证元数据 + 授权范围 + 白名单 + 配额 + 额度判定）。 */
@@ -130,7 +132,9 @@ export function fetchAuditEvents(appId: string, page: number, size: number) {
 // ================================================================ 写入
 
 /** 注册应用。 */
-export function registerApp(input: IntegrationAppInput): Promise<IntegrationAppPage['items'][number]> {
+export function registerApp(
+  input: IntegrationAppInput,
+): Promise<IntegrationAppPage['items'][number]> {
   return api(`${base}`, 'POST', input);
 }
 
@@ -146,10 +150,7 @@ export function rotateCredential(appId: string): Promise<IntegrationCredentialIs
 
 /** 吊销单个凭证（泄露时的一键止血）。 */
 export function revokeCredential(appId: string, credentialId: string, reason: string) {
-  return api(
-    `${base}/${appId}/credentials/${credentialId}/revoke?${query({ reason })}`,
-    'POST',
-  );
+  return api(`${base}/${appId}/credentials/${credentialId}/revoke?${query({ reason })}`, 'POST');
 }
 
 /** 吊销应用（**一键吊销**：该应用全部凭证同时失效）。 */
@@ -187,7 +188,11 @@ export function verifyCredential(
   appId: string,
   input: IntegrationCredentialVerifyInput,
 ): Promise<IntegrationCredentialVerifyResult> {
-  return api<IntegrationCredentialVerifyResult>(`${base}/${appId}/credentials/verify`, 'POST', input);
+  return api<IntegrationCredentialVerifyResult>(
+    `${base}/${appId}/credentials/verify`,
+    'POST',
+    input,
+  );
 }
 
 // ================================================================ 展示口径

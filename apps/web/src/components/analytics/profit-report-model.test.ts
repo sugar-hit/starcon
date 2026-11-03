@@ -46,9 +46,7 @@ import type {
  * 5. **前端不做业务算术**。毛利、毛利率、成本合计一律来自服务端，这里只做格式化。
  */
 
-function component(
-  overrides: Partial<ProfitComponentAmount> = {},
-): ProfitComponentAmount {
+function component(overrides: Partial<ProfitComponentAmount> = {}): ProfitComponentAmount {
   return {
     component: 'COGS',
     label: '商品成本',
@@ -162,15 +160,17 @@ describe('13.4.1.1 多模式利润报表 · 模式不合并', () => {
   it('毛利语义色：盈利 success / 亏损 danger / 不可比 neutral', () => {
     expect(grossProfitTone(row({ grossProfit: 10, grossProfitComparable: true }))).toBe('success');
     expect(grossProfitTone(row({ grossProfit: -10, grossProfitComparable: true }))).toBe('danger');
-    expect(
-      grossProfitTone(row({ grossProfit: null, grossProfitComparable: false })),
-    ).toBe('neutral');
+    expect(grossProfitTone(row({ grossProfit: null, grossProfitComparable: false }))).toBe(
+      'neutral',
+    );
   });
 
   it('毛利状态标签', () => {
     expect(grossProfitLabel(row({ grossProfit: 10, grossProfitComparable: true }))).toBe('盈利');
     expect(grossProfitLabel(row({ grossProfit: -10, grossProfitComparable: true }))).toBe('亏损');
-    expect(grossProfitLabel(row({ grossProfit: null, grossProfitComparable: false }))).toBe('不可比');
+    expect(grossProfitLabel(row({ grossProfit: null, grossProfitComparable: false }))).toBe(
+      '不可比',
+    );
   });
 });
 
@@ -183,9 +183,7 @@ describe('13.4.1.1 多模式利润报表 · 汇率快照', () => {
 
   it('汇率必须带时点', () => {
     expect(baseRateText(null, null)).toBe('—');
-    expect(baseRateText(7.123456, '2026-10-01T00:00:00Z')).toBe(
-      '7.123456（2026-10-01T00:00:00Z）',
-    );
+    expect(baseRateText(7.123456, '2026-10-01T00:00:00Z')).toBe('7.123456（2026-10-01T00:00:00Z）');
   });
 });
 

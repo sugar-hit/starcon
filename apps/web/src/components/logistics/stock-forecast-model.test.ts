@@ -69,9 +69,9 @@ describe('10.4.2.2 备货预报展示派生', () => {
     expect(availabilityState(availability())).toBe(AvailabilityState.ENOUGH);
     expect(availabilityState(availability({ sellable: 3 }))).toBe(AvailabilityState.SHORT);
     // 上游没给这一行：不是「不足」，是「不可用」
-    expect(
-      availabilityState(availability({ sellable: null, sellableKnown: false })),
-    ).toBe(AvailabilityState.UNAVAILABLE);
+    expect(availabilityState(availability({ sellable: null, sellableKnown: false }))).toBe(
+      AvailabilityState.UNAVAILABLE,
+    );
   });
 
   it('口径不可用时明说不可用，不用 0 顶（0 会被读成没有库存需求）', () => {

@@ -3,12 +3,7 @@ import type {
   IntegrationCredentialVerifyResult,
   IntegrationQuotaStatusRow,
 } from '../../../../../packages/api-contracts/src/index';
-import {
-  maskSecret,
-  quotaLabel,
-  quotaTone,
-  verifyConclusion,
-} from './app-credential-model';
+import { maskSecret, quotaLabel, quotaTone, verifyConclusion } from './app-credential-model';
 
 /**
  * 18.1.1.1 应用与凭证 前端模型的单测。
@@ -87,9 +82,9 @@ describe('18.1.1.1 应用与凭证 · 凭证自检结论', () => {
   });
 
   it('凭证有效但授权范围不足时，结论里点名是授权范围', () => {
-    expect(
-      verifyConclusion(verify({ scopeChecked: true, scopeGranted: false })),
-    ).toBe('凭证有效，但授权范围不足');
+    expect(verifyConclusion(verify({ scopeChecked: true, scopeGranted: false }))).toBe(
+      '凭证有效，但授权范围不足',
+    );
   });
 
   it('凭证有效但来源 IP 不在白名单时，结论里点名是 IP', () => {

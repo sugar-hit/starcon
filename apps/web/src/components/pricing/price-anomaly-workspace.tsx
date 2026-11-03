@@ -86,9 +86,8 @@ export function PriceAnomalyWorkspace() {
   const [detail, setDetail] = useState<EventDetail | null>(null);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [observations, setObservations] = useState<ObservationListPage | null>(null);
-  const [observationFilters, setObservationFilters] = useState<ObservationFilters>(
-    EMPTY_OBSERVATION_FILTERS,
-  );
+  const [observationFilters, setObservationFilters] =
+    useState<ObservationFilters>(EMPTY_OBSERVATION_FILTERS);
   const [notifications, setNotifications] = useState<NotificationListPage | null>(null);
   const [detection, setDetection] = useState<DetectionRun | null>(null);
   const [error, setError] = useState('');
@@ -162,7 +161,12 @@ export function PriceAnomalyWorkspace() {
       setNotice(
         `已登记观测（${saved.platformCode}/${saved.siteCode}）—— 观测是只追加的，历史不会被覆盖。`,
       );
-      setObservationForm({ ...observationForm, internalPrice: null, platformPrice: null, note: '' });
+      setObservationForm({
+        ...observationForm,
+        internalPrice: null,
+        platformPrice: null,
+        note: '',
+      });
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : '观测登记失败');
@@ -175,7 +179,10 @@ export function PriceAnomalyWorkspace() {
     setBusy(true);
     setError('');
     try {
-      const run = await runPriceAnomalyDetection(filters.windowFrom || null, filters.windowTo || null);
+      const run = await runPriceAnomalyDetection(
+        filters.windowFrom || null,
+        filters.windowTo || null,
+      );
       setDetection(run);
       setNotice(
         `检测完成：扫描 ${run.observationsScanned} 条观测，新开 ${run.eventsOpened} 条、更新 ${run.eventsUpdated} 条、消解 ${run.eventsResolved} 条，发通知 ${run.notificationsRaised} 条。`,
@@ -249,7 +256,9 @@ export function PriceAnomalyWorkspace() {
                   <div key={type.code} className="border-border rounded-md border p-3">
                     <div className="flex flex-wrap items-center gap-2">
                       <Badge tone={anomalyTone(type.code)}>{type.label}</Badge>
-                      <span className="text-copy-12 text-muted-foreground">{type.thresholdNote}</span>
+                      <span className="text-copy-12 text-muted-foreground">
+                        {type.thresholdNote}
+                      </span>
                     </div>
                     <p className="text-copy-12 text-muted-foreground mt-2">{type.basis}</p>
                     {type.note ? (
@@ -308,7 +317,10 @@ export function PriceAnomalyWorkspace() {
       ) : null}
 
       {/* ============================================================ 筛选 + 检测 */}
-      <SectionCard title="筛选与检测" description="检测是显式触发的扫描：事件用指纹做幂等键，重复检测不会堆重复事件。">
+      <SectionCard
+        title="筛选与检测"
+        description="检测是显式触发的扫描：事件用指纹做幂等键，重复检测不会堆重复事件。"
+      >
         <div className="grid gap-3 md:grid-cols-4">
           <FormField id="anomaly-kw" label="关键词" hint="SKU 编码 / 名称">
             <Input
@@ -362,7 +374,11 @@ export function PriceAnomalyWorkspace() {
             <Button onClick={runDetection} disabled={busy}>
               运行检测
             </Button>
-            <Button variant="outline" onClick={() => setFilters(EMPTY_ANOMALY_FILTERS)} disabled={busy}>
+            <Button
+              variant="outline"
+              onClick={() => setFilters(EMPTY_ANOMALY_FILTERS)}
+              disabled={busy}
+            >
               重置
             </Button>
           </div>
@@ -391,7 +407,8 @@ export function PriceAnomalyWorkspace() {
             ))}
             {events ? (
               <p className="text-copy-12 text-muted-foreground">
-                共 {events.total} 条（第 {events.page + 1} 页，每页 {events.size} 条）。{events.note}
+                共 {events.total} 条（第 {events.page + 1} 页，每页 {events.size} 条）。
+                {events.note}
               </p>
             ) : null}
           </div>
@@ -508,7 +525,11 @@ export function PriceAnomalyWorkspace() {
               value={observationFilters.platformCode}
               placeholder="全部"
               onChange={(e) =>
-                setObservationFilters({ ...observationFilters, platformCode: e.target.value, page: 0 })
+                setObservationFilters({
+                  ...observationFilters,
+                  platformCode: e.target.value,
+                  page: 0,
+                })
               }
             />
           </FormField>
@@ -567,7 +588,10 @@ export function PriceAnomalyWorkspace() {
               id="obs-new-platform"
               value={observationForm.platformCode}
               onChange={(e) =>
-                setObservationForm({ ...observationForm, platformCode: e.target.value.toUpperCase() })
+                setObservationForm({
+                  ...observationForm,
+                  platformCode: e.target.value.toUpperCase(),
+                })
               }
             />
           </FormField>
@@ -580,7 +604,12 @@ export function PriceAnomalyWorkspace() {
               }
             />
           </FormField>
-          <FormField id="obs-new-currency" label="币种" required hint="站点自身币种（DE=EUR / US=USD）">
+          <FormField
+            id="obs-new-currency"
+            label="币种"
+            required
+            hint="站点自身币种（DE=EUR / US=USD）"
+          >
             <Input
               id="obs-new-currency"
               value={observationForm.currency}
@@ -636,7 +665,9 @@ export function PriceAnomalyWorkspace() {
             <Input
               id="obs-new-at"
               value={observationForm.observedAt}
-              onChange={(e) => setObservationForm({ ...observationForm, observedAt: e.target.value })}
+              onChange={(e) =>
+                setObservationForm({ ...observationForm, observedAt: e.target.value })
+              }
             />
           </FormField>
           <FormField
@@ -723,10 +754,15 @@ export function PriceAnomalyWorkspace() {
             </div>
             {detection.uncomparablePairs.length > 0 ? (
               <div>
-                <p className="text-label-13 mb-1 font-semibold">不可比的站点对（没有汇率，不编汇率）</p>
+                <p className="text-label-13 mb-1 font-semibold">
+                  不可比的站点对（没有汇率，不编汇率）
+                </p>
                 <div className="space-y-2">
                   {detection.uncomparablePairs.map((pair, index) => (
-                    <div key={`${pair.skuId}-${index}`} className="border-border rounded-md border p-3">
+                    <div
+                      key={`${pair.skuId}-${index}`}
+                      className="border-border rounded-md border p-3"
+                    >
                       <p className="text-copy-13">
                         {pair.platformCode}/{pair.siteCode}（{pair.currency}） vs{' '}
                         {pair.relatedPlatformCode}/{pair.relatedSiteCode}（{pair.relatedCurrency}）
@@ -747,7 +783,10 @@ export function PriceAnomalyWorkspace() {
         description="下游 1 工作台预警未交付 ⇒ 通知只落在本服务内，尚未投递到任何通道。"
       >
         {notifications && notifications.items.length === 0 ? (
-          <EmptyState title="还没有预警通知" description="运行一次检测后，新命中的异常会各发一条通知。" />
+          <EmptyState
+            title="还没有预警通知"
+            description="运行一次检测后，新命中的异常会各发一条通知。"
+          />
         ) : (
           <div className="space-y-2">
             {(notifications?.items ?? []).map((item) => (
@@ -755,7 +794,9 @@ export function PriceAnomalyWorkspace() {
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge tone={severityTone(item.severity)}>{item.severityLabel}</Badge>
                   <span className="text-label-13 font-semibold">{item.title}</span>
-                  <Badge tone={statusTone(item.anomalyType === '' ? '' : 'OPEN')}>{item.anomalyTypeLabel}</Badge>
+                  <Badge tone={statusTone(item.anomalyType === '' ? '' : 'OPEN')}>
+                    {item.anomalyTypeLabel}
+                  </Badge>
                   <Badge tone="neutral">{item.ownerModule}</Badge>
                   <Badge tone={item.delivered ? 'success' : 'warning'}>
                     {item.delivered ? '已投递' : '未投递'}
@@ -812,7 +853,9 @@ function EventRowView({
         {event.gapRatio !== null ? <span>价差 {ratioText(event.gapRatio)}</span> : null}
         <span>{durationText(event)}</span>
         {event.costLine !== null ? <span>成本线 {costLineText(event)}</span> : null}
-        <span>命中 {dayText(event.firstSeenAt)} → {dayText(event.lastSeenAt)}</span>
+        <span>
+          命中 {dayText(event.firstSeenAt)} → {dayText(event.lastSeenAt)}
+        </span>
       </div>
     </button>
   );
@@ -842,7 +885,8 @@ function ObservationTable({ rows }: { rows: ObservationRow[] }) {
             <span>平台价 {moneyWithCurrency(row.platformPrice, row.currency)}</span>
             {row.comparisonCurrency ? (
               <span>
-                比价口径 {row.comparisonCurrency} @ {row.fxRate}（{row.fxRateDate} · {row.fxRateSource}）
+                比价口径 {row.comparisonCurrency} @ {row.fxRate}（{row.fxRateDate} ·{' '}
+                {row.fxRateSource}）
               </span>
             ) : (
               <span>比价口径：只用同币种站点比</span>

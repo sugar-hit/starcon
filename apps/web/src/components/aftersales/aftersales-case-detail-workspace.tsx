@@ -4,7 +4,10 @@ import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { ArrowLeft, Paperclip, MessageSquare, Plus, RefreshCw, TriangleAlert } from 'lucide-react';
 import { Button, EmptyState, Input, PageHeader, SectionCard, StatCard } from '@starcon/ui';
-import type { AftersalesCaseDetail, AftersalesDetailCapabilities } from '../../../../../packages/api-contracts/src/index';
+import type {
+  AftersalesCaseDetail,
+  AftersalesDetailCapabilities,
+} from '../../../../../packages/api-contracts/src/index';
 import {
   addAftersalesAttachment,
   addAftersalesCaseLine,
@@ -162,7 +165,11 @@ export function AftersalesCaseDetailWorkspace({ caseId }: { caseId: string }) {
         <StatCard
           label="当前状态"
           value={`${header.statusLabel}${terminal ? '（已结案）' : ''}`}
-          comparisonLabel={terminal ? `结案于 ${formatTime(header.resolvedAt)}` : `受理于 ${formatTime(header.receivedAt)}`}
+          comparisonLabel={
+            terminal
+              ? `结案于 ${formatTime(header.resolvedAt)}`
+              : `受理于 ${formatTime(header.receivedAt)}`
+          }
         />
         <StatCard
           label="平台时效"
@@ -210,14 +217,18 @@ export function AftersalesCaseDetailWorkspace({ caseId }: { caseId: string }) {
                   <div className="flex flex-wrap items-center gap-2">
                     <span className={`badge ${side.badge}`}>{side.label}</span>
                     <span className="text-copy-13 font-medium">{e.kindLabel}</span>
-                    <span className="text-muted-foreground text-copy-12">{formatTime(e.occurredAt)}</span>
+                    <span className="text-muted-foreground text-copy-12">
+                      {formatTime(e.occurredAt)}
+                    </span>
                   </div>
-                  {e.summary && <p className="mt-1 text-copy-13">{e.summary}</p>}
+                  {e.summary && <p className="text-copy-13 mt-1">{e.summary}</p>}
                   {e.body && (
-                    <p className="text-muted-foreground mt-1 text-copy-13 whitespace-pre-wrap">{e.body}</p>
+                    <p className="text-muted-foreground text-copy-13 mt-1 whitespace-pre-wrap">
+                      {e.body}
+                    </p>
                   )}
                   {e.reference && (
-                    <p className="text-muted-foreground mt-1 text-copy-12">引用：{e.reference}</p>
+                    <p className="text-muted-foreground text-copy-12 mt-1">引用：{e.reference}</p>
                   )}
                 </li>
               );
@@ -227,7 +238,10 @@ export function AftersalesCaseDetailWorkspace({ caseId }: { caseId: string }) {
       </SectionCard>
 
       {/* ============================ 原订单信息 ============================ */}
-      <SectionCard title="原订单信息" description="直接读 sales_order 簇（V99，同库只读），不是复制品 —— 截图上的订单号与系统里的不一致是纠纷举证里最致命的破绽。">
+      <SectionCard
+        title="原订单信息"
+        description="直接读 sales_order 簇（V99，同库只读），不是复制品 —— 截图上的订单号与系统里的不一致是纠纷举证里最致命的破绽。"
+      >
         {!detail.order ? (
           <EmptyState
             title="关联订单缺失"
@@ -244,7 +258,10 @@ export function AftersalesCaseDetailWorkspace({ caseId }: { caseId: string }) {
             />
             <Field label="外部订单号" value={detail.order.externalOrderNo ?? '—'} />
             <Field label="订单状态" value={detail.order.orderStatus ?? '—'} />
-            <Field label="订单总额" value={formatAmount(detail.order.grandTotalAmount, detail.order.currency)} />
+            <Field
+              label="订单总额"
+              value={formatAmount(detail.order.grandTotalAmount, detail.order.currency)}
+            />
             <Field label="客户" value={detail.order.customerName ?? '—'} />
             <Field label="客户类型" value={detail.order.customerType ?? '—'} />
             <Field label="收货人" value={detail.order.recipientName ?? '—'} />
@@ -256,11 +273,14 @@ export function AftersalesCaseDetailWorkspace({ caseId }: { caseId: string }) {
       </SectionCard>
 
       {/* ============================ 商品行与数量 ============================ */}
-      <SectionCard title="商品行与数量" description="订单行是 V99 的下单快照；involved 标记本单涉及哪几行。SKU 与单价不在本模块复制 —— 复制会与订单漂移。">
+      <SectionCard
+        title="商品行与数量"
+        description="订单行是 V99 的下单快照；involved 标记本单涉及哪几行。SKU 与单价不在本模块复制 —— 复制会与订单漂移。"
+      >
         {detail.orderLines.length === 0 ? (
           <EmptyState title="订单没有商品行" description="这张单关联的订单下没有任何订单行。" />
         ) : (
-          <table className="w-full text-copy-13">
+          <table className="text-copy-13 w-full">
             <thead>
               <tr className="border-border border-b text-left">
                 <th className="py-2">行</th>
@@ -299,7 +319,7 @@ export function AftersalesCaseDetailWorkspace({ caseId }: { caseId: string }) {
           </table>
         )}
         {detail.lines.length > 0 && (
-          <p className="text-muted-foreground mt-3 text-copy-13">
+          <p className="text-muted-foreground text-copy-13 mt-3">
             本单登记的申请金额合计：
             {formatAmount(
               detail.lines.reduce((acc, l) => acc + (l.requestedAmount ?? 0), 0),
@@ -310,7 +330,10 @@ export function AftersalesCaseDetailWorkspace({ caseId }: { caseId: string }) {
       </SectionCard>
 
       {/* ============================ 买家诉求与处置流程 ============================ */}
-      <SectionCard title="申请内容与处置流程状态" description="买家诉求原文与授权决定。授权只推进到「处理中」—— 把它标成已解决会凭空造出一个已完成的售后。">
+      <SectionCard
+        title="申请内容与处置流程状态"
+        description="买家诉求原文与授权决定。授权只推进到「处理中」—— 把它标成已解决会凭空造出一个已完成的售后。"
+      >
         <div className="space-y-3">
           <div>
             <p className="text-muted-foreground text-copy-12">买家诉求原文</p>
@@ -331,7 +354,9 @@ export function AftersalesCaseDetailWorkspace({ caseId }: { caseId: string }) {
             </span>
           </div>
           {detail.authorizations.length === 0 ? (
-            <p className="text-muted-foreground text-copy-13">尚无授权记录（授权在列表页批量操作里做）。</p>
+            <p className="text-muted-foreground text-copy-13">
+              尚无授权记录（授权在列表页批量操作里做）。
+            </p>
           ) : (
             <ul className="space-y-1">
               {detail.authorizations.map((a) => (
@@ -346,8 +371,8 @@ export function AftersalesCaseDetailWorkspace({ caseId }: { caseId: string }) {
           )}
           {detail.ticket && (
             <p className="text-copy-13">
-              工单 {detail.ticket.ticketNo}（{detail.ticket.ticketStatusLabel} ·
-              优先级 {detail.ticket.priorityLabel}）—— 归属 {detail.ticket.ownerModule}，该模块未交付。
+              工单 {detail.ticket.ticketNo}（{detail.ticket.ticketStatusLabel} · 优先级{' '}
+              {detail.ticket.priorityLabel}）—— 归属 {detail.ticket.ownerModule}，该模块未交付。
             </p>
           )}
           <p className="text-muted-foreground text-copy-13">
@@ -362,7 +387,10 @@ export function AftersalesCaseDetailWorkspace({ caseId }: { caseId: string }) {
       </SectionCard>
 
       {/* ============================ 责任判定 ============================ */}
-      <SectionCard title="责任判定" description="「我们认了还是没认」由真实的授权决定 + 原因分类 + 责任人流转合成；环节级归因未交付。">
+      <SectionCard
+        title="责任判定"
+        description="「我们认了还是没认」由真实的授权决定 + 原因分类 + 责任人流转合成；环节级归因未交付。"
+      >
         <div className="space-y-2">
           <p className="text-copy-13">{detail.liability.liability}</p>
           <p className="text-muted-foreground text-copy-13">
@@ -376,13 +404,13 @@ export function AftersalesCaseDetailWorkspace({ caseId }: { caseId: string }) {
       </SectionCard>
 
       {/* ============================ 平台侧状态 ============================ */}
-      <SectionCard title="平台侧状态" description="受理号与时限是平台倒计时的依据；平台最终判责未交付，因此不显示任何判定结论。">
+      <SectionCard
+        title="平台侧状态"
+        description="受理号与时限是平台倒计时的依据；平台最终判责未交付，因此不显示任何判定结论。"
+      >
         <dl className="grid gap-x-6 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
           <Field label="平台单号" value={detail.platform.platformCaseNo ?? '—'} />
-          <Field
-            label="平台链接"
-            value={detail.platform.platformCaseUrl ?? '—'}
-          />
+          <Field label="平台链接" value={detail.platform.platformCaseUrl ?? '—'} />
           <Field label="平台受理时刻" value={formatTime(detail.platform.platformReceivedAt)} />
           <Field label="要求回复时限" value={formatTime(detail.platform.replyDueAt)} />
           <Field label="要求处理时限" value={formatTime(detail.platform.resolveDueAt)} />
@@ -405,12 +433,18 @@ export function AftersalesCaseDetailWorkspace({ caseId }: { caseId: string }) {
         description="「买家说了什么」在这里，与下方时间线同源。平台对话当前只能由租户转录 —— 卷 2 平台消息未交付（channel 独立库无任何平台消息表，跨服务读被禁止）。"
       >
         {detail.messages.length === 0 ? (
-          <EmptyState title="还没有沟通记录" description="登记一条沟通记录，它会同时出现在时间线的对应一侧。" />
+          <EmptyState
+            title="还没有沟通记录"
+            description="登记一条沟通记录，它会同时出现在时间线的对应一侧。"
+          />
         ) : (
           <ul className="space-y-2">
             {detail.messages.map((m) => (
-              <li key={m.id} className={`border-border rounded-md border px-3 py-2 ${m.direction === 'BUYER_TO_US' ? timelineTone('BUYER').badge : timelineTone('US').badge}`}>
-                <div className="flex flex-wrap items-center gap-2 text-copy-12">
+              <li
+                key={m.id}
+                className={`border-border rounded-md border px-3 py-2 ${m.direction === 'BUYER_TO_US' ? timelineTone('BUYER').badge : timelineTone('US').badge}`}
+              >
+                <div className="text-copy-12 flex flex-wrap items-center gap-2">
                   <span className="font-medium">{m.directionLabel}</span>
                   <span className="text-muted-foreground">{m.channelLabel}</span>
                   <span className="text-muted-foreground">发生于 {formatTime(m.sentAt)}</span>
@@ -419,7 +453,7 @@ export function AftersalesCaseDetailWorkspace({ caseId }: { caseId: string }) {
                 </div>
                 <p className="text-copy-13 mt-1 whitespace-pre-wrap">{m.messageBody}</p>
                 {m.externalMessageId && (
-                  <p className="text-muted-foreground mt-1 text-copy-12">
+                  <p className="text-muted-foreground text-copy-12 mt-1">
                     平台消息号：{m.externalMessageId}
                   </p>
                 )}
@@ -435,7 +469,10 @@ export function AftersalesCaseDetailWorkspace({ caseId }: { caseId: string }) {
         description="按提供方分组：平台判责看的是谁的证据。本服务只登记对象存储定位符，不托管文件内容 —— 存 base64 会把一页凭证顶到几十 MB。"
       >
         {detail.attachments.length === 0 ? (
-          <EmptyState title="还没有凭证" description="登记一份凭证，它会进入时间线并按提供方归组。" />
+          <EmptyState
+            title="还没有凭证"
+            description="登记一份凭证，它会进入时间线并按提供方归组。"
+          />
         ) : (
           groupAttachments(detail.attachments).map((g) => (
             <div key={g.side} className="mb-3">
@@ -504,9 +541,10 @@ export function AftersalesCaseDetailWorkspace({ caseId }: { caseId: string }) {
           ))}
         </div>
         {terminal && (
-          <p className="text-muted-foreground mt-3 text-copy-13">
+          <p className="text-muted-foreground text-copy-13 mt-3">
             <TriangleAlert className="mr-1 inline h-4 w-4" />
-            售后单已结案，追加沟通记录 / 凭证 / 商品行 / 备注一律被拒：结案的语义是「这张单办完了」，
+            售后单已结案，追加沟通记录 / 凭证 / 商品行 /
+            备注一律被拒：结案的语义是「这张单办完了」，
             事后往里塞东西会让「结案时到底有什么证据」永远没有答案。
           </p>
         )}
@@ -527,7 +565,15 @@ export function AftersalesCaseDetailWorkspace({ caseId }: { caseId: string }) {
   );
 }
 
-function Field({ label, value, hint }: { label: string; value: string; hint?: string | null | undefined }) {
+function Field({
+  label,
+  value,
+  hint,
+}: {
+  label: string;
+  value: string;
+  hint?: string | null | undefined;
+}) {
   return (
     <div>
       <dt className="text-muted-foreground text-copy-12">{label}</dt>
@@ -764,7 +810,9 @@ function AppendPanels({
           />
           <Button
             size="sm"
-            disabled={busy !== null || line.orderLineId.trim() === '' || line.quantity.trim() === ''}
+            disabled={
+              busy !== null || line.orderLineId.trim() === '' || line.quantity.trim() === ''
+            }
             onClick={() =>
               void run(
                 'line',

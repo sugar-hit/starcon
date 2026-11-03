@@ -165,7 +165,8 @@ export function BatchCalculationSection() {
   }, [sites]);
 
   const storeOptions = useMemo(
-    () => sites.filter((site) => !request.platformCode || site.platformCode === request.platformCode),
+    () =>
+      sites.filter((site) => !request.platformCode || site.platformCode === request.platformCode),
     [sites, request.platformCode],
   );
 
@@ -232,7 +233,12 @@ export function BatchCalculationSection() {
         description="SKU 范围按分类 / 品牌 / 店铺三个维度；平台费率与物流单价是手工假设（5.2.3.1 / 5.2.3.2 未交付）。"
       >
         <div className="grid gap-3 md:grid-cols-4">
-          <FormField id="bc-platform" label="平台" required error={problem?.field === 'platformCode' ? problem.message : undefined}>
+          <FormField
+            id="bc-platform"
+            label="平台"
+            required
+            error={problem?.field === 'platformCode' ? problem.message : undefined}
+          >
             <select
               id="bc-platform"
               className="border-border bg-background text-copy-13 h-9 w-full rounded-md border px-3"
@@ -255,7 +261,13 @@ export function BatchCalculationSection() {
               ))}
             </select>
           </FormField>
-          <FormField id="bc-site" label="店铺（站点）" required hint="决定取价与币种" error={problem?.field === 'siteCode' ? problem.message : undefined}>
+          <FormField
+            id="bc-site"
+            label="店铺（站点）"
+            required
+            hint="决定取价与币种"
+            error={problem?.field === 'siteCode' ? problem.message : undefined}
+          >
             <select
               id="bc-site"
               className="border-border bg-background text-copy-13 h-9 w-full rounded-md border px-3"
@@ -277,7 +289,12 @@ export function BatchCalculationSection() {
               ))}
             </select>
           </FormField>
-          <FormField id="bc-category" label="分类" hint="精确匹配，空 = 不限定" error={problem?.field === 'category' ? problem.message : undefined}>
+          <FormField
+            id="bc-category"
+            label="分类"
+            hint="精确匹配，空 = 不限定"
+            error={problem?.field === 'category' ? problem.message : undefined}
+          >
             <Input
               id="bc-category"
               value={request.category}
@@ -285,7 +302,12 @@ export function BatchCalculationSection() {
               onChange={(e) => patch({ category: e.target.value })}
             />
           </FormField>
-          <FormField id="bc-brand" label="品牌" hint="精确匹配，空 = 不限定" error={problem?.field === 'brand' ? problem.message : undefined}>
+          <FormField
+            id="bc-brand"
+            label="品牌"
+            hint="精确匹配，空 = 不限定"
+            error={problem?.field === 'brand' ? problem.message : undefined}
+          >
             <Input
               id="bc-brand"
               value={request.brand}
@@ -293,7 +315,12 @@ export function BatchCalculationSection() {
               onChange={(e) => patch({ brand: e.target.value })}
             />
           </FormField>
-          <FormField id="bc-quantity" label="数量" hint="用于阶梯与运费" error={problem?.field === 'quantity' ? problem.message : undefined}>
+          <FormField
+            id="bc-quantity"
+            label="数量"
+            hint="用于阶梯与运费"
+            error={problem?.field === 'quantity' ? problem.message : undefined}
+          >
             <Input
               id="bc-quantity"
               type="number"
@@ -331,7 +358,9 @@ export function BatchCalculationSection() {
               step="0.01"
               value={request.logisticsCostPerUnit ?? ''}
               onChange={(e) =>
-                patch({ logisticsCostPerUnit: e.target.value === '' ? null : Number(e.target.value) })
+                patch({
+                  logisticsCostPerUnit: e.target.value === '' ? null : Number(e.target.value),
+                })
               }
             />
           </FormField>
@@ -357,7 +386,8 @@ export function BatchCalculationSection() {
             {busy ? '测算中……' : '开始批量测算'}
           </Button>
           <span className="text-copy-12 text-muted-foreground">
-            一次最多 200 个 SKU（每个 SKU 的成本构成要跨服务读 warehouse）。超出会**明确报错**，不静默截断。
+            一次最多 200 个 SKU（每个 SKU 的成本构成要跨服务读
+            warehouse）。超出会**明确报错**，不静默截断。
           </span>
         </div>
       </SectionCard>
@@ -520,7 +550,7 @@ export function BatchCalculationSection() {
             {results && results.items.length ? (
               <>
                 <div className="mt-3 overflow-x-auto">
-                  <table className="w-full text-copy-13">
+                  <table className="text-copy-13 w-full">
                     <thead>
                       <tr className="border-b text-left">
                         <th className="p-2">SKU</th>

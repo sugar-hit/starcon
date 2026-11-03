@@ -91,7 +91,10 @@ export function SourceAlternativeWorkspace() {
   const [newRun, setNewRun] = useState({ skuId: '', reason: 'STOCKOUT', quantity: '', note: '' });
   const [previewRows, setPreviewRows] = useState<SourceAlternativeCandidate[] | null>(null);
   const [previewing, setPreviewing] = useState(false);
-  const [decision, setDecision] = useState({ type: 'CONFIRMED' as 'CONFIRMED' | 'REJECTED', reason: '' });
+  const [decision, setDecision] = useState({
+    type: 'CONFIRMED' as 'CONFIRMED' | 'REJECTED',
+    reason: '',
+  });
   const [deciding, setDeciding] = useState<SourceAlternativeCandidate | null>(null);
   const [requesting, setRequesting] = useState<SourceAlternativeCandidate | null>(null);
   const [requestForm, setRequestForm] = useState({
@@ -334,10 +337,7 @@ export function SourceAlternativeWorkspace() {
 
         {/* ============================================================ 推荐批次 */}
         <TabsContent value="runs">
-          <SectionCard
-            title="筛选"
-            description="批次列表是真分页真筛选。点一行看候选与判定留痕。"
-          >
+          <SectionCard title="筛选" description="批次列表是真分页真筛选。点一行看候选与判定留痕。">
             <div className="grid gap-3 md:grid-cols-4">
               <FormField id="sku" label="内部 SKU id" hint="catalog 的 SKU 逻辑 id">
                 <Input
@@ -433,9 +433,7 @@ export function SourceAlternativeWorkspace() {
                     size="sm"
                     variant="outline"
                     disabled={busy || page.page <= 0}
-                    onClick={() =>
-                      setFilters({ ...filters, page: Math.max(0, filters.page - 1) })
-                    }
+                    onClick={() => setFilters({ ...filters, page: Math.max(0, filters.page - 1) })}
                   >
                     上一页
                   </Button>
@@ -604,7 +602,9 @@ export function SourceAlternativeWorkspace() {
                   <Input
                     id="max"
                     value={policyForm.maxCandidates}
-                    onChange={(e) => setPolicyForm({ ...policyForm, maxCandidates: e.target.value })}
+                    onChange={(e) =>
+                      setPolicyForm({ ...policyForm, maxCandidates: e.target.value })
+                    }
                   />
                 </FormField>
                 <FormField id="manual" label="弱匹配必须人工确认" hint="默认开着">
@@ -636,9 +636,7 @@ export function SourceAlternativeWorkspace() {
                   <Input
                     id="w-rating"
                     value={policyForm.ratingWeight}
-                    onChange={(e) =>
-                      setPolicyForm({ ...policyForm, ratingWeight: e.target.value })
-                    }
+                    onChange={(e) => setPolicyForm({ ...policyForm, ratingWeight: e.target.value })}
                   />
                 </FormField>
                 <FormField id="w-history" label="历史权重">
@@ -714,7 +712,10 @@ export function SourceAlternativeWorkspace() {
 /** 批次详情：候选 + 判定留痕 + 价格对比。 */
 function RunDetail({ detail }: { detail: SourceAlternativeRunDetail }) {
   const [deciding, setDeciding] = useState<SourceAlternativeCandidate | null>(null);
-  const [decision, setDecision] = useState({ type: 'CONFIRMED' as 'CONFIRMED' | 'REJECTED', reason: '' });
+  const [decision, setDecision] = useState({
+    type: 'CONFIRMED' as 'CONFIRMED' | 'REJECTED',
+    reason: '',
+  });
   const [requesting, setRequesting] = useState<SourceAlternativeCandidate | null>(null);
   const [requestForm, setRequestForm] = useState({
     quantity: '',
@@ -825,16 +826,17 @@ function RunDetail({ detail }: { detail: SourceAlternativeRunDetail }) {
       ) : (
         <div className="space-y-3">
           {detail.candidates.map((c) => (
-            <div key={c.id ?? c.itemId} className="border-border bg-card rounded-lg border px-4 py-3">
+            <div
+              key={c.id ?? c.itemId}
+              className="border-border bg-card rounded-lg border px-4 py-3"
+            >
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-foreground text-sm font-medium">{c.title}</span>
                 <Badge tone={confidenceTone(c.confidence)}>
                   同款置信度 {confidenceLabel(c.confidence)}
                 </Badge>
                 <Badge tone="neutral">{matchTypeLabel(c.matchType, c.matchTypeLabel)}</Badge>
-                {c.requiresManualConfirmation ? (
-                  <Badge tone="warning">需人工确认</Badge>
-                ) : null}
+                {c.requiresManualConfirmation ? <Badge tone="warning">需人工确认</Badge> : null}
                 {c.lowestPrice ? <Badge tone="success">同币种最低价</Badge> : null}
                 {c.decision ? <Badge tone="info">{decisionLabel(c.decision)}</Badge> : null}
               </div>
@@ -882,9 +884,7 @@ function RunDetail({ detail }: { detail: SourceAlternativeRunDetail }) {
                   生成采购申请
                 </Button>
                 {!canCreateRequest(c) ? (
-                  <span className="text-muted-foreground text-xs">
-                    {requestBlockedReason(c)}
-                  </span>
+                  <span className="text-muted-foreground text-xs">{requestBlockedReason(c)}</span>
                 ) : null}
                 {c.purchaseRequestNo ? (
                   <span className="text-muted-foreground text-xs">

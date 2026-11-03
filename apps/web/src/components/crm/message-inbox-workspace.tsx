@@ -211,7 +211,9 @@ export function MessageInboxWorkspace() {
         externalMessageId: null,
         note: '',
       });
-      setNotice(`消息 ${created.messageNo} 已登记（${created.buyerReference} · ${created.orderReference}）。`);
+      setNotice(
+        `消息 ${created.messageNo} 已登记（${created.buyerReference} · ${created.orderReference}）。`,
+      );
       setDraftSubject('');
       setDraftBody('');
       setDraftPlatformTime('');
@@ -274,9 +276,7 @@ export function MessageInboxWorkspace() {
         messageIds: selected,
         priority: batchAction === 'SET_PRIORITY' ? batchPriority : '',
         intentType:
-          batchAction === 'RECORD_INTENT' || batchAction === 'CANCEL_INTENT'
-            ? batchIntentType
-            : '',
+          batchAction === 'RECORD_INTENT' || batchAction === 'CANCEL_INTENT' ? batchIntentType : '',
         reason: batchAction === 'RECORD_INTENT' ? batchReason : '',
       });
       setBatch(result);
@@ -292,7 +292,16 @@ export function MessageInboxWorkspace() {
     } finally {
       setBusy(false);
     }
-  }, [selected, batchAction, batchPriority, batchIntentType, batchReason, load, detail, openDetail]);
+  }, [
+    selected,
+    batchAction,
+    batchPriority,
+    batchIntentType,
+    batchReason,
+    load,
+    detail,
+    openDetail,
+  ]);
 
   if (loading) {
     return (
@@ -309,22 +318,22 @@ export function MessageInboxWorkspace() {
   return (
     <div className="space-y-4">
       {error && (
-        <div className="border-destructive/40 bg-destructive/10 text-destructive rounded-md px-3 py-2 text-copy-13">
+        <div className="border-destructive/40 bg-destructive/10 text-destructive text-copy-13 rounded-md px-3 py-2">
           {error}
         </div>
       )}
       {actionError && (
-        <div className="border-destructive/40 bg-destructive/10 text-destructive rounded-md px-3 py-2 text-copy-13">
+        <div className="border-destructive/40 bg-destructive/10 text-destructive text-copy-13 rounded-md px-3 py-2">
           {actionError}
         </div>
       )}
       {notice && (
-        <div className="border-border bg-muted/40 rounded-md px-3 py-2 text-copy-13">{notice}</div>
+        <div className="border-border bg-muted/40 text-copy-13 rounded-md px-3 py-2">{notice}</div>
       )}
 
       {/* ---------------------------------------------------------- 能力声明 */}
       <SectionCard title="能力声明">
-        <ul className="space-y-2 text-copy-13">
+        <ul className="text-copy-13 space-y-2">
           {(capabilities?.dimensions ?? []).map((dimension) => (
             <li key={dimension.dimension} className="flex flex-wrap items-start gap-2">
               <Badge tone={dimension.available ? 'success' : 'warning'}>
@@ -340,7 +349,7 @@ export function MessageInboxWorkspace() {
           ))}
         </ul>
         {capabilities?.highlight && (
-          <p className="text-muted-foreground mt-3 text-copy-12">{capabilities.highlight}</p>
+          <p className="text-muted-foreground text-copy-12 mt-3">{capabilities.highlight}</p>
         )}
       </SectionCard>
 
@@ -352,7 +361,7 @@ export function MessageInboxWorkspace() {
             而不是一份空清单。
           </p>
         ) : (
-          <ul className="space-y-1 text-copy-13">
+          <ul className="text-copy-13 space-y-1">
             {platforms.map((platform) => (
               <li key={platform.platformCode} className="flex flex-wrap items-start gap-2">
                 <Badge tone={platform.connected ? 'success' : 'warning'}>
@@ -364,7 +373,7 @@ export function MessageInboxWorkspace() {
             ))}
           </ul>
         )}
-        <p className="text-muted-foreground mt-3 text-copy-12">
+        <p className="text-muted-foreground text-copy-12 mt-3">
           平台侧买家站内信适配器未接入 ⇒ 同步入口会返回 <strong>409</strong> 且一条数据都不写；
           消息只能<strong>人工登记</strong>。本页<strong>不提供</strong>「同步平台消息」按钮 ——
           一个点了就成功的假按钮会让运营以为平台消息已经进来了。
@@ -498,7 +507,9 @@ export function MessageInboxWorkspace() {
           </Field>
           <Button
             onClick={() => void submitMessage()}
-            disabled={busy || !writable || !draftShopId || !draftBuyer || !draftOrder || !draftPlatformTime}
+            disabled={
+              busy || !writable || !draftShopId || !draftBuyer || !draftOrder || !draftPlatformTime
+            }
             size="sm"
           >
             <Inbox className="mr-1 h-4 w-4" />
@@ -649,7 +660,7 @@ export function MessageInboxWorkspace() {
           />
         ) : (
           <>
-            <ul className="space-y-2 text-copy-13">
+            <ul className="text-copy-13 space-y-2">
               {items.map((row) => (
                 <li key={row.id} className="border-border rounded-md px-3 py-2">
                   <div className="flex flex-wrap items-center gap-2">
@@ -681,7 +692,7 @@ export function MessageInboxWorkspace() {
                     </Badge>
                     <button
                       type="button"
-                      className="hover:underline font-medium"
+                      className="font-medium hover:underline"
                       onClick={() => void openDetail(row.id)}
                     >
                       {row.subject || row.messageNo}
@@ -690,17 +701,19 @@ export function MessageInboxWorkspace() {
                       {row.shopName} · {row.buyerReference} · {row.orderReference}
                     </span>
                     <span className="text-muted-foreground">
-                      {messageTypeLabel(row.messageType)} · {directionLabel(row.direction)} · 平台时间{' '}
-                      {row.platformTime}
+                      {messageTypeLabel(row.messageType)} · {directionLabel(row.direction)} ·
+                      平台时间 {row.platformTime}
                     </span>
-                    {row.attachmentCount > 0 && <Badge tone="brand">带附件 {row.attachmentCount}</Badge>}
+                    {row.attachmentCount > 0 && (
+                      <Badge tone="brand">带附件 {row.attachmentCount}</Badge>
+                    )}
                     <span className="text-muted-foreground">{messageSourceLabel(row.source)}</span>
                   </div>
                 </li>
               ))}
             </ul>
 
-            <div className="mt-3 flex flex-wrap items-center gap-2 text-copy-12">
+            <div className="text-copy-12 mt-3 flex flex-wrap items-center gap-2">
               <span className="text-muted-foreground">
                 共 {page?.total ?? 0} 条 · 第 {(page?.page ?? 0) + 1} 页 · 每页 {page?.size ?? 0} 条
               </span>
@@ -729,8 +742,8 @@ export function MessageInboxWorkspace() {
       <SectionCard title="批量处理">
         <div className="space-y-3">
           <p className="text-muted-foreground text-copy-13">
-            已选 <strong>{selected.length}</strong> 条。批量结果<strong>逐条</strong>给出结论与原因 ——
-            「点了 20 条、实际生效 17 条」这件事必须看得见，失败的条目不会被悄悄跳过。
+            已选 <strong>{selected.length}</strong> 条。批量结果<strong>逐条</strong>给出结论与原因
+            —— 「点了 20 条、实际生效 17 条」这件事必须看得见，失败的条目不会被悄悄跳过。
           </p>
           <div className="flex flex-wrap items-end gap-2">
             <Field label="动作">
@@ -797,7 +810,7 @@ export function MessageInboxWorkspace() {
           </div>
 
           {batch && (
-            <div className="space-y-2 text-copy-12">
+            <div className="text-copy-12 space-y-2">
               <p className="text-muted-foreground">{batch.boundaryNote}</p>
               <ul className="max-h-64 space-y-1 overflow-auto">
                 {batch.items.map((item) => (
@@ -818,7 +831,7 @@ export function MessageInboxWorkspace() {
       {/* ---------------------------------------------------------- 详情 */}
       {detail && (
         <SectionCard title={`消息详情 · ${detail.message.messageNo}`}>
-          <div className="space-y-3 text-copy-13">
+          <div className="text-copy-13 space-y-3">
             <p className="text-muted-foreground">
               {detail.message.shopName} · {detail.message.platformCode} · 买家{' '}
               <strong>{detail.message.buyerReference}</strong> · 订单{' '}
@@ -833,12 +846,12 @@ export function MessageInboxWorkspace() {
               {detail.attachments.length === 0 ? (
                 <p className="text-muted-foreground text-copy-12">这条消息没有附件。</p>
               ) : (
-                <ul className="space-y-1 text-copy-12">
+                <ul className="text-copy-12 space-y-1">
                   {detail.attachments.map((attachment) => (
                     <li key={attachment.id}>
                       {attachment.fileName}
                       {attachment.fileUrl && (
-                        <a className="hover:underline ml-2" href={attachment.fileUrl}>
+                        <a className="ml-2 hover:underline" href={attachment.fileUrl}>
                           打开附件
                         </a>
                       )}
@@ -860,7 +873,7 @@ export function MessageInboxWorkspace() {
                   {orderContextText(detail.orderContext)}
                 </p>
               )}
-              <p className="text-muted-foreground mt-1 text-copy-12">
+              <p className="text-muted-foreground text-copy-12 mt-1">
                 订单上下文的真值在 trade 服务（9.1.1.1），本服务只经授权 HTTP API 只读补全；
                 查不到时显示的是「不可用 + 原因」，不是空白。
               </p>
@@ -874,7 +887,7 @@ export function MessageInboxWorkspace() {
                   在当前版本里不可调用，批量动作只在本服务留一条意图记录。
                 </p>
               ) : (
-                <ul className="space-y-1 text-copy-12">
+                <ul className="text-copy-12 space-y-1">
                   {detail.intents.map((intent) => (
                     <li key={intent.id} className="flex flex-wrap gap-2">
                       <Badge tone={intent.status === 'RECORDED' ? 'info' : 'neutral'}>
@@ -921,7 +934,9 @@ export function MessageInboxWorkspace() {
                 onClick={() => {
                   setBatchAction('RECORD_INTENT');
                   setSelected([detail.message.id]);
-                  setNotice('已把这条消息放进批量处理的选择里：在「批量处理」里填原因后执行「登记处置意图」。');
+                  setNotice(
+                    '已把这条消息放进批量处理的选择里：在「批量处理」里填原因后执行「登记处置意图」。',
+                  );
                 }}
               >
                 <ClipboardList className="mr-1 h-4 w-4" />

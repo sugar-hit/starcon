@@ -114,9 +114,7 @@ export function platformSummary(row: {
 }): string {
   if (!row.configured) return '平台尚未配置';
   if (row.flagKind === 'RATE_LIMIT')
-    return row.rateLimitPerMinute === null
-      ? '平台尚未配置'
-      : `每分钟 ${row.rateLimitPerMinute} 次`;
+    return row.rateLimitPerMinute === null ? '平台尚未配置' : `每分钟 ${row.rateLimitPerMinute} 次`;
   if (row.flagKind === 'ANNOUNCEMENT')
     return row.announcementTitle
       ? `${row.announcementTitle}（${row.announcementFrom ?? '?'} ~ ${row.announcementTo ?? '?'}）`
@@ -147,9 +145,7 @@ export function describeEvaluation(row: EvaluationLike): string {
     : row.tenantLayer.present
       ? `本租户被单独禁用（${row.tenantLayer.reason ?? '未填原因'}）`
       : '本租户无例外';
-  const effective = row.effectiveLayer.enabled
-    ? '最终可用'
-    : '最终不可用';
+  const effective = row.effectiveLayer.enabled ? '最终可用' : '最终不可用';
   return `${platform} ｜ ${tenant} ｜ ${effective}（${reasonLabel(row.effectiveLayer.reason)}）`;
 }
 

@@ -69,7 +69,8 @@ import {
  */
 
 /** 归集来源的五个动作入口。 */
-type CollectAction = 'PLATFORM_SETTLEMENT' | 'AD_SPEND' | 'LOGISTICS_WAYBILL' | 'HEAD_MILE_SHIPMENT' | 'MANUAL';
+type CollectAction =
+  'PLATFORM_SETTLEMENT' | 'AD_SPEND' | 'LOGISTICS_WAYBILL' | 'HEAD_MILE_SHIPMENT' | 'MANUAL';
 
 const COLLECT_ACTIONS: { key: CollectAction; label: string; hint: string }[] = [
   {
@@ -173,10 +174,7 @@ export function CostCollectionWorkspace() {
   }, [load]);
 
   /** 当前来源下可用的规则（只有启用中的规则能用来归集）。 */
-  const activeRules = useMemo(
-    () => rules.filter((rule) => rule.status === 'ACTIVE'),
-    [rules],
-  );
+  const activeRules = useMemo(() => rules.filter((rule) => rule.status === 'ACTIVE'), [rules]);
 
   /** 人工录入只能用订阅 / 人员 / 办公三类来源。 */
   const manualRules = useMemo(
@@ -292,7 +290,11 @@ export function CostCollectionWorkspace() {
         不是分摊结果。分摊（按 SKU / 订单 / 期间拆开）属 12.4.2.2，尚未交付。
       </Notice>
 
-      {notice ? <Notice tone="success" title="操作完成">{notice}</Notice> : null}
+      {notice ? (
+        <Notice tone="success" title="操作完成">
+          {notice}
+        </Notice>
+      ) : null}
       {actionError ? (
         <Notice tone="danger" title="操作失败">
           {actionError}
@@ -302,7 +304,7 @@ export function CostCollectionWorkspace() {
       {/* ---------------- 1. 归集规则 ---------------- */}
       <SectionCard title="归集规则" description="费用来源 → 费用项 → 分摊目标维度 → 费用池">
         <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             规则由租户自己维护，系统<b>不预置任何一行</b>（费用池怎么划分是租户的账务口径）。
             下面的蓝图标准绑定模板是<b>只读</b>的，可直接照着建规则。
           </p>
@@ -310,7 +312,7 @@ export function CostCollectionWorkspace() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b text-left text-xs text-muted-foreground">
+                  <tr className="text-muted-foreground border-b text-left text-xs">
                     <th className="py-2 pr-3">费用来源</th>
                     <th className="py-2 pr-3">费用项</th>
                     <th className="py-2 pr-3">分摊目标维度</th>
@@ -347,7 +349,7 @@ export function CostCollectionWorkspace() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b text-left text-xs text-muted-foreground">
+                  <tr className="text-muted-foreground border-b text-left text-xs">
                     <th className="py-2 pr-3">规则</th>
                     <th className="py-2 pr-3">来源 → 费用项</th>
                     <th className="py-2 pr-3">目标维度</th>
@@ -361,10 +363,13 @@ export function CostCollectionWorkspace() {
                     <tr key={rule.id} className="border-b last:border-0">
                       <td className="py-2 pr-3">
                         <div className="font-medium">{rule.ruleName}</div>
-                        <div className="font-mono text-xs text-muted-foreground">{rule.ruleCode}</div>
+                        <div className="text-muted-foreground font-mono text-xs">
+                          {rule.ruleCode}
+                        </div>
                       </td>
                       <td className="py-2 pr-3">
-                        {costFeeSourceLabel(rule.feeSource)} → {costFeeCategoryLabel(rule.feeCategory)}
+                        {costFeeSourceLabel(rule.feeSource)} →{' '}
+                        {costFeeCategoryLabel(rule.feeCategory)}
                       </td>
                       <td className="py-2 pr-3">{costDimensionLabel(rule.targetDimension)}</td>
                       <td className="py-2 pr-3">{rule.poolName || rule.poolKey}</td>
@@ -406,15 +411,15 @@ export function CostCollectionWorkspace() {
               </Button>
             ))}
           </div>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             {COLLECT_ACTIONS.find((item) => item.key === action)?.hint}
           </p>
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <label className="space-y-1 text-sm">
-              <span className="text-xs text-muted-foreground">归集规则</span>
+              <span className="text-muted-foreground text-xs">归集规则</span>
               <select
-                className="w-full rounded-md border border-input bg-background px-2 py-2 text-sm"
+                className="border-input bg-background w-full rounded-md border px-2 py-2 text-sm"
                 value={ruleId}
                 onChange={(event) => setRuleId(event.target.value)}
               >
@@ -429,7 +434,7 @@ export function CostCollectionWorkspace() {
             </label>
 
             <label className="space-y-1 text-sm">
-              <span className="text-xs text-muted-foreground">
+              <span className="text-muted-foreground text-xs">
                 基准日期（{action === 'AD_SPEND' ? '必填：要关账的那个月' : '人工录入必填'}）
               </span>
               <Input
@@ -442,7 +447,7 @@ export function CostCollectionWorkspace() {
             {action === 'MANUAL' ? (
               <>
                 <label className="space-y-1 text-sm">
-                  <span className="text-xs text-muted-foreground">费用单据号</span>
+                  <span className="text-muted-foreground text-xs">费用单据号</span>
                   <Input
                     value={manualKey}
                     placeholder="如 SUB-2026-03"
@@ -450,7 +455,7 @@ export function CostCollectionWorkspace() {
                   />
                 </label>
                 <label className="space-y-1 text-sm">
-                  <span className="text-xs text-muted-foreground">金额</span>
+                  <span className="text-muted-foreground text-xs">金额</span>
                   <Input
                     value={manualAmount}
                     placeholder="如 899.00"
@@ -458,7 +463,7 @@ export function CostCollectionWorkspace() {
                   />
                 </label>
                 <label className="space-y-1 text-sm">
-                  <span className="text-xs text-muted-foreground">币种</span>
+                  <span className="text-muted-foreground text-xs">币种</span>
                   <Input
                     value={manualCurrency}
                     placeholder="如 USD"
@@ -466,7 +471,7 @@ export function CostCollectionWorkspace() {
                   />
                 </label>
                 <label className="space-y-1 text-sm">
-                  <span className="text-xs text-muted-foreground">费用归属说明</span>
+                  <span className="text-muted-foreground text-xs">费用归属说明</span>
                   <Input
                     value={manualSubject}
                     placeholder="如 ERP 订阅 2026 年 3 月"
@@ -474,7 +479,9 @@ export function CostCollectionWorkspace() {
                   />
                 </label>
                 <label className="space-y-1 text-sm">
-                  <span className="text-xs text-muted-foreground">归属期间起（会计期间口径必填）</span>
+                  <span className="text-muted-foreground text-xs">
+                    归属期间起（会计期间口径必填）
+                  </span>
                   <Input
                     type="date"
                     value={manualPeriodStart}
@@ -482,7 +489,9 @@ export function CostCollectionWorkspace() {
                   />
                 </label>
                 <label className="space-y-1 text-sm">
-                  <span className="text-xs text-muted-foreground">归属期间止（会计期间口径必填）</span>
+                  <span className="text-muted-foreground text-xs">
+                    归属期间止（会计期间口径必填）
+                  </span>
                   <Input
                     type="date"
                     value={manualPeriodEnd}
@@ -490,7 +499,7 @@ export function CostCollectionWorkspace() {
                   />
                 </label>
                 <label className="space-y-1 text-sm">
-                  <span className="text-xs text-muted-foreground">凭据引用（发票号 / 合同号）</span>
+                  <span className="text-muted-foreground text-xs">凭据引用（发票号 / 合同号）</span>
                   <Input
                     value={manualEvidence}
                     onChange={(event) => setManualEvidence(event.target.value)}
@@ -508,10 +517,10 @@ export function CostCollectionWorkspace() {
           </Button>
 
           {lastResult ? (
-            <div className="rounded-md border border-border p-3 text-sm">
+            <div className="border-border rounded-md border p-3 text-sm">
               <p className="font-medium">{resultText(lastResult)}</p>
               {lastResult.notes.length ? (
-                <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-muted-foreground">
+                <ul className="text-muted-foreground mt-2 list-disc space-y-1 pl-5 text-xs">
                   {lastResult.notes.slice(0, 20).map((note) => (
                     <li key={note}>{note}</li>
                   ))}
@@ -528,7 +537,7 @@ export function CostCollectionWorkspace() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b text-left text-xs text-muted-foreground">
+                <tr className="text-muted-foreground border-b text-left text-xs">
                   <th className="py-2 pr-3">费用池</th>
                   <th className="py-2 pr-3">目标维度</th>
                   <th className="py-2 pr-3">归属期间</th>
@@ -575,7 +584,7 @@ export function CostCollectionWorkspace() {
         )}
 
         {poolDetail ? (
-          <div className="mt-4 rounded-md border border-border p-3">
+          <div className="border-border mt-4 rounded-md border p-3">
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium">
                 {poolDetail.pool.poolName || poolDetail.pool.poolKey} ·{' '}
@@ -585,16 +594,17 @@ export function CostCollectionWorkspace() {
                 收起
               </Button>
             </div>
-            <p className="mt-1 text-xs text-muted-foreground">
-              合计 {formatCostMoney(poolDetail.pool.totalAmount, poolDetail.pool.currency)} ·
-              共 {poolDetail.pool.entryCount} 条 · 目标维度{' '}
+            <p className="text-muted-foreground mt-1 text-xs">
+              合计 {formatCostMoney(poolDetail.pool.totalAmount, poolDetail.pool.currency)} · 共{' '}
+              {poolDetail.pool.entryCount} 条 · 目标维度{' '}
               {costDimensionLabel(poolDetail.pool.dimension)} · 尚未分摊（分摊属 12.4.2.2）
             </p>
             <ul className="mt-2 space-y-1 text-xs">
               {poolDetail.entries.map((entry) => (
                 <li key={entry.id} className="flex justify-between gap-3">
                   <span className="truncate">
-                    {costFeeCategoryLabel(entry.feeCategory)} · {entry.sourceRefCode || entry.sourceRefKey}
+                    {costFeeCategoryLabel(entry.feeCategory)} ·{' '}
+                    {entry.sourceRefCode || entry.sourceRefKey}
                   </span>
                   <span className="tabular-nums">
                     {formatCostMoney(entry.amount, entry.currency)}
@@ -611,9 +621,9 @@ export function CostCollectionWorkspace() {
         <div className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <label className="space-y-1 text-sm">
-              <span className="text-xs text-muted-foreground">费用来源</span>
+              <span className="text-muted-foreground text-xs">费用来源</span>
               <select
-                className="w-full rounded-md border border-input bg-background px-2 py-2 text-sm"
+                className="border-input bg-background w-full rounded-md border px-2 py-2 text-sm"
                 value={feeSource}
                 onChange={(event) => {
                   setFeeSource(event.target.value);
@@ -629,9 +639,9 @@ export function CostCollectionWorkspace() {
               </select>
             </label>
             <label className="space-y-1 text-sm">
-              <span className="text-xs text-muted-foreground">分摊目标维度</span>
+              <span className="text-muted-foreground text-xs">分摊目标维度</span>
               <select
-                className="w-full rounded-md border border-input bg-background px-2 py-2 text-sm"
+                className="border-input bg-background w-full rounded-md border px-2 py-2 text-sm"
                 value={targetDimension}
                 onChange={(event) => {
                   setTargetDimension(event.target.value);
@@ -647,9 +657,9 @@ export function CostCollectionWorkspace() {
               </select>
             </label>
             <label className="space-y-1 text-sm">
-              <span className="text-xs text-muted-foreground">币种</span>
+              <span className="text-muted-foreground text-xs">币种</span>
               <select
-                className="w-full rounded-md border border-input bg-background px-2 py-2 text-sm"
+                className="border-input bg-background w-full rounded-md border px-2 py-2 text-sm"
                 value={currency}
                 onChange={(event) => {
                   setCurrency(event.target.value);
@@ -665,7 +675,7 @@ export function CostCollectionWorkspace() {
               </select>
             </label>
             <label className="space-y-1 text-sm">
-              <span className="text-xs text-muted-foreground">关键字</span>
+              <span className="text-muted-foreground text-xs">关键字</span>
               <Input
                 value={keyword}
                 placeholder="单据号 / 池名 / 备注"
@@ -705,7 +715,7 @@ export function CostCollectionWorkspace() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b text-left text-xs text-muted-foreground">
+                  <tr className="text-muted-foreground border-b text-left text-xs">
                     <th className="py-2 pr-3">费用项</th>
                     <th className="py-2 pr-3">目标维度</th>
                     <th className="py-2 pr-3">费用池 / 期间</th>
@@ -716,10 +726,10 @@ export function CostCollectionWorkspace() {
                 </thead>
                 <tbody>
                   {entries.items.map((entry) => (
-                    <tr key={entry.id} className="border-b last:border-0 align-top">
+                    <tr key={entry.id} className="border-b align-top last:border-0">
                       <td className="py-2 pr-3">
                         <div>{costFeeCategoryLabel(entry.feeCategory)}</div>
-                        <div className="text-xs text-muted-foreground">
+                        <div className="text-muted-foreground text-xs">
                           {costFeeSourceLabel(entry.feeSource)}
                         </div>
                       </td>
@@ -737,7 +747,8 @@ export function CostCollectionWorkspace() {
                               {costBasisTypeLabel(entry.basis.basisType)} · {entry.basis.basisCode}
                             </div>
                             <div className="text-muted-foreground">
-                              依据金额 {formatCostMoney(entry.basis.basisAmount, entry.basis.basisCurrency)}
+                              依据金额{' '}
+                              {formatCostMoney(entry.basis.basisAmount, entry.basis.basisCurrency)}
                               {entry.basis.evidenceRef ? ` · 凭据 ${entry.basis.evidenceRef}` : ''}
                             </div>
                             <div className="text-muted-foreground">
@@ -778,7 +789,7 @@ export function CostCollectionWorkspace() {
 
           {entries && entries.total > entries.size ? (
             <div className="flex items-center justify-between text-sm">
-              <span className="text-xs text-muted-foreground">
+              <span className="text-muted-foreground text-xs">
                 第 {entries.page + 1} 页 · 共 {entries.total} 条（每页 {entries.size} 条）
               </span>
               <div className="flex gap-2">
@@ -808,16 +819,16 @@ export function CostCollectionWorkspace() {
             {caps.capabilities
               .filter((item) => !item.available)
               .map((item) => (
-                <li key={item.moduleId} className="rounded-md border border-border p-3">
+                <li key={item.moduleId} className="border-border rounded-md border p-3">
                   <div className="font-medium">
                     {item.moduleId} · {item.dimension}
                     {item.ownerModule ? (
-                      <span className="ml-2 text-xs text-muted-foreground">
+                      <span className="text-muted-foreground ml-2 text-xs">
                         归属 {item.ownerModule}
                       </span>
                     ) : null}
                   </div>
-                  <p className="mt-1 text-xs text-muted-foreground">{item.note}</p>
+                  <p className="text-muted-foreground mt-1 text-xs">{item.note}</p>
                 </li>
               ))}
           </ul>

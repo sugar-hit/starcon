@@ -92,7 +92,7 @@ export function InfluencerAttributionWorkspace() {
     <div className="flex flex-col gap-4 p-4">
       <header className="flex flex-col gap-2">
         <h1 className="text-xl font-medium">带货归因</h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           达人带来的订单量、GMV、退款率、佣金成本与有效粉丝转化；对比达人投入产出，
           并在归因批次写完后触发一次评级重算。
         </p>
@@ -110,7 +110,8 @@ export function InfluencerAttributionWorkspace() {
             <ul className="flex flex-col gap-1 text-sm">
               {unavailable.map((dimension) => (
                 <li key={dimension.dimension} className="text-muted-foreground">
-                  <span className="font-medium">{dimension.dimension}</span>：{dimension.description}
+                  <span className="font-medium">{dimension.dimension}</span>：
+                  {dimension.description}
                   {dimension.ownerModule ? `（责任模块 ${dimension.ownerModule}）` : ''}
                   —— {dimension.impact}
                 </li>
@@ -271,9 +272,7 @@ function ReportTab({ options }: { options: AttributionOptions | null }) {
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <div className="rounded border p-4">
             <p className="text-muted-foreground text-xs">归因 GMV 合计</p>
-            <p className="text-sm font-medium">
-              {attributionMoney(summary.attributedGmvTotal)}
-            </p>
+            <p className="text-sm font-medium">{attributionMoney(summary.attributedGmvTotal)}</p>
           </div>
           <div className="rounded border p-4">
             <p className="text-muted-foreground text-xs">佣金成本合计</p>
@@ -304,7 +303,8 @@ function ReportTab({ options }: { options: AttributionOptions | null }) {
           归因口径按规则{' '}
           <span className="font-medium">{summary.ruleCode ?? '（未配置生效规则）'}</span>
           {summary.attributionModel ? `（${attributionModelLabel(summary.attributionModel)}）` : ''}
-          统计；有归因记录的达人 {summary.influencerCount} 位、归因记录 {summary.attributionCount} 条。
+          统计；有归因记录的达人 {summary.influencerCount} 位、归因记录 {summary.attributionCount}{' '}
+          条。
         </p>
       ) : null}
 
@@ -314,9 +314,7 @@ function ReportTab({ options }: { options: AttributionOptions | null }) {
         {loading ? (
           <p className="text-muted-foreground text-sm">加载中…</p>
         ) : page && page.items.length === 0 ? (
-          <p className="text-muted-foreground text-sm">
-            {emptyStateText(page.total, filtered)}
-          </p>
+          <p className="text-muted-foreground text-sm">{emptyStateText(page.total, filtered)}</p>
         ) : page ? (
           <table className="w-full text-sm">
             <thead>
@@ -562,7 +560,7 @@ function RecordsTab({ options }: { options: AttributionOptions | null }) {
                   <td className="py-1">
                     {accrualStatusLabel(row.accrualStatus)}
                     {row.commissionVariance === null ? null : (
-                      <span className="text-amber-600 text-xs">
+                      <span className="text-xs text-amber-600">
                         {' '}
                         差额 {attributionMoney(row.commissionVariance)}
                       </span>
@@ -674,9 +672,7 @@ function AttributionDetailPanel({
         </div>
         <div>
           <p className="text-muted-foreground text-xs">有效粉丝转化率</p>
-          <p className="text-sm">
-            {attributionPercent(detail.influencer.followerConversionRate)}
-          </p>
+          <p className="text-sm">{attributionPercent(detail.influencer.followerConversionRate)}</p>
         </div>
         <div>
           <p className="text-muted-foreground text-xs">评级</p>
@@ -693,9 +689,9 @@ function AttributionDetailPanel({
 
       <p className="text-muted-foreground text-xs">
         规则快照：{detail.rule.ruleCode} · {attributionModelLabel(detail.rule.attributionModel)} ·{' '}
-        {poolWeightBasisLabel(detail.rule.poolWeightBasis)} · 窗口 {detail.rule.attributionWindowDays}{' '}
-        天 · {refundTreatmentLabel(detail.rule.refundTreatment)} ·{' '}
-        {commissionBasisLabel(detail.rule.commissionBasis)}
+        {poolWeightBasisLabel(detail.rule.poolWeightBasis)} · 窗口{' '}
+        {detail.rule.attributionWindowDays} 天 · {refundTreatmentLabel(detail.rule.refundTreatment)}{' '}
+        · {commissionBasisLabel(detail.rule.commissionBasis)}
       </p>
 
       <div className="flex flex-wrap items-end gap-2">
@@ -731,7 +727,12 @@ function AttributionDetailPanel({
             )?.value;
             void (async () => {
               try {
-                onChanged(await accrueAttribution(row.id, { status: status ?? 'ACCRUED', note: note ?? '' }));
+                onChanged(
+                  await accrueAttribution(row.id, {
+                    status: status ?? 'ACCRUED',
+                    note: note ?? '',
+                  }),
+                );
               } catch (e) {
                 onError(errorText(e));
               }
@@ -744,7 +745,9 @@ function AttributionDetailPanel({
       <p className="text-muted-foreground text-xs">
         当前状态：{accrualStatusLabel(row.accrualStatus)}
         {row.accruedAt ? ` · 计提时刻 ${attributionTimestamp(row.accruedAt)}` : ''}
-        {row.commissionVariance === null ? null : ` · 与口径的差额 ${attributionMoney(row.commissionVariance)}`}
+        {row.commissionVariance === null
+          ? null
+          : ` · 与口径的差额 ${attributionMoney(row.commissionVariance)}`}
       </p>
     </div>
   );
@@ -809,8 +812,8 @@ function RulesTab({
         ) : current ? (
           <p className="text-sm">
             {current.ruleCode} · {attributionModelLabel(current.attributionModel)} ·{' '}
-            {poolWeightBasisLabel(current.poolWeightBasis)} · 窗口 {current.attributionWindowDays} 天 ·{' '}
-            {refundTreatmentLabel(current.refundTreatment)} ·{' '}
+            {poolWeightBasisLabel(current.poolWeightBasis)} · 窗口 {current.attributionWindowDays}{' '}
+            天 · {refundTreatmentLabel(current.refundTreatment)} ·{' '}
             {commissionBasisLabel(current.commissionBasis)}
           </p>
         ) : (
@@ -842,8 +845,8 @@ function RulesTab({
         {run ? (
           <p className="text-muted-foreground text-xs">
             新建 {run.created} 条 / 刷新 {run.refreshed} 条 / 跳过出窗 {run.skippedOutOfWindow} 条 /
-            跳过无效果数据 {run.skippedNoEffectData} 条 / 跳过分摊基准不可用 {run.skippedNoSplitBasis} 条
-            / 触发评级重算 {run.ratingRecomputed} 次
+            跳过无效果数据 {run.skippedNoEffectData} 条 / 跳过分摊基准不可用{' '}
+            {run.skippedNoSplitBasis} 条 / 触发评级重算 {run.ratingRecomputed} 次
           </p>
         ) : null}
       </div>
@@ -895,9 +898,7 @@ function RulesTab({
               max={365}
               className="rounded border px-2 py-1 text-sm"
               value={form.attributionWindowDays}
-              onChange={(e) =>
-                setForm({ ...form, attributionWindowDays: Number(e.target.value) })
-              }
+              onChange={(e) => setForm({ ...form, attributionWindowDays: Number(e.target.value) })}
             />
           </label>
           <label className="flex flex-col gap-1 text-sm">
@@ -1020,7 +1021,7 @@ function RulesTab({
                   <tr key={item.platformCode} className="border-t">
                     <td className="py-1">{item.platformName}</td>
                     <td className="py-1">{item.available ? '已接入' : '未接入'}</td>
-                    <td className="py-1 text-muted-foreground">{item.reason}</td>
+                    <td className="text-muted-foreground py-1">{item.reason}</td>
                     <td className="py-1">{item.registeredCount}</td>
                   </tr>
                 ))}

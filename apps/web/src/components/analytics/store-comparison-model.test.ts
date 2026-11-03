@@ -102,8 +102,22 @@ function response(overrides: Partial<ComparisonResponse> = {}): ComparisonRespon
         displayName: '平台侧成交金额',
         unit: 'CURRENCY',
         entries: [
-          { rank: 1, shopCode: 'shop-a', shopName: '亚马逊旗舰店', platformCode: 'AMAZON', currency: 'USD', value: 100 },
-          { rank: 1, shopCode: 'shop-b', shopName: 'TikTok 小店', platformCode: 'TIKTOK', currency: 'EUR', value: 80 },
+          {
+            rank: 1,
+            shopCode: 'shop-a',
+            shopName: '亚马逊旗舰店',
+            platformCode: 'AMAZON',
+            currency: 'USD',
+            value: 100,
+          },
+          {
+            rank: 1,
+            shopCode: 'shop-b',
+            shopName: 'TikTok 小店',
+            platformCode: 'TIKTOK',
+            currency: 'EUR',
+            value: 80,
+          },
         ],
         note: '',
       },
@@ -203,9 +217,7 @@ describe('口径', () => {
   });
 
   it('派生比型说清分子与分母', () => {
-    expect(metricFormulaText(DEFINITIONS[2]!)).toBe(
-      'STORE_GMV_PLATFORM ÷ STORE_GMV_RESTORED',
-    );
+    expect(metricFormulaText(DEFINITIONS[2]!)).toBe('STORE_GMV_PLATFORM ÷ STORE_GMV_RESTORED');
   });
 
   it('窗口环比型没有声明被比较指标时要说口径不成立', () => {
@@ -240,7 +252,9 @@ describe('矩阵的列', () => {
 
   it('没有事实的单元格是「—」而不是 0', () => {
     const target = row({
-      metrics: [metric({ value: null, availability: 'NO_DATA', availabilityNote: '这个窗口没有事实。' })],
+      metrics: [
+        metric({ value: null, availability: 'NO_DATA', availabilityNote: '这个窗口没有事实。' }),
+      ],
     });
     const columns = matrixColumns(DEFINITIONS);
     expect(cellText(target, columns[0]!)).toBe('—');
@@ -290,8 +304,20 @@ describe('平台与口径差异（蓝图的加粗要求）', () => {
   it('多个平台时必须提示「分组之间的大小差异不能直接当成经营能力差异」', () => {
     const multi = response({
       platformGroups: [
-        { platformCode: 'AMAZON', platformName: '亚马逊', stores: [row()], storeCount: 1, caliberNote: 'a' },
-        { platformCode: 'TIKTOK', platformName: 'TikTok', stores: [row()], storeCount: 1, caliberNote: 'b' },
+        {
+          platformCode: 'AMAZON',
+          platformName: '亚马逊',
+          stores: [row()],
+          storeCount: 1,
+          caliberNote: 'a',
+        },
+        {
+          platformCode: 'TIKTOK',
+          platformName: 'TikTok',
+          stores: [row()],
+          storeCount: 1,
+          caliberNote: 'b',
+        },
       ],
     });
     expect(hasMultiplePlatforms(multi)).toBe(true);

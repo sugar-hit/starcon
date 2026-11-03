@@ -75,7 +75,13 @@ import {
  * </ol>
  */
 export function ExchangeAuthorizationWorkspace() {
-  const [params, setParams] = useState({ status: '', decision: '', keyword: '', page: 0, size: 20 });
+  const [params, setParams] = useState({
+    status: '',
+    decision: '',
+    keyword: '',
+    page: 0,
+    size: 20,
+  });
   const [page, setPage] = useState<ExchangePage | null>(null);
   const [capabilities, setCapabilities] = useState<ExchangeCapabilities | null>(null);
   const [filters, setFilters] = useState<ExchangeFilterOptions | null>(null);
@@ -253,9 +259,17 @@ export function ExchangeAuthorizationWorkspace() {
       ))}
 
       <div className="grid gap-4 md:grid-cols-4">
-        <StatCard label="换货授权总数" value={summary?.totalCount ?? 0} comparisonLabel="当前筛选下的真实条数" />
+        <StatCard
+          label="换货授权总数"
+          value={summary?.totalCount ?? 0}
+          comparisonLabel="当前筛选下的真实条数"
+        />
         <StatCard label="生效中" value={summary?.activeCount ?? 0} comparisonLabel="预占仍占着货" />
-        <StatCard label="已撤销" value={summary?.cancelledCount ?? 0} comparisonLabel="预占已释放" />
+        <StatCard
+          label="已撤销"
+          value={summary?.cancelledCount ?? 0}
+          comparisonLabel="预占已释放"
+        />
         <StatCard
           label="等旧货回寄"
           value={formatQty(summary?.totalWaitingReturnQuantity)}
@@ -268,7 +282,7 @@ export function ExchangeAuthorizationWorkspace() {
           <FormField id="ex-status" label="状态">
             <select
               id="ex-status"
-              className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
+              className="bg-background mt-1 w-full rounded-md border px-2 py-1.5 text-sm"
               value={params.status}
               onChange={(e: ChangeEvent<HTMLSelectElement>) =>
                 setParams({ ...params, status: e.target.value, page: 0 })
@@ -285,7 +299,7 @@ export function ExchangeAuthorizationWorkspace() {
           <FormField id="ex-decision" label="授权结论">
             <select
               id="ex-decision"
-              className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
+              className="bg-background mt-1 w-full rounded-md border px-2 py-1.5 text-sm"
               value={params.decision}
               onChange={(e: ChangeEvent<HTMLSelectElement>) =>
                 setParams({ ...params, decision: e.target.value, page: 0 })
@@ -441,11 +455,15 @@ export function ExchangeAuthorizationWorkspace() {
                   <tr key={l.id} className="border-b last:border-0">
                     <td className="p-2">
                       <div className="font-mono text-xs">{unavailable(l.originalSkuCode)}</div>
-                      <div className="text-muted-foreground text-xs">{unavailable(l.originalSkuName)}</div>
+                      <div className="text-muted-foreground text-xs">
+                        {unavailable(l.originalSkuName)}
+                      </div>
                     </td>
                     <td className="p-2">
                       <div className="font-mono text-xs">{unavailable(l.replacementSkuCode)}</div>
-                      <div className="text-muted-foreground text-xs">{unavailable(l.replacementSkuName)}</div>
+                      <div className="text-muted-foreground text-xs">
+                        {unavailable(l.replacementSkuName)}
+                      </div>
                       {l.replacementReason && (
                         <div className="text-muted-foreground text-xs">{l.replacementReason}</div>
                       )}
@@ -454,10 +472,14 @@ export function ExchangeAuthorizationWorkspace() {
                       {formatQty(l.requestedQuantity)} / {formatQty(l.authorizedQuantity)}
                     </td>
                     <td className="p-2">
-                      <Badge tone={reservationTone(l.reservationStatus)}>{reservationBadge(l)}</Badge>
+                      <Badge tone={reservationTone(l.reservationStatus)}>
+                        {reservationBadge(l)}
+                      </Badge>
                     </td>
                     <td className="p-2 text-xs">
-                      {l.outboundDemandStatus === 'PENDING' ? '待出库接手' : l.outboundDemandStatus || '—'}
+                      {l.outboundDemandStatus === 'PENDING'
+                        ? '待出库接手'
+                        : l.outboundDemandStatus || '—'}
                     </td>
                     <td className="p-2">
                       <Badge tone={waitingReturnTone(l.returnRequirementStatus)}>
@@ -519,7 +541,7 @@ export function ExchangeAuthorizationWorkspace() {
             <FormField id="ex-case" label="换货售后单" required>
               <select
                 id="ex-case"
-                className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
+                className="bg-background mt-1 w-full rounded-md border px-2 py-1.5 text-sm"
                 value={caseId}
                 onChange={(e: ChangeEvent<HTMLSelectElement>) => {
                   setCaseId(e.target.value);
@@ -543,7 +565,7 @@ export function ExchangeAuthorizationWorkspace() {
               <FormField id="ex-case-line" label="换哪一条商品行" required>
                 <select
                   id="ex-case-line"
-                  className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
+                  className="bg-background mt-1 w-full rounded-md border px-2 py-1.5 text-sm"
                   value={caseLineId}
                   onChange={(e: ChangeEvent<HTMLSelectElement>) => {
                     setCaseLineId(e.target.value);
@@ -554,7 +576,8 @@ export function ExchangeAuthorizationWorkspace() {
                   <option value="">请选择</option>
                   {(selectedCase.lines ?? []).map((l) => (
                     <option key={l.caseLineId} value={l.caseLineId}>
-                      {unavailable(l.skuCode)} · {unavailable(l.skuName)} · 涉及 {formatQty(l.quantity)}
+                      {unavailable(l.skuCode)} · {unavailable(l.skuName)} · 涉及{' '}
+                      {formatQty(l.quantity)}
                     </option>
                   ))}
                 </select>
@@ -563,8 +586,8 @@ export function ExchangeAuthorizationWorkspace() {
 
             {selectedLine && (
               <p className="text-muted-foreground text-xs">
-                要换回的是 {unavailable(selectedLine.skuCode)}（{unavailable(selectedLine.skuName)}），
-                售后单上登记涉及 {formatQty(selectedLine.quantity)}。
+                要换回的是 {unavailable(selectedLine.skuCode)}（{unavailable(selectedLine.skuName)}
+                ）， 售后单上登记涉及 {formatQty(selectedLine.quantity)}。
               </p>
             )}
 
@@ -584,7 +607,12 @@ export function ExchangeAuthorizationWorkspace() {
                 onChange={(e) => setLegalEntityId(e.target.value)}
               />
             </FormField>
-            <FormField id="ex-sku" label="替换商品 SKU UUID" required hint="必须是 catalog 里的在售 SKU">
+            <FormField
+              id="ex-sku"
+              label="替换商品 SKU UUID"
+              required
+              hint="必须是 catalog 里的在售 SKU"
+            >
               <Input
                 id="ex-sku"
                 value={replacementSkuId}

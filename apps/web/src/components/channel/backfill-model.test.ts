@@ -37,8 +37,12 @@ const base: BackfillForm = {
 describe('补拉时间窗', () => {
   it('右端晚于左端才算合法', () => {
     expect(validateWindow(base)).toBeNull();
-    expect(validateWindow({ ...base, windowEnd: '2026-03-14T10:00' })).toContain('右端必须晚于左端');
-    expect(validateWindow({ ...base, windowEnd: '2026-03-14T09:00' })).toContain('右端必须晚于左端');
+    expect(validateWindow({ ...base, windowEnd: '2026-03-14T10:00' })).toContain(
+      '右端必须晚于左端',
+    );
+    expect(validateWindow({ ...base, windowEnd: '2026-03-14T09:00' })).toContain(
+      '右端必须晚于左端',
+    );
   });
 
   it('零长窗口被拒：捞不到任何东西却会让人以为该区间无缺口', () => {
@@ -55,7 +59,9 @@ describe('补拉时间窗', () => {
     const input = buildTaskInput(base);
     expect(input.windowStart).toBe(new Date('2026-03-14T10:00').toISOString());
     expect(input.windowEnd).toBe(new Date('2026-03-14T12:00').toISOString());
-    expect(new Date(input.windowEnd).getTime()).toBeGreaterThan(new Date(input.windowStart).getTime());
+    expect(new Date(input.windowEnd).getTime()).toBeGreaterThan(
+      new Date(input.windowStart).getTime(),
+    );
   });
 });
 

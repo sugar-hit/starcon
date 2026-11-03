@@ -251,7 +251,8 @@ export function CostAllocationSection() {
               <div className="space-y-1">
                 <p>
                   <b>规则</b>：{capabilities.rules.map((r) => r.label).join(' / ')}。
-                  规则不是页面上的装饰 —— 它真的参与算术：同一批货，换一条规则，每个 SKU 的分摊额就变。
+                  规则不是页面上的装饰 —— 它真的参与算术：同一批货，换一条规则，每个 SKU
+                  的分摊额就变。
                 </p>
                 <p>
                   <b>基数</b>：{capabilities.basisNote}
@@ -325,7 +326,11 @@ export function CostAllocationSection() {
         description="选一张货件 + 选一条规则 + 填货件成本总额，落第一个版本。一个货件只能摊一次。"
       >
         <div className="grid gap-3 md:grid-cols-4">
-          <FormField id="alloc-source" label="货件（头程发运单）" hint="一张单里多个 SKU 才是混合成本货件">
+          <FormField
+            id="alloc-source"
+            label="货件（头程发运单）"
+            hint="一张单里多个 SKU 才是混合成本货件"
+          >
             <select
               id="alloc-source"
               className="border-input h-9 w-full rounded-md border px-2 text-sm"
@@ -405,9 +410,7 @@ export function CostAllocationSection() {
             建分摊单
           </Button>
           {sources?.truncated ? (
-            <span className="text-copy-12 text-warning-foreground">
-              🔴 {sources.note}
-            </span>
+            <span className="text-copy-12 text-warning-foreground">🔴 {sources.note}</span>
           ) : null}
         </div>
       </SectionCard>
@@ -472,7 +475,7 @@ export function CostAllocationSection() {
             <div className="mt-4 overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="border-border border-b text-copy-12 text-muted-foreground">
+                  <tr className="border-border text-copy-12 text-muted-foreground border-b">
                     <th className="p-2">货件</th>
                     <th className="p-2">规则</th>
                     <th className="p-2">币种</th>
@@ -587,8 +590,8 @@ export function CostAllocationSection() {
                   <p>
                     参与分摊的行：{detail.currentRevision?.eligibleLineCount ?? 0} /{' '}
                     {detail.currentRevision?.lineCount ?? 0}
-                    {detail.currentRevision && detail.currentRevision.eligibleLineCount <
-                    detail.currentRevision.lineCount
+                    {detail.currentRevision &&
+                    detail.currentRevision.eligibleLineCount < detail.currentRevision.lineCount
                       ? '（其余行基数不可得，未参与分摊）'
                       : ''}
                   </p>
@@ -602,7 +605,7 @@ export function CostAllocationSection() {
               <div className="mt-4 overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
-                    <tr className="border-border border-b text-copy-12 text-muted-foreground">
+                    <tr className="border-border text-copy-12 text-muted-foreground border-b">
                       <th className="p-2">SKU</th>
                       <th className="p-2">数量</th>
                       <th className="p-2">基数</th>
@@ -627,11 +630,14 @@ export function CostAllocationSection() {
                             <span className="text-muted-foreground">基数不可得</span>
                           )}
                         </td>
-                        <td className="p-2 text-copy-12 text-muted-foreground">
+                        <td className="text-copy-12 text-muted-foreground p-2">
                           {basisNoteText(line)}
                         </td>
                         <td className="p-2 font-mono">
-                          {moneyWithCurrency(line.allocatedAmount, detail.currentRevision?.currency)}
+                          {moneyWithCurrency(
+                            line.allocatedAmount,
+                            detail.currentRevision?.currency,
+                          )}
                         </td>
                         <td className="p-2 font-mono">
                           {Number(line.adjustmentAmount) === 0 ? (
@@ -685,7 +691,9 @@ export function CostAllocationSection() {
                   value={recalcRule}
                   onChange={(e) => setRecalcRule(e.target.value)}
                 >
-                  <option value="">沿用当前（{detail.currentRevision?.basisRuleLabel ?? '—'}）</option>
+                  <option value="">
+                    沿用当前（{detail.currentRevision?.basisRuleLabel ?? '—'}）
+                  </option>
                   {(capabilities?.rules ?? []).map((r) => (
                     <option key={r.value} value={r.value}>
                       {r.label}
@@ -726,10 +734,7 @@ export function CostAllocationSection() {
                   size="sm"
                   variant="ghost"
                   onClick={() =>
-                    setAdjustments([
-                      ...adjustments,
-                      { skuId: '', amount: '', reason: '' },
-                    ])
+                    setAdjustments([...adjustments, { skuId: '', amount: '', reason: '' }])
                   }
                 >
                   加一行微调
@@ -737,8 +742,8 @@ export function CostAllocationSection() {
               </div>
               {adjustments.length === 0 ? (
                 <p className="text-copy-12 text-muted-foreground mt-1">
-                  没有微调。微调是**相对计算分摊额的增减**，会让「逐行最终额之和」与货件成本总额产生差额 ——
-                  那个差额会显式显示出来。
+                  没有微调。微调是**相对计算分摊额的增减**，会让「逐行最终额之和」与货件成本总额产生差额
+                  —— 那个差额会显式显示出来。
                 </p>
               ) : (
                 <div className="mt-2 space-y-2">
@@ -755,7 +760,11 @@ export function CostAllocationSection() {
                           }}
                         />
                       </FormField>
-                      <FormField id={`adj-amount-${index}`} label="调整额" hint="可正可负，不能为 0">
+                      <FormField
+                        id={`adj-amount-${index}`}
+                        label="调整额"
+                        hint="可正可负，不能为 0"
+                      >
                         <Input
                           id={`adj-amount-${index}`}
                           value={adjustment.amount}
@@ -783,9 +792,7 @@ export function CostAllocationSection() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() =>
-                            setAdjustments(adjustments.filter((_, i) => i !== index))
-                          }
+                          onClick={() => setAdjustments(adjustments.filter((_, i) => i !== index))}
                         >
                           删掉这行
                         </Button>
@@ -833,7 +840,7 @@ export function CostAllocationSection() {
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="border-border border-b text-copy-12 text-muted-foreground">
+                  <tr className="border-border text-copy-12 text-muted-foreground border-b">
                     <th className="p-2">版本</th>
                     <th className="p-2">规则</th>
                     <th className="p-2">货件成本总额</th>
@@ -860,7 +867,7 @@ export function CostAllocationSection() {
                         {moneyWithCurrency(revision.variance, revision.currency, '0.00')}
                       </td>
                       <td className="p-2">{timeText(revision.effectiveFrom)}</td>
-                      <td className="p-2 text-copy-12 text-muted-foreground">
+                      <td className="text-copy-12 text-muted-foreground p-2">
                         {revision.changeReason}
                       </td>
                     </tr>
@@ -904,9 +911,7 @@ function AllocationRowView({
       <td className="p-2 font-mono">{moneyWithCurrency(row.totalCost, row.currency)}</td>
       <td className="p-2 font-mono">{moneyWithCurrency(row.allocatedTotal, row.currency)}</td>
       <td className="p-2 font-mono">{moneyWithCurrency(row.finalTotal, row.currency)}</td>
-      <td className="p-2 font-mono">
-        {moneyWithCurrency(row.variance, row.currency, '0.00')}
-      </td>
+      <td className="p-2 font-mono">{moneyWithCurrency(row.variance, row.currency, '0.00')}</td>
       <td className="p-2">
         第 {row.revisionNo ?? 1} 版 / 共 {row.revisionCount} 版
       </td>
@@ -963,7 +968,7 @@ function DiffView({
       <div className="overflow-x-auto">
         <table className="w-full text-left">
           <thead>
-            <tr className="border-border border-b text-copy-12 text-muted-foreground">
+            <tr className="border-border text-copy-12 text-muted-foreground border-b">
               <th className="p-2">SKU</th>
               <th className="p-2">变化</th>
               <th className="p-2">旧值</th>
@@ -981,11 +986,13 @@ function DiffView({
                 <td className="p-2">
                   <Badge tone={diffTone(row.change)}>{diffChangeLabel(row.change)}</Badge>
                 </td>
-                <td className="p-2 font-mono">{moneyWithCurrency(row.beforeAmount, currency, '—')}</td>
-                <td className="p-2 font-mono">{moneyWithCurrency(row.afterAmount, currency, '—')}</td>
                 <td className="p-2 font-mono">
-                  {moneyWithCurrency(row.delta, currency, '—')}
+                  {moneyWithCurrency(row.beforeAmount, currency, '—')}
                 </td>
+                <td className="p-2 font-mono">
+                  {moneyWithCurrency(row.afterAmount, currency, '—')}
+                </td>
+                <td className="p-2 font-mono">{moneyWithCurrency(row.delta, currency, '—')}</td>
               </tr>
             ))}
           </tbody>

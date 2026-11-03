@@ -193,13 +193,17 @@ export function unavailableFilters(
  * （审批通过 / 驳回 / 转交）归 17.4.2.1，工作台**不执行审批动作**，
  * 它们会被渲染成一条说明而不是第二个能改单子的按钮。
  */
-export function availableActions(capabilities: ApprovalTodoCapabilities | null): ApprovalTodoAction[] {
+export function availableActions(
+  capabilities: ApprovalTodoCapabilities | null,
+): ApprovalTodoAction[] {
   if (!capabilities) return [];
   return (capabilities.actions ?? []).filter((action) => action.available);
 }
 
 /** **不可用**的动作（归 17 执行，或当前没有归属入口）。 */
-export function blockedActions(capabilities: ApprovalTodoCapabilities | null): ApprovalTodoAction[] {
+export function blockedActions(
+  capabilities: ApprovalTodoCapabilities | null,
+): ApprovalTodoAction[] {
   if (!capabilities) return [];
   return (capabilities.actions ?? []).filter((action) => !action.available);
 }
@@ -252,10 +256,13 @@ export const EMPTY_FILTERS: ApprovalFilters = {
  */
 export function buildQuery(filters: ApprovalFilters): string {
   const parts = new URLSearchParams();
-  if (filters.documentTypeCode.trim()) parts.set('documentTypeCode', filters.documentTypeCode.trim());
+  if (filters.documentTypeCode.trim())
+    parts.set('documentTypeCode', filters.documentTypeCode.trim());
   if (filters.sourceSystem.trim()) parts.set('sourceSystem', filters.sourceSystem.trim());
-  if (filters.currencyCode.trim()) parts.set('currencyCode', filters.currencyCode.trim().toUpperCase());
-  if (filters.amountBranchName.trim()) parts.set('amountBranchName', filters.amountBranchName.trim());
+  if (filters.currencyCode.trim())
+    parts.set('currencyCode', filters.currencyCode.trim().toUpperCase());
+  if (filters.amountBranchName.trim())
+    parts.set('amountBranchName', filters.amountBranchName.trim());
   const min = parseAmount(filters.minAmount);
   const max = parseAmount(filters.maxAmount);
   if (min !== null) parts.set('minAmount', String(min));
@@ -283,7 +290,10 @@ export function parseAmount(value: string): number | null {
 }
 
 /** 分档里某一档的条数；没有这一档时是 0（不是报错 —— 一档都没有是合法状态）。 */
-export function bucketCount(buckets: readonly ApprovalTodoBucket[] | undefined, code: string): number {
+export function bucketCount(
+  buckets: readonly ApprovalTodoBucket[] | undefined,
+  code: string,
+): number {
   if (!buckets) return 0;
   return buckets.find((bucket) => bucket.code === code)?.count ?? 0;
 }

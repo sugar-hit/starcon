@@ -261,7 +261,7 @@ export function RmaInstructionWorkspace() {
 
       {error && (
         <SectionCard>
-          <p className="text-sm text-danger" role="alert">
+          <p className="text-danger text-sm" role="alert">
             {error}
           </p>
         </SectionCard>
@@ -269,7 +269,7 @@ export function RmaInstructionWorkspace() {
 
       {loading && !data ? (
         <SectionCard>
-          <p className="text-sm text-muted">加载中…</p>
+          <p className="text-muted text-sm">加载中…</p>
         </SectionCard>
       ) : !data || data.rows.length === 0 ? (
         <EmptyState
@@ -296,8 +296,8 @@ export function RmaInstructionWorkspace() {
                   <td className="p-2 font-mono text-xs">{row.instructionNo}</td>
                   <td className="p-2">
                     <div>{row.rmaNo ?? '—'}</div>
-                    <div className="text-xs text-muted">{row.caseNo ?? '—'}</div>
-                    <div className="text-xs text-muted">{row.orderNo ?? '—'}</div>
+                    <div className="text-muted text-xs">{row.caseNo ?? '—'}</div>
+                    <div className="text-muted text-xs">{row.orderNo ?? '—'}</div>
                   </td>
                   <td className="p-2">
                     <div className="flex flex-col gap-1">
@@ -311,13 +311,17 @@ export function RmaInstructionWorkspace() {
                   </td>
                   <td className="p-2">
                     {quantity(row.expectedQty)}
-                    <div className="text-xs text-muted">{row.lineCount} 行 · {row.deliveryChannelLabel}</div>
+                    <div className="text-muted text-xs">
+                      {row.lineCount} 行 · {row.deliveryChannelLabel}
+                    </div>
                   </td>
                   <td className="p-2 text-xs">
                     {row.returnByAt ? new Date(row.returnByAt).toLocaleString() : '—'}
                   </td>
                   <td className="p-2 text-xs">
-                    <div>{row.labelStatus ? `${row.labelStatus} · ${row.labelNo}` : '未出标签'}</div>
+                    <div>
+                      {row.labelStatus ? `${row.labelStatus} · ${row.labelNo}` : '未出标签'}
+                    </div>
                     {row.trackingEventCount > 0 ? (
                       <div className="mt-1 flex flex-wrap items-center gap-1">
                         <Badge tone={trackingTone(row.latestTrackingEventCode)}>
@@ -365,7 +369,11 @@ export function RmaInstructionWorkspace() {
               第 {data.page + 1} 页 · 每页 {data.size} · 共 {data.total} 条
             </span>
             <div className="flex gap-2">
-              <Button variant="secondary" disabled={data.page === 0} onClick={() => setPage((p) => p - 1)}>
+              <Button
+                variant="secondary"
+                disabled={data.page === 0}
+                onClick={() => setPage((p) => p - 1)}
+              >
                 上一页
               </Button>
               <Button
@@ -386,7 +394,7 @@ export function RmaInstructionWorkspace() {
             <div>
               <dt className="text-muted">退货地址（快照，下发后冻结）</dt>
               <dd>{addressText(detail.head) || '—'}</dd>
-              <dd className="text-xs text-muted">
+              <dd className="text-muted text-xs">
                 {detail.head.addressSourceLabel}
                 {detail.head.returnRecipientPhone ? ` · ${detail.head.returnRecipientPhone}` : ''}
               </dd>
@@ -394,7 +402,7 @@ export function RmaInstructionWorkspace() {
             <div>
               <dt className="text-muted">指引送达渠道</dt>
               <dd>{detail.head.deliveryChannelLabel}</dd>
-              <dd className="text-xs text-muted">
+              <dd className="text-muted text-xs">
                 收件方：{detail.head.recipientName ?? '—'}
                 {detail.head.recipientEmail ? ` · ${detail.head.recipientEmail}` : ''}
               </dd>
@@ -402,10 +410,10 @@ export function RmaInstructionWorkspace() {
             <div>
               <dt className="text-muted">寄回时限</dt>
               <dd>
-                {new Date(detail.head.returnByAt).toLocaleString()} · {detail.timelinessStateLabel} ·{' '}
-                {remainingText(detail.remainingSeconds)}
+                {new Date(detail.head.returnByAt).toLocaleString()} · {detail.timelinessStateLabel}{' '}
+                · {remainingText(detail.remainingSeconds)}
               </dd>
-              <dd className="text-xs text-muted">
+              <dd className="text-muted text-xs">
                 时限到期只判「时限过了」，不判「货有没有回来」。
               </dd>
             </div>
@@ -413,7 +421,7 @@ export function RmaInstructionWorkspace() {
               <dt className="text-muted">包装与寄回要求</dt>
               <dd>{detail.head.packingRequirements || '—'}</dd>
               {detail.head.buyerNote && (
-                <dd className="text-xs text-muted">附注：{detail.head.buyerNote}</dd>
+                <dd className="text-muted text-xs">附注：{detail.head.buyerNote}</dd>
               )}
             </div>
           </dl>
@@ -433,11 +441,20 @@ export function RmaInstructionWorkspace() {
                       const id = detail.head.id;
                       const version = detail.head.version;
                       if (action.code === 'ISSUE') {
-                        void act(() => issueInstruction(id, { issueNote: null, expectedVersion: version }));
+                        void act(() =>
+                          issueInstruction(id, { issueNote: null, expectedVersion: version }),
+                        );
                       } else if (action.code === 'ACKNOWLEDGE') {
-                        void act(() => acknowledgeInstruction(id, { acknowledgeNote: '买家回复已收到', expectedVersion: version }));
+                        void act(() =>
+                          acknowledgeInstruction(id, {
+                            acknowledgeNote: '买家回复已收到',
+                            expectedVersion: version,
+                          }),
+                        );
                       } else if (action.code === 'CANCEL') {
-                        void act(() => cancelInstruction(id, { reason: '人工撤销', expectedVersion: version }));
+                        void act(() =>
+                          cancelInstruction(id, { reason: '人工撤销', expectedVersion: version }),
+                        );
                       } else if (action.code === 'VOID_LABEL') {
                         void act(() => voidLabel(id, { reason: '承运商取消了运单' }));
                       }
@@ -450,7 +467,11 @@ export function RmaInstructionWorkspace() {
             <Button
               variant="secondary"
               disabled={busy || !detail.label}
-              title={detail.label ? '按指令真值渲染 / 登记外部标签，并给出 SHA-256 校验和' : '当前没有未作废的标签'}
+              title={
+                detail.label
+                  ? '按指令真值渲染 / 登记外部标签，并给出 SHA-256 校验和'
+                  : '当前没有未作废的标签'
+              }
               onClick={() =>
                 void act(() =>
                   generateLabel(detail.head.id, {
@@ -474,7 +495,9 @@ export function RmaInstructionWorkspace() {
               variant="secondary"
               disabled={busy || !detail.label || detail.label.labelStatus === 'DELIVERED'}
               title="生成 ≠ 交付：贴纸真的到买家手上了才算交付"
-              onClick={() => void act(() => deliverLabel(detail.head.id, { deliveredVia: 'BUYER_EMAIL' }))}
+              onClick={() =>
+                void act(() => deliverLabel(detail.head.id, { deliveredVia: 'BUYER_EMAIL' }))
+              }
             >
               交付标签
             </Button>
@@ -490,7 +513,7 @@ export function RmaInstructionWorkspace() {
           {detail.actions
             .filter((a) => !a.allowed && a.unavailableReason)
             .map((a) => (
-              <p key={a.code} className="mt-2 text-xs text-muted">
+              <p key={a.code} className="text-muted mt-2 text-xs">
                 「{a.label}」不可用 —— 归属 {a.ownerModule}：{a.unavailableReason}
               </p>
             ))}
@@ -510,7 +533,7 @@ export function RmaInstructionWorkspace() {
                 <tr key={line.id} className="border-b">
                   <td className="p-2">
                     <div className="font-mono text-xs">{line.skuCode}</div>
-                    <div className="text-xs text-muted">{line.skuName}</div>
+                    <div className="text-muted text-xs">{line.skuName}</div>
                   </td>
                   <td className="p-2">
                     {quantity(line.expectedQty)} / {quantity(line.authorizedQty)}
@@ -518,7 +541,7 @@ export function RmaInstructionWorkspace() {
                   <td className="p-2 text-xs">
                     {line.unitPrice} {line.currency}
                   </td>
-                  <td className="p-2 text-xs text-muted">{line.lineNote || '—'}</td>
+                  <td className="text-muted p-2 text-xs">{line.lineNote || '—'}</td>
                 </tr>
               ))}
             </tbody>
@@ -527,11 +550,11 @@ export function RmaInstructionWorkspace() {
           <h3 className="mt-5 text-sm font-medium">
             退货标签
             {detail.label ? (
-              <span className="ml-2 font-normal text-muted">{detail.label.labelStatusLabel}</span>
+              <span className="text-muted ml-2 font-normal">{detail.label.labelStatusLabel}</span>
             ) : null}
           </h3>
           {detail.label ? (
-            <p className="mt-1 text-xs text-muted">
+            <p className="text-muted mt-1 text-xs">
               {detail.label.labelSourceLabel} · {detail.label.labelNo} · SHA-256{' '}
               <span className="font-mono">{detail.label.labelChecksum.slice(0, 16)}…</span> ·{' '}
               {detail.label.contentLength} 字符
@@ -540,21 +563,19 @@ export function RmaInstructionWorkspace() {
                 : ' · 无承运商运单号（本模块出的模板标签不含运单号，运单号由轨迹登记带入）'}
             </p>
           ) : (
-            <p className="mt-1 text-xs text-muted">当前没有未作废的退货标签。</p>
+            <p className="text-muted mt-1 text-xs">当前没有未作废的退货标签。</p>
           )}
 
           {labelContent && (
             <div
               className={`mt-2 rounded-md border p-3 text-sm ${
-                labelContent.checksumVerified
-                  ? 'border-border'
-                  : 'border-red-500/60 bg-red-500/10'
+                labelContent.checksumVerified ? 'border-border' : 'border-red-500/60 bg-red-500/10'
               }`}
             >
               {!labelContent.checksumVerified && (
-                <p className="mb-2 text-danger" role="alert">
+                <p className="text-danger mb-2" role="alert">
                   ⚠️ 完整性校验失败 —— 库里存的内容与它的校验和对不上，标签文件在入库之后被改过。
-                  <span className="block text-xs text-muted">{labelIntegrityHint}</span>
+                  <span className="text-muted block text-xs">{labelIntegrityHint}</span>
                 </p>
               )}
               <pre className="whitespace-pre-wrap break-all text-xs">{labelContent.content}</pre>
@@ -563,11 +584,14 @@ export function RmaInstructionWorkspace() {
 
           <h3 className="mt-5 text-sm font-medium">回寄物流轨迹</h3>
           {detail.trackingParcels.length === 0 ? (
-            <p className="mt-1 text-xs text-muted">还没有任何回寄轨迹。</p>
+            <p className="text-muted mt-1 text-xs">还没有任何回寄轨迹。</p>
           ) : (
             <div className="mt-2 flex flex-wrap gap-2">
               {detail.trackingParcels.map((parcel) => (
-                <Badge key={`${parcel.carrierCode}-${parcel.trackingNo}`} tone={trackingTone(parcel.currentEventCode)}>
+                <Badge
+                  key={`${parcel.carrierCode}-${parcel.trackingNo}`}
+                  tone={trackingTone(parcel.currentEventCode)}
+                >
                   {parcel.carrierCode} {parcel.trackingNo} · {parcel.currentEventCodeLabel} ·{' '}
                   {parcel.eventCount} 条
                 </Badge>
@@ -575,7 +599,7 @@ export function RmaInstructionWorkspace() {
             </div>
           )}
           {detail.trackingParcels.some((p) => p.currentEventCode === 'DELIVERED') && (
-            <p className="mt-2 text-xs text-muted">
+            <p className="text-muted mt-2 text-xs">
               ⚠️ 「已签收」只表示**承运商说**这个包裹送到了，不等于我们收到货。登记实收属 11.2.2.1，
               未交付；退回商品<b>默认进待检</b>。
             </p>
@@ -596,7 +620,11 @@ export function RmaInstructionWorkspace() {
           <div className="mt-3 flex flex-wrap items-end gap-3">
             <label className="text-sm">
               <span className="mb-1 block">承运商</span>
-              <Input value={evCarrier} onChange={(e) => setEvCarrier(e.target.value)} placeholder="FedEx" />
+              <Input
+                value={evCarrier}
+                onChange={(e) => setEvCarrier(e.target.value)}
+                placeholder="FedEx"
+              />
             </label>
             <label className="text-sm">
               <span className="mb-1 block">运单号</span>
@@ -604,7 +632,11 @@ export function RmaInstructionWorkspace() {
             </label>
             <label className="text-sm">
               <span className="mb-1 block">事件</span>
-              <select className="rounded border px-2 py-1" value={evCode} onChange={(e) => setEvCode(e.target.value)}>
+              <select
+                className="rounded border px-2 py-1"
+                value={evCode}
+                onChange={(e) => setEvCode(e.target.value)}
+              >
                 <option value="ACCEPTED">已揽收</option>
                 <option value="PICKED_UP">已取件</option>
                 <option value="IN_TRANSIT">运输中</option>
@@ -654,15 +686,16 @@ export function RmaInstructionWorkspace() {
             ))}
           </ol>
 
-          <p className="mt-5 text-xs text-muted">{detail.note}</p>
+          <p className="text-muted mt-5 text-xs">{detail.note}</p>
 
           {caps && (
             <>
               <h3 className="mt-5 text-sm font-medium">本模块刻意不做的事</h3>
-              <ul className="mt-2 space-y-1 text-xs text-muted">
+              <ul className="text-muted mt-2 space-y-1 text-xs">
                 {caps.boundaries.map((b) => (
                   <li key={b.boundary}>
-                    <span className="text-foreground">{b.boundary}</span>（归属 {b.ownerModule}）：{b.reason}
+                    <span className="text-foreground">{b.boundary}</span>（归属 {b.ownerModule}）：
+                    {b.reason}
                   </li>
                 ))}
               </ul>
@@ -678,7 +711,7 @@ export function RmaInstructionWorkspace() {
       )}
 
       <SectionCard title="新建退货指引">
-        <p className="text-xs text-muted">
+        <p className="text-muted text-xs">
           指引必须挂在一张**已授权 / 部分授权**的退货授权单下；地址与时限由服务端从授权单复制成
           **快照**，不给手工重敲的机会。
         </p>
@@ -718,7 +751,11 @@ function NewInstructionForm({
       </label>
       <label className="text-sm">
         <span className="mb-1 block">送达渠道</span>
-        <select className="rounded border px-2 py-1" value={channel} onChange={(e) => setChannel(e.target.value)}>
+        <select
+          className="rounded border px-2 py-1"
+          value={channel}
+          onChange={(e) => setChannel(e.target.value)}
+        >
           <option value="BUYER_EMAIL">买家邮箱</option>
           <option value="PLATFORM_MESSAGE">平台站内消息</option>
           <option value="TENANT_DOWNLOAD_PRINT">租户下载后打印/转发</option>
@@ -735,7 +772,11 @@ function NewInstructionForm({
       </label>
       <label className="text-sm">
         <span className="mb-1 block">包装与寄回要求</span>
-        <Input value={requirements} onChange={(e) => setRequirements(e.target.value)} placeholder="外箱请加固" />
+        <Input
+          value={requirements}
+          onChange={(e) => setRequirements(e.target.value)}
+          placeholder="外箱请加固"
+        />
       </label>
       <Button
         variant="secondary"

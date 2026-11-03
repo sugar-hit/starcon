@@ -105,9 +105,7 @@ export function fetchWriteOffAdvanceBalance() {
 
 /** 预收挂账行列表。 */
 export function fetchWriteOffAdvanceRows(status?: string, currency?: string) {
-  return api<FinanceWriteOffAdvanceRow[]>(
-    `${base}/advance${query({ status, currency })}`,
-  );
+  return api<FinanceWriteOffAdvanceRow[]>(`${base}/advance${query({ status, currency })}`);
 }
 
 /** 自动匹配的候选（只读，不落库）：先看清「凭什么匹配上」再决定要不要核销。 */
@@ -149,7 +147,9 @@ export function autoMatchWriteOff(input: FinanceWriteOffAutoMatchInput) {
  * 页面必须把后端给的解释原样显示（替代路径是「作废 + 新单」，属 12.1.1.3）。
  */
 export function reverseWriteOff(id: string, reason: string) {
-  return api<FinanceWriteOffDetail>(`${base}/${encodeURIComponent(id)}/reverse`, 'POST', { reason });
+  return api<FinanceWriteOffDetail>(`${base}/${encodeURIComponent(id)}/reverse`, 'POST', {
+    reason,
+  });
 }
 
 /**
@@ -297,9 +297,11 @@ export function matchConditionHint(candidate: FinanceWriteOffMatchCandidate): st
  *
  * <p>⚠️ 两个口径**互不重复计数**：本模块挂账的预收 + 12.2.1.1 预收标记收款单的未核销余额。
  */
-export function advanceBalanceHint(
-  row: { parkedAmount: number; flaggedAmount: number; totalAmount: number },
-): string {
+export function advanceBalanceHint(row: {
+  parkedAmount: number;
+  flaggedAmount: number;
+  totalAmount: number;
+}): string {
   return `挂账 ${formatWriteOffAmount(row.parkedAmount)} + 预收标记 ${formatWriteOffAmount(
     row.flaggedAmount,
   )} = ${formatWriteOffAmount(row.totalAmount)}`;

@@ -26,7 +26,9 @@ import { GET } from './[...path]/route';
 
 // 相对**本文件**定位：vitest 从仓库根或 apps/web 跑时 cwd 都不同，用 cwd 会静默读空。
 const SOURCE = readFileSync(
-  fileURLToPath(new URL('../../../components/dashboard/anomaly-order-workspace.tsx', import.meta.url)),
+  fileURLToPath(
+    new URL('../../../components/dashboard/anomaly-order-workspace.tsx', import.meta.url),
+  ),
   'utf8',
 );
 
@@ -111,15 +113,15 @@ it('跨服务读的两个端点也被放行（前端聚合层要读它们）', a
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
   vi.stubGlobal('fetch', fetcher);
 
-  for (const path of [
-    'channel/buyer-blacklist/flags',
-    'warehouse/inventory/sellable/skus',
-  ]) {
-    const response = await GET(new NextRequest(`http://localhost:3000/api/${path}`, {
-      headers: { cookie: 'starcon_session=private-session' },
-    }), {
-      params: Promise.resolve({ path: path.split('/') }),
-    });
+  for (const path of ['channel/buyer-blacklist/flags', 'warehouse/inventory/sellable/skus']) {
+    const response = await GET(
+      new NextRequest(`http://localhost:3000/api/${path}`, {
+        headers: { cookie: 'starcon_session=private-session' },
+      }),
+      {
+        params: Promise.resolve({ path: path.split('/') }),
+      },
+    );
     expect(response.status, `${path} 未被放行`).toBe(200);
   }
 });

@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import type { ReconciliationDiffActions, ReconciliationDiffRow } from '../../../../../packages/api-contracts/src/index';
+import type {
+  ReconciliationDiffActions,
+  ReconciliationDiffRow,
+} from '../../../../../packages/api-contracts/src/index';
 import {
   formatReconciliationDiffDifference,
   formatReconciliationDiffMoney,
@@ -89,9 +92,7 @@ const actions = (over: Partial<ReconciliationDiffActions>): ReconciliationDiffAc
 
 describe('12.3.2.2 差异处理 · 界面纪律', () => {
   it('差额算不出来就说算不出来 —— 绝不显示 0', () => {
-    expect(
-      formatReconciliationDiffDifference(null, 'EUR', false),
-    ).toContain('汇率不可得');
+    expect(formatReconciliationDiffDifference(null, 'EUR', false)).toContain('汇率不可得');
     expect(formatReconciliationDiffDifference(null, 'EUR', false)).not.toContain('0.0000');
     expect(formatReconciliationDiffDifference(null, 'EUR', true)).toBe('—');
     expect(formatReconciliationDiffDifference(-75, 'USD', true)).toBe('-75.0000 USD');
@@ -189,7 +190,9 @@ describe('12.3.2.2 差异处理 · 界面纪律', () => {
   });
 
   it('责任人不编造姓名 —— 只显示 uuid 前 8 位', () => {
-    expect(reconciliationDiffAssigneeLabel('abcdef01-2345-6789-abcd-ef0123456789')).toBe('abcdef01');
+    expect(reconciliationDiffAssigneeLabel('abcdef01-2345-6789-abcd-ef0123456789')).toBe(
+      'abcdef01',
+    );
     expect(reconciliationDiffAssigneeLabel(null)).toBe('未指派');
     expect(reconciliationDiffAssigneeLabel(undefined)).toBe('未指派');
   });
@@ -251,7 +254,9 @@ describe('12.3.2.2 差异处理 · 界面纪律', () => {
       '至少要有一个',
     );
     expect(reconciliationDiffAdjustmentBasisHint({ voucherNo: 'VCH-1', explanation: '' })).toBe('');
-    expect(reconciliationDiffAdjustmentBasisHint({ voucherNo: '', explanation: '补记手续费' })).toBe('');
+    expect(
+      reconciliationDiffAdjustmentBasisHint({ voucherNo: '', explanation: '补记手续费' }),
+    ).toBe('');
   });
 
   it('分类理由不能为空', () => {

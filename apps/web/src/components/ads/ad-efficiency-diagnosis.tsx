@@ -269,8 +269,9 @@ export function AdEfficiencyDiagnosisWorkspace() {
               ))}
             </ul>
             {undelivered.length > 0 ? (
-              <p className="text-amber-600 text-xs">
-                🔴 上面标「未交付」的段落在本页**不可用**：{undelivered.map((d) => d.dimension).join('、')}
+              <p className="text-xs text-amber-600">
+                🔴 上面标「未交付」的段落在本页**不可用**：
+                {undelivered.map((d) => d.dimension).join('、')}
                 。页面不给一个点了没用的按钮 —— 不可用的建议动作会写明责任模块与影响。
               </p>
             ) : null}
@@ -402,7 +403,9 @@ export function AdEfficiencyDiagnosisWorkspace() {
                 <input
                   className="rounded border px-2 py-1 text-sm"
                   value={ruleInput.minOverTargetDays}
-                  onChange={(e) => setRuleInput({ ...ruleInput, minOverTargetDays: e.target.value })}
+                  onChange={(e) =>
+                    setRuleInput({ ...ruleInput, minOverTargetDays: e.target.value })
+                  }
                 />
               </label>
               <label className="flex flex-col text-xs">
@@ -506,7 +509,7 @@ export function AdEfficiencyDiagnosisWorkspace() {
                   <td className="py-1">
                     {rule.ruleName || rule.ruleCode}
                     {rule.dataSourceReady ? null : (
-                      <span className="text-amber-600 ml-2 text-xs">数据源未就绪</span>
+                      <span className="ml-2 text-xs text-amber-600">数据源未就绪</span>
                     )}
                   </td>
                   <td className={`py-1 ${severityTone(rule.severity)}`}>
@@ -517,7 +520,9 @@ export function AdEfficiencyDiagnosisWorkspace() {
                   </td>
                   <td className="py-1 text-xs">
                     {rule.thresholdAmount !== null ? `金额 ≥ ${money(rule.thresholdAmount)}` : null}
-                    {rule.thresholdRatio !== null ? `ACOS 目标 ${ratioText(rule.thresholdRatio)}` : null}
+                    {rule.thresholdRatio !== null
+                      ? `ACOS 目标 ${ratioText(rule.thresholdRatio)}`
+                      : null}
                     {rule.budgetUtilizationRatio !== null
                       ? `利用率 ≥ ${ratioText(rule.budgetUtilizationRatio)}`
                       : null}
@@ -528,7 +533,9 @@ export function AdEfficiencyDiagnosisWorkspace() {
                   </td>
                   <td className="py-1">
                     {actionTypeLabel(rule.actionType)}
-                    {rule.dryRun ? <span className="text-muted-foreground ml-1 text-xs">试运行</span> : null}
+                    {rule.dryRun ? (
+                      <span className="text-muted-foreground ml-1 text-xs">试运行</span>
+                    ) : null}
                   </td>
                   <td className="py-1">{rule.enabled ? '启用' : '停用'}</td>
                   <td className="py-1 text-right">
@@ -570,7 +577,8 @@ export function AdEfficiencyDiagnosisWorkspace() {
               <option value="">查看某次运行…</option>
               {runs.items.map((r) => (
                 <option key={r.id} value={r.id}>
-                  {timestampText(r.createdAt)} · {r.diagnosisCount} 条结论 · 跳过 {r.skippedRuleCount} 条规则
+                  {timestampText(r.createdAt)} · {r.diagnosisCount} 条结论 · 跳过{' '}
+                  {r.skippedRuleCount} 条规则
                 </option>
               ))}
             </select>
@@ -580,13 +588,14 @@ export function AdEfficiencyDiagnosisWorkspace() {
         {runDetail ? (
           <div className="flex flex-col gap-2">
             <p className="text-sm">
-              本次运行：窗口 {dateText(runDetail.run.windowFrom)} ~ {dateText(runDetail.run.windowTo)}，
-              评估 {runDetail.run.enabledRuleCount} 条规则（跳过 {runDetail.run.skippedRuleCount} 条），
-              产出 <strong>{runDetail.run.diagnosisCount}</strong> 条结论，数据截至{' '}
+              本次运行：窗口 {dateText(runDetail.run.windowFrom)} ~{' '}
+              {dateText(runDetail.run.windowTo)}， 评估 {runDetail.run.enabledRuleCount}{' '}
+              条规则（跳过 {runDetail.run.skippedRuleCount} 条）， 产出{' '}
+              <strong>{runDetail.run.diagnosisCount}</strong> 条结论，数据截至{' '}
               {runDetail.run.dataAsOf ? timestampText(runDetail.run.dataAsOf) : '—'}。
             </p>
             {runDetail.run.message ? (
-              <p className="text-amber-600 text-xs">{runDetail.run.message}</p>
+              <p className="text-xs text-amber-600">{runDetail.run.message}</p>
             ) : null}
             <table className="w-full text-sm">
               <thead>
@@ -663,13 +672,11 @@ export function AdEfficiencyDiagnosisWorkspace() {
                     {diagnosisStatusLabel(d.status)}
                   </span>
                 </div>
-                <p className="mt-1 text-xs">
-                  🔴 判定依据：{d.evidence}
-                </p>
+                <p className="mt-1 text-xs">🔴 判定依据：{d.evidence}</p>
                 <p className="mt-1 text-xs">💡 建议：{d.recommendation}</p>
                 <p className="text-muted-foreground mt-1 text-xs">
-                  观察窗口 {dateText(d.windowFrom)} ~ {dateText(d.windowTo)}（{d.metricDays} 天有数据）·
-                  曝光 {quantity(d.impressions)} · 点击 {quantity(d.clicks)} · 订单{' '}
+                  观察窗口 {dateText(d.windowFrom)} ~ {dateText(d.windowTo)}（{d.metricDays}{' '}
+                  天有数据）· 曝光 {quantity(d.impressions)} · 点击 {quantity(d.clicks)} · 订单{' '}
                   {quantity(d.orders)} · 消耗 {money(d.spend)} · 销售额 {money(d.sales)} · ACOS{' '}
                   {ratioText(d.acos)} · ROAS {ratioText(d.roas)} · 日预算 {money(d.dailyBudget)} ·
                   预算利用率 {ratioText(d.budgetUtilization)} · 曝光相对倍数{' '}
@@ -706,10 +713,15 @@ export function AdEfficiencyDiagnosisWorkspace() {
         ) : (
           <ul className="flex flex-col gap-2">
             {(actions?.items ?? []).map((a) => (
-              <li key={a.id} className="flex flex-wrap items-center gap-2 rounded border p-2 text-sm">
+              <li
+                key={a.id}
+                className="flex flex-wrap items-center gap-2 rounded border p-2 text-sm"
+              >
                 <span className="font-medium">{actionTypeLabel(a.actionType)}</span>
                 <span className="text-muted-foreground text-xs">{a.campaignName}</span>
-                <span className={`text-xs ${outcomeTone(a.outcome)}`}>{outcomeLabel(a.outcome)}</span>
+                <span className={`text-xs ${outcomeTone(a.outcome)}`}>
+                  {outcomeLabel(a.outcome)}
+                </span>
                 <span className="text-muted-foreground text-xs">
                   {actionModeLabel(a.actionMode)}
                   {a.actionMode === 'UNAVAILABLE' ? ` · ${unavailableText(a)}` : null}
@@ -718,12 +730,16 @@ export function AdEfficiencyDiagnosisWorkspace() {
                 {a.beforeValue !== null || a.afterValue !== null ? (
                   <span className="text-muted-foreground text-xs">
                     预算 {money(a.beforeValue)} → {money(a.afterValue)}
-                    {a.actionPercent !== null ? `（${actionAmountText(a.actionPercent, a.actionAmount)}）` : null}
+                    {a.actionPercent !== null
+                      ? `（${actionAmountText(a.actionPercent, a.actionAmount)}）`
+                      : null}
                   </span>
                 ) : null}
-                {a.message ? <span className="text-muted-foreground text-xs">{a.message}</span> : null}
+                {a.message ? (
+                  <span className="text-muted-foreground text-xs">{a.message}</span>
+                ) : null}
                 {a.guardrailNote ? (
-                  <span className="text-amber-600 text-xs">{a.guardrailNote}</span>
+                  <span className="text-xs text-amber-600">{a.guardrailNote}</span>
                 ) : null}
                 {actionExecutable(a) ? (
                   <button
@@ -739,7 +755,9 @@ export function AdEfficiencyDiagnosisWorkspace() {
                     一键调整
                   </button>
                 ) : (
-                  <span className="text-muted-foreground ml-auto text-xs">{unavailableText(a)}</span>
+                  <span className="text-muted-foreground ml-auto text-xs">
+                    {unavailableText(a)}
+                  </span>
                 )}
               </li>
             ))}
@@ -770,8 +788,8 @@ export function AdEfficiencyDiagnosisWorkspace() {
               />
             </label>
             <p className="text-muted-foreground text-xs">
-              🔴 真实执行会走 14.1.1.1 已交付的写路径：单次 / 总额 / 单活动预算上限越限
-              ⇒ **拒绝并留痕**（不静默截断）；已执行过的动作重复提交 ⇒ 跳过。
+              🔴 真实执行会走 14.1.1.1 已交付的写路径：单次 / 总额 / 单活动预算上限越限 ⇒
+              **拒绝并留痕**（不静默截断）；已执行过的动作重复提交 ⇒ 跳过。
               本次改动只落本地并标记「待回写平台」。
             </p>
             <div className="flex gap-2">

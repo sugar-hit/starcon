@@ -308,11 +308,18 @@ export function OrderRiskWorkspace() {
       {/* ---------------------------------------------------- 1. 能力与上游缺口 */}
       <SectionCard
         title="能力与上游缺口"
-        extra={capabilities && <span className="text-copy-13 text-muted">{capabilities.weightCheck}</span>}
+        extra={
+          capabilities && (
+            <span className="text-copy-13 text-muted">{capabilities.weightCheck}</span>
+          )
+        }
       >
         {capabilities ? (
           <div className="space-y-3">
-            <Notice tone={capabilities.crossServiceReadAvailable ? 'info' : 'warning'} title="上游接线情况">
+            <Notice
+              tone={capabilities.crossServiceReadAvailable ? 'info' : 'warning'}
+              title="上游接线情况"
+            >
               {capabilities.gaps}
             </Notice>
             <ul className="space-y-2">
@@ -322,7 +329,9 @@ export function OrderRiskWorkspace() {
                   className="border-border flex flex-wrap items-start justify-between gap-2 border-b pb-2 last:border-0"
                 >
                   <div className="min-w-0">
-                    <div className="text-copy-14 text-foreground font-medium">{dimension.label}</div>
+                    <div className="text-copy-14 text-foreground font-medium">
+                      {dimension.label}
+                    </div>
                     <div className="text-copy-13 text-muted-foreground">{dimension.source}</div>
                     {!dimension.upstreamDelivered && dimension.gap && (
                       <div className="text-copy-13 text-warning">{dimension.gap}</div>
@@ -341,7 +350,10 @@ export function OrderRiskWorkspace() {
               ))}
             </ul>
             <div className="text-copy-13 text-muted-foreground">{capabilities.scoringOrder}</div>
-            <Notice tone="warning" title={`下游 ${capabilities.downstream.moduleId}「${capabilities.downstream.name}」尚未交付`}>
+            <Notice
+              tone="warning"
+              title={`下游 ${capabilities.downstream.moduleId}「${capabilities.downstream.name}」尚未交付`}
+            >
               {capabilities.downstream.handoff}
             </Notice>
           </div>
@@ -392,19 +404,25 @@ export function OrderRiskWorkspace() {
               <div>
                 <div className="text-copy-13 text-muted-foreground">五维权重</div>
                 <div className="text-copy-13 font-mono">
-                  买家 {weight(rule.weightBuyerHistory)} / 设备IP {weight(rule.weightDeviceIpLink)} /
-                  频次 {weight(rule.weightOrderFrequency)} / 金额 {weight(rule.weightAmountAnomaly)} /
-                  地址 {weight(rule.weightAddressConcentration)}
+                  买家 {weight(rule.weightBuyerHistory)} / 设备IP {weight(rule.weightDeviceIpLink)}{' '}
+                  / 频次 {weight(rule.weightOrderFrequency)} / 金额{' '}
+                  {weight(rule.weightAmountAnomaly)} / 地址{' '}
+                  {weight(rule.weightAddressConcentration)}
                 </div>
               </div>
               <Cell
                 label="缺信号口径"
                 value={
-                  rule.missingSignalPolicy === 'BLOCK_EVALUATION' ? '缺任一维度即不出分' : '按已知维度打分'
+                  rule.missingSignalPolicy === 'BLOCK_EVALUATION'
+                    ? '缺任一维度即不出分'
+                    : '按已知维度打分'
                 }
               />
               <Cell label="信号新鲜度" value={`${rule.signalMaxAgeHours} 小时`} />
-              <Cell label="下单频次窗" value={`${rule.frequencyWindowHours} 小时 / 打满 ${rule.frequencyMaxOrders} 笔`} />
+              <Cell
+                label="下单频次窗"
+                value={`${rule.frequencyWindowHours} 小时 / 打满 ${rule.frequencyMaxOrders} 笔`}
+              />
               <Cell
                 label="金额异常打满档"
                 value={`${score(rule.amountAnomalyRatio)} 倍（至少 ${rule.amountAnomalyMinOrders} 笔同币种历史）`}
@@ -558,7 +576,11 @@ export function OrderRiskWorkspace() {
                       </div>
                     </td>
                     <td className="py-2">
-                      <div className={row.recommendedAction === 'HOLD_SHIPMENT' ? 'text-destructive' : ''}>
+                      <div
+                        className={
+                          row.recommendedAction === 'HOLD_SHIPMENT' ? 'text-destructive' : ''
+                        }
+                      >
                         {actionText(row.recommendedAction)}
                       </div>
                       {row.manualReviewRequired && (
@@ -568,7 +590,9 @@ export function OrderRiskWorkspace() {
                     <td className="py-2">
                       <div>{finalActionText(row.finalAction)}</div>
                       {row.finalAction === null && (
-                        <div className="text-muted-foreground text-xs">分数不能单独作为拒绝依据</div>
+                        <div className="text-muted-foreground text-xs">
+                          分数不能单独作为拒绝依据
+                        </div>
                       )}
                     </td>
                     <td className="py-2">
@@ -627,7 +651,7 @@ export function OrderRiskWorkspace() {
             </Notice>
 
             <div>
-              <div className="mb-2 text-copy-14 text-foreground font-medium">五个维度</div>
+              <div className="text-copy-14 text-foreground mb-2 font-medium">五个维度</div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
@@ -643,10 +667,17 @@ export function OrderRiskWorkspace() {
                   </thead>
                   <tbody>
                     {detail.components.map((component) => (
-                      <tr key={component.id} className="border-border border-b align-top last:border-0">
+                      <tr
+                        key={component.id}
+                        className="border-border border-b align-top last:border-0"
+                      >
                         <td className="py-2">{dimensionText(component.dimension)}</td>
                         <td className="py-2">
-                          <span className={component.status === 'SCORED' ? 'text-success' : 'text-warning'}>
+                          <span
+                            className={
+                              component.status === 'SCORED' ? 'text-success' : 'text-warning'
+                            }
+                          >
                             {componentStatusText(component.status)}
                           </span>
                         </td>
@@ -661,7 +692,9 @@ export function OrderRiskWorkspace() {
                               采集于 {isoText(component.signalCapturedAt)}
                             </div>
                           )}
-                          <div className="text-muted-foreground text-xs">{component.explanation}</div>
+                          <div className="text-muted-foreground text-xs">
+                            {component.explanation}
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -675,7 +708,9 @@ export function OrderRiskWorkspace() {
                 <div className="text-copy-14 text-foreground font-medium">人工复核留痕</div>
                 <div>结论：{finalActionText(detail.review.decision)}</div>
                 <div>原因：{reasonText(detail.review.reasonCode)}</div>
-                <div className="text-muted-foreground">复核于 {isoText(detail.review.reviewedAt)}</div>
+                <div className="text-muted-foreground">
+                  复核于 {isoText(detail.review.reviewedAt)}
+                </div>
                 {detail.review.note && <div>备注：{detail.review.note}</div>}
               </div>
             )}

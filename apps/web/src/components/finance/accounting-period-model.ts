@@ -71,10 +71,7 @@ export type AccountingCalendarTypeValue = 'CALENDAR_MONTH' | 'FISCAL_445' | 'CUS
 
 /** 重开结局（与后端的 outcome 一一对应）。 */
 export type AccountingReopenOutcome =
-  | 'REOPEN_REQUESTED'
-  | 'PENDING_APPROVAL'
-  | 'REJECTED'
-  | 'REOPENED';
+  'REOPEN_REQUESTED' | 'PENDING_APPROVAL' | 'REJECTED' | 'REOPENED';
 
 function query(params: Record<string, string | number | boolean | undefined>): string {
   const parts: string[] = [];
@@ -110,9 +107,7 @@ export function fetchAccountingPeriod(id: string) {
 
 /** 期间事件留痕（＝ 蓝图输出里的「关账记录」）。 */
 export function fetchAccountingPeriodEvents(id: string) {
-  return api<FinanceAccountingPeriodDetail['events']>(
-    `${base}/${encodeURIComponent(id)}/events`,
-  );
+  return api<FinanceAccountingPeriodDetail['events']>(`${base}/${encodeURIComponent(id)}/events`);
 }
 
 /** 期间的审批链路（identity 链路的本地镜像）。 */
@@ -167,11 +162,12 @@ export function createAccountingCalendar(input: FinanceAccountingCalendarInput) 
 }
 
 /** 改会计日历（⚠️ 账期形状不可改 —— 只有名称 / 状态 / 备注可改）。 */
-export function updateAccountingCalendar(
-  id: string,
-  input: FinanceAccountingCalendarUpdateInput,
-) {
-  return api<FinanceAccountingCalendarRow>(`${base}/calendars/${encodeURIComponent(id)}`, 'PUT', input);
+export function updateAccountingCalendar(id: string, input: FinanceAccountingCalendarUpdateInput) {
+  return api<FinanceAccountingCalendarRow>(
+    `${base}/calendars/${encodeURIComponent(id)}`,
+    'PUT',
+    input,
+  );
 }
 
 /** 从日历生成一个财年的期间。 */

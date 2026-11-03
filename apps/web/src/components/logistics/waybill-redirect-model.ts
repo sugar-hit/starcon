@@ -63,7 +63,9 @@ export interface BuyerNotificationParams {
 
 /** 把入参声明成 {@code object}（TS 的 interface 没有隐式索引签名）。 */
 function query(params: object): string {
-  const parts = Object.entries(params as Record<string, string | number | boolean | undefined | null>)
+  const parts = Object.entries(
+    params as Record<string, string | number | boolean | undefined | null>,
+  )
     .filter(([, v]) => v !== undefined && v !== null && `${v}` !== '')
     .map(([k, v]) => `${k}=${encodeURIComponent(String(v))}`);
   return parts.length ? `?${parts.join('&')}` : '';
@@ -106,10 +108,7 @@ export function submitRedirect(
   return api<WaybillRedirectRow>(`${base}/redirects/${requestId}/submit`, 'POST', input);
 }
 
-export function submitCancel(
-  requestId: string,
-  input: WaybillCancelInput,
-): Promise<unknown> {
+export function submitCancel(requestId: string, input: WaybillCancelInput): Promise<unknown> {
   return api(`${base}/cancels/${requestId}/submit`, 'POST', input);
 }
 

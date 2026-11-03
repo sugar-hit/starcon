@@ -131,10 +131,7 @@ export function createMatchRateSnapshot(
 }
 
 /** 匹配率快照历史（真分页）。 */
-export function fetchMatchRateSnapshots(
-  id: string,
-  params: { page?: number; size?: number } = {},
-) {
+export function fetchMatchRateSnapshots(id: string, params: { page?: number; size?: number } = {}) {
   return api<FinanceMatchRateSnapshotPage>(
     `${base}/${encodeURIComponent(id)}/rate-snapshots${query({ ...params })}`,
   );
@@ -157,9 +154,7 @@ export function matchRuleStatusLabel(status: string): string {
 }
 
 /** 规则状态色调。 */
-export function matchRuleStatusTone(
-  status: string,
-): 'success' | 'warning' | 'danger' | 'neutral' {
+export function matchRuleStatusTone(status: string): 'success' | 'warning' | 'danger' | 'neutral' {
   switch (status) {
     case 'ACTIVE':
       return 'success';
@@ -243,9 +238,7 @@ export function matchRuleReasonLabel(reason: string): string {
 }
 
 /** 未匹配原因色调。 */
-export function matchRuleReasonTone(
-  reason: string,
-): 'success' | 'warning' | 'danger' | 'neutral' {
+export function matchRuleReasonTone(reason: string): 'success' | 'warning' | 'danger' | 'neutral' {
   switch (reason) {
     case 'AMOUNT_MISMATCH':
     case 'EXTERNAL_ONLY':

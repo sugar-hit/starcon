@@ -138,10 +138,7 @@ export function ListingStatusSyncWorkspace() {
     [queue],
   );
   const openRepublishable = useMemo(
-    () =>
-      republishable.filter(
-        (item) => item.state === 'OPEN' || item.state === 'ACKNOWLEDGED',
-      ),
+    () => republishable.filter((item) => item.state === 'OPEN' || item.state === 'ACKNOWLEDGED'),
     [republishable],
   );
 
@@ -156,7 +153,8 @@ export function ListingStatusSyncWorkspace() {
 
   /** 真实平台推送通道是否已接入（能力表里 available）。 */
   const webhookIngested = useMemo(
-    () => caps?.dimensions.some((d) => d.dimension === 'real_platform_webhook' && d.available) ?? false,
+    () =>
+      caps?.dimensions.some((d) => d.dimension === 'real_platform_webhook' && d.available) ?? false,
     [caps],
   );
 
@@ -177,7 +175,7 @@ export function ListingStatusSyncWorkspace() {
       />
 
       {error && (
-        <div className="border-destructive/40 bg-destructive/5 text-destructive flex items-center gap-2 rounded-lg border px-4 py-3 text-label-13">
+        <div className="border-destructive/40 bg-destructive/5 text-destructive text-label-13 flex items-center gap-2 rounded-lg border px-4 py-3">
           <TriangleAlert className="size-4 shrink-0" />
           <span className="flex-1">{error}</span>
           <Button size="sm" variant="secondary" onClick={() => void load()}>
@@ -188,7 +186,7 @@ export function ListingStatusSyncWorkspace() {
       )}
 
       {loading && !events ? (
-        <div className="text-muted-foreground flex items-center gap-2 px-1 py-8 text-label-13">
+        <div className="text-muted-foreground text-label-13 flex items-center gap-2 px-1 py-8">
           <Loader2 className="size-4 animate-spin" />
           正在加载平台状态回流数据…
         </div>
@@ -201,13 +199,13 @@ export function ListingStatusSyncWorkspace() {
           >
             {!conflicts || conflicts.items.length === 0 ? (
               <EmptyState
-                icon={<CheckCheck className="size-8 text-muted-foreground" />}
+                icon={<CheckCheck className="text-muted-foreground size-8" />}
                 title="当前没有冲突"
                 description={emptyConflictsMessage()}
               />
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-label-13">
+                <table className="text-label-13 w-full text-left">
                   <thead className="text-muted-foreground border-border border-b">
                     <tr>
                       <th className="px-4 py-2 font-medium">商品</th>
@@ -236,9 +234,11 @@ export function ListingStatusSyncWorkspace() {
                           </div>
                         </td>
                         <td className="px-4 py-2">
-                          <Badge tone={queueStateTone(item.state)}>{queueStateLabel(item.state)}</Badge>
+                          <Badge tone={queueStateTone(item.state)}>
+                            {queueStateLabel(item.state)}
+                          </Badge>
                         </td>
-                        <td className="text-muted-foreground px-4 py-2 text-label-12">
+                        <td className="text-muted-foreground text-label-12 px-4 py-2">
                           {new Date(item.createdAt).toLocaleString('zh-CN')}
                         </td>
                       </tr>
@@ -261,13 +261,13 @@ export function ListingStatusSyncWorkspace() {
           >
             {!queue || queue.items.length === 0 ? (
               <EmptyState
-                icon={<TriangleAlert className="size-8 text-muted-foreground" />}
+                icon={<TriangleAlert className="text-muted-foreground size-8" />}
                 title="没有待处理事项"
                 description={emptyQueueMessage()}
               />
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-label-13">
+                <table className="text-label-13 w-full text-left">
                   <thead className="text-muted-foreground border-border border-b">
                     <tr>
                       <th className="px-4 py-2 font-medium">商品</th>
@@ -292,19 +292,24 @@ export function ListingStatusSyncWorkspace() {
                             {queueKindLabel(item.kind)} · {eventTypeLabel(item.eventType)}
                           </Badge>
                         </td>
-                        <td className="text-foreground px-4 py-2">
-                          {item.rejectionReason || '—'}
-                        </td>
+                        <td className="text-foreground px-4 py-2">{item.rejectionReason || '—'}</td>
                         <td className="px-4 py-2">
-                          <Badge tone={queueStateTone(item.state)}>{queueStateLabel(item.state)}</Badge>
+                          <Badge tone={queueStateTone(item.state)}>
+                            {queueStateLabel(item.state)}
+                          </Badge>
                         </td>
                         <td className="px-4 py-2">
                           {item.operationId ? (
                             <div>
                               <Badge tone={operationStatusTone(item.operationStatus)}>
-                                {operationStatusLabel(item.operationStatus, item.operationVerification)}
+                                {operationStatusLabel(
+                                  item.operationStatus,
+                                  item.operationVerification,
+                                )}
                               </Badge>
-                              <div className="text-muted-foreground text-label-12">{item.operationId}</div>
+                              <div className="text-muted-foreground text-label-12">
+                                {item.operationId}
+                              </div>
                             </div>
                           ) : (
                             <span className="text-muted-foreground text-label-12">尚未发起</span>
@@ -320,7 +325,9 @@ export function ListingStatusSyncWorkspace() {
                                 onClick={() =>
                                   void run(async () => {
                                     await acknowledgeQueueItem(item.queueId, '已查看');
-                                    setLastAction(`已确认 ${item.externalItemId || item.listingId}`);
+                                    setLastAction(
+                                      `已确认 ${item.externalItemId || item.listingId}`,
+                                    );
                                     await load();
                                   })
                                 }
@@ -336,7 +343,9 @@ export function ListingStatusSyncWorkspace() {
                                 onClick={() =>
                                   void run(async () => {
                                     await resolveQueueItem(item.queueId, '人工处理完成');
-                                    setLastAction(`已标记处理完成 ${item.externalItemId || item.listingId}`);
+                                    setLastAction(
+                                      `已标记处理完成 ${item.externalItemId || item.listingId}`,
+                                    );
                                     await load();
                                   })
                                 }
@@ -374,7 +383,7 @@ export function ListingStatusSyncWorkspace() {
               </div>
 
               <div>
-                <p className="text-foreground mb-2 text-label-13 font-medium">发起的事件类型</p>
+                <p className="text-foreground text-label-13 mb-2 font-medium">发起的事件类型</p>
                 <div className="flex flex-wrap gap-2">
                   {(['REJECTED', 'DELISTED', 'SUPPRESSED'] as const).map((value) => (
                     <Button
@@ -387,9 +396,9 @@ export function ListingStatusSyncWorkspace() {
                     </Button>
                   ))}
                 </div>
-                <p className="text-muted-foreground mt-2 text-label-12">
-                  限流 / 类目审核 / 价格异常<strong>不在</strong>可重发范围内 —— 它们进的是「需人工处理」，
-                  盲目重发解决不了限流。
+                <p className="text-muted-foreground text-label-12 mt-2">
+                  限流 / 类目审核 / 价格异常<strong>不在</strong>可重发范围内 ——
+                  它们进的是「需人工处理」， 盲目重发解决不了限流。
                 </p>
               </div>
 
@@ -429,8 +438,8 @@ export function ListingStatusSyncWorkspace() {
 
               {receiptLines && receiptLines.length > 0 && (
                 <div className="border-border bg-muted/30 rounded-lg border px-3 py-3">
-                  <p className="text-foreground mb-2 text-label-13 font-medium">回执</p>
-                  <ul className="text-muted-foreground space-y-1 text-label-12">
+                  <p className="text-foreground text-label-13 mb-2 font-medium">回执</p>
+                  <ul className="text-muted-foreground text-label-12 space-y-1">
                     {receiptLines.map((line, i) => (
                       <li key={`${line}-${i}`}>{line}</li>
                     ))}
@@ -438,9 +447,7 @@ export function ListingStatusSyncWorkspace() {
                 </div>
               )}
 
-              {lastAction && (
-                <p className="text-muted-foreground text-label-12">{lastAction}</p>
-              )}
+              {lastAction && <p className="text-muted-foreground text-label-12">{lastAction}</p>}
             </div>
           </SectionCard>
 
@@ -468,14 +475,14 @@ export function ListingStatusSyncWorkspace() {
           >
             {!events || events.items.length === 0 ? (
               <EmptyState
-                icon={<AlertTriangle className="size-8 text-muted-foreground" />}
+                icon={<AlertTriangle className="text-muted-foreground size-8" />}
                 title="还没有状态变更记录"
                 description={emptyEventsMessage(webhookIngested)}
               />
             ) : (
               <>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-label-13">
+                  <table className="text-label-13 w-full text-left">
                     <thead className="text-muted-foreground border-border border-b">
                       <tr>
                         <th className="px-4 py-2 font-medium">商品</th>
@@ -500,7 +507,7 @@ export function ListingStatusSyncWorkspace() {
                               {eventTypeLabel(event.eventType)}
                             </Badge>
                             {event.conflictDetected && (
-                              <div className="text-warning mt-1 text-label-12">
+                              <div className="text-warning text-label-12 mt-1">
                                 {conflictSummary(event)}
                               </div>
                             )}
@@ -513,13 +520,13 @@ export function ListingStatusSyncWorkspace() {
                               </div>
                             )}
                           </td>
-                          <td className="text-muted-foreground px-4 py-2 text-label-12">
+                          <td className="text-muted-foreground text-label-12 px-4 py-2">
                             {ingestChannelLabel(event.ingestChannel)}
                           </td>
-                          <td className="text-muted-foreground px-4 py-2 text-label-12">
+                          <td className="text-muted-foreground text-label-12 px-4 py-2">
                             {new Date(event.occurredAt).toLocaleString('zh-CN')}
                           </td>
-                          <td className="text-muted-foreground px-4 py-2 text-label-12">
+                          <td className="text-muted-foreground text-label-12 px-4 py-2">
                             {syncDelayLabel(event.occurredAt, event.receivedAt)}
                           </td>
                         </tr>
@@ -527,7 +534,7 @@ export function ListingStatusSyncWorkspace() {
                     </tbody>
                   </table>
                 </div>
-                <div className="text-muted-foreground mt-3 flex items-center justify-between text-label-12">
+                <div className="text-muted-foreground text-label-12 mt-3 flex items-center justify-between">
                   <span>{pageSummary(events)}</span>
                   <div className="flex gap-2">
                     <Button
@@ -560,9 +567,12 @@ export function ListingStatusSyncWorkspace() {
               title="未交付能力的归属"
               description="下面这些不属于本模块，页面据此显示「这归谁管」而不是显示一个必然失败的按钮。"
             >
-              <ul className="space-y-2 text-label-13">
+              <ul className="text-label-13 space-y-2">
                 {unavailableDimensions(caps).map((d) => (
-                  <li key={d.dimension} className="border-border border-b pb-2 last:border-0 last:pb-0">
+                  <li
+                    key={d.dimension}
+                    className="border-border border-b pb-2 last:border-0 last:pb-0"
+                  >
                     <span className="text-foreground font-medium">{d.dimension}</span>
                     <span className="text-muted-foreground"> · 归 {d.ownerModule}</span>
                     <div className="text-muted-foreground text-label-12">{d.impact}</div>

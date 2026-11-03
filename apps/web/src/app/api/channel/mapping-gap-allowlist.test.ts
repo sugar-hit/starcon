@@ -205,11 +205,7 @@ it('本车道没有把队列挂到别的服务前缀下', async () => {
   vi.stubGlobal('fetch', fetcher);
   // 映射缺失是 channel 的事实（平台变体在 channel 库里），挂到别的服务前缀上
   // 只会让「这条路由归谁」永远答不出来。
-  for (const path of [
-    'catalog/mapping-gaps',
-    'trade/mapping-gaps',
-    'identity/mapping-gaps',
-  ]) {
+  for (const path of ['catalog/mapping-gaps', 'trade/mapping-gaps', 'identity/mapping-gaps']) {
     const response = await callProxy(path, {
       headers: { cookie: 'starcon_session=private-session' },
     });

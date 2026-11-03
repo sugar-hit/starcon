@@ -124,15 +124,11 @@ export function savePolicy(input: InterceptPolicyInput): Promise<InterceptPolicy
   return api<InterceptPolicy>(path('/policy'), 'PUT', input);
 }
 
-export function fetchRestrictions(
-  params: RestrictionParams,
-): Promise<InterceptRestrictionPage> {
+export function fetchRestrictions(params: RestrictionParams): Promise<InterceptRestrictionPage> {
   return api<InterceptRestrictionPage>(path('/restrictions', params));
 }
 
-export function saveRestriction(
-  input: InterceptRestrictionInput,
-): Promise<InterceptRestriction> {
+export function saveRestriction(input: InterceptRestrictionInput): Promise<InterceptRestriction> {
   return api<InterceptRestriction>(path('/restrictions'), 'POST', input);
 }
 

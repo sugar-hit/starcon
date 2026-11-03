@@ -111,11 +111,14 @@ export function PlatformFlagWorkspace() {
       api<ChildTenant[]>('identity/children'),
     ]);
     const problems: string[] = [];
-    if (local[0].status === 'rejected') problems.push(`按租户禁用的例外数据（${message(local[0].reason)}）`);
+    if (local[0].status === 'rejected')
+      problems.push(`按租户禁用的例外数据（${message(local[0].reason)}）`);
     else setExceptions(local[0].value);
-    if (local[1].status === 'rejected') problems.push(`功能可用性判定（${message(local[1].reason)}）`);
+    if (local[1].status === 'rejected')
+      problems.push(`功能可用性判定（${message(local[1].reason)}）`);
     else setEvaluations(local[1].value);
-    if (local[2].status === 'rejected') problems.push(`可管理的子租户列表（${message(local[2].reason)}）`);
+    if (local[2].status === 'rejected')
+      problems.push(`可管理的子租户列表（${message(local[2].reason)}）`);
     else setChildTenants(local[2].value);
     setPartial(problems.join('；'));
     setReady(true);
@@ -146,10 +149,7 @@ export function PlatformFlagWorkspace() {
     setBusy(true);
     setError('');
     try {
-      await api(
-        `identity/platform-flags/exceptions/${row.id}?tenantId=${row.tenantId}`,
-        'DELETE',
-      );
+      await api(`identity/platform-flags/exceptions/${row.id}?tenantId=${row.tenantId}`, 'DELETE');
       setNotice('禁用例外已撤销');
       await load();
     } catch (e) {
@@ -231,7 +231,10 @@ export function PlatformFlagWorkspace() {
           <p className="text-copy-14 font-medium">能力声明</p>
           <ul className="space-y-1">
             {capabilities.dimensions.map((dimension) => (
-              <li key={dimension.dimension} className="text-copy-12 flex flex-wrap items-center gap-2">
+              <li
+                key={dimension.dimension}
+                className="text-copy-12 flex flex-wrap items-center gap-2"
+              >
                 <Badge tone={dimension.available ? 'success' : 'warning'}>
                   {dimension.available ? '已交付' : '未交付'}
                 </Badge>
@@ -311,7 +314,7 @@ export function PlatformFlagWorkspace() {
 
                       {/* ---------------- 三层裁决 ---------------- */}
                       {verdict && (
-                        <dl className="border-border mt-3 grid gap-2 border-t pt-3 text-copy-12 md:grid-cols-3">
+                        <dl className="border-border text-copy-12 mt-3 grid gap-2 border-t pt-3 md:grid-cols-3">
                           <div>
                             <dt className="text-muted-foreground">{LAYER_LABELS.platform}</dt>
                             <dd>
@@ -415,9 +418,7 @@ export function PlatformFlagWorkspace() {
 
         {exceptions.length === 0 ? (
           <div className="bg-card rounded-lg border p-8 text-center">
-            <p className="text-copy-13 text-muted-foreground">
-              当前没有针对本租户的禁用例外
-            </p>
+            <p className="text-copy-13 text-muted-foreground">当前没有针对本租户的禁用例外</p>
           </div>
         ) : (
           <ul className="space-y-2">
@@ -427,7 +428,9 @@ export function PlatformFlagWorkspace() {
                   <div className="min-w-0">
                     <p className="text-copy-14 flex flex-wrap items-center gap-2 font-medium">
                       {row.flagName}
-                      <Badge tone="danger">{row.effect === 'DISABLED' ? '已禁用' : row.effect}</Badge>
+                      <Badge tone="danger">
+                        {row.effect === 'DISABLED' ? '已禁用' : row.effect}
+                      </Badge>
                     </p>
                     <p className="text-copy-12 text-muted-foreground mt-1">
                       {row.reason} · {row.createdAt}
@@ -470,8 +473,7 @@ export function PlatformFlagWorkspace() {
                   <p className="text-copy-13">
                     <span className="font-mono">{row.flagCode}</span>{' '}
                     {ACTION_LABELS[row.action] ?? row.action}
-                    {row.beforeRolloutPercent !== null &&
-                    row.afterRolloutPercent !== null && (
+                    {row.beforeRolloutPercent !== null && row.afterRolloutPercent !== null && (
                       <span className="text-muted-foreground">
                         {' '}
                         放量 {formatPercent(row.beforeRolloutPercent)} →{' '}
@@ -531,9 +533,7 @@ export function PlatformFlagWorkspace() {
                 enabled: draft.enabled,
                 rolloutPercent: Number(draft.rolloutPercent),
                 rateLimitPerMinute:
-                  draft.rateLimitPerMinute.trim() === ''
-                    ? null
-                    : Number(draft.rateLimitPerMinute),
+                  draft.rateLimitPerMinute.trim() === '' ? null : Number(draft.rateLimitPerMinute),
                 announcementTitle: draft.announcementTitle.trim() || null,
                 announcementBody: draft.announcementBody.trim() || null,
                 announcementFrom: fromLocalInputValue(draft.announcementFrom),

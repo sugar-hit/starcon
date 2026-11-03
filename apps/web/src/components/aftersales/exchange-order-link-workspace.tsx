@@ -83,7 +83,13 @@ import {
  * </ol>
  */
 export function ExchangeOrderLinkWorkspace() {
-  const [params, setParams] = useState({ status: '', keyword: '', sort: 'attention_first', page: 0, size: 20 });
+  const [params, setParams] = useState({
+    status: '',
+    keyword: '',
+    sort: 'attention_first',
+    page: 0,
+    size: 20,
+  });
   const [page, setPage] = useState<ExchangeOrderPage | null>(null);
   const [capabilities, setCapabilities] = useState<ExchangeOrderCapabilities | null>(null);
   const [filters, setFilters] = useState<ExchangeOrderFilterOptions | null>(null);
@@ -141,7 +147,10 @@ export function ExchangeOrderLinkWorkspace() {
     [filters, authorizationId],
   );
 
-  const blocker = useMemo(() => authorizationBlocker(selectedAuthorization), [selectedAuthorization]);
+  const blocker = useMemo(
+    () => authorizationBlocker(selectedAuthorization),
+    [selectedAuthorization],
+  );
 
   const submitCreate = async () => {
     if (!authorizationId) {
@@ -213,7 +222,9 @@ export function ExchangeOrderLinkWorkspace() {
       });
       setCancelling(false);
       setCancelReason('');
-      setNotice('换货新单已撤销，新发货需求已同步取消。替换货预占仍被仓库圈着 —— 如需真正释放，请到「换货授权」撤销那张授权。');
+      setNotice(
+        '换货新单已撤销，新发货需求已同步取消。替换货预占仍被仓库圈着 —— 如需真正释放，请到「换货授权」撤销那张授权。',
+      );
       setDetail(next);
       await load();
     } catch (e) {
@@ -273,7 +284,11 @@ export function ExchangeOrderLinkWorkspace() {
       ))}
 
       <div className="grid gap-4 md:grid-cols-4">
-        <StatCard label="换货新单总数" value={summary?.totalCount ?? 0} comparisonLabel="当前筛选下的真实条数" />
+        <StatCard
+          label="换货新单总数"
+          value={summary?.totalCount ?? 0}
+          comparisonLabel="当前筛选下的真实条数"
+        />
         <StatCard
           label="已建立待提交"
           value={summary?.createdCount ?? 0}
@@ -296,7 +311,7 @@ export function ExchangeOrderLinkWorkspace() {
           <FormField id="eol-status" label="闭环状态">
             <select
               id="eol-status"
-              className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
+              className="bg-background mt-1 w-full rounded-md border px-2 py-1.5 text-sm"
               value={params.status}
               onChange={(e: ChangeEvent<HTMLSelectElement>) =>
                 setParams({ ...params, status: e.target.value, page: 0 })
@@ -313,7 +328,7 @@ export function ExchangeOrderLinkWorkspace() {
           <FormField id="eol-sort" label="排序">
             <select
               id="eol-sort"
-              className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
+              className="bg-background mt-1 w-full rounded-md border px-2 py-1.5 text-sm"
               value={params.sort}
               onChange={(e: ChangeEvent<HTMLSelectElement>) =>
                 setParams({ ...params, sort: e.target.value, page: 0 })
@@ -326,7 +341,11 @@ export function ExchangeOrderLinkWorkspace() {
               ))}
             </select>
           </FormField>
-          <FormField id="eol-keyword" label="关键字" hint="换货新单号 / 新销售单号 / 售后号 / 原单号 / SKU">
+          <FormField
+            id="eol-keyword"
+            label="关键字"
+            hint="换货新单号 / 新销售单号 / 售后号 / 原单号 / SKU"
+          >
             <Input
               id="eol-keyword"
               value={params.keyword}
@@ -372,7 +391,9 @@ export function ExchangeOrderLinkWorkspace() {
                     <td className="p-2 font-mono text-xs">{r.linkNo}</td>
                     <td className="p-2">
                       <div>{r.caseNo}</div>
-                      <div className="text-muted-foreground text-xs">{unavailable(r.originalOrderNo)}</div>
+                      <div className="text-muted-foreground text-xs">
+                        {unavailable(r.originalOrderNo)}
+                      </div>
                     </td>
                     <td className="p-2">
                       <div className="font-mono text-xs">{unavailable(r.newOrderNo)}</div>
@@ -433,7 +454,9 @@ export function ExchangeOrderLinkWorkspace() {
             <div>
               <div className="text-muted-foreground">原售后单</div>
               <div>{detail.link.caseNo}</div>
-              <div className="text-muted-foreground text-xs">授权 {detail.link.authorizationNo}</div>
+              <div className="text-muted-foreground text-xs">
+                授权 {detail.link.authorizationNo}
+              </div>
             </div>
             <div>
               <div className="text-muted-foreground">原销售订单（只读，不被修改）</div>
@@ -448,7 +471,9 @@ export function ExchangeOrderLinkWorkspace() {
             </div>
             <div>
               <div className="text-muted-foreground">闭环状态</div>
-              <Badge tone={closureTone(detail.link.closureStatus)}>{closureLabel(detail.link)}</Badge>
+              <Badge tone={closureTone(detail.link.closureStatus)}>
+                {closureLabel(detail.link)}
+              </Badge>
             </div>
           </div>
 
@@ -529,17 +554,29 @@ export function ExchangeOrderLinkWorkspace() {
           </div>
 
           <div className="mt-4 flex flex-wrap items-center gap-3">
-            <Button variant="outline" disabled={!canSubmit(detail) || submitting} onClick={() => void submitOrder()}>
+            <Button
+              variant="outline"
+              disabled={!canSubmit(detail) || submitting}
+              onClick={() => void submitOrder()}
+            >
               提交进审单队列
             </Button>
             {submitBlocking(detail) && (
               <span className="text-muted-foreground text-xs">{submitBlocking(detail)}</span>
             )}
-            <Button variant="outline" disabled={!canSync(detail) || submitting} onClick={() => void syncOrder()}>
+            <Button
+              variant="outline"
+              disabled={!canSync(detail) || submitting}
+              onClick={() => void syncOrder()}
+            >
               同步闭环状态
             </Button>
             <span className="text-muted-foreground text-xs">{syncExplainer()}</span>
-            <Button variant="outline" disabled={!canCancel(detail) || submitting} onClick={() => setCancelling(true)}>
+            <Button
+              variant="outline"
+              disabled={!canCancel(detail) || submitting}
+              onClick={() => setCancelling(true)}
+            >
               撤销换货新单
             </Button>
             {cancelBlocking(detail) && (
@@ -567,8 +604,8 @@ export function ExchangeOrderLinkWorkspace() {
           <ModalHeader>
             <ModalTitle>建立换货新单</ModalTitle>
             <ModalDescription>
-              这张单会**真的**建在销售订单里（不是本模块自己的一串编号）：9 订单与 8 出库接手的就是它。
-              收货地址与客户快照照抄原订单，金额恒为 0 —— 换货不二次收费。
+              这张单会**真的**建在销售订单里（不是本模块自己的一串编号）：9 订单与 8
+              出库接手的就是它。 收货地址与客户快照照抄原订单，金额恒为 0 —— 换货不二次收费。
             </ModalDescription>
           </ModalHeader>
 
@@ -584,7 +621,7 @@ export function ExchangeOrderLinkWorkspace() {
             <FormField id="eol-auth" label="换货授权单" required>
               <select
                 id="eol-auth"
-                className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
+                className="bg-background mt-1 w-full rounded-md border px-2 py-1.5 text-sm"
                 value={authorizationId}
                 onChange={(e: ChangeEvent<HTMLSelectElement>) => setAuthorizationId(e.target.value)}
               >
@@ -606,7 +643,8 @@ export function ExchangeOrderLinkWorkspace() {
                 <ul className="mt-1 space-y-0.5">
                   {selectedAuthorization.lines.map((l) => (
                     <li key={l.authorizationLineId}>
-                      {unavailable(l.originalSkuCode)} → {unavailable(l.skuCode)} × {formatQty(l.quantity)}
+                      {unavailable(l.originalSkuCode)} → {unavailable(l.skuCode)} ×{' '}
+                      {formatQty(l.quantity)}
                     </li>
                   ))}
                 </ul>
@@ -642,8 +680,8 @@ export function ExchangeOrderLinkWorkspace() {
           <ModalHeader>
             <ModalTitle>撤销换货新单</ModalTitle>
             <ModalDescription>
-              只在新单仍是草稿且从未发货时可撤。撤销会同步取消新发货需求；
-              替换货预占仍被仓库圈着 —— 如需真正释放预占，请到「换货授权」撤销那张换货授权。
+              只在新单仍是草稿且从未发货时可撤。撤销会同步取消新发货需求； 替换货预占仍被仓库圈着 ——
+              如需真正释放预占，请到「换货授权」撤销那张换货授权。
             </ModalDescription>
           </ModalHeader>
 
@@ -660,7 +698,11 @@ export function ExchangeOrderLinkWorkspace() {
             <Button variant="outline" onClick={() => setCancelling(false)} disabled={submitting}>
               再想想
             </Button>
-            <Button variant="destructive" onClick={() => void confirmCancel()} disabled={submitting}>
+            <Button
+              variant="destructive"
+              onClick={() => void confirmCancel()}
+              disabled={submitting}
+            >
               {submitting ? '撤销中…' : '确认撤销'}
             </Button>
           </ModalFooter>

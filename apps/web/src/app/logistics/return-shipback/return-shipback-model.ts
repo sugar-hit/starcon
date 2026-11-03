@@ -27,21 +27,11 @@ import { api, ApiError } from '../../../lib/api';
 
 /** 退运单状态（展示名以服务端 capabilities 为准，这里只做兜底）。 */
 export type ShipbackStatus =
-  | 'DRAFT'
-  | 'CONFIRMED'
-  | 'DISPATCHED'
-  | 'ARRIVED'
-  | 'CLOSED'
-  | 'CANCELLED';
+  'DRAFT' | 'CONFIRMED' | 'DISPATCHED' | 'ARRIVED' | 'CLOSED' | 'CANCELLED';
 
 /** 运输方式。 */
 export type TransportMode =
-  | 'SEA_CONSOLIDATION'
-  | 'SEA_FULL_CONTAINER'
-  | 'AIR'
-  | 'EXPRESS'
-  | 'TRUCK'
-  | 'OTHER';
+  'SEA_CONSOLIDATION' | 'SEA_FULL_CONTAINER' | 'AIR' | 'EXPRESS' | 'TRUCK' | 'OTHER';
 
 /** 成本分摊口径。 */
 export type AllocationBasis = 'WEIGHT' | 'QUANTITY' | 'DECLARED_VALUE' | 'EQUAL';
@@ -764,9 +754,7 @@ export function emptyConsignmentForm(): ConsignmentForm {
   };
 }
 
-export function emptySelectedCandidate(
-  candidate: ShipbackCandidateRow,
-): SelectedCandidate {
+export function emptySelectedCandidate(candidate: ShipbackCandidateRow): SelectedCandidate {
   return {
     dispositionOrderId: candidate.dispositionOrderId,
     skuCode: candidate.skuCode,

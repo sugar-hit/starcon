@@ -178,11 +178,7 @@ describe('跨服务合并', () => {
 
   it('严重度按黑名单的风险等级抬升', () => {
     const target = row({ buyerKey: BUYER_KEY, anomalyTypes: ['BUYER_MESSAGE_PENDING'] });
-    const merged = mergeCrossService(
-      [target],
-      [flag({ riskLevel: 'CRITICAL' })],
-      new Map(),
-    );
+    const merged = mergeCrossService([target], [flag({ riskLevel: 'CRITICAL' })], new Map());
     expect(merged[0]?.severity).toBe('CRITICAL');
   });
 
@@ -229,18 +225,30 @@ describe('筛选与汇总', () => {
   );
 
   it('按异常类型筛选', () => {
-    expect(filterMerged(rows, { type: 'BLACKLIST_BUYER', shopCode: '', keyword: '', minDwellHours: 0 })).toHaveLength(1);
-    expect(filterMerged(rows, { type: 'DUPLICATE_ORDER', shopCode: '', keyword: '', minDwellHours: 0 })).toHaveLength(1);
+    expect(
+      filterMerged(rows, { type: 'BLACKLIST_BUYER', shopCode: '', keyword: '', minDwellHours: 0 }),
+    ).toHaveLength(1);
+    expect(
+      filterMerged(rows, { type: 'DUPLICATE_ORDER', shopCode: '', keyword: '', minDwellHours: 0 }),
+    ).toHaveLength(1);
   });
 
   it('按店铺与关键字筛选', () => {
-    expect(filterMerged(rows, { type: '', shopCode: 'SHOP-2', keyword: '', minDwellHours: 0 })).toHaveLength(1);
-    expect(filterMerged(rows, { type: '', shopCode: '', keyword: 'SO-A', minDwellHours: 0 })).toHaveLength(1);
+    expect(
+      filterMerged(rows, { type: '', shopCode: 'SHOP-2', keyword: '', minDwellHours: 0 }),
+    ).toHaveLength(1);
+    expect(
+      filterMerged(rows, { type: '', shopCode: '', keyword: 'SO-A', minDwellHours: 0 }),
+    ).toHaveLength(1);
   });
 
   it('按停留时长筛选', () => {
-    expect(filterMerged(rows, { type: '', shopCode: '', keyword: '', minDwellHours: 24 })).toHaveLength(1);
-    expect(filterMerged(rows, { type: '', shopCode: '', keyword: '', minDwellHours: 0 })).toHaveLength(2);
+    expect(
+      filterMerged(rows, { type: '', shopCode: '', keyword: '', minDwellHours: 24 }),
+    ).toHaveLength(1);
+    expect(
+      filterMerged(rows, { type: '', shopCode: '', keyword: '', minDwellHours: 0 }),
+    ).toHaveLength(2);
   });
 
   it('汇总计数与清单同源，且翻页不变', () => {

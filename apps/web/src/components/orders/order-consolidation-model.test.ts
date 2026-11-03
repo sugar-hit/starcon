@@ -200,11 +200,15 @@ describe('9.3.1.2 合单前端模型', () => {
     });
 
     it('规模同时报订单数 / 行数 / 件数', () => {
-      expect(sizeText({ orderCount: 3, totalLineCount: 5, totalQty: 6 })).toBe('3 笔 / 5 行 / 6 件');
+      expect(sizeText({ orderCount: 3, totalLineCount: 5, totalQty: 6 })).toBe(
+        '3 笔 / 5 行 / 6 件',
+      );
     });
 
     it('件数为 null 时按 0 显示而不是 NaN', () => {
-      expect(sizeText({ orderCount: 1, totalLineCount: 1, totalQty: null })).toBe('1 笔 / 1 行 / 0 件');
+      expect(sizeText({ orderCount: 1, totalLineCount: 1, totalQty: null })).toBe(
+        '1 笔 / 1 行 / 0 件',
+      );
     });
   });
 

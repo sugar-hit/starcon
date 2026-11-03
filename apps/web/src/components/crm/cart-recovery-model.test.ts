@@ -32,9 +32,9 @@ import {
 describe('15.6.2.2 购物车与弃单挽回前端模型', () => {
   describe('「挽回到哪一步」的四态', () => {
     it('还没触达 / 已触达 / 已挽回成交 —— 三句话互不相同', () => {
-      expect(cartRecoveryStateLabel({ status: 'ABANDONED', touchCount: 0, recoveredOrderNo: '' })).toBe(
-        '还没触达',
-      );
+      expect(
+        cartRecoveryStateLabel({ status: 'ABANDONED', touchCount: 0, recoveredOrderNo: '' }),
+      ).toBe('还没触达');
       expect(
         cartRecoveryStateLabel({ status: 'ABANDONED', touchCount: 2, recoveredOrderNo: '' }),
       ).toContain('已触达');

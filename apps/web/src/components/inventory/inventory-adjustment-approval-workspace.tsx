@@ -92,13 +92,17 @@ export function InventoryAdjustmentApprovalWorkspace() {
   const [pending, setPending] = useState<InventoryAdjustmentApprovalPendingPage | null>(null);
   const [rules, setRules] = useState<InventoryAdjustmentApprovalRule[]>([]);
   const [approvers, setApprovers] = useState<InventoryAdjustmentApprovalApprover[]>([]);
-  const [valuations, setValuations] = useState<InventoryAdjustmentApprovalValuationPage | null>(null);
+  const [valuations, setValuations] = useState<InventoryAdjustmentApprovalValuationPage | null>(
+    null,
+  );
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [notice, setNotice] = useState<{ tone: 'success' | 'danger'; title: string; body: string } | null>(
-    null,
-  );
+  const [notice, setNotice] = useState<{
+    tone: 'success' | 'danger';
+    title: string;
+    body: string;
+  } | null>(null);
 
   const [selected, setSelected] = useState<string[]>([]);
   const [notes, setNotes] = useState<Record<string, string>>({});
@@ -326,7 +330,10 @@ export function InventoryAdjustmentApprovalWorkspace() {
       ) : null}
 
       {capabilities ? (
-        <Notice tone={capabilities.policy.thresholdEnabled ? 'info' : 'warning'} title="阈值闸门状态">
+        <Notice
+          tone={capabilities.policy.thresholdEnabled ? 'info' : 'warning'}
+          title="阈值闸门状态"
+        >
           {capabilities.policy.note}
         </Notice>
       ) : null}
@@ -387,14 +394,15 @@ export function InventoryAdjustmentApprovalWorkspace() {
                           </Badge>
                           <Badge tone="info">{tierLabel(item.approvalCase.requiredTier)}</Badge>
                           <Badge tone="neutral">
-                            已批 {item.approvalCase.approvedCount}/{item.approvalCase.requiredApprovals} 人
+                            已批 {item.approvalCase.approvedCount}/
+                            {item.approvalCase.requiredApprovals} 人
                           </Badge>
                         </div>
                         <p className="text-muted-foreground mt-1 text-xs">
-                          {ruleMatchLabel(item.approvalCase)} · 申报金额 {amountText(item.approvalCase.orderAmount)}{' '}
-                          {item.approvalCase.currency} · 调整量 {qtyText(item.approvalCase.orderQty)} ·{' '}
-                          {item.lineCount} 行 · 净调整 {qtyText(item.netQty)} · 原因{' '}
-                          {item.reasonLabel || item.reasonCode}
+                          {ruleMatchLabel(item.approvalCase)} · 申报金额{' '}
+                          {amountText(item.approvalCase.orderAmount)} {item.approvalCase.currency} ·
+                          调整量 {qtyText(item.approvalCase.orderQty)} · {item.lineCount} 行 ·
+                          净调整 {qtyText(item.netQty)} · 原因 {item.reasonLabel || item.reasonCode}
                         </p>
                         <p className="mt-1 text-xs">
                           {item.approvable ? (
@@ -463,7 +471,10 @@ export function InventoryAdjustmentApprovalWorkspace() {
             )}
           </SectionCard>
 
-          <SectionCard title="批量审批 / 批量驳回" description="逐条给结论：一张失败不影响其它张，失败原因逐条列出，不静默丢弃。">
+          <SectionCard
+            title="批量审批 / 批量驳回"
+            description="逐条给结论：一张失败不影响其它张，失败原因逐条列出，不静默丢弃。"
+          >
             <div className="flex flex-wrap items-end gap-2">
               <FormField id="batch-note" label="审批意见">
                 <Input
@@ -474,11 +485,21 @@ export function InventoryAdjustmentApprovalWorkspace() {
                   onChange={(event) => setBatchNote(event.target.value)}
                 />
               </FormField>
-              <Button size="sm" variant="success" disabled={busy} onClick={() => void runBatch(true)}>
+              <Button
+                size="sm"
+                variant="success"
+                disabled={busy}
+                onClick={() => void runBatch(true)}
+              >
                 <CheckCheck className="mr-1 h-4 w-4" />
                 批量批准（{selected.length}）
               </Button>
-              <Button size="sm" variant="destructive" disabled={busy} onClick={() => void runBatch(false)}>
+              <Button
+                size="sm"
+                variant="destructive"
+                disabled={busy}
+                onClick={() => void runBatch(false)}
+              >
                 批量驳回（{selected.length}）
               </Button>
             </div>
@@ -488,7 +509,10 @@ export function InventoryAdjustmentApprovalWorkspace() {
 
       {!loading && tab === 'rules' ? (
         <>
-          <SectionCard title="阈值规则" description="（调整单类型, 币种, 金额区间, 数量区间）⇒ 要求的审批层级与人数。区间是半开区间 [下限, 上限)。">
+          <SectionCard
+            title="阈值规则"
+            description="（调整单类型, 币种, 金额区间, 数量区间）⇒ 要求的审批层级与人数。区间是半开区间 [下限, 上限)。"
+          >
             {rules.length === 0 ? (
               <EmptyState
                 title="还没有阈值规则"
@@ -497,7 +521,10 @@ export function InventoryAdjustmentApprovalWorkspace() {
             ) : (
               <ul className="space-y-2">
                 {rules.map((rule) => (
-                  <li key={rule.id} className="border-border flex flex-wrap items-center gap-2 rounded border p-2">
+                  <li
+                    key={rule.id}
+                    className="border-border flex flex-wrap items-center gap-2 rounded border p-2"
+                  >
                     <span className="text-sm font-medium">{rule.ruleNo}</span>
                     <span className="text-muted-foreground text-xs">{rule.ruleName}</span>
                     <Badge tone="neutral">
@@ -505,8 +532,8 @@ export function InventoryAdjustmentApprovalWorkspace() {
                     </Badge>
                     <span className="text-muted-foreground text-xs">
                       金额 [{amountText(rule.minAmount)}
-                      {rule.maxAmount === null ? ', ∞)' : `, ${amountText(rule.maxAmount)})`} · 数量 [
-                      {qtyText(rule.minQty)}
+                      {rule.maxAmount === null ? ', ∞)' : `, ${amountText(rule.maxAmount)})`} · 数量
+                      [{qtyText(rule.minQty)}
                       {rule.maxQty === null ? ', ∞)' : `, ${qtyText(rule.maxQty)})`} ·{' '}
                       {tierLabel(rule.requiredTier)} · {rule.requiredApprovals} 人
                     </span>
@@ -554,7 +581,7 @@ export function InventoryAdjustmentApprovalWorkspace() {
               <FormField id="rule-reason" label="适用调整单类型">
                 <select
                   id="rule-reason"
-                  className="border-control-border h-9 w-full rounded border bg-card px-2 text-sm"
+                  className="border-control-border bg-card h-9 w-full rounded border px-2 text-sm"
                   value={ruleForm.reasonCode}
                   onChange={(event) => setRuleForm({ ...ruleForm, reasonCode: event.target.value })}
                 >
@@ -603,9 +630,11 @@ export function InventoryAdjustmentApprovalWorkspace() {
               <FormField id="rule-tier" label="要求的审批层级">
                 <select
                   id="rule-tier"
-                  className="border-control-border h-9 w-full rounded border bg-card px-2 text-sm"
+                  className="border-control-border bg-card h-9 w-full rounded border px-2 text-sm"
                   value={ruleForm.requiredTier}
-                  onChange={(event) => setRuleForm({ ...ruleForm, requiredTier: event.target.value })}
+                  onChange={(event) =>
+                    setRuleForm({ ...ruleForm, requiredTier: event.target.value })
+                  }
                 >
                   {['L1', 'L2', 'L3'].map((tier) => (
                     <option key={tier} value={tier}>
@@ -645,13 +674,20 @@ export function InventoryAdjustmentApprovalWorkspace() {
             ) : (
               <ul className="space-y-2">
                 {approvers.map((approver) => (
-                  <li key={approver.id} className="border-border flex flex-wrap items-center gap-2 rounded border p-2">
-                    <span className="text-sm font-medium">{approver.userName || approver.userId}</span>
+                  <li
+                    key={approver.id}
+                    className="border-border flex flex-wrap items-center gap-2 rounded border p-2"
+                  >
+                    <span className="text-sm font-medium">
+                      {approver.userName || approver.userId}
+                    </span>
                     <Badge tone="info">{tierLabel(approver.approvalTier)}</Badge>
                     <span className="text-muted-foreground text-xs">
                       {approver.currency} 金额 [{amountText(approver.minAmount)}
-                      {approver.maxAmount === null ? ', ∞)' : `, ${amountText(approver.maxAmount)})`} · 数量上限{' '}
-                      {approver.maxQty === null ? '不限' : qtyText(approver.maxQty)}
+                      {approver.maxAmount === null
+                        ? ', ∞)'
+                        : `, ${amountText(approver.maxAmount)})`}{' '}
+                      · 数量上限 {approver.maxQty === null ? '不限' : qtyText(approver.maxQty)}
                     </span>
                     <Badge tone={approver.status === 'ACTIVE' ? 'success' : 'neutral'}>
                       {approver.status === 'ACTIVE' ? '生效中' : '已停用'}
@@ -704,7 +740,7 @@ export function InventoryAdjustmentApprovalWorkspace() {
               <FormField id="approver-tier" label="审批层级">
                 <select
                   id="approver-tier"
-                  className="border-control-border h-9 w-full rounded border bg-card px-2 text-sm"
+                  className="border-control-border bg-card h-9 w-full rounded border px-2 text-sm"
                   value={approverForm.approvalTier}
                   onChange={(event) =>
                     setApproverForm({ ...approverForm, approvalTier: event.target.value })
@@ -754,7 +790,12 @@ export function InventoryAdjustmentApprovalWorkspace() {
                 />
               </FormField>
             </div>
-            <Button className="mt-3" size="sm" disabled={busy} onClick={() => void submitApprover()}>
+            <Button
+              className="mt-3"
+              size="sm"
+              disabled={busy}
+              onClick={() => void submitApprover()}
+            >
               登记授权
             </Button>
           </SectionCard>
@@ -774,7 +815,10 @@ export function InventoryAdjustmentApprovalWorkspace() {
           ) : (
             <ul className="space-y-2">
               {valuations.items.map((item) => (
-                <li key={item.id} className="border-border flex flex-wrap items-center gap-2 rounded border p-2">
+                <li
+                  key={item.id}
+                  className="border-border flex flex-wrap items-center gap-2 rounded border p-2"
+                >
                   <span className="text-sm font-medium">{item.orderCode}</span>
                   <Badge tone={item.status === 'EFFECTIVE' ? 'success' : 'neutral'}>
                     {valuationStatusLabel(item.status)}
@@ -799,7 +843,9 @@ export function InventoryAdjustmentApprovalWorkspace() {
                 <Badge tone={capability.available ? 'success' : 'neutral'}>
                   {capability.available ? '可用' : '不可用'}
                 </Badge>{' '}
-                <span className="text-muted-foreground text-xs">归属：{capability.ownerModule}</span>
+                <span className="text-muted-foreground text-xs">
+                  归属：{capability.ownerModule}
+                </span>
                 <p className="text-muted-foreground mt-1 text-xs">{capability.note}</p>
               </li>
             ))}

@@ -145,12 +145,7 @@ export function DefaultContextWorkspace() {
             ) : (
               <Badge tone="neutral">当前未设置任何默认项</Badge>
             )}
-            <Button
-              variant="outline"
-              onClick={reset}
-              disabled={saving}
-              aria-label="重置默认上下文"
-            >
+            <Button variant="outline" onClick={reset} disabled={saving} aria-label="重置默认上下文">
               <RotateCcw className="h-4 w-4" />
               <span className="ml-1">重置</span>
             </Button>
@@ -238,7 +233,10 @@ export function DefaultContextWorkspace() {
       )}
 
       {view && (
-        <SectionCard title="当前生效的默认上下文" description="下游页面（09 订单履约 / 07 库存核算 / 13 利润分析）读到的就是这一份。">
+        <SectionCard
+          title="当前生效的默认上下文"
+          description="下游页面（09 订单履约 / 07 库存核算 / 13 利润分析）读到的就是这一份。"
+        >
           <ul className="text-copy-13 space-y-1">
             {describeContext(view).map((line) => (
               <li key={line} className="text-muted-foreground">
@@ -257,7 +255,10 @@ export function DefaultContextWorkspace() {
           <div className="space-y-4">
             <ul className="space-y-2">
               {(capabilities.sources ?? []).map((source) => (
-                <li key={source.dimension} className="text-copy-13 flex flex-wrap items-center gap-2">
+                <li
+                  key={source.dimension}
+                  className="text-copy-13 flex flex-wrap items-center gap-2"
+                >
                   <Badge tone={source.available ? 'success' : 'warning'}>
                     {dimensionLabel(source.dimension)}
                     {source.available ? ' 已接通' : ' 未接通'}
@@ -321,7 +322,10 @@ function DimensionPicker({
 
   return (
     <div className="space-y-2">
-      <label className="text-label-13 flex items-center gap-2" htmlFor={`default-context-${dimension}`}>
+      <label
+        className="text-label-13 flex items-center gap-2"
+        htmlFor={`default-context-${dimension}`}
+      >
         {icon}
         默认{label}
         {source && (

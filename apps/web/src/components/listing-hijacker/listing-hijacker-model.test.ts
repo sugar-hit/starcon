@@ -130,9 +130,27 @@ describe('4.5.2.1 跟卖监控 · 前端模型', () => {
     it('已交付的维度不能被误标成未接入', () => {
       const caps = {
         dimensions: [
-          { dimension: 'anomaly_detection', available: true, description: '', ownerModule: '', impact: '' },
-          { dimension: 'brand_protection_enforcement', available: false, description: '', ownerModule: '', impact: '' },
-          { dimension: 'workbench_alert_notification', available: false, description: '', ownerModule: '', impact: '' },
+          {
+            dimension: 'anomaly_detection',
+            available: true,
+            description: '',
+            ownerModule: '',
+            impact: '',
+          },
+          {
+            dimension: 'brand_protection_enforcement',
+            available: false,
+            description: '',
+            ownerModule: '',
+            impact: '',
+          },
+          {
+            dimension: 'workbench_alert_notification',
+            available: false,
+            description: '',
+            ownerModule: '',
+            impact: '',
+          },
         ],
       } as ListingHijackerCapabilities;
       const missing = unavailableDimensions(caps);

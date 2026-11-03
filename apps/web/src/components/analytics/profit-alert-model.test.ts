@@ -72,7 +72,11 @@ function alert(overrides: Partial<ProfitAlert> = {}): ProfitAlert {
     reason: 'SKU SKU-1 毛利率 -20.0000% 已跌破阈值 0.0000%',
     note: 'SKU 维度的收入取订单行金额口径',
     actions: [
-      { label: '去利润报表复核这个 SKU', href: '/analytics/profit/profit-report', description: 'x' },
+      {
+        label: '去利润报表复核这个 SKU',
+        href: '/analytics/profit/profit-report',
+        description: 'x',
+      },
     ],
     ...overrides,
   };
@@ -172,7 +176,11 @@ describe('13.4.3.1 利润预警 · 阈值单位', () => {
     ).toBe('1.67 倍');
     expect(
       observedText(
-        alert({ observedValue: 20, observedUnit: 'PERCENTAGE_POINTS', thresholdUnit: 'PERCENTAGE_POINTS' }),
+        alert({
+          observedValue: 20,
+          observedUnit: 'PERCENTAGE_POINTS',
+          thresholdUnit: 'PERCENTAGE_POINTS',
+        }),
       ),
     ).toBe('20.00 个百分点');
   });
@@ -303,8 +311,12 @@ describe('13.4.3.1 利润预警 · 阈值规则', () => {
 
   it('规则阈值带单位', () => {
     expect(ruleThresholdText(rule())).toBe('10.00 个百分点');
-    expect(ruleThresholdText(rule({ thresholdValue: 1, thresholdUnit: 'MULTIPLE' }))).toBe('1.00 倍');
-    expect(ruleThresholdText(rule({ thresholdValue: 80, thresholdUnit: 'PERCENT' }))).toBe('80.00%');
+    expect(ruleThresholdText(rule({ thresholdValue: 1, thresholdUnit: 'MULTIPLE' }))).toBe(
+      '1.00 倍',
+    );
+    expect(ruleThresholdText(rule({ thresholdValue: 80, thresholdUnit: 'PERCENT' }))).toBe(
+      '80.00%',
+    );
   });
 });
 

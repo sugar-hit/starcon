@@ -1,8 +1,5 @@
 import { api, ApiError } from '@/lib/api';
-import {
-  type GlobalSearchResponse,
-  type ServiceSearchOutcome,
-} from './global-search-model';
+import { type GlobalSearchResponse, type ServiceSearchOutcome } from './global-search-model';
 
 /**
  * 1.2.1.1 全局搜索框 —— 前端聚合层（并发调用各服务的只读检索端点）。

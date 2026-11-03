@@ -366,7 +366,11 @@ export function MassProductionWorkspace() {
 
       {total > 0 && (
         <div className="flex items-center justify-end gap-2 text-sm">
-          <Button variant="ghost" disabled={page <= 0} onClick={() => setPage((p) => Math.max(0, p - 1))}>
+          <Button
+            variant="ghost"
+            disabled={page <= 0}
+            onClick={() => setPage((p) => Math.max(0, p - 1))}
+          >
             上一页
           </Button>
           <span className="text-muted-foreground">
@@ -392,22 +396,14 @@ export function MassProductionWorkspace() {
         />
       )}
 
-      {detailId && (
-        <PlanDetailModal planId={detailId} onClose={() => setDetailId(null)} />
-      )}
+      {detailId && <PlanDetailModal planId={detailId} onClose={() => setDetailId(null)} />}
     </div>
   );
 }
 
 // ================================================================ 新建量产计划
 
-function CreatePlanModal({
-  onClose,
-  onCreated,
-}: {
-  onClose: () => void;
-  onCreated: () => void;
-}) {
+function CreatePlanModal({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
   const [trials, setTrials] = useState<MassProductionTrialCandidateRow[]>([]);
   const [boms, setBoms] = useState<ProductionTrialBomVersionCandidateRow[]>([]);
   const [planNo, setPlanNo] = useState('');
@@ -488,7 +484,11 @@ function CreatePlanModal({
           )}
           <label className="flex flex-col gap-1 text-sm">
             <span className="text-muted-foreground">量产计划号 *</span>
-            <Input value={planNo} onChange={(e) => setPlanNo(e.target.value)} placeholder="MP-20261021-a1b2c3d4" />
+            <Input
+              value={planNo}
+              onChange={(e) => setPlanNo(e.target.value)}
+              placeholder="MP-20261021-a1b2c3d4"
+            />
           </label>
           <label className="flex flex-col gap-1 text-sm">
             <span className="text-muted-foreground">上游试产单 *</span>
@@ -531,11 +531,19 @@ function CreatePlanModal({
             </label>
             <label className="flex flex-col gap-1 text-sm">
               <span className="text-muted-foreground">币种 *</span>
-              <Input value={currency} onChange={(e) => setCurrency(e.target.value)} placeholder="USD" />
+              <Input
+                value={currency}
+                onChange={(e) => setCurrency(e.target.value)}
+                placeholder="USD"
+              />
             </label>
             <label className="flex flex-col gap-1 text-sm">
               <span className="text-muted-foreground">量产目标成本（可留空 = 取不到）</span>
-              <Input value={targetCost} onChange={(e) => setTargetCost(e.target.value)} placeholder="12.5000" />
+              <Input
+                value={targetCost}
+                onChange={(e) => setTargetCost(e.target.value)}
+                placeholder="12.5000"
+              />
             </label>
             <label className="flex flex-col gap-1 text-sm">
               <span className="text-muted-foreground">计划开始时间</span>
@@ -582,9 +590,8 @@ function PlanDetailModal({ planId, onClose }: { planId: string; onClose: () => v
 
   // 决策表单
   const [decision, setDecision] = useState<MassProductionDecision>('GO');
-  const [decisionSource, setDecisionSource] = useState<MassProductionDecisionSource>(
-    'TRIAL_RECOMMENDATION',
-  );
+  const [decisionSource, setDecisionSource] =
+    useState<MassProductionDecisionSource>('TRIAL_RECOMMENDATION');
   const [decisionRationale, setDecisionRationale] = useState('');
   const [overrideReason, setOverrideReason] = useState('');
   const [transitionReason, setTransitionReason] = useState('');
@@ -718,8 +725,8 @@ function PlanDetailModal({ planId, onClose }: { planId: string; onClose: () => v
         <ModalHeader>
           <ModalTitle>{plan ? `量产计划 ${plan.planNo}` : '量产计划详情'}</ModalTitle>
           <ModalDescription>
-            转量产是开发与供应链的交接口：SKU 编码 / 条码在此时生成，后续全链路引用此编码。
-            正式 SKU 由**商品中心**建（写入所有权在 3.1.2.1），本页只落建档请求事实。
+            转量产是开发与供应链的交接口：SKU 编码 / 条码在此时生成，后续全链路引用此编码。 正式 SKU
+            由**商品中心**建（写入所有权在 3.1.2.1），本页只落建档请求事实。
           </ModalDescription>
         </ModalHeader>
         <div className="max-h-[70vh] space-y-3 overflow-y-auto">
@@ -786,7 +793,9 @@ function PlanDetailModal({ planId, onClose }: { planId: string; onClose: () => v
                   </div>
                 </dl>
                 {plan.decisionRationale && (
-                  <p className="text-muted-foreground mt-2 text-sm">决策理由：{plan.decisionRationale}</p>
+                  <p className="text-muted-foreground mt-2 text-sm">
+                    决策理由：{plan.decisionRationale}
+                  </p>
                 )}
                 {plan.overrideReason && (
                   <p className="text-muted-foreground mt-1 text-sm">
@@ -797,9 +806,7 @@ function PlanDetailModal({ planId, onClose }: { planId: string; onClose: () => v
 
               {comparison && (
                 <SectionCard title="量产目标成本 vs 上游试产实测成本">
-                  <p className="text-sm">
-                    {describeTargetCostComparison(comparison).headline}
-                  </p>
+                  <p className="text-sm">{describeTargetCostComparison(comparison).headline}</p>
                   <p className="text-muted-foreground mt-1 text-sm">
                     {describeTargetCostComparison(comparison).detail}
                   </p>
@@ -965,7 +972,9 @@ function PlanDetailModal({ planId, onClose }: { planId: string; onClose: () => v
                       </label>
                     </div>
                     <details className="text-sm">
-                      <summary className="cursor-pointer">报关属性（可留空 —— 留空时建档照样成立）</summary>
+                      <summary className="cursor-pointer">
+                        报关属性（可留空 —— 留空时建档照样成立）
+                      </summary>
                       <div className="mt-2 grid gap-2 sm:grid-cols-2">
                         <label className="flex flex-col gap-1 text-sm">
                           <span className="text-muted-foreground">HS 编码</span>
@@ -981,7 +990,10 @@ function PlanDetailModal({ planId, onClose }: { planId: string; onClose: () => v
                         </label>
                         <label className="flex flex-col gap-1 text-sm">
                           <span className="text-muted-foreground">申报品名</span>
-                          <Input value={declaredName} onChange={(e) => setDeclaredName(e.target.value)} />
+                          <Input
+                            value={declaredName}
+                            onChange={(e) => setDeclaredName(e.target.value)}
+                          />
                         </label>
                         <label className="flex flex-col gap-1 text-sm">
                           <span className="text-muted-foreground">法定单位</span>
@@ -994,7 +1006,13 @@ function PlanDetailModal({ planId, onClose }: { planId: string; onClose: () => v
                       </div>
                     </details>
                     <Button
-                      disabled={busy || !targetSpuId || !skuCode.trim() || !skuName.trim() || !barcode.trim()}
+                      disabled={
+                        busy ||
+                        !targetSpuId ||
+                        !skuCode.trim() ||
+                        !skuName.trim() ||
+                        !barcode.trim()
+                      }
                       onClick={() => void createFiling()}
                     >
                       登记建档请求
@@ -1014,8 +1032,8 @@ function PlanDetailModal({ planId, onClose }: { planId: string; onClose: () => v
                   <ul className="space-y-1 text-sm">
                     {(detail?.transitions ?? []).map((row) => (
                       <li key={row.id} className="border-t pt-1">
-                        <span className="font-mono">{row.occurredAt}</span> · {row.fromStatusLabel} →{' '}
-                        {row.toStatusLabel}
+                        <span className="font-mono">{row.occurredAt}</span> · {row.fromStatusLabel}{' '}
+                        → {row.toStatusLabel}
                         {row.reason ? ` · ${row.reason}` : ''}
                       </li>
                     ))}
@@ -1038,9 +1056,7 @@ function PlanDetailModal({ planId, onClose }: { planId: string; onClose: () => v
 // ================================================================ 量产 BOM 组件行
 
 function BomLinesSection({ planId }: { planId: string }) {
-  const [lines, setLines] = useState<
-    Awaited<ReturnType<typeof fetchMassProductionBomLines>>
-  >([]);
+  const [lines, setLines] = useState<Awaited<ReturnType<typeof fetchMassProductionBomLines>>>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -1084,9 +1100,9 @@ function HandoffsSection({
   onRetrigger: () => Promise<void>;
   busy: boolean;
 }) {
-  const [handoffs, setHandoffs] = useState<
-    Awaited<ReturnType<typeof fetchMassProductionHandoffs>>
-  >([]);
+  const [handoffs, setHandoffs] = useState<Awaited<ReturnType<typeof fetchMassProductionHandoffs>>>(
+    [],
+  );
 
   useEffect(() => {
     void (async () => {

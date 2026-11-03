@@ -99,7 +99,13 @@ describe('14.4.1.2 优惠券表单校验', () => {
   });
 
   it('折扣码：折扣率与面额必须二选一（两个都填让利额有两个答案）', () => {
-    const base = { ...emptyAdCouponInput(), couponCode: 'C1', couponName: '券', shopCode: 'S', platformId: 'p' };
+    const base = {
+      ...emptyAdCouponInput(),
+      couponCode: 'C1',
+      couponName: '券',
+      shopCode: 'S',
+      platformId: 'p',
+    };
     const both = validateAdCoupon({ ...base, discountRate: '0.1', discountValue: '5' });
     expect(both.ok).toBe(false);
     expect(both.errors.join('|')).toContain('两个都填让利额会有两个答案');
@@ -143,7 +149,12 @@ describe('14.4.1.2 优惠券表单校验', () => {
     const missing = validateAdCoupon(base);
     expect(missing.errors.join('|')).toContain('买赠券必须给买 N 与送 M');
 
-    const withMoney = validateAdCoupon({ ...base, buyQuantity: '2', giftQuantity: '1', discountValue: '5' });
+    const withMoney = validateAdCoupon({
+      ...base,
+      buyQuantity: '2',
+      giftQuantity: '1',
+      discountValue: '5',
+    });
     expect(withMoney.errors.join('|')).toContain('买赠券没有金额口径');
   });
 
@@ -187,7 +198,11 @@ describe('14.4.1.2 优惠券表单校验', () => {
       platformId: 'p',
       discountRate: '0.1',
     };
-    const bad = validateAdCoupon({ ...base, startAt: '2026-10-02T10:00', endAt: '2026-10-01T10:00' });
+    const bad = validateAdCoupon({
+      ...base,
+      startAt: '2026-10-02T10:00',
+      endAt: '2026-10-01T10:00',
+    });
     expect(bad.errors.join('|')).toContain('失效时间必须晚于生效时间');
   });
 
@@ -198,7 +213,11 @@ describe('14.4.1.2 优惠券表单校验', () => {
     const badQuantity = validateAdClaim({ ...emptyAdClaimInput(), quantity: '0' });
     expect(badQuantity.errors.join('|')).toContain('领取张数必须大于 0');
 
-    const ok = validateAdClaim({ ...emptyAdClaimInput(), recipientKey: 'customer-1', quantity: '1' });
+    const ok = validateAdClaim({
+      ...emptyAdClaimInput(),
+      recipientKey: 'customer-1',
+      quantity: '1',
+    });
     expect(ok.ok).toBe(true);
   });
 

@@ -301,7 +301,8 @@ export function validateCarrierForm(input: SaveCarrierInput): string[] {
     problems.push('至少登记一个覆盖国家：一个国家都送不到的承运商不该被选中');
   }
   countries.forEach((c) => {
-    if (!/^[A-Za-z]{2}$/.test(c.trim())) problems.push(`国家代码「${c}」必须是两位字母（如 DE / US）`);
+    if (!/^[A-Za-z]{2}$/.test(c.trim()))
+      problems.push(`国家代码「${c}」必须是两位字母（如 DE / US）`);
   });
   if (input.businessTypes.filter((b) => b.trim()).length === 0) {
     problems.push('至少声明一种业务类型（自发货 / 退货 / FBA 入仓）');

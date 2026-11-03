@@ -161,9 +161,9 @@ describe('逾期天数：提前到货不是负的逾期', () => {
 
 describe('采购侧运营档案：只写采购侧那三列', () => {
   it('合作状态必填', () => {
-    expect(validateSupplyProfile({ supplyStatus: 'ACTIVE', categoryId: null, note: '', version: 0 })).toEqual(
-      [],
-    );
+    expect(
+      validateSupplyProfile({ supplyStatus: 'ACTIVE', categoryId: null, note: '', version: 0 }),
+    ).toEqual([]);
     expect(
       validateSupplyProfile({ supplyStatus: '  ', categoryId: null, note: '', version: 0 }).join(),
     ).toContain('合作状态必填');
@@ -171,8 +171,12 @@ describe('采购侧运营档案：只写采购侧那三列', () => {
 
   it('备注超长给出可读原因', () => {
     expect(
-      validateSupplyProfile({ supplyStatus: 'ACTIVE', categoryId: null, note: 'x'.repeat(2001), version: 0 })
-        .join(),
+      validateSupplyProfile({
+        supplyStatus: 'ACTIVE',
+        categoryId: null,
+        note: 'x'.repeat(2001),
+        version: 0,
+      }).join(),
     ).toContain('2000');
   });
 
@@ -244,9 +248,9 @@ describe('到货记录校验', () => {
   });
 
   it('收货事实不可能早于下单', () => {
-    expect(
-      validateDelivery({ ...base, receivedDate: '2026-05-01' }).join(),
-    ).toContain('不能早于下单');
+    expect(validateDelivery({ ...base, receivedDate: '2026-05-01' }).join()).toContain(
+      '不能早于下单',
+    );
   });
 
   it('早到不是错误 —— 准时与否由两个日期推出，表单不额外问', () => {
@@ -270,7 +274,9 @@ describe('质检记录校验：合格数不得超过检验数', () => {
   });
 
   it('合格 > 检验被拦下，并说清会让合格率算出 100% 以上', () => {
-    expect(validateInspection({ ...base, qualifiedQuantity: '120' }).join()).toContain('不能超过检验数量');
+    expect(validateInspection({ ...base, qualifiedQuantity: '120' }).join()).toContain(
+      '不能超过检验数量',
+    );
   });
 
   it('检验数量必须大于 0，合格数量不能为负', () => {

@@ -83,7 +83,8 @@ export const NOTIFICATION_TYPE_LABELS: Record<string, string> = {
  *
  * <p>🔴 {@code https://} **不在名单里**：那不是引用，那是**凭据本体**（Webhook 地址本身）。
  */
-export const SECRET_REF_PATTERN = /^(secret|vault|external-secrets|k8s):\/\/[A-Za-z0-9][A-Za-z0-9._/-]{0,180}$/;
+export const SECRET_REF_PATTERN =
+  /^(secret|vault|external-secrets|k8s):\/\/[A-Za-z0-9][A-Za-z0-9._/-]{0,180}$/;
 
 /** 站内相对路径的形状（点击跳转目标）。 */
 export const RELATIVE_LINK_PATTERN = /^\/[^\s]{1,499}$/;
@@ -275,7 +276,14 @@ export function summarizeDeliveries(list: ExternalDeliveryList | null): Delivery
     if (delivery.status === 'FAILED_EXHAUSTED') exhausted++;
     if (delivery.alertState === 'RAISED') alerting++;
   }
-  return { total: list?.total ?? deliveries.length, delivered, failed, deferred, exhausted, alerting };
+  return {
+    total: list?.total ?? deliveries.length,
+    delivered,
+    failed,
+    deferred,
+    exhausted,
+    alerting,
+  };
 }
 
 /** 按状态拆清单（成功 / 待重试 / 推迟 / 已耗尽）。 */

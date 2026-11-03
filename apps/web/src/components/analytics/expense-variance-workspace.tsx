@@ -111,7 +111,9 @@ export function AnalyticsExpenseVarianceWorkspace() {
       try {
         const params = new URLSearchParams({ from, to, page: String(page), size: '50' });
         if (feeType) params.set('feeType', feeType);
-        setSkuPage(await api<ExpenseSkuVariancePage>(`reporting/expense-variance/by-sku?${params}`));
+        setSkuPage(
+          await api<ExpenseSkuVariancePage>(`reporting/expense-variance/by-sku?${params}`),
+        );
         setSkuPageIndex(page);
       } catch (e) {
         setSkuPage(null);
@@ -144,7 +146,12 @@ export function AnalyticsExpenseVarianceWorkspace() {
         </div>
         <div className="text-copy-13 text-muted-foreground flex items-center gap-3">
           <span>{rangeText(from, to)}</span>
-          <Button variant="outline" size="sm" disabled={loading || busy} onClick={() => void load()}>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={loading || busy}
+            onClick={() => void load()}
+          >
             <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
             刷新
           </Button>
@@ -247,7 +254,10 @@ export function AnalyticsExpenseVarianceWorkspace() {
 
       {state === 'loading' && (
         <SectionCard>
-          <EmptyState title="正在读取费用差异…" description="读取期间页面上的「数据截至」仍然有效。" />
+          <EmptyState
+            title="正在读取费用差异…"
+            description="读取期间页面上的「数据截至」仍然有效。"
+          />
         </SectionCard>
       )}
 
@@ -287,14 +297,19 @@ export function AnalyticsExpenseVarianceWorkspace() {
                     {data.rows.map((r, index) => {
                       const direction = biasDirection(r.varianceRate);
                       return (
-                        <tr key={`${r.feeType}|${r.skuCode}|${r.periodStart}|${r.currency}|${index}`} className="border-border border-b">
+                        <tr
+                          key={`${r.feeType}|${r.skuCode}|${r.periodStart}|${r.currency}|${index}`}
+                          className="border-border border-b"
+                        >
                           <td className="py-2 pr-3">
                             <div>{r.feeTypeLabel}</div>
                             {r.feeSubType && (
-                              <div className="text-copy-13 text-muted-foreground">{r.feeSubType}</div>
+                              <div className="text-copy-13 text-muted-foreground">
+                                {r.feeSubType}
+                              </div>
                             )}
                           </td>
-                          <td className="py-2 pr-3 whitespace-nowrap">
+                          <td className="whitespace-nowrap py-2 pr-3">
                             {periodText(r.periodStart, r.periodEnd)}
                           </td>
                           <td className="py-2 pr-3">
@@ -303,16 +318,16 @@ export function AnalyticsExpenseVarianceWorkspace() {
                               预计 {r.estimateCount} 笔 / 实际 {r.actualCount} 笔
                             </div>
                           </td>
-                          <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                          <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                             {amountText(r.estimatedAmount, r.currency)}
                           </td>
-                          <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                          <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                             {amountText(r.actualAmount, r.currency)}
                           </td>
-                          <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                          <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                             {varianceText(r.varianceAmount, r.currency)}
                           </td>
-                          <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                          <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                             {rateText(r.varianceRate)}
                           </td>
                           <td className="py-2 pr-3">
@@ -354,7 +369,10 @@ export function AnalyticsExpenseVarianceWorkspace() {
                   </thead>
                   <tbody>
                     {data.unmatchedActuals.map((r, index) => (
-                      <tr key={`${r.feeType}|${r.scopeLabel}|${r.currency}|${index}`} className="border-border border-b">
+                      <tr
+                        key={`${r.feeType}|${r.scopeLabel}|${r.currency}|${index}`}
+                        className="border-border border-b"
+                      >
                         <td className="py-2 pr-3">
                           <div>{r.feeTypeLabel}</div>
                           {r.feeSubType && (
@@ -362,12 +380,14 @@ export function AnalyticsExpenseVarianceWorkspace() {
                           )}
                         </td>
                         <td className="py-2 pr-3">{r.scopeLabel}</td>
-                        <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                        <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                           {unmatchedAmountText(r)}
                         </td>
                         <td className="py-2 pr-3 text-right tabular-nums">{r.actualCount}</td>
                         <td className="py-2 pr-3">{r.actualSource}</td>
-                        <td className="py-2 pr-3 text-muted-foreground">{unmatchedReasonText(r)}</td>
+                        <td className="text-muted-foreground py-2 pr-3">
+                          {unmatchedReasonText(r)}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -406,7 +426,10 @@ export function AnalyticsExpenseVarianceWorkspace() {
             ) : (
               <div className="space-y-3">
                 {data.recommendations.map((r, index) => (
-                  <div key={`${r.feeType}|${r.feeSubType}|${r.scopeLabel}|${r.currency}|${index}`} className="border-border rounded-lg border px-4 py-3">
+                  <div
+                    key={`${r.feeType}|${r.feeSubType}|${r.scopeLabel}|${r.currency}|${index}`}
+                    className="border-border rounded-lg border px-4 py-3"
+                  >
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="text-copy-14 text-foreground font-medium">
                         {r.feeTypeLabel}
@@ -464,7 +487,9 @@ export function AnalyticsExpenseVarianceWorkspace() {
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={busy || !skuPage || skuPageIndex + 1 >= Math.ceil(skuPage.total / skuPage.size)}
+                  disabled={
+                    busy || !skuPage || skuPageIndex + 1 >= Math.ceil(skuPage.total / skuPage.size)
+                  }
                   onClick={() => void loadSku(skuPageIndex + 1)}
                 >
                   下一页
@@ -472,10 +497,13 @@ export function AnalyticsExpenseVarianceWorkspace() {
               </div>
             }
           >
-            {skuPage && <p className="text-copy-13 text-muted-foreground mb-3">{skuPageNote(skuPage)}</p>}
+            {skuPage && (
+              <p className="text-copy-13 text-muted-foreground mb-3">{skuPageNote(skuPage)}</p>
+            )}
             {!skuPage || skuPage.items.length === 0 ? (
               <p className="text-copy-13 text-muted-foreground">
-                没有 SKU 级差异行。目前只有**头程分摊**两侧都带 SKU（上游的平台费 / 物流费台账只到平台、渠道维度）。
+                没有 SKU 级差异行。目前只有**头程分摊**两侧都带 SKU（上游的平台费 /
+                物流费台账只到平台、渠道维度）。
               </p>
             ) : (
               <div className="overflow-x-auto">
@@ -493,7 +521,10 @@ export function AnalyticsExpenseVarianceWorkspace() {
                   </thead>
                   <tbody>
                     {skuPage.items.map((r, index) => (
-                      <tr key={`${r.skuCode}|${r.feeType}|${r.periodStart}|${index}`} className="border-border border-b">
+                      <tr
+                        key={`${r.skuCode}|${r.feeType}|${r.periodStart}|${index}`}
+                        className="border-border border-b"
+                      >
                         <td className="py-2 pr-3">{r.skuCode}</td>
                         <td className="py-2 pr-3">
                           <div>{r.feeTypeLabel}</div>
@@ -501,19 +532,19 @@ export function AnalyticsExpenseVarianceWorkspace() {
                             <div className="text-copy-13 text-muted-foreground">{r.feeSubType}</div>
                           )}
                         </td>
-                        <td className="py-2 pr-3 whitespace-nowrap">
+                        <td className="whitespace-nowrap py-2 pr-3">
                           {periodText(r.periodStart, r.periodEnd)}
                         </td>
-                        <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                        <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                           {amountText(r.estimatedAmount, r.currency)}
                         </td>
-                        <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                        <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                           {amountText(r.actualAmount, r.currency)}
                         </td>
-                        <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                        <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                           {varianceText(r.varianceAmount, r.currency)}
                         </td>
-                        <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                        <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                           {rateText(r.varianceRate)}
                         </td>
                       </tr>
@@ -599,7 +630,9 @@ function VarianceTrendLine({
     y: height - padding - ((point.rate - bounds.min) / span) * (height - padding * 2),
     point,
   }));
-  const path = coords.map((c, i) => `${i === 0 ? 'M' : 'L'}${c.x.toFixed(2)},${c.y.toFixed(2)}`).join(' ');
+  const path = coords
+    .map((c, i) => `${i === 0 ? 'M' : 'L'}${c.x.toFixed(2)},${c.y.toFixed(2)}`)
+    .join(' ');
   const zeroY = height - padding - ((0 - bounds.min) / span) * (height - padding * 2);
 
   return (
@@ -607,7 +640,12 @@ function VarianceTrendLine({
       <div className="text-copy-13 text-foreground">
         {series.feeTypeLabel} · {series.currency}
       </div>
-      <svg viewBox={`0 0 ${width} ${height}`} className="h-32 w-full" role="img" aria-label={`${series.feeTypeLabel} 偏差趋势`}>
+      <svg
+        viewBox={`0 0 ${width} ${height}`}
+        className="h-32 w-full"
+        role="img"
+        aria-label={`${series.feeTypeLabel} 偏差趋势`}
+      >
         <line
           x1={padding}
           y1={zeroY.toFixed(2)}
@@ -617,15 +655,15 @@ function VarianceTrendLine({
           strokeWidth={1}
           strokeDasharray="4 4"
         />
-        <path d={path} fill="none" stroke="currentColor" strokeWidth={1.5} className="text-foreground" />
+        <path
+          d={path}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.5}
+          className="text-foreground"
+        />
         {coords.map((c) => (
-          <circle
-            key={c.point.periodStart}
-            cx={c.x}
-            cy={c.y}
-            r={2.5}
-            className="fill-foreground"
-          >
+          <circle key={c.point.periodStart} cx={c.x} cy={c.y} r={2.5} className="fill-foreground">
             <title>{`${c.point.periodStart}：${rateText(c.point.rate)}`}</title>
           </circle>
         ))}

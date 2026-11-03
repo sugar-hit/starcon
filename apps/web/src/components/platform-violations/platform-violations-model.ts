@@ -436,7 +436,10 @@ export async function transitionViolation(
   violationId: string,
   status: string,
 ): Promise<PlatformViolation> {
-  return api<PlatformViolation>(`${BASE}/violations/${violationId}/status`, 'POST', { status, note: '' });
+  return api<PlatformViolation>(`${BASE}/violations/${violationId}/status`, 'POST', {
+    status,
+    note: '',
+  });
 }
 
 export async function addPenalty(
@@ -480,7 +483,9 @@ export async function fetchAffected(
   if (warehouseId) query.set('warehouseId', warehouseId);
   const suffix = query.toString();
   return api<PlatformViolationAffected>(
-    suffix ? `${BASE}/violations/${violationId}/affected?${suffix}` : `${BASE}/violations/${violationId}/affected`,
+    suffix
+      ? `${BASE}/violations/${violationId}/affected?${suffix}`
+      : `${BASE}/violations/${violationId}/affected`,
   );
 }
 
@@ -639,7 +644,9 @@ export function impactLabel(level: string | null | undefined): string {
  * <p>「尚无处罚措施」用 **neutral** 而不是 success —— 一条没有任何处罚的违规
  * **仍然需要处理**，把它显示成绿色是最容易让人漏掉的一种撒谎。
  */
-export function impactTone(level: string | null | undefined): 'danger' | 'warning' | 'success' | 'neutral' {
+export function impactTone(
+  level: string | null | undefined,
+): 'danger' | 'warning' | 'success' | 'neutral' {
   switch (level) {
     case 'CRITICAL':
       return 'danger';
@@ -675,7 +682,9 @@ export function statusLabel(status: string | null | undefined): string {
 }
 
 /** 处理状态的色调。 */
-export function statusTone(status: string | null | undefined): 'danger' | 'warning' | 'success' | 'neutral' {
+export function statusTone(
+  status: string | null | undefined,
+): 'danger' | 'warning' | 'success' | 'neutral' {
   switch (status) {
     case 'PENDING':
       return 'danger';

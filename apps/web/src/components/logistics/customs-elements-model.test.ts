@@ -167,7 +167,9 @@ describe('10.5.1.2 缺失项提示', () => {
 
   it('行级计数：齐备 / 只有口径提示 / 有阻断项，三种说法不同', () => {
     expect(missingCountLabel(row({ missingCount: 0 }))).toBe('齐备');
-    expect(missingCountLabel(row({ missingCount: 1, blockingMissingCount: 0 }))).toBe('1 项口径提示');
+    expect(missingCountLabel(row({ missingCount: 1, blockingMissingCount: 0 }))).toBe(
+      '1 项口径提示',
+    );
     expect(missingCountLabel(row({ missingCount: 3, blockingMissingCount: 2 }))).toBe('缺 2 项');
     expect(missingTone(row({ missingCount: 0 }))).toBe('ok');
     expect(missingTone(row({ missingCount: 1, blockingMissingCount: 0 }))).toBe('warn');
@@ -199,8 +201,12 @@ describe('10.5.1.2 「未填」不得渲染成 0 或空', () => {
 
 describe('10.5.1.2 状态与生效', () => {
   it('「已发布」与「此刻生效」分开说，不合成一个标签', () => {
-    expect(rowStateLabel(row({ status: 'PUBLISHED', effectiveNow: true }))).toBe('已发布 · 此刻生效');
-    expect(rowStateLabel(row({ status: 'PUBLISHED', effectiveNow: false }))).toBe('已发布 · 此刻不生效');
+    expect(rowStateLabel(row({ status: 'PUBLISHED', effectiveNow: true }))).toBe(
+      '已发布 · 此刻生效',
+    );
+    expect(rowStateLabel(row({ status: 'PUBLISHED', effectiveNow: false }))).toBe(
+      '已发布 · 此刻不生效',
+    );
     expect(rowStateLabel(row({ status: 'DRAFT' }))).toBe('草稿');
   });
 
@@ -220,7 +226,9 @@ describe('10.5.1.2 状态与生效', () => {
   });
 
   it('目的地 + 版本号是清单与详情共用的读法', () => {
-    expect(destinationVersionLabel(row({ destinationCountryCode: 'US', versionNo: 3 }))).toBe('US · v3');
+    expect(destinationVersionLabel(row({ destinationCountryCode: 'US', versionNo: 3 }))).toBe(
+      'US · v3',
+    );
   });
 });
 
@@ -271,7 +279,14 @@ describe('10.5.1.2 汇总与词表', () => {
   it('无数据时页脚明说无数据，不显示 1 / 0 页', () => {
     const line = summaryLine({
       items: [],
-      summary: { total: 0, draft: 0, published: 0, effectiveNow: 0, missingAny: 0, publishedMissing: 0 },
+      summary: {
+        total: 0,
+        draft: 0,
+        published: 0,
+        effectiveNow: 0,
+        missingAny: 0,
+        publishedMissing: 0,
+      },
       page: 0,
       size: 20,
       totalElements: 0,
@@ -299,8 +314,22 @@ describe('10.5.1.2 汇总与词表', () => {
   it('available=false 的能力维度被单独挑出来（不属本模块的要说清）', () => {
     const caps = {
       dimensions: [
-        { dimension: 'ELEMENT_SET', summary: '', available: true, source: '', ownerModule: '', note: '' },
-        { dimension: 'TARIFF_RATE', summary: '', available: false, source: '', ownerModule: '16 合规', note: '主张不等于会免' },
+        {
+          dimension: 'ELEMENT_SET',
+          summary: '',
+          available: true,
+          source: '',
+          ownerModule: '',
+          note: '',
+        },
+        {
+          dimension: 'TARIFF_RATE',
+          summary: '',
+          available: false,
+          source: '',
+          ownerModule: '16 合规',
+          note: '主张不等于会免',
+        },
       ],
       currencies: [],
       brandTypes: [],
@@ -327,12 +356,25 @@ describe('10.5.1.2 错误与回填', () => {
     const input = detailToInput(
       detail({
         items: [
-          { id: 'i1', ordinal: 1, elementCode: 'A1', elementName: '用途细分', elementValue: '手机', required: true },
+          {
+            id: 'i1',
+            ordinal: 1,
+            elementCode: 'A1',
+            elementName: '用途细分',
+            elementValue: '手机',
+            required: true,
+          },
         ],
       }),
     );
     expect(input.items).toEqual([
-      { ordinal: 1, elementCode: 'A1', elementName: '用途细分', elementValue: '手机', required: true },
+      {
+        ordinal: 1,
+        elementCode: 'A1',
+        elementName: '用途细分',
+        elementValue: '手机',
+        required: true,
+      },
     ]);
     expect(input.destinationCountryCode).toBe('DE');
   });

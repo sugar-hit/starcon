@@ -97,7 +97,9 @@ export function fetchShipmentRecordBoard(
   return api<ShipmentRecordBoard>(`${base}/board${query(params)}`);
 }
 
-export function fetchShipmentRecords(params: ShipmentRecordListParams): Promise<ShipmentRecordPage> {
+export function fetchShipmentRecords(
+  params: ShipmentRecordListParams,
+): Promise<ShipmentRecordPage> {
   return api<ShipmentRecordPage>(`${base}/records${query(params)}`);
 }
 
@@ -198,7 +200,9 @@ export function trackingStatusLabel(status: string | undefined): string {
  * 「正常」色：它不是好消息，是「还没有数据源」。把它涂成绿色，运营就会以为
  * 这一票的物流没问题，而真实情况是没人报过。
  */
-export function trackingSeverity(status: string | undefined): 'danger' | 'warn' | 'muted' | 'normal' {
+export function trackingSeverity(
+  status: string | undefined,
+): 'danger' | 'warn' | 'muted' | 'normal' {
   if (status === 'EXCEPTION') return 'danger';
   if (status === 'RETURNED') return 'danger';
   if (status === 'NO_TRACE') return 'warn';
@@ -257,14 +261,15 @@ export function callbackSeverity(
  * <p>这个判断刻意写成一个可测的纯函数：它是本模块最容易被前端悄悄糊掉的一条，
  * 一旦糊掉，界面就会把「漏回传」画成「按策略不回传」。
  */
-export function callbackGapNote(status: string | undefined, note: string | undefined): string | null {
+export function callbackGapNote(
+  status: string | undefined,
+  note: string | undefined,
+): string | null {
   if (status === 'UNSET') {
     return '尚未登记平台回传状态（9.4.2.1 / 2.5.1.1 未交付）——这是「漏了」，与「决定不回传」不同';
   }
   if (status === 'SKIPPED') {
-    return note
-      ? `决定不回传，原因：${note}`
-      : '决定不回传（未填原因，服务端会拒绝这种登记）';
+    return note ? `决定不回传，原因：${note}` : '决定不回传（未填原因，服务端会拒绝这种登记）';
   }
   return null;
 }

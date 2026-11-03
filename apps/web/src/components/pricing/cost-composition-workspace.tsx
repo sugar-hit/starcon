@@ -124,41 +124,44 @@ export function CostCompositionWorkspace() {
   }, [load]);
 
   /** 打开一个 SKU 的明细。 */
-  const openDetail = useCallback(async (skuId: string, currency: string | null) => {
-    setBusy(true);
-    setError('');
-    setNotice('');
-    setSelectedSkuId(skuId);
-    try {
-      const next = await fetchCostDetail(
-        skuId,
-        currency,
-        filters.windowFrom || null,
-        filters.windowTo || null,
-      );
-      setDetail(next);
-      setProfileForm({
-        costMethod: next.costMethod || 'MOVING_AVERAGE',
-        currency: next.currency || 'USD',
-        effectiveFrom: nowLocal(),
-        packagingCost: next.components.find((c) => c.code === 'PACKAGING')?.amount ?? null,
-        changeReason: '',
-        version: 0,
-      });
-      setAdjustmentForm({
-        component: 'OTHER_DIRECT',
-        amount: '',
-        currency: next.currency || 'USD',
-        reason: '',
-        effectiveFrom: nowLocal(),
-      });
-    } catch (e) {
-      setDetail(null);
-      setError(e instanceof Error ? e.message : '成本构成明细读不到');
-    } finally {
-      setBusy(false);
-    }
-  }, [filters.windowFrom, filters.windowTo]);
+  const openDetail = useCallback(
+    async (skuId: string, currency: string | null) => {
+      setBusy(true);
+      setError('');
+      setNotice('');
+      setSelectedSkuId(skuId);
+      try {
+        const next = await fetchCostDetail(
+          skuId,
+          currency,
+          filters.windowFrom || null,
+          filters.windowTo || null,
+        );
+        setDetail(next);
+        setProfileForm({
+          costMethod: next.costMethod || 'MOVING_AVERAGE',
+          currency: next.currency || 'USD',
+          effectiveFrom: nowLocal(),
+          packagingCost: next.components.find((c) => c.code === 'PACKAGING')?.amount ?? null,
+          changeReason: '',
+          version: 0,
+        });
+        setAdjustmentForm({
+          component: 'OTHER_DIRECT',
+          amount: '',
+          currency: next.currency || 'USD',
+          reason: '',
+          effectiveFrom: nowLocal(),
+        });
+      } catch (e) {
+        setDetail(null);
+        setError(e instanceof Error ? e.message : '成本构成明细读不到');
+      } finally {
+        setBusy(false);
+      }
+    },
+    [filters.windowFrom, filters.windowTo],
+  );
 
   const refreshDetail = useCallback(async () => {
     if (!selectedSkuId) return;
@@ -256,7 +259,10 @@ export function CostCompositionWorkspace() {
                   <p className="font-semibold">{costBasisText(detail)}</p>
                   <p>{detail.costMethodBasis || costMethodBasis(detail.costMethod)}</p>
                   {detail.maintained ? null : (
-                    <p>🔴 该 SKU **尚未维护构成**：当前按默认口径（移动加权）显示，保存后按你选的成本法固化。</p>
+                    <p>
+                      🔴 该 SKU
+                      **尚未维护构成**：当前按默认口径（移动加权）显示，保存后按你选的成本法固化。
+                    </p>
                   )}
                 </div>
               ) : (
@@ -268,7 +274,9 @@ export function CostCompositionWorkspace() {
             </Notice>
 
             <div>
-              <p className="text-label-13 mb-2 font-semibold">三种成本法（同一份到货事实，三个不同的单位成本）</p>
+              <p className="text-label-13 mb-2 font-semibold">
+                三种成本法（同一份到货事实，三个不同的单位成本）
+              </p>
               <div className="grid gap-2 md:grid-cols-3">
                 {capabilities.costMethods.map((m) => (
                   <div key={m.value} className="border-border rounded-md border p-3">
@@ -354,7 +362,11 @@ export function CostCompositionWorkspace() {
               onChange={(e) => setFilters({ ...filters, currency: e.target.value, page: 0 })}
             />
           </FormField>
-          <FormField id="cost-maintained" label="是否已维护" hint="未维护的 SKU 也在这里（成本治理待办）">
+          <FormField
+            id="cost-maintained"
+            label="是否已维护"
+            hint="未维护的 SKU 也在这里（成本治理待办）"
+          >
             <select
               id="cost-maintained"
               className="border-input h-9 w-full rounded-md border px-2 text-sm"
@@ -411,7 +423,7 @@ export function CostCompositionWorkspace() {
         ) : page && page.items.length > 0 ? (
           <div className="space-y-3">
             <div className="overflow-x-auto">
-              <table className="w-full text-copy-13">
+              <table className="text-copy-13 w-full">
                 <thead>
                   <tr className="border-b text-left">
                     <th className="p-2">SKU</th>
@@ -504,7 +516,7 @@ export function CostCompositionWorkspace() {
             </div>
 
             <div className="mt-4 overflow-x-auto">
-              <table className="w-full text-copy-13">
+              <table className="text-copy-13 w-full">
                 <thead>
                   <tr className="border-b text-left">
                     <th className="p-2">分项</th>
@@ -539,7 +551,7 @@ export function CostCompositionWorkspace() {
                           </div>
                         ) : null}
                       </td>
-                      <td className="p-2 text-copy-12 text-muted-foreground">
+                      <td className="text-copy-12 text-muted-foreground p-2">
                         {c.basis}
                         {c.note ? <div className="mt-1">{c.note}</div> : null}
                       </td>
@@ -566,7 +578,8 @@ export function CostCompositionWorkspace() {
             {detail.excludedDeliveryCount > 0 ? (
               <div className="mt-3">
                 <Notice tone="warning" title="有到货记录被排除">
-                  {detail.excludedDeliveryCount} 条到货记录折算不出基础数量（采购单位与基础单位之间没有换算版本），
+                  {detail.excludedDeliveryCount}{' '}
+                  条到货记录折算不出基础数量（采购单位与基础单位之间没有换算版本），
                   已被排除。采购成本分项因此只是「已知部分」，合计也只覆盖一部分事实。
                 </Notice>
               </div>
@@ -589,9 +602,7 @@ export function CostCompositionWorkspace() {
                   id="profile-method"
                   className="border-input h-9 w-full rounded-md border px-2 text-sm"
                   value={profileForm.costMethod}
-                  onChange={(e) =>
-                    setProfileForm({ ...profileForm, costMethod: e.target.value })
-                  }
+                  onChange={(e) => setProfileForm({ ...profileForm, costMethod: e.target.value })}
                 >
                   {(capabilities?.costMethods ?? []).map((m) => (
                     <option key={m.value} value={m.value}>
@@ -600,19 +611,31 @@ export function CostCompositionWorkspace() {
                   ))}
                 </select>
               </FormField>
-              <FormField id="profile-currency" label="计价币种" hint="同 SKU 换币种 = 新增一条构成" required>
+              <FormField
+                id="profile-currency"
+                label="计价币种"
+                hint="同 SKU 换币种 = 新增一条构成"
+                required
+              >
                 <Input
                   id="profile-currency"
                   value={profileForm.currency}
                   onChange={(e) => setProfileForm({ ...profileForm, currency: e.target.value })}
                 />
               </FormField>
-              <FormField id="profile-effective" label="生效时间" hint="这一版从哪一刻起算数" required>
+              <FormField
+                id="profile-effective"
+                label="生效时间"
+                hint="这一版从哪一刻起算数"
+                required
+              >
                 <Input
                   id="profile-effective"
                   type="datetime-local"
                   value={profileForm.effectiveFrom}
-                  onChange={(e) => setProfileForm({ ...profileForm, effectiveFrom: e.target.value })}
+                  onChange={(e) =>
+                    setProfileForm({ ...profileForm, effectiveFrom: e.target.value })
+                  }
                 />
               </FormField>
               <FormField
@@ -647,7 +670,7 @@ export function CostCompositionWorkspace() {
               </FormField>
             </div>
             {profileProblems.length ? (
-              <ul className="text-destructive mt-3 list-disc pl-4 text-copy-12">
+              <ul className="text-destructive text-copy-12 mt-3 list-disc pl-4">
                 {profileProblems.map((p) => (
                   <li key={p}>{p}</li>
                 ))}
@@ -694,7 +717,9 @@ export function CostCompositionWorkspace() {
                 <Input
                   id="adj-currency"
                   value={adjustmentForm.currency}
-                  onChange={(e) => setAdjustmentForm({ ...adjustmentForm, currency: e.target.value })}
+                  onChange={(e) =>
+                    setAdjustmentForm({ ...adjustmentForm, currency: e.target.value })
+                  }
                 />
               </FormField>
               <FormField id="adj-effective" label="生效时间" required>
@@ -717,7 +742,7 @@ export function CostCompositionWorkspace() {
               </FormField>
             </div>
             {adjustmentProblems.length ? (
-              <ul className="text-destructive mt-3 list-disc pl-4 text-copy-12">
+              <ul className="text-destructive text-copy-12 mt-3 list-disc pl-4">
                 {adjustmentProblems.map((p) => (
                   <li key={p}>{p}</li>
                 ))}
@@ -731,7 +756,7 @@ export function CostCompositionWorkspace() {
 
             {detail.adjustments.length > 0 ? (
               <div className="mt-4 overflow-x-auto">
-                <table className="w-full text-copy-13">
+                <table className="text-copy-13 w-full">
                   <thead>
                     <tr className="border-b text-left">
                       <th className="p-2">分项</th>
@@ -746,9 +771,7 @@ export function CostCompositionWorkspace() {
                     {detail.adjustments.map((a) => (
                       <tr key={a.id} className="border-b align-top">
                         <td className="p-2">{a.componentLabel}</td>
-                        <td className="p-2 font-mono">
-                          {moneyWithCurrency(a.amount, a.currency)}
-                        </td>
+                        <td className="p-2 font-mono">{moneyWithCurrency(a.amount, a.currency)}</td>
                         <td className="p-2">{a.reason}</td>
                         <td className="p-2">{timeText(a.effectiveFrom)}</td>
                         <td className="p-2">
@@ -782,7 +805,7 @@ export function CostCompositionWorkspace() {
                 </table>
               </div>
             ) : (
-              <p className="text-muted-foreground mt-4 text-copy-13">
+              <p className="text-muted-foreground text-copy-13 mt-4">
                 还没有手工调整项。没有调整记录时「其他直接成本」是 0 —— 这一项的事实源就是这张表。
               </p>
             )}
@@ -795,7 +818,7 @@ export function CostCompositionWorkspace() {
           >
             {detail.recentRevisions.length > 0 ? (
               <div className="overflow-x-auto">
-                <table className="w-full text-copy-13">
+                <table className="text-copy-13 w-full">
                   <thead>
                     <tr className="border-b text-left">
                       <th className="p-2">版本</th>
@@ -858,10 +881,12 @@ export function CostCompositionWorkspace() {
           <SectionCard title="批次与报价参考">
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <p className="text-label-13 mb-2 font-semibold">批次（成本法 = 批次时的批次清单）</p>
+                <p className="text-label-13 mb-2 font-semibold">
+                  批次（成本法 = 批次时的批次清单）
+                </p>
                 {detail.lots.length > 0 ? (
                   <div className="overflow-x-auto">
-                    <table className="w-full text-copy-13">
+                    <table className="text-copy-13 w-full">
                       <thead>
                         <tr className="border-b text-left">
                           <th className="p-2">到货单号</th>
@@ -900,7 +925,10 @@ export function CostCompositionWorkspace() {
               </div>
               <div>
                 <p className="text-label-13 mb-2 font-semibold">供应商报价（只读参考）</p>
-                <Notice tone={detail.quoteReference.available ? 'info' : 'warning'} title="不是采购成本">
+                <Notice
+                  tone={detail.quoteReference.available ? 'info' : 'warning'}
+                  title="不是采购成本"
+                >
                   {detail.quoteReference.reason ?? detail.quoteReference.note}
                 </Notice>
                 {detail.quoteReference.available ? (

@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import type { FinanceReceiptCurrencySummary, FinanceReceiptRow } from '../../../../../packages/api-contracts/src/index';
+import type {
+  FinanceReceiptCurrencySummary,
+  FinanceReceiptRow,
+} from '../../../../../packages/api-contracts/src/index';
 import {
   allocationStatusLabel,
   fetchReceiptBalance,
@@ -115,7 +118,9 @@ describe('金额只原样展示', () => {
 });
 
 describe('未核销余额：核销未交付 ⇒ 恒等于收款金额', () => {
-  const summary = (over: Partial<FinanceReceiptCurrencySummary>): FinanceReceiptCurrencySummary => ({
+  const summary = (
+    over: Partial<FinanceReceiptCurrencySummary>,
+  ): FinanceReceiptCurrencySummary => ({
     currency: 'USD',
     amount: 1000,
     settledAmount: 0,

@@ -1,14 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  AlertTriangle,
-  BarChart3,
-  RefreshCw,
-  ShieldAlert,
-  Store,
-  Users,
-} from 'lucide-react';
+import { AlertTriangle, BarChart3, RefreshCw, ShieldAlert, Store, Users } from 'lucide-react';
 import {
   Button,
   EmptyState,
@@ -356,14 +349,11 @@ export function FulfillmentQualityWorkspace() {
         }
       >
         {!dimensions || dimensions.items.length === 0 ? (
-          <EmptyState
-            title="暂无维度数据"
-            description="当前窗口内该维度没有可聚合的样本。"
-          />
+          <EmptyState title="暂无维度数据" description="当前窗口内该维度没有可聚合的样本。" />
         ) : (
           <div className="flex flex-col gap-4">
             {dimensions.items.map((row) => (
-              <div key={row.dimensionKey} className="border rounded-lg p-3">
+              <div key={row.dimensionKey} className="rounded-lg border p-3">
                 <div className="mb-2 flex items-center gap-2">
                   {dimensionBy === 'PERSON' ? (
                     <Users className="h-4 w-4" />
@@ -420,15 +410,12 @@ export function FulfillmentQualityWorkspace() {
           />
         </div>
         {!drilldown || drilldown.total === 0 ? (
-          <EmptyState
-            title="没有明细"
-            description="该窗口内这个指标没有任何可判定样本。"
-          />
+          <EmptyState title="没有明细" description="该窗口内这个指标没有任何可判定样本。" />
         ) : (
           <div className="mt-3 flex flex-col gap-3">
             <p className="text-muted-foreground text-xs">
-              {drilldown.metricDisplayName}：{drilldown.definition}；
-              分子 {drilldown.numeratorCount} ÷ 分母 {drilldown.denominatorCount} ＝{' '}
+              {drilldown.metricDisplayName}：{drilldown.definition}； 分子{' '}
+              {drilldown.numeratorCount} ÷ 分母 {drilldown.denominatorCount} ＝{' '}
               {formatRate(drilldown.rate)}；共 {drilldown.total} 行（第 {drilldown.page + 1} /{' '}
               {drilldown.totalPages} 页）
             </p>

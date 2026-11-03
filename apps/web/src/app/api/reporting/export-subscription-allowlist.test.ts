@@ -30,7 +30,10 @@ import { proxy } from '../../../lib/api-proxy';
 const SPEC = JSON.parse(
   readFileSync(
     fileURLToPath(
-      new URL('../../../../../../packages/api-contracts/src/reporting.openapi.json', import.meta.url),
+      new URL(
+        '../../../../../../packages/api-contracts/src/reporting.openapi.json',
+        import.meta.url,
+      ),
     ),
     'utf8',
   ),
@@ -138,18 +141,16 @@ it('投递的写动作也被放行', async () => {
 it('🔴 二进制下载原样透传：xlsx 的字节逐个相同（不能被 UTF-8 解码吃掉）', async () => {
   // 造一段**不是合法 UTF-8** 的字节（xlsx / pdf 就是这样的二进制）。
   const bytes = new Uint8Array([0x50, 0x4b, 0x03, 0x04, 0xff, 0xfe, 0x00, 0x80, 0x9f, 0xc3]);
-  const fetcher = vi.fn().mockImplementation(
-    () =>
-      Promise.resolve(
-        new Response(bytes, {
-          status: 200,
-          headers: {
-            'Content-Type':
-              'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'Content-Disposition': 'attachment; filename="R-1.xlsx"',
-          },
-        }),
-      ),
+  const fetcher = vi.fn().mockImplementation(() =>
+    Promise.resolve(
+      new Response(bytes, {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'Content-Disposition': 'attachment; filename="R-1.xlsx"',
+        },
+      }),
+    ),
   );
   vi.stubGlobal('fetch', fetcher);
 
@@ -164,14 +165,13 @@ it('🔴 二进制下载原样透传：xlsx 的字节逐个相同（不能被 UT
 
 it('🔴 PDF 也原样透传', async () => {
   const bytes = new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d, 0xff, 0x00, 0xc3]);
-  const fetcher = vi.fn().mockImplementation(
-    () =>
-      Promise.resolve(
-        new Response(bytes, {
-          status: 200,
-          headers: { 'Content-Type': 'application/pdf' },
-        }),
-      ),
+  const fetcher = vi.fn().mockImplementation(() =>
+    Promise.resolve(
+      new Response(bytes, {
+        status: 200,
+        headers: { 'Content-Type': 'application/pdf' },
+      }),
+    ),
   );
   vi.stubGlobal('fetch', fetcher);
 

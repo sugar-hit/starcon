@@ -193,7 +193,9 @@ export function ReceivableAgingWorkspace() {
   }
 
   const hasFilters = Boolean(currency || shopId || counterpartyRef || bucketCode) || disputeOnly;
-  const totalPages = overdue ? Math.max(1, Math.ceil(overdue.total / Math.max(1, overdue.size))) : 1;
+  const totalPages = overdue
+    ? Math.max(1, Math.ceil(overdue.total / Math.max(1, overdue.size)))
+    : 1;
   const gaps = caps?.downstreamGaps.filter((gap) => !gap.available) ?? [];
 
   return (
@@ -323,9 +325,7 @@ export function ReceivableAgingWorkspace() {
                             />
                           </td>
                           <td className="py-2">
-                            {agingBucketRange(
-                              config.buckets.find((b) => b.code === draft.code),
-                            )}
+                            {agingBucketRange(config.buckets.find((b) => b.code === draft.code))}
                           </td>
                         </tr>
                       );
@@ -336,7 +336,11 @@ export function ReceivableAgingWorkspace() {
                   <Button onClick={() => void saveBuckets()} disabled={loading}>
                     保存区间
                   </Button>
-                  <Button variant="secondary" onClick={() => void resetBuckets()} disabled={loading}>
+                  <Button
+                    variant="secondary"
+                    onClick={() => void resetBuckets()}
+                    disabled={loading}
+                  >
                     回到蓝图默认
                   </Button>
                 </div>
@@ -567,9 +571,7 @@ export function ReceivableAgingWorkspace() {
               <EmptyState
                 title={hasFilters ? '没有符合筛选条件的逾期应收' : '没有逾期的应收单'}
                 description={
-                  hasFilters
-                    ? '把筛选条件放宽一点再试。'
-                    : '所有未核销的应收都还在账期内。'
+                  hasFilters ? '把筛选条件放宽一点再试。' : '所有未核销的应收都还在账期内。'
                 }
               />
             ) : (

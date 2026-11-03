@@ -233,7 +233,12 @@ export function resumeServiceTicketProcessSla(ticketId: string, input: { resumeR
 /** 关联订单或售后单（服务端会去上游核实，查不到就拒绝关联）。 */
 export function linkServiceTicketProcessDocument(
   ticketId: string,
-  input: { linkType: string; orderNo?: string | null; caseNo?: string | null; note?: string | null },
+  input: {
+    linkType: string;
+    orderNo?: string | null;
+    caseNo?: string | null;
+    note?: string | null;
+  },
 ) {
   return api<CrmServiceTicketProcessOutcome>(
     `${base}/tickets/${encodeURIComponent(ticketId)}/links`,

@@ -179,7 +179,13 @@ export function ExchangeRateSnapshotWorkspace() {
         `已登记舍入规则「${saved.name}」（${saved.code}）：${saved.roundingModeLabel} · ${saved.roundingScale} 位小数。` +
           `改规则不动历史快照 —— 快照里冻的是当时的模式与位数。`,
       );
-      setRuleForm({ code: '', name: '', targetCurrency: '', roundingMode: 'HALF_UP', roundingScale: 2 });
+      setRuleForm({
+        code: '',
+        name: '',
+        targetCurrency: '',
+        roundingMode: 'HALF_UP',
+        roundingScale: 2,
+      });
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : '舍入规则登记失败');
@@ -282,13 +288,17 @@ export function ExchangeRateSnapshotWorkspace() {
               {capabilities.roundingRule}
             </Notice>
             <div className="grid gap-3 md:grid-cols-2">
-              <div className="rounded-md border border-control-border p-3">
+              <div className="border-control-border rounded-md border p-3">
                 <p className="text-label-13 font-semibold">上游</p>
-                <p className="text-copy-13 text-muted-foreground mt-1">{capabilities.upstreamNote}</p>
+                <p className="text-copy-13 text-muted-foreground mt-1">
+                  {capabilities.upstreamNote}
+                </p>
               </div>
-              <div className="rounded-md border border-control-border p-3">
+              <div className="border-control-border rounded-md border p-3">
                 <p className="text-label-13 font-semibold">下游</p>
-                <p className="text-copy-13 text-muted-foreground mt-1">{capabilities.downstreamNote}</p>
+                <p className="text-copy-13 text-muted-foreground mt-1">
+                  {capabilities.downstreamNote}
+                </p>
               </div>
             </div>
             <p className="text-copy-12 text-muted-foreground">{capabilities.ownershipNote}</p>
@@ -302,7 +312,13 @@ export function ExchangeRateSnapshotWorkspace() {
         <StatCard label="可用舍入规则" value={enabledRules.length} />
         <StatCard
           label="复算结论"
-          value={report ? (report.mismatched === 0 ? '全部一致' : `${report.mismatched} 笔对不上`) : '未复算'}
+          value={
+            report
+              ? report.mismatched === 0
+                ? '全部一致'
+                : `${report.mismatched} 笔对不上`
+              : '未复算'
+          }
         />
         <StatCard label="舍入方式" value={capabilities ? capabilities.roundingModes.length : 0} />
       </div>
@@ -460,9 +476,7 @@ export function ExchangeRateSnapshotWorkspace() {
                 id="snap-filter-doctype"
                 value={filters.documentType}
                 placeholder="PRICE_LIST"
-                onChange={(e) =>
-                  setFilters({ ...filters, documentType: e.target.value, page: 0 })
-                }
+                onChange={(e) => setFilters({ ...filters, documentType: e.target.value, page: 0 })}
               />
             </FormField>
             <FormField id="snap-filter-docid" label="单据 id">
@@ -524,7 +538,7 @@ export function ExchangeRateSnapshotWorkspace() {
 
           {page && page.items.length > 0 && (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-copy-13">
+              <table className="text-copy-13 w-full text-left">
                 <thead className="text-muted-foreground">
                   <tr>
                     <th className="py-2 pr-3 font-medium">换算过程</th>
@@ -537,7 +551,7 @@ export function ExchangeRateSnapshotWorkspace() {
                 </thead>
                 <tbody>
                   {page.items.map((row) => (
-                    <tr key={row.id} className="border-t border-control-border">
+                    <tr key={row.id} className="border-control-border border-t">
                       <td className="py-2 pr-3 font-medium">{snapshotConversionText(row)}</td>
                       <td className="py-2 pr-3">
                         {snapshotRateText(row)}
@@ -563,7 +577,7 @@ export function ExchangeRateSnapshotWorkspace() {
                           · {row.roundingScale} 位小数 · {row.roundingRuleCode}
                         </span>
                       </td>
-                      <td className="py-2 text-muted-foreground">
+                      <td className="text-muted-foreground py-2">
                         {timeText(row.frozenAt)}
                         <Button
                           variant="ghost"
@@ -660,7 +674,7 @@ export function ExchangeRateSnapshotWorkspace() {
                 />
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-copy-13">
+                  <table className="text-copy-13 w-full text-left">
                     <thead className="text-muted-foreground">
                       <tr>
                         <th className="py-2 pr-3 font-medium">单据行</th>
@@ -671,7 +685,7 @@ export function ExchangeRateSnapshotWorkspace() {
                     </thead>
                     <tbody>
                       {report.rows.map((row) => (
-                        <tr key={row.snapshotId} className="border-t border-control-border">
+                        <tr key={row.snapshotId} className="border-control-border border-t">
                           <td className="py-2 pr-3">
                             {row.documentNo || '（无单据号）'}
                             <span className="text-muted-foreground ml-1">
@@ -726,7 +740,7 @@ export function ExchangeRateSnapshotWorkspace() {
             />
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-copy-13">
+              <table className="text-copy-13 w-full text-left">
                 <thead className="text-muted-foreground">
                   <tr>
                     <th className="py-2 pr-3 font-medium">规则</th>
@@ -738,7 +752,7 @@ export function ExchangeRateSnapshotWorkspace() {
                 </thead>
                 <tbody>
                   {rules.map((rule) => (
-                    <tr key={rule.id} className="border-t border-control-border">
+                    <tr key={rule.id} className="border-control-border border-t">
                       <td className="py-2 pr-3">
                         {rule.name}
                         <span className="text-muted-foreground ml-1">({rule.code})</span>

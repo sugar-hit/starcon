@@ -2,15 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ChangeEvent } from 'react';
-import {
-  AlertTriangle,
-  Coins,
-  FileWarning,
-  Layers,
-  Package,
-  RefreshCw,
-  Scale,
-} from 'lucide-react';
+import { AlertTriangle, Coins, FileWarning, Layers, Package, RefreshCw, Scale } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -200,7 +192,8 @@ export function LogisticsCostAnalysisWorkspace() {
         ruleCode: 'FM-STD',
         ruleName: '标准头程分摊',
         allocationBasis: 'BY_QUANTITY',
-        effectiveFrom: toIsoInstant(new Date().toISOString().slice(0, 10)) ?? new Date().toISOString(),
+        effectiveFrom:
+          toIsoInstant(new Date().toISOString().slice(0, 10)) ?? new Date().toISOString(),
         effectiveTo: null,
         note: '工作区新建',
         activate: true,
@@ -437,10 +430,14 @@ export function LogisticsCostAnalysisWorkspace() {
                           </p>
                         )}
                         {component.basis && (
-                          <p className="text-label-12 text-muted-foreground mt-1">口径：{component.basis}</p>
+                          <p className="text-label-12 text-muted-foreground mt-1">
+                            口径：{component.basis}
+                          </p>
                         )}
                         {component.impact && (
-                          <p className="text-label-12 text-muted-foreground mt-1">影响：{component.impact}</p>
+                          <p className="text-label-12 text-muted-foreground mt-1">
+                            影响：{component.impact}
+                          </p>
                         )}
                       </div>
                     ))}
@@ -457,7 +454,7 @@ export function LogisticsCostAnalysisWorkspace() {
                     />
                   ) : (
                     <div className="overflow-x-auto">
-                      <table className="w-full text-left text-label-12">
+                      <table className="text-label-12 w-full text-left">
                         <thead>
                           <tr className="text-muted-foreground">
                             <th className="py-2 pr-3">币种</th>
@@ -504,7 +501,7 @@ export function LogisticsCostAnalysisWorkspace() {
                               <td className={cellTone(row.packagingShare)}>
                                 {formatShare(row.packagingShare)}
                               </td>
-                              <td className="py-2 pr-3 text-muted-foreground">
+                              <td className="text-muted-foreground py-2 pr-3">
                                 {row.missingComponents.length > 0
                                   ? missingComponentLabels(row.missingComponents).join('、')
                                   : '—'}
@@ -526,7 +523,7 @@ export function LogisticsCostAnalysisWorkspace() {
                     />
                   ) : (
                     <div className="overflow-x-auto">
-                      <table className="w-full text-left text-label-12">
+                      <table className="text-label-12 w-full text-left">
                         <thead>
                           <tr className="text-muted-foreground">
                             <th className="py-2 pr-3">币种</th>
@@ -653,7 +650,7 @@ export function LogisticsCostAnalysisWorkspace() {
                 <p className="text-copy-13 text-muted-foreground">正在加载渠道对比…</p>
               ) : comparison && comparison.rows.length > 0 ? (
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-label-12">
+                  <table className="text-label-12 w-full text-left">
                     <thead>
                       <tr className="text-muted-foreground">
                         <th className="py-2 pr-3">承运商</th>
@@ -678,8 +675,7 @@ export function LogisticsCostAnalysisWorkspace() {
                             {row.byCurrency.length > 0
                               ? row.byCurrency
                                   .map(
-                                    (metric) =>
-                                      `${metric.currency} ${formatAmount(metric.amount)}`,
+                                    (metric) => `${metric.currency} ${formatAmount(metric.amount)}`,
                                   )
                                   .join('、')
                               : '暂无数据（这一渠道的运费一票都没登记）'}
@@ -720,8 +716,8 @@ export function LogisticsCostAnalysisWorkspace() {
                   <div className="mb-3 flex flex-wrap gap-2">
                     {overCost.thresholds.map((threshold) => (
                       <Badge key={threshold.currency} tone="info">
-                        {threshold.currency}：平均 {formatAmount(threshold.averageUnitFreight)} / KG，
-                        阈值 {formatAmount(threshold.thresholdUnitFreight)}（评估{' '}
+                        {threshold.currency}：平均 {formatAmount(threshold.averageUnitFreight)} /
+                        KG， 阈值 {formatAmount(threshold.thresholdUnitFreight)}（评估{' '}
                         {threshold.evaluatedWaybills} 票，越线 {threshold.overCostWaybills} 票）
                       </Badge>
                     ))}
@@ -734,7 +730,7 @@ export function LogisticsCostAnalysisWorkspace() {
                     />
                   ) : (
                     <div className="overflow-x-auto">
-                      <table className="w-full text-left text-label-12">
+                      <table className="text-label-12 w-full text-left">
                         <thead>
                           <tr className="text-muted-foreground">
                             <th className="py-2 pr-3">运单号</th>
@@ -767,7 +763,9 @@ export function LogisticsCostAnalysisWorkspace() {
                               <td className={cellTone(row.excessAmount)}>
                                 {formatAmount(row.excessAmount, row.currency)}
                               </td>
-                              <td className="py-2 pr-3 text-muted-foreground">{row.excessReason}</td>
+                              <td className="text-muted-foreground py-2 pr-3">
+                                {row.excessReason}
+                              </td>
                             </tr>
                           ))}
                         </tbody>
@@ -800,7 +798,7 @@ export function LogisticsCostAnalysisWorkspace() {
                 <p className="text-copy-13 text-muted-foreground">正在加载规则…</p>
               ) : rules && rules.items.length > 0 ? (
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-label-12">
+                  <table className="text-label-12 w-full text-left">
                     <thead>
                       <tr className="text-muted-foreground">
                         <th className="py-2 pr-3">规则</th>
@@ -870,7 +868,7 @@ export function LogisticsCostAnalysisWorkspace() {
                     ))}
                   </div>
                   <div className="overflow-x-auto">
-                    <table className="w-full text-left text-label-12">
+                    <table className="text-label-12 w-full text-left">
                       <thead>
                         <tr className="text-muted-foreground">
                           <th className="py-2 pr-3">分摊单</th>

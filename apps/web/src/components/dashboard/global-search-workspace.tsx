@@ -118,9 +118,12 @@ export function useGlobalSearchState(initialKeyword = ''): GlobalSearchState {
     [runSearch],
   );
 
-  useEffect(() => () => {
-    if (timer.current) clearTimeout(timer.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (timer.current) clearTimeout(timer.current);
+    },
+    [],
+  );
 
   const changeKeyword = useCallback(
     (next: string) => {
@@ -365,7 +368,7 @@ export function GlobalSearchPageWorkspace() {
               <li key={entry.keyword}>
                 <Link
                   href={`/dashboard/search?q=${encodeURIComponent(entry.keyword)}`}
-                  className="border-border hover:bg-muted rounded-md border px-2.5 py-1 text-copy-13"
+                  className="border-border hover:bg-muted text-copy-13 rounded-md border px-2.5 py-1"
                 >
                   {entry.keyword}
                 </Link>

@@ -95,7 +95,9 @@ export function AnalyticsInventoryAnalysisWorkspace() {
     setError('');
     try {
       const [s, t, a, st, ab, tk, dr, caps] = await Promise.all([
-        api<InventoryStructureResponse>(`reporting/inventory-analysis/structure?dimension=${dimension}`),
+        api<InventoryStructureResponse>(
+          `reporting/inventory-analysis/structure?dimension=${dimension}`,
+        ),
         api<InventoryTurnoverResponse>(`reporting/inventory-analysis/turnover?${query}`),
         api<InventoryAgingResponse>('reporting/inventory-analysis/aging'),
         api<InventoryStockStatusResponse>(
@@ -161,7 +163,9 @@ export function AnalyticsInventoryAnalysisWorkspace() {
           <div>{structure.caliberNote}</div>
           {turnover && <div className="mt-1">{turnover.caliberNote}</div>}
           {crossCurrencyNote(structure.totals, structure.totalCurrency) && (
-            <div className="mt-1">{crossCurrencyNote(structure.totals, structure.totalCurrency)}</div>
+            <div className="mt-1">
+              {crossCurrencyNote(structure.totals, structure.totalCurrency)}
+            </div>
           )}
         </div>
       )}
@@ -255,7 +259,10 @@ export function AnalyticsInventoryAnalysisWorkspace() {
 
       {state === 'loading' && (
         <SectionCard>
-          <EmptyState title="正在读取库存分析…" description="读取期间页面上的「数据截至」仍然有效。" />
+          <EmptyState
+            title="正在读取库存分析…"
+            description="读取期间页面上的「数据截至」仍然有效。"
+          />
         </SectionCard>
       )}
 
@@ -300,10 +307,10 @@ export function AnalyticsInventoryAnalysisWorkspace() {
                       >
                         <td className="py-2 pr-3">{row.dimensionLabel}</td>
                         <td className="py-2 pr-3">{row.currency}</td>
-                        <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                        <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                           {amountText(row.inventoryValue, row.currency)}
                         </td>
-                        <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                        <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                           {shareText(row.valueShare)}
                         </td>
                         <td className="py-2 pr-3">
@@ -318,14 +325,14 @@ export function AnalyticsInventoryAnalysisWorkspace() {
                             </div>
                           )}
                         </td>
-                        <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                        <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                           {quantityText(row.onHandQuantity)}
                         </td>
                         <td className="py-2 pr-3 text-right tabular-nums">{row.skuCount}</td>
-                        <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                        <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                           {row.zeroStockSkuCount} / {row.overstockSkuCount}
                         </td>
-                        <td className="text-copy-13 text-muted-foreground py-2 pr-3 max-w-xs">
+                        <td className="text-copy-13 text-muted-foreground max-w-xs py-2 pr-3">
                           {row.note || '—'}
                         </td>
                       </tr>
@@ -369,26 +376,28 @@ export function AnalyticsInventoryAnalysisWorkspace() {
                       >
                         <td className="py-2 pr-3">{row.dimensionLabel}</td>
                         <td className="py-2 pr-3">{row.currency}</td>
-                        <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                        <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                           {amountText(row.costOfGoodsSold, row.currency)}
                         </td>
-                        <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                        <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                           {amountText(row.openingInventoryValue, row.currency)}
                         </td>
-                        <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                        <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                           {amountText(row.closingInventoryValue, row.currency)}
                         </td>
-                        <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                        <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                           {amountText(row.averageInventoryValue, row.currency)}
                         </td>
-                        <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
-                          <Badge tone={turnoverTone(row.comparable)}>{rateText(row.turnoverRate)}</Badge>
+                        <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
+                          <Badge tone={turnoverTone(row.comparable)}>
+                            {rateText(row.turnoverRate)}
+                          </Badge>
                         </td>
-                        <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                        <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                           {row.turnoverDays === null ? '—' : quantityText(row.turnoverDays)}
                         </td>
                         <td className="py-2 pr-3">{caliberLabel(row.caliber)}</td>
-                        <td className="text-copy-13 text-muted-foreground py-2 pr-3 max-w-xs">
+                        <td className="text-copy-13 text-muted-foreground max-w-xs py-2 pr-3">
                           {row.note || '—'}
                         </td>
                       </tr>
@@ -508,18 +517,21 @@ export function AnalyticsInventoryAnalysisWorkspace() {
                   </thead>
                   <tbody>
                     {stockStatus.rows.map((row, index) => (
-                      <tr
-                        key={`${row.dimensionKey}|${index}`}
-                        className="border-border border-b"
-                      >
+                      <tr key={`${row.dimensionKey}|${index}`} className="border-border border-b">
                         <td className="py-2 pr-3">
-                          <Badge tone={stockStatusTone(row.zeroStockSkuCount, row.overstockSkuCount)}>
+                          <Badge
+                            tone={stockStatusTone(row.zeroStockSkuCount, row.overstockSkuCount)}
+                          >
                             {row.dimensionLabel}
                           </Badge>
                         </td>
                         <td className="py-2 pr-3 text-right tabular-nums">{row.totalSkuCount}</td>
-                        <td className="py-2 pr-3 text-right tabular-nums">{row.zeroStockSkuCount}</td>
-                        <td className="py-2 pr-3 text-right tabular-nums">{row.overstockSkuCount}</td>
+                        <td className="py-2 pr-3 text-right tabular-nums">
+                          {row.zeroStockSkuCount}
+                        </td>
+                        <td className="py-2 pr-3 text-right tabular-nums">
+                          {row.overstockSkuCount}
+                        </td>
                         <td className="py-2 pr-3 text-right tabular-nums">
                           {quantityText(row.overstockQuantity)}
                         </td>
@@ -532,7 +544,8 @@ export function AnalyticsInventoryAnalysisWorkspace() {
                           ) : (
                             row.amounts.map((amount) => (
                               <div key={amount.currency}>
-                                {amount.currency}：库存 {amountText(amount.totalValue, amount.currency)}
+                                {amount.currency}：库存{' '}
+                                {amountText(amount.totalValue, amount.currency)}
                                 ，超储 {amountText(amount.overstockValue, amount.currency)}
                               </div>
                             ))
@@ -578,13 +591,13 @@ export function AnalyticsInventoryAnalysisWorkspace() {
                         </td>
                         <td className="py-2 pr-3">{row.categoryCode || '未归类'}</td>
                         <td className="py-2 pr-3">{row.currency}</td>
-                        <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                        <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                           {amountText(row.inventoryValue, row.currency)}
                         </td>
-                        <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                        <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                           {shareText(row.valueShare)}
                         </td>
-                        <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                        <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                           {shareText(row.cumulativeShare)}
                         </td>
                         <td className="py-2 pr-3">
@@ -624,9 +637,13 @@ export function AnalyticsInventoryAnalysisWorkspace() {
                         <td className="py-2 pr-3">{row.scopeLabel || row.scopeType}</td>
                         <td className="py-2 pr-3">{row.status}</td>
                         <td className="py-2 pr-3 text-right tabular-nums">{row.lineCount}</td>
-                        <td className="py-2 pr-3 text-right tabular-nums">{row.countedLineCount}</td>
-                        <td className="py-2 pr-3 text-right tabular-nums">{row.varianceLineCount}</td>
-                        <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                        <td className="py-2 pr-3 text-right tabular-nums">
+                          {row.countedLineCount}
+                        </td>
+                        <td className="py-2 pr-3 text-right tabular-nums">
+                          {row.varianceLineCount}
+                        </td>
+                        <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                           {row.countedRate === null ? '—（不可比）' : shareText(row.countedRate)}
                         </td>
                       </tr>
@@ -673,16 +690,16 @@ export function AnalyticsInventoryAnalysisWorkspace() {
                         <td className="py-2 pr-3 text-right tabular-nums">
                           {quantityText(row.availableQuantity)}
                         </td>
-                        <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                        <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                           {row.unitCost === null ? '—' : quantityText(row.unitCost)}
                         </td>
-                        <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                        <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                           {amountText(row.inventoryValue, row.currency)}
                         </td>
                         <td className="py-2 pr-3 text-right tabular-nums">
                           {quantityText(row.soldQuantity)}
                         </td>
-                        <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                        <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                           {amountText(row.costOfGoodsSold, row.currency)}
                         </td>
                       </tr>

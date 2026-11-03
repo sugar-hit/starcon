@@ -200,10 +200,7 @@ export function LandedCostWorkspace() {
     }
   }, [parameterForm]);
 
-  const completeness = useMemo(
-    () => landedCompleteness(detail?.missingComponents),
-    [detail],
-  );
+  const completeness = useMemo(() => landedCompleteness(detail?.missingComponents), [detail]);
 
   return (
     <div className="space-y-4">
@@ -220,8 +217,8 @@ export function LandedCostWorkspace() {
                 <p>算了六项：{capabilities.basis.includedComponents.join('、')}</p>
                 <p>
                   🔴 明确**不算**两项：
-                  {capabilities.basis.excludedComponents.join('、')} —— 仓储费与尾程派送费实际值
-                  归 10.6.1.1 成本分析与 8 仓储作业，不在本模块里。
+                  {capabilities.basis.excludedComponents.join('、')} —— 仓储费与尾程派送费实际值 归
+                  10.6.1.1 成本分析与 8 仓储作业，不在本模块里。
                 </p>
                 <p>{capabilities.basis.note}</p>
               </div>
@@ -321,7 +318,7 @@ export function LandedCostWorkspace() {
           </div>
         </div>
         {computeProblems.length ? (
-          <ul className="text-copy-12 mt-2 space-y-1 text-destructive">
+          <ul className="text-copy-12 text-destructive mt-2 space-y-1">
             {computeProblems.map((p) => (
               <li key={p}>{p}</li>
             ))}
@@ -390,7 +387,7 @@ export function LandedCostWorkspace() {
         ) : page && page.items.length > 0 ? (
           <div className="space-y-3">
             <div className="overflow-x-auto">
-              <table className="w-full text-copy-13">
+              <table className="text-copy-13 w-full">
                 <thead>
                   <tr className="border-b text-left">
                     <th className="p-2">到岸成本单</th>
@@ -443,7 +440,11 @@ export function LandedCostWorkspace() {
             title="这个筛选下没有到岸成本单"
             description="到岸成本是按上游 10.4.1.1 头程发运单算出来的单据级事实。台账为空通常意味着还没有算过，或者筛选条件太窄。"
             action={
-              <Button size="sm" variant="ghost" onClick={() => setFilters(EMPTY_LANDED_COST_FILTERS)}>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setFilters(EMPTY_LANDED_COST_FILTERS)}
+              >
                 重置筛选
               </Button>
             }
@@ -467,12 +468,7 @@ export function LandedCostWorkspace() {
               polarity="neutral"
             />
             <StatCard label="行数" value={detail.totalLineCount} unit="行" polarity="neutral" />
-            <StatCard
-              label="计算次数"
-              value={detail.computeCount}
-              unit="次"
-              polarity="neutral"
-            />
+            <StatCard label="计算次数" value={detail.computeCount} unit="次" polarity="neutral" />
           </div>
 
           <div className="mt-3">
@@ -558,7 +554,7 @@ export function LandedCostWorkspace() {
           </div>
         </div>
         {parameterProblems.length ? (
-          <ul className="text-copy-12 mt-2 space-y-1 text-destructive">
+          <ul className="text-copy-12 text-destructive mt-2 space-y-1">
             {parameterProblems.map((p) => (
               <li key={p}>{p}</li>
             ))}
@@ -600,9 +596,7 @@ function LandedCostRowView({
         <div className="text-copy-12 text-muted-foreground">{row.destinationName}</div>
       </td>
       <td className="p-2">{row.incoterm || '—'}</td>
-      <td className="p-2 font-mono">
-        {landedMoneyWithCurrency(row.totalAmount, row.currency)}
-      </td>
+      <td className="p-2 font-mono">{landedMoneyWithCurrency(row.totalAmount, row.currency)}</td>
       <td className="p-2">
         <Badge tone={completeness.tone === 'success' ? 'success' : 'warning'}>
           计入 {row.includedComponentCount} / 缺 {row.missingComponentCount}
@@ -639,16 +633,16 @@ function LandedCostLineView({ line, currency }: { line: LandedCostLineRow; curre
         <span className="text-copy-12 text-muted-foreground">
           数量 {line.baseQuantity} {line.baseUnit}
         </span>
-        <span className="font-mono text-copy-13">
+        <span className="text-copy-13 font-mono">
           单位到岸成本 {landedMoneyWithCurrency(line.unitLandedCost, currency)}
         </span>
-        <span className="font-mono text-copy-13">
+        <span className="text-copy-13 font-mono">
           行合计 {landedMoneyWithCurrency(line.totalAmount, currency)}
         </span>
       </div>
 
       <div className="mt-3 overflow-x-auto">
-        <table className="w-full text-copy-13">
+        <table className="text-copy-13 w-full">
           <thead>
             <tr className="border-b text-left">
               <th className="p-2">分量</th>
@@ -669,12 +663,16 @@ function LandedCostLineView({ line, currency }: { line: LandedCostLineRow; curre
                     <div className="text-copy-12 text-muted-foreground">{c.code}</div>
                   </td>
                   <td className="p-2">
-                    <Badge tone={landedSourceTone(c.sourceKind)}>{landedSourceLabel(c.sourceKind)}</Badge>
+                    <Badge tone={landedSourceTone(c.sourceKind)}>
+                      {landedSourceLabel(c.sourceKind)}
+                    </Badge>
                     <div className="text-copy-12 text-muted-foreground">{c.sourceModule}</div>
                   </td>
                   <td className="p-2 font-mono">{c.sourceDocumentCode || '—'}</td>
                   <td className="p-2 font-mono">{landedMoneyWithCurrency(c.amount, currency)}</td>
-                  <td className="p-2 font-mono">{landedMoneyWithCurrency(c.unitAmount, currency)}</td>
+                  <td className="p-2 font-mono">
+                    {landedMoneyWithCurrency(c.unitAmount, currency)}
+                  </td>
                   <td className="p-2">
                     <Badge tone={state.tone}>{state.text}</Badge>
                     <div className="text-copy-12 text-muted-foreground">
@@ -701,7 +699,14 @@ function LandedCostLineView({ line, currency }: { line: LandedCostLineRow; curre
 /** 当前的参数清单。 */
 function LandedCostParameterTable() {
   const [rows, setRows] = useState<
-    { id: string; componentLabel: string; destinationCountryCode: string; currency: string; unitAmount: number; updatedAt: string }[]
+    {
+      id: string;
+      componentLabel: string;
+      destinationCountryCode: string;
+      currency: string;
+      unitAmount: number;
+      updatedAt: string;
+    }[]
   >([]);
   const [error, setError] = useState('');
 
@@ -734,7 +739,7 @@ function LandedCostParameterTable() {
   }
   return (
     <div className="mt-3 overflow-x-auto">
-      <table className="w-full text-copy-13">
+      <table className="text-copy-13 w-full">
         <thead>
           <tr className="border-b text-left">
             <th className="p-2">分量</th>

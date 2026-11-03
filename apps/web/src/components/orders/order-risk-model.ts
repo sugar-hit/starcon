@@ -117,10 +117,7 @@ export function fetchAssessment(assessmentId: string): Promise<RiskDetail> {
   return api<RiskDetail>(`${base}/assessments/${assessmentId}`);
 }
 
-export function submitReview(
-  assessmentId: string,
-  input: RiskReviewInput,
-): Promise<ReviewSaved> {
+export function submitReview(assessmentId: string, input: RiskReviewInput): Promise<ReviewSaved> {
   return api<ReviewSaved>(`${base}/assessments/${assessmentId}/review`, 'POST', input);
 }
 

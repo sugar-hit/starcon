@@ -509,7 +509,11 @@ export function AdPromotionAnalysisWorkspace() {
           <button className="rounded border px-2 py-1" disabled={busy} onClick={() => void onRun()}>
             跑一次分析
           </button>
-          <button className="rounded border px-2 py-1" disabled={busy} onClick={() => void onExport()}>
+          <button
+            className="rounded border px-2 py-1"
+            disabled={busy}
+            onClick={() => void onExport()}
+          >
             导出（登记留痕）
           </button>
         </div>
@@ -525,9 +529,8 @@ export function AdPromotionAnalysisWorkspace() {
           <p className="text-muted-foreground text-sm">正在加载效果报表…</p>
         ) : report && report.items.length === 0 ? (
           <p className="text-muted-foreground text-sm">
-            还没有可分析的结果。先「跑一次分析」把促销期与基期算出来
-            （平台回报口径的每日销量 / 销售额来自 listing_performance_snapshot，
-            毛利还需要先登记成本快照）。
+            还没有可分析的结果。先「跑一次分析」把促销期与基期算出来 （平台回报口径的每日销量 /
+            销售额来自 listing_performance_snapshot， 毛利还需要先登记成本快照）。
           </p>
         ) : (
           <table className="w-full text-sm">
@@ -606,8 +609,8 @@ export function AdPromotionAnalysisWorkspace() {
                     {analysisMarginAlertText(row.marginAlert)}
                   </td>
                   <td className="py-1 text-xs">
-                    毛利可比 {row.grossProfitProductCount} / 全部可比 {row.comparableProductCount} / 共{' '}
-                    {row.productCount}
+                    毛利可比 {row.grossProfitProductCount} / 全部可比 {row.comparableProductCount} /
+                    共 {row.productCount}
                   </td>
                   <td className="py-1 text-xs">{analysisTimestampText(row.dataAsOf)}</td>
                 </tr>

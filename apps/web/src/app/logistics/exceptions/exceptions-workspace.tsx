@@ -494,7 +494,9 @@ export function ExceptionsWorkspace() {
                     <tr key={row.id} className="border-b">
                       <td className="py-2">
                         <div className="font-medium">{row.caseNo}</div>
-                        <div className="text-muted-foreground">{row.waybillNo || '（无运单号）'}</div>
+                        <div className="text-muted-foreground">
+                          {row.waybillNo || '（无运单号）'}
+                        </div>
                       </td>
                       <td className="py-2">
                         <div>{row.exceptionTypeLabel}</div>
@@ -510,7 +512,8 @@ export function ExceptionsWorkspace() {
                       <td className="py-2">
                         {row.overdue ? (
                           <span className="text-destructive flex items-center gap-1">
-                            <Siren className="h-4 w-4" />已逾期
+                            <Siren className="h-4 w-4" />
+                            已逾期
                           </span>
                         ) : (
                           <span className="text-muted-foreground">
@@ -634,9 +637,7 @@ export function ExceptionsWorkspace() {
                       <td className="py-2">
                         {row.downstreamTaskCount > 0 ? `${row.downstreamTaskCount} 条待通知` : '—'}
                       </td>
-                      <td className="py-2">
-                        {new Date(row.occurredAt).toLocaleString('zh-CN')}
-                      </td>
+                      <td className="py-2">{new Date(row.occurredAt).toLocaleString('zh-CN')}</td>
                       <td className="py-2">{row.detail || '—'}</td>
                     </tr>
                   ))}
@@ -745,9 +746,7 @@ export function ExceptionsWorkspace() {
                     <tr key={row.id} className="border-b">
                       <td className="py-2">
                         <div className="font-medium">{row.ruleCode}</div>
-                        {row.note ? (
-                          <div className="text-muted-foreground">{row.note}</div>
-                        ) : null}
+                        {row.note ? <div className="text-muted-foreground">{row.note}</div> : null}
                       </td>
                       <td className="py-2">{row.ruleTypeLabel}</td>
                       <td className="py-2">
@@ -862,7 +861,9 @@ export function ExceptionsWorkspace() {
                       {detail.downstreamTasks.map((task) => (
                         <li key={task.id} className="rounded border p-2">
                           <div className="flex items-center gap-2">
-                            <Badge tone="warning">{downstreamStatusLabel(task.downstreamStatus)}</Badge>
+                            <Badge tone="warning">
+                              {downstreamStatusLabel(task.downstreamStatus)}
+                            </Badge>
                             <span>{downstreamModuleLabel(task.downstreamModule)}</span>
                           </div>
                           <p className="text-muted-foreground mt-1">{task.note}</p>
@@ -871,7 +872,9 @@ export function ExceptionsWorkspace() {
                     </ul>
                   )}
                   {capabilities ? (
-                    <p className="text-muted-foreground mt-2 text-sm">{capabilities.downstreamNote}</p>
+                    <p className="text-muted-foreground mt-2 text-sm">
+                      {capabilities.downstreamNote}
+                    </p>
                   ) : null}
                 </div>
 
@@ -1015,7 +1018,10 @@ export function ExceptionsWorkspace() {
       </Modal>
 
       {/* ---------------- 追加处置 ---------------- */}
-      <Modal open={dispositionTarget !== null} onOpenChange={(o) => !o && setDispositionTarget(null)}>
+      <Modal
+        open={dispositionTarget !== null}
+        onOpenChange={(o) => !o && setDispositionTarget(null)}
+      >
         <ModalContent>
           <ModalHeader>
             <ModalTitle>追加处置记录</ModalTitle>
@@ -1085,7 +1091,9 @@ export function ExceptionsWorkspace() {
                 <Input
                   className="mt-1"
                   value={dispositionForm.amount}
-                  onChange={(e) => setDispositionForm({ ...dispositionForm, amount: e.target.value })}
+                  onChange={(e) =>
+                    setDispositionForm({ ...dispositionForm, amount: e.target.value })
+                  }
                 />
               </label>
               <label className="block">
@@ -1100,9 +1108,7 @@ export function ExceptionsWorkspace() {
               </label>
             </div>
             <label className="block">
-              <span className="text-muted-foreground">
-                说明（结案 / 作废时必填）
-              </span>
+              <span className="text-muted-foreground">说明（结案 / 作废时必填）</span>
               <textarea
                 className="mt-1 w-full rounded border px-2 py-1"
                 rows={3}
@@ -1111,17 +1117,12 @@ export function ExceptionsWorkspace() {
               />
             </label>
             <Notice tone="info" title="下游待通知">
-              「联系客服 / 请求改址 / 请求补发」会自动生成一条**待通知**任务
-              （15 客服 / 10.2.1.3 改址 / 7 库存）。这些模块当前未交付，
-              页面**不会**把它们显示成「已通知」或「已受理」。
+              「联系客服 / 请求改址 / 请求补发」会自动生成一条**待通知**任务 （15 客服 / 10.2.1.3
+              改址 / 7 库存）。这些模块当前未交付， 页面**不会**把它们显示成「已通知」或「已受理」。
             </Notice>
           </div>
           <ModalFooter>
-            <Button
-              variant="ghost"
-              onClick={() => setDispositionTarget(null)}
-              disabled={busy}
-            >
+            <Button variant="ghost" onClick={() => setDispositionTarget(null)} disabled={busy}>
               取消
             </Button>
             <Button onClick={() => void submitDisposition()} disabled={busy}>
@@ -1281,9 +1282,7 @@ export function ExceptionsWorkspace() {
                 className="mt-1"
                 placeholder="ADDRESS_INVALID"
                 value={ruleForm.matchExceptionCode}
-                onChange={(e) =>
-                  setRuleForm({ ...ruleForm, matchExceptionCode: e.target.value })
-                }
+                onChange={(e) => setRuleForm({ ...ruleForm, matchExceptionCode: e.target.value })}
               />
             </label>
             <div className="grid grid-cols-2 gap-2">
@@ -1292,9 +1291,7 @@ export function ExceptionsWorkspace() {
                 <Input
                   className="mt-1"
                   value={ruleForm.thresholdMinutes}
-                  onChange={(e) =>
-                    setRuleForm({ ...ruleForm, thresholdMinutes: e.target.value })
-                  }
+                  onChange={(e) => setRuleForm({ ...ruleForm, thresholdMinutes: e.target.value })}
                 />
               </label>
               <label className="block">
@@ -1302,9 +1299,7 @@ export function ExceptionsWorkspace() {
                 <Input
                   className="mt-1"
                   value={ruleForm.resolveSlaMinutes}
-                  onChange={(e) =>
-                    setRuleForm({ ...ruleForm, resolveSlaMinutes: e.target.value })
-                  }
+                  onChange={(e) => setRuleForm({ ...ruleForm, resolveSlaMinutes: e.target.value })}
                 />
               </label>
             </div>

@@ -303,9 +303,8 @@ export function PricingRuleWorkspace() {
               {capabilities.suggestFirstNote} {capabilities.downstreamNote}
             </Notice>
             <Notice tone="info" title="上游与口径">
-              {capabilities.upstreamNote} {capabilities.competitorNote}{' '}
-              {capabilities.priorityNote} {capabilities.assumptionNote} {capabilities.sourceNote}{' '}
-              {capabilities.actionNote}
+              {capabilities.upstreamNote} {capabilities.competitorNote} {capabilities.priorityNote}{' '}
+              {capabilities.assumptionNote} {capabilities.sourceNote} {capabilities.actionNote}
             </Notice>
           </div>
         ) : (
@@ -445,7 +444,11 @@ export function PricingRuleWorkspace() {
               />
             </FormField>
             <FormField id="pr-name" label="规则名称" required>
-              <Input id="pr-name" value={form.name} onChange={(e) => patch({ name: e.target.value })} />
+              <Input
+                id="pr-name"
+                value={form.name}
+                onChange={(e) => patch({ name: e.target.value })}
+              />
             </FormField>
             <FormField id="pr-currency" label="建议价币种" required>
               <Input
@@ -470,7 +473,9 @@ export function PricingRuleWorkspace() {
               <Input
                 id="pr-action-field"
                 value={form.actionType}
-                onChange={(e) => patch(applyAction(form, e.target.value.toUpperCase() as ActionType))}
+                onChange={(e) =>
+                  patch(applyAction(form, e.target.value.toUpperCase() as ActionType))
+                }
               />
             </FormField>
             <FormField id="pr-priority" label="优先级" hint="数字小者优先">
@@ -533,7 +538,9 @@ export function PricingRuleWorkspace() {
                   step="0.01"
                   value={form.marginFloorRate ?? ''}
                   onChange={(e) =>
-                    patch({ marginFloorRate: e.target.value === '' ? null : Number(e.target.value) })
+                    patch({
+                      marginFloorRate: e.target.value === '' ? null : Number(e.target.value),
+                    })
                   }
                 />
               </FormField>
@@ -589,8 +596,7 @@ export function PricingRuleWorkspace() {
                   value={form.maxAutoPriceDropRate ?? ''}
                   onChange={(e) =>
                     patch({
-                      maxAutoPriceDropRate:
-                        e.target.value === '' ? null : Number(e.target.value),
+                      maxAutoPriceDropRate: e.target.value === '' ? null : Number(e.target.value),
                     })
                   }
                 />
@@ -627,7 +633,10 @@ export function PricingRuleWorkspace() {
                 <p className="text-copy-12 text-muted-foreground">未限定（适用于全租户）</p>
               ) : (
                 form.scopes.map((scope, index) => (
-                  <div key={`${scope.type}-${scope.ref}-${index}`} className="grid gap-2 md:grid-cols-4">
+                  <div
+                    key={`${scope.type}-${scope.ref}-${index}`}
+                    className="grid gap-2 md:grid-cols-4"
+                  >
                     <FormField id={`pr-scope-type-${index}`} label="类型">
                       <Input
                         id={`pr-scope-type-${index}`}
@@ -883,7 +892,8 @@ export function PricingRuleWorkspace() {
           </Button>
           {directory ? (
             <span className="text-copy-12 text-muted-foreground">
-              分类 {directory.categories.length} 个 · 品牌 {directory.brands.length} 个（作用范围目录）
+              分类 {directory.categories.length} 个 · 品牌 {directory.brands.length}{' '}
+              个（作用范围目录）
             </span>
           ) : null}
         </div>
@@ -906,9 +916,7 @@ export function PricingRuleWorkspace() {
                     <span className="text-label-13 font-semibold">
                       {hit.skuCode ?? hit.skuName ?? hit.skuId}
                     </span>
-                    <Badge tone={hitTone(hit.matched, hit.superseded)}>
-                      {hitStatusText(hit)}
-                    </Badge>
+                    <Badge tone={hitTone(hit.matched, hit.superseded)}>{hitStatusText(hit)}</Badge>
                   </div>
                   <div className="text-copy-12 text-muted-foreground mt-1 flex flex-wrap gap-2">
                     <span>{hit.ruleCode}</span>
@@ -950,12 +958,8 @@ export function PricingRuleWorkspace() {
                     <span>· {suggestion.siteCode ?? '不限店铺'}</span>
                   </div>
                   <div className="mt-2 grid gap-1 md:grid-cols-4">
-                    <span className="text-copy-12">
-                      当前价：{currentPriceText(suggestion)}
-                    </span>
-                    <span className="text-copy-12">
-                      建议价：{suggestedPriceText(suggestion)}
-                    </span>
+                    <span className="text-copy-12">当前价：{currentPriceText(suggestion)}</span>
+                    <span className="text-copy-12">建议价：{suggestedPriceText(suggestion)}</span>
                     <span className="text-copy-12">
                       变动：{priceChangeText(suggestion.priceChangeRate)}
                     </span>
@@ -970,7 +974,11 @@ export function PricingRuleWorkspace() {
                   <p className="text-copy-12 text-muted-foreground mt-1">{suggestion.reason}</p>
                   {suggestion.status === 'PENDING_CONFIRMATION' ? (
                     <div className="mt-2 flex gap-2">
-                      <Button size="sm" onClick={() => void decide(suggestion.id, 'CONFIRM')} disabled={busy}>
+                      <Button
+                        size="sm"
+                        onClick={() => void decide(suggestion.id, 'CONFIRM')}
+                        disabled={busy}
+                      >
                         确认放行
                       </Button>
                       <Button
@@ -997,15 +1005,12 @@ export function PricingRuleWorkspace() {
         >
           <div className="grid gap-2 md:grid-cols-4">
             <span className="text-copy-12">
-              触发条件：{triggerTypeLabel(selected.triggerType)} ·{' '}
-              {thresholdText(selected)}
+              触发条件：{triggerTypeLabel(selected.triggerType)} · {thresholdText(selected)}
             </span>
             <span className="text-copy-12">
               动作：{actionRateText(selected.actionType, selected.actionRate)}
             </span>
-            <span className="text-copy-12">
-              优先级：{selected.priority}（数字小者优先）
-            </span>
+            <span className="text-copy-12">优先级：{selected.priority}（数字小者优先）</span>
             <span className="text-copy-12">
               自动放行上限：{percentText(selected.maxAutoPriceDropRate, '0%')}
             </span>

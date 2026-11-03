@@ -102,7 +102,9 @@ describe('与生效方法的差额', () => {
 
 describe('生效区间的展示', () => {
   it('结束时间为空表示「一直生效」，不是「没填」', () => {
-    expect(valuationEffectiveWindow('2026-01-01T00:00:00Z', null)).toBe('2026-01-01 起（一直生效）');
+    expect(valuationEffectiveWindow('2026-01-01T00:00:00Z', null)).toBe(
+      '2026-01-01 起（一直生效）',
+    );
   });
 
   it('有结束时间时展示区间', () => {

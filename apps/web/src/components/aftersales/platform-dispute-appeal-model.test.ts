@@ -130,7 +130,11 @@ describe('举证覆盖：两个数字分开显示', () => {
 describe('动作清单：每条都带「为什么不能做」', () => {
   const actions = [
     { code: 'SUBMIT', allowed: true, blockingReason: null },
-    { code: 'ATTACH_MATERIAL', allowed: false, blockingReason: '申诉单已是「已提交平台」，材料包已冻结' },
+    {
+      code: 'ATTACH_MATERIAL',
+      allowed: false,
+      blockingReason: '申诉单已是「已提交平台」，材料包已冻结',
+    },
   ];
 
   it('允许的动作没有阻塞原因', () => {

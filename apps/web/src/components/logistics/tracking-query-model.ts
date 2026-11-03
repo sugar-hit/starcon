@@ -472,7 +472,10 @@ export function eventSourceLabel(code: string): string {
  */
 export function formatMoment(value: string | null | undefined): string {
   if (!value) return '—';
-  return value.replace('T', ' ').replace(/\.\d+/, '').replace(/([+-]\d{2}:\d{2}|Z)$/, ' $1');
+  return value
+    .replace('T', ' ')
+    .replace(/\.\d+/, '')
+    .replace(/([+-]\d{2}:\d{2}|Z)$/, ' $1');
 }
 
 /** 重量展示：去掉无意义的尾随零，但**不做单位换算**（后端已换算成公斤）。 */
@@ -584,9 +587,7 @@ export function fetchTrackingSubject(id: string): Promise<TrackingTimelineDetail
   return api<TrackingTimelineDetail>(`channel/logistics-tracking/subjects/${id}`);
 }
 
-export function fetchTrackingEvents(
-  filters: TrackingFilters,
-): Promise<TrackingEventPage> {
+export function fetchTrackingEvents(filters: TrackingFilters): Promise<TrackingEventPage> {
   const query = new URLSearchParams();
   if (filters.carrierCode) query.set('carrierCode', filters.carrierCode);
   if (filters.nodeType) query.set('nodeType', filters.nodeType);

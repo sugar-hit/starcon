@@ -146,7 +146,10 @@ export function fetchReconciliationDifferences(
 }
 
 /** 事件流（真分页；append-only 举证）。 */
-export function fetchReconciliationEvents(id: string, params: { page?: number; size?: number } = {}) {
+export function fetchReconciliationEvents(
+  id: string,
+  params: { page?: number; size?: number } = {},
+) {
   return api<FinanceReconEventPage>(
     `${base}/${encodeURIComponent(id)}/events${query({ ...params })}`,
   );
@@ -451,7 +454,9 @@ export function reconciliationScopeLabel(row: {
   periodEnd: string;
   bookSources: string[];
 }): string {
-  const shop = row.shopId ? `${row.shopName}（${row.platformCode || '未标注平台'}）` : '全部授权店铺';
+  const shop = row.shopId
+    ? `${row.shopName}（${row.platformCode || '未标注平台'}）`
+    : '全部授权店铺';
   const sources = row.bookSources.map(reconciliationBookSourceLabel).join(' + ');
   return `${row.accountNo} ${row.accountName} · ${shop} · ${row.periodStart} → ${row.periodEnd} · 我方账：${sources}`;
 }

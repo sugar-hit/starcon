@@ -92,23 +92,25 @@ export const fetchServiceTicketCapabilities = () =>
 // 工单
 // ==========================================================================
 
-export const fetchServiceTickets = (params: {
-  page?: number;
-  size?: number;
-  status?: string;
-  ticketType?: string;
-  priority?: string;
-  sourceChannel?: string;
-  assignedToRef?: string;
-  caseId?: string;
-  slaState?: string;
-  overdueOnly?: boolean;
-  unassignedOnly?: boolean;
-  from?: string;
-  to?: string;
-  keyword?: string;
-  sort?: string;
-} = {}) => call<ServiceTicketPage>(`${base}${query(params)}`);
+export const fetchServiceTickets = (
+  params: {
+    page?: number;
+    size?: number;
+    status?: string;
+    ticketType?: string;
+    priority?: string;
+    sourceChannel?: string;
+    assignedToRef?: string;
+    caseId?: string;
+    slaState?: string;
+    overdueOnly?: boolean;
+    unassignedOnly?: boolean;
+    from?: string;
+    to?: string;
+    keyword?: string;
+    sort?: string;
+  } = {},
+) => call<ServiceTicketPage>(`${base}${query(params)}`);
 
 export const fetchServiceTicket = (id: string) => call<ServiceTicketDetail>(`${base}/${id}`);
 
@@ -254,7 +256,9 @@ export function countdownText(dueAt: string | null | undefined, now = Date.now()
 }
 
 /** SLA 判定的色调（语义挂钩，不跟颜色挂钩）。 */
-export function slaTone(state: string | null | undefined): 'danger' | 'warning' | 'success' | 'neutral' {
+export function slaTone(
+  state: string | null | undefined,
+): 'danger' | 'warning' | 'success' | 'neutral' {
   switch (state) {
     case 'BREACHED':
       return 'danger';
@@ -268,7 +272,9 @@ export function slaTone(state: string | null | undefined): 'danger' | 'warning' 
 }
 
 /** 优先级色调。 */
-export function priorityTone(priority: string | null | undefined): 'danger' | 'warning' | 'info' | 'neutral' {
+export function priorityTone(
+  priority: string | null | undefined,
+): 'danger' | 'warning' | 'info' | 'neutral' {
   switch (priority) {
     case 'URGENT':
       return 'danger';
@@ -282,7 +288,9 @@ export function priorityTone(priority: string | null | undefined): 'danger' | 'w
 }
 
 /** 工单状态色调。 */
-export function statusTone(status: string | null | undefined): 'success' | 'info' | 'warning' | 'neutral' {
+export function statusTone(
+  status: string | null | undefined,
+): 'success' | 'info' | 'warning' | 'neutral' {
   switch (status) {
     case 'RESOLVED':
       return 'success';
@@ -364,8 +372,7 @@ export function escalateHint(ticketType: string | null | undefined): string {
  */
 export function actionBlockedReason(
   actions:
-    | ReadonlyArray<Pick<ServiceTicketAction, 'code' | 'allowed' | 'blockedReason'>>
-    | undefined,
+    ReadonlyArray<Pick<ServiceTicketAction, 'code' | 'allowed' | 'blockedReason'>> | undefined,
   code: string,
 ): string | null {
   if (!actions) return '动作清单不可用（未加载到工单详情）';
@@ -512,7 +519,8 @@ export function escalateMissingFields(
     if (!fields.caseType) missing.push('目标售后类型');
     if (!fields.reasonCode) missing.push('目标原因分类');
     if (!fields.amount || !fields.amount.trim()) missing.push('申请金额');
-    if (!fields.currency || fields.currency.trim().length !== 3) missing.push('币种（三位大写字母）');
+    if (!fields.currency || fields.currency.trim().length !== 3)
+      missing.push('币种（三位大写字母）');
     if (!fields.quantity || !fields.quantity.trim()) missing.push('申请数量');
   } else if (targetType === 'DISPUTE') {
     if (!fields.platformCode || !fields.platformCode.trim()) missing.push('平台码');

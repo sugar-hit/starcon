@@ -59,9 +59,9 @@ describe('verdictTone · 判定与结论是两个维度', () => {
   });
 
   it('真实受理是绿的，且优先于 canSucceed（受理后 canSucceed 可能仍为 false）', () => {
-    expect(
-      verdictTone({ verdict: 'WITHIN_WINDOW', canSucceed: false, outcome: 'ACCEPTED' }),
-    ).toBe('ok');
+    expect(verdictTone({ verdict: 'WITHIN_WINDOW', canSucceed: false, outcome: 'ACCEPTED' })).toBe(
+      'ok',
+    );
   });
 
   it('拒收是红的', () => {
@@ -132,9 +132,9 @@ describe('dispatchStateText · 未派发必须先于「能不能成」', () => {
     expect(dispatchStateText({ ...baseRow, outcome: 'ACCEPTED', carrierRef: 'ref-1' })).toContain(
       'ref-1',
     );
-    expect(
-      dispatchStateText({ ...baseRow, outcome: 'REJECTED', carrierRef: 'ref-2' }),
-    ).toContain('ref-2');
+    expect(dispatchStateText({ ...baseRow, outcome: 'REJECTED', carrierRef: 'ref-2' })).toContain(
+      'ref-2',
+    );
   });
 });
 

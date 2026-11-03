@@ -2,16 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Badge, Button, EmptyState, SectionCard, StatCard } from '@starcon/ui';
-import {
-  CircleAlert,
-  Link2,
-  Loader2,
-  Plus,
-  RefreshCw,
-  Save,
-  Star,
-  Trash2,
-} from 'lucide-react';
+import { CircleAlert, Link2, Loader2, Plus, RefreshCw, Save, Star, Trash2 } from 'lucide-react';
 import { fetchNodes, fetchTrees } from './category-tree-model';
 import type { CategoryNode, CategoryTree } from '../../../../../packages/api-contracts/src/index';
 import { Editor, Field, control } from './fields';
@@ -149,8 +140,12 @@ export function PlatformMappingWorkspace() {
   const [resolveError, setResolveError] = useState<string | null>(null);
   const [resolving, setResolving] = useState(false);
 
-  const hasFilters = platformFilter !== '' || siteFilter !== '' || keyword.trim() !== '' ||
-    enabledFilter !== null || unmappedOnly;
+  const hasFilters =
+    platformFilter !== '' ||
+    siteFilter !== '' ||
+    keyword.trim() !== '' ||
+    enabledFilter !== null ||
+    unmappedOnly;
 
   const query: PlatformMappingQuery = useMemo(
     () => ({
@@ -179,10 +174,7 @@ export function PlatformMappingWorkspace() {
     setLoading(true);
     setError(null);
     try {
-      const [summary, pageData] = await Promise.all([
-        fetchMappingOverview(),
-        fetchMappings(query),
-      ]);
+      const [summary, pageData] = await Promise.all([fetchMappingOverview(), fetchMappings(query)]);
       setOverview(summary);
       setRows(pageData.items);
       setTotal(pageData.total);
@@ -202,10 +194,7 @@ export function PlatformMappingWorkspace() {
     let cancelled = false;
     void (async () => {
       try {
-        const [siteOptionsData, trees] = await Promise.all([
-          fetchPlatformSites(),
-          fetchTrees(),
-        ]);
+        const [siteOptionsData, trees] = await Promise.all([fetchPlatformSites(), fetchTrees()]);
         if (cancelled) return;
         setPlatformSites(siteOptionsData);
 
@@ -306,9 +295,7 @@ export function PlatformMappingWorkspace() {
     setResolveError(null);
     setResolveResult(null);
     try {
-      setResolveResult(
-        await resolveTarget(resolveCategoryId, resolvePlatform, resolveSite),
-      );
+      setResolveResult(await resolveTarget(resolveCategoryId, resolvePlatform, resolveSite));
     } catch (e) {
       setResolveError(errorText(e, '解析失败'));
     } finally {
@@ -451,9 +438,7 @@ export function PlatformMappingWorkspace() {
               className={control}
               value={enabledFilter === null ? '' : String(enabledFilter)}
               onChange={(e) => {
-                setEnabledFilter(
-                  e.target.value === '' ? null : e.target.value === 'true',
-                );
+                setEnabledFilter(e.target.value === '' ? null : e.target.value === 'true');
                 setPage(1);
               }}
             >
@@ -507,7 +492,9 @@ export function PlatformMappingWorkspace() {
                   清空筛选
                 </Button>
               ) : writable ? (
-                <Button onClick={() => setMappingDraft(emptyMappingDraft(platformFilter, siteFilter))}>
+                <Button
+                  onClick={() => setMappingDraft(emptyMappingDraft(platformFilter, siteFilter))}
+                >
                   <Plus /> 新建映射
                 </Button>
               ) : undefined
@@ -536,7 +523,9 @@ export function PlatformMappingWorkspace() {
                   >
                     <td className="px-3 py-2">
                       <div className="text-foreground font-medium">{row.internalCategoryName}</div>
-                      <div className="text-muted-foreground text-xs">{row.internalCategoryCode}</div>
+                      <div className="text-muted-foreground text-xs">
+                        {row.internalCategoryCode}
+                      </div>
                     </td>
                     <td className="px-3 py-2">
                       <Badge tone="info">{row.platformCode}</Badge>{' '}
@@ -572,7 +561,11 @@ export function PlatformMappingWorkspace() {
                     </td>
                     <td className="px-3 py-2">
                       <div className="flex flex-wrap gap-1">
-                        <Button variant="ghost" size="sm" onClick={() => void selectMapping(row.id)}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => void selectMapping(row.id)}
+                        >
                           属性规则
                         </Button>
                         {writable && (
@@ -718,9 +711,7 @@ export function PlatformMappingWorkspace() {
           <div className="flex items-end">
             <Button
               onClick={() => void doResolve()}
-              disabled={
-                resolving || !resolveCategoryId || !resolvePlatform || !resolveSite
-              }
+              disabled={resolving || !resolveCategoryId || !resolvePlatform || !resolveSite}
             >
               {resolving ? <Loader2 className="animate-spin" /> : <RefreshCw />}
               解析
@@ -865,9 +856,7 @@ export function PlatformMappingWorkspace() {
                 <input
                   className={control}
                   value={mappingDraft.siteCode}
-                  onChange={(e) =>
-                    setMappingDraft({ ...mappingDraft, siteCode: e.target.value })
-                  }
+                  onChange={(e) => setMappingDraft({ ...mappingDraft, siteCode: e.target.value })}
                   placeholder="US"
                 />
               </Field>
@@ -902,9 +891,7 @@ export function PlatformMappingWorkspace() {
                 <input
                   type="checkbox"
                   checked={mappingDraft.enabled}
-                  onChange={(e) =>
-                    setMappingDraft({ ...mappingDraft, enabled: e.target.checked })
-                  }
+                  onChange={(e) => setMappingDraft({ ...mappingDraft, enabled: e.target.checked })}
                 />
                 启用
               </label>

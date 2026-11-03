@@ -356,10 +356,7 @@ export function ReturnShipbackWorkspace() {
           label="退运成本合计"
           value={
             overview && overview.costTotals.length === 1
-              ? moneyText(
-                  overview.costTotals[0]?.amount,
-                  overview.costTotals[0]?.currency,
-                )
+              ? moneyText(overview.costTotals[0]?.amount, overview.costTotals[0]?.currency)
               : `${overview?.costTotals.length ?? 0} 个币种`
           }
           comparisonLabel="按币种分行，跨币种绝不相加"
@@ -549,7 +546,7 @@ export function ReturnShipbackWorkspace() {
                       <td className="py-2 text-xs">
                         {row.customsStatusLabel || shipbackStatusLabel(row.customsStatus)}
                         {row.customsDeclarationNo ? (
-                          <div className="font-mono text-muted-foreground">
+                          <div className="text-muted-foreground font-mono">
                             {row.customsDeclarationNo}
                           </div>
                         ) : null}
@@ -572,10 +569,7 @@ export function ReturnShipbackWorkspace() {
 
         {/* ---------------- 留痕 ---------------- */}
         <TabsContent value="events">
-          <SectionCard
-            title="退运留痕"
-            description="追加式记录：已写入的事件不许改、不许删。"
-          >
+          <SectionCard title="退运留痕" description="追加式记录：已写入的事件不许改、不许删。">
             {loading ? (
               <p className="text-muted-foreground text-sm">正在加载留痕…</p>
             ) : (events?.rows.length ?? 0) === 0 ? (
@@ -632,9 +626,7 @@ export function ReturnShipbackWorkspace() {
               <select
                 className="w-full rounded border px-2 py-1"
                 value={consignForm.transportMode}
-                onChange={(e) =>
-                  setConsignForm({ ...consignForm, transportMode: e.target.value })
-                }
+                onChange={(e) => setConsignForm({ ...consignForm, transportMode: e.target.value })}
               >
                 <option value="SEA_CONSOLIDATION">海运拼箱（LCL）</option>
                 <option value="SEA_FULL_CONTAINER">海运整柜（FCL）</option>
@@ -648,9 +640,7 @@ export function ReturnShipbackWorkspace() {
               <span className="mb-1 block">成本币种</span>
               <Input
                 value={consignForm.costCurrency}
-                onChange={(e) =>
-                  setConsignForm({ ...consignForm, costCurrency: e.target.value })
-                }
+                onChange={(e) => setConsignForm({ ...consignForm, costCurrency: e.target.value })}
                 placeholder="USD"
               />
             </label>
@@ -658,9 +648,7 @@ export function ReturnShipbackWorkspace() {
               <span className="mb-1 block">起运国家（两位）</span>
               <Input
                 value={consignForm.originCountry}
-                onChange={(e) =>
-                  setConsignForm({ ...consignForm, originCountry: e.target.value })
-                }
+                onChange={(e) => setConsignForm({ ...consignForm, originCountry: e.target.value })}
                 placeholder="DE"
               />
             </label>
@@ -763,7 +751,8 @@ export function ReturnShipbackWorkspace() {
                           onChange={(e) => {
                             const next = [...selected];
                             const current = next[index];
-                            if (current) next[index] = { ...current, declaredValue: e.target.value };
+                            if (current)
+                              next[index] = { ...current, declaredValue: e.target.value };
                             setSelected(next);
                           }}
                         />
@@ -787,7 +776,8 @@ export function ReturnShipbackWorkspace() {
                           onChange={(e) => {
                             const next = [...selected];
                             const current = next[index];
-                            if (current) next[index] = { ...current, declaredItemName: e.target.value };
+                            if (current)
+                              next[index] = { ...current, declaredItemName: e.target.value };
                             setSelected(next);
                           }}
                         />
@@ -816,7 +806,8 @@ export function ReturnShipbackWorkspace() {
           <ModalHeader>
             <ModalTitle>登记报关资料</ModalTitle>
             <ModalDescription>
-              申报品名独立必填（不照搬销售标题）；关税金额由「申报货值 × 税率」派生，不给两个互相矛盾的数。
+              申报品名独立必填（不照搬销售标题）；关税金额由「申报货值 ×
+              税率」派生，不给两个互相矛盾的数。
             </ModalDescription>
           </ModalHeader>
 
@@ -919,10 +910,14 @@ export function ReturnShipbackWorkspace() {
 
           {declarationForm.declaredValue && declarationForm.tariffRate ? (
             <Notice tone="info" title="关税预览（服务端会再算一遍，以服务端为准）">
-              关税 = {moneyText(Number(declarationForm.declaredValue), declarationForm.declaredCurrency)}{' '}
-              × {declarationForm.tariffRate} ={' '}
+              关税 ={' '}
+              {moneyText(Number(declarationForm.declaredValue), declarationForm.declaredCurrency)} ×{' '}
+              {declarationForm.tariffRate} ={' '}
               {moneyText(
-                previewTariffAmount(Number(declarationForm.declaredValue), Number(declarationForm.tariffRate)),
+                previewTariffAmount(
+                  Number(declarationForm.declaredValue),
+                  Number(declarationForm.tariffRate),
+                ),
                 declarationForm.declaredCurrency,
               )}
             </Notice>
@@ -1101,12 +1096,20 @@ export function ReturnShipbackWorkspace() {
             <div className="space-y-4">
               <div className="flex flex-wrap gap-2">
                 {detail.head.status === 'DRAFT' ? (
-                  <Button size="sm" onClick={() => void advance('confirm', detail.head.id)} disabled={busy}>
+                  <Button
+                    size="sm"
+                    onClick={() => void advance('confirm', detail.head.id)}
+                    disabled={busy}
+                  >
                     确认
                   </Button>
                 ) : null}
                 {detail.head.status === 'CONFIRMED' ? (
-                  <Button size="sm" onClick={() => void advance('dispatch', detail.head.id)} disabled={busy}>
+                  <Button
+                    size="sm"
+                    onClick={() => void advance('dispatch', detail.head.id)}
+                    disabled={busy}
+                  >
                     发出
                   </Button>
                 ) : null}
@@ -1136,12 +1139,22 @@ export function ReturnShipbackWorkspace() {
                   </Button>
                 ) : null}
                 {detail.head.status === 'ARRIVED' ? (
-                  <Button size="sm" variant="outline" onClick={() => void advance('close', detail.head.id)} disabled={busy}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => void advance('close', detail.head.id)}
+                    disabled={busy}
+                  >
                     关闭
                   </Button>
                 ) : null}
                 {detail.head.status === 'DRAFT' || detail.head.status === 'CONFIRMED' ? (
-                  <Button size="sm" variant="outline" onClick={() => void advance('cancel', detail.head.id)} disabled={busy}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => void advance('cancel', detail.head.id)}
+                    disabled={busy}
+                  >
                     取消
                   </Button>
                 ) : null}
@@ -1153,13 +1166,18 @@ export function ReturnShipbackWorkspace() {
                     setCostError('');
                     setCostForm(emptyCostForm(detail.head.costCurrency));
                   }}
-                  disabled={busy || detail.head.status === 'CLOSED' || detail.head.status === 'CANCELLED'}
+                  disabled={
+                    busy || detail.head.status === 'CLOSED' || detail.head.status === 'CANCELLED'
+                  }
                 >
                   登记成本并分摊
                 </Button>
               </div>
 
-              <SectionCard title="明细行" description="每一行挂一条 10.7.1.1 的处置单；摊到本行的成本是分摊算出来的。">
+              <SectionCard
+                title="明细行"
+                description="每一行挂一条 10.7.1.1 的处置单；摊到本行的成本是分摊算出来的。"
+              >
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="text-muted-foreground border-b text-left">
@@ -1176,7 +1194,7 @@ export function ReturnShipbackWorkspace() {
                       <tr key={line.id} className="border-b last:border-0">
                         <td className="py-2">
                           <div>{line.skuCode}</div>
-                          <div className="font-mono text-muted-foreground text-xs">
+                          <div className="text-muted-foreground font-mono text-xs">
                             {line.dispositionNo}
                           </div>
                         </td>
@@ -1192,8 +1210,12 @@ export function ReturnShipbackWorkspace() {
                             {line.hsCode} {line.declaredItemName}
                           </div>
                         </td>
-                        <td className="py-2">{moneyText(line.salvageAmount, line.salvageCurrency)}</td>
-                        <td className="py-2">{moneyText(line.allocatedCost, detail.head.costCurrency)}</td>
+                        <td className="py-2">
+                          {moneyText(line.salvageAmount, line.salvageCurrency)}
+                        </td>
+                        <td className="py-2">
+                          {moneyText(line.allocatedCost, detail.head.costCurrency)}
+                        </td>
                         <td className="py-2">{line.statusLabel}</td>
                       </tr>
                     ))}
@@ -1259,8 +1281,12 @@ export function ReturnShipbackWorkspace() {
                                     </div>
                                   ) : null}
                                 </td>
-                                <td className="py-2 font-mono text-xs">{ratioText(row.allocationRatio)}</td>
-                                <td className="py-2">{moneyText(row.allocatedAmount, row.currency)}</td>
+                                <td className="py-2 font-mono text-xs">
+                                  {ratioText(row.allocationRatio)}
+                                </td>
+                                <td className="py-2">
+                                  {moneyText(row.allocatedAmount, row.currency)}
+                                </td>
                                 <td className="py-2 text-xs">
                                   {Math.abs(row.residualAmount ?? 0) > 1e-9
                                     ? moneyText(row.residualAmount, row.currency)
@@ -1276,7 +1302,10 @@ export function ReturnShipbackWorkspace() {
                 )}
               </SectionCard>
 
-              <SectionCard title="报关资料" description="本模块自持的快照：10.5.1 / 3.7 全部跨服务，不跨库 join。">
+              <SectionCard
+                title="报关资料"
+                description="本模块自持的快照：10.5.1 / 3.7 全部跨服务，不跨库 join。"
+              >
                 {detail.declarations.length === 0 ? (
                   <EmptyState
                     icon={<ClipboardList className="h-6 w-6" />}
@@ -1324,7 +1353,10 @@ export function ReturnShipbackWorkspace() {
               </SectionCard>
 
               {detail.arrivals.length > 0 ? (
-                <SectionCard title="回国收货" description="国内收货仓签收：破损与短少单列，不会被抹平。">
+                <SectionCard
+                  title="回国收货"
+                  description="国内收货仓签收：破损与短少单列，不会被抹平。"
+                >
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="text-muted-foreground border-b text-left">

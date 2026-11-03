@@ -159,9 +159,7 @@ export function InventoryRiskWorkspace() {
       } catch (velocityFailure) {
         setVelocities([]);
         setVelocityError(
-          velocityFailure instanceof ApiError
-            ? velocityFailure.message
-            : '销售速度暂时读不到',
+          velocityFailure instanceof ApiError ? velocityFailure.message : '销售速度暂时读不到',
         );
       }
     } catch (failure) {
@@ -341,10 +339,10 @@ export function InventoryRiskWorkspace() {
 
       {/* ---------------- 筛选 ---------------- */}
       <section className="flex flex-wrap items-end gap-3">
-        <label className="flex flex-col gap-1 text-copy-12">
+        <label className="text-copy-12 flex flex-col gap-1">
           <span className="text-muted-foreground">仓库类型</span>
           <select
-            className="border rounded px-2 py-1 text-copy-12"
+            className="text-copy-12 rounded border px-2 py-1"
             value={warehouseKind}
             onChange={(e) => {
               setWarehouseKind(e.target.value);
@@ -359,10 +357,10 @@ export function InventoryRiskWorkspace() {
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-copy-12">
+        <label className="text-copy-12 flex flex-col gap-1">
           <span className="text-muted-foreground">仓库</span>
           <select
-            className="border rounded px-2 py-1 text-copy-12"
+            className="text-copy-12 rounded border px-2 py-1"
             value={warehouseId}
             onChange={(e) => {
               setWarehouseId(e.target.value);
@@ -377,19 +375,19 @@ export function InventoryRiskWorkspace() {
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-copy-12">
+        <label className="text-copy-12 flex flex-col gap-1">
           <span className="text-muted-foreground">SKU</span>
           <input
-            className="border rounded px-2 py-1 font-mono text-copy-12"
+            className="text-copy-12 rounded border px-2 py-1 font-mono"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             placeholder="SKU 编码或名称"
           />
         </label>
-        <label className="flex flex-col gap-1 text-copy-12">
+        <label className="text-copy-12 flex flex-col gap-1">
           <span className="text-muted-foreground">风险类型</span>
           <select
-            className="border rounded px-2 py-1 text-copy-12"
+            className="text-copy-12 rounded border px-2 py-1"
             value={riskFilter}
             onChange={(e) => {
               const next = e.target.value as '' | RiskType;
@@ -423,16 +421,12 @@ export function InventoryRiskWorkspace() {
           />
         ) : (
           <div className="bg-card overflow-x-auto rounded-lg border">
-            <table className="w-full text-left text-copy-12">
+            <table className="text-copy-12 w-full text-left">
               <thead className="text-muted-foreground border-b">
                 <tr>
                   {columnVisible('sku') && <th className="px-3 py-2 font-medium">SKU</th>}
-                  {columnVisible('warehouse') && (
-                    <th className="px-3 py-2 font-medium">仓库</th>
-                  )}
-                  {columnVisible('riskType') && (
-                    <th className="px-3 py-2 font-medium">风险类型</th>
-                  )}
+                  {columnVisible('warehouse') && <th className="px-3 py-2 font-medium">仓库</th>}
+                  {columnVisible('riskType') && <th className="px-3 py-2 font-medium">风险类型</th>}
                   {columnVisible('available') && (
                     <th className="px-3 py-2 text-right font-medium">可用量</th>
                   )}
@@ -445,9 +439,7 @@ export function InventoryRiskWorkspace() {
                   {columnVisible('threshold') && (
                     <th className="px-3 py-2 font-medium">阈值档位</th>
                   )}
-                  {columnVisible('action') && (
-                    <th className="px-3 py-2 font-medium">建议动作</th>
-                  )}
+                  {columnVisible('action') && <th className="px-3 py-2 font-medium">建议动作</th>}
                 </tr>
               </thead>
               <tbody>
@@ -520,7 +512,8 @@ export function InventoryRiskWorkspace() {
         )}
         {summary.noThresholdCount > 0 && (
           <p className="text-copy-12 text-muted-foreground">
-            有 {summary.noThresholdCount} 行没有配置任何库存阈值（未配置 ≠ 0），这些行不参与缺货与超储判定。
+            有 {summary.noThresholdCount} 行没有配置任何库存阈值（未配置 ≠
+            0），这些行不参与缺货与超储判定。
           </p>
         )}
         {summary.noVelocityCount > 0 && (

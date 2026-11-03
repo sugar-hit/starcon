@@ -112,9 +112,7 @@ const match = (over: Partial<FinanceReconMatchRow>): FinanceReconMatchRow => ({
   ...over,
 });
 
-const difference = (
-  over: Partial<FinanceReconDifferenceRow>,
-): FinanceReconDifferenceRow => ({
+const difference = (over: Partial<FinanceReconDifferenceRow>): FinanceReconDifferenceRow => ({
   id: '88888888-8888-8888-8888-888888888888',
   taskId: '11111111-1111-1111-1111-111111111111',
   differenceType: 'AMOUNT_MISMATCH',

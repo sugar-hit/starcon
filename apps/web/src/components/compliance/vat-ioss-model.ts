@@ -539,7 +539,9 @@ export function groupTotalsByCurrency(rows: VatIossStatisticsRow[]): CurrencyTot
  *
  * <p>四档各自独立；`unresolved` **不并进**任何一档。
  */
-export function splitByScope(rows: VatIossStatisticsRow[]): Record<FilingScope, VatIossStatisticsRow[]> {
+export function splitByScope(
+  rows: VatIossStatisticsRow[],
+): Record<FilingScope, VatIossStatisticsRow[]> {
   const out: Record<FilingScope, VatIossStatisticsRow[]> = {
     IOSS: [],
     GENERAL_VAT: [],
@@ -734,7 +736,11 @@ export async function syncOrders(shopCode?: string): Promise<VatIossOrderSyncRes
   const query = new URLSearchParams();
   if (shopCode) query.set('shopCode', shopCode);
   const suffix = query.toString();
-  return api<VatIossOrderSyncResult>(`${BASE}/orders/sync${suffix ? `?${suffix}` : ''}`, 'POST', {});
+  return api<VatIossOrderSyncResult>(
+    `${BASE}/orders/sync${suffix ? `?${suffix}` : ''}`,
+    'POST',
+    {},
+  );
 }
 
 export async function fetchStatistics(

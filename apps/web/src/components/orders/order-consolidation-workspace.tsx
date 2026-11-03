@@ -178,7 +178,9 @@ export function OrderConsolidationWorkspace() {
         // 而空输入的含义是「租户还没报价」。两者在运费节省上一句是
         // 「省下 0 元」与「还不知道能省多少」，不能混。
         // 契约把该字段生成成非空 number（丢了可空性），故做一次显式转换。
-        consolidatedShippingAmount: (quote.trim() === '' ? null : Number(quote)) as unknown as number,
+        consolidatedShippingAmount: (quote.trim() === ''
+          ? null
+          : Number(quote)) as unknown as number,
         note: '',
       });
       setSelected([]);
@@ -216,7 +218,9 @@ export function OrderConsolidationWorkspace() {
 
   const writeback = useCallback(
     async (consolidationId: string, memberId: string, task: WritebackTask) => {
-      const tracking = window.prompt(`登记 ${task.platformCode} / ${task.platformOrderRef} 的物流号`);
+      const tracking = window.prompt(
+        `登记 ${task.platformCode} / ${task.platformOrderRef} 的物流号`,
+      );
       if (tracking === null) return;
       setBusy(true);
       setActionError(null);
@@ -243,9 +247,7 @@ export function OrderConsolidationWorkspace() {
   const canSubmit = canConsolidate(candidates, selected.length);
 
   if (loading && !capabilities) {
-    return (
-      <PageHeader title="订单合单" description="正在载入合单能力与合并单…" />
-    );
+    return <PageHeader title="订单合单" description="正在载入合单能力与合并单…" />;
   }
 
   return (
@@ -276,7 +278,10 @@ export function OrderConsolidationWorkspace() {
       )}
 
       {/* ------------------------------------------------ 1. 能力与规则 */}
-      <SectionCard title="能力与规则" description="合单会真实改变包裹形态与逐单回传口径，先看资格再动手。">
+      <SectionCard
+        title="能力与规则"
+        description="合单会真实改变包裹形态与逐单回传口径，先看资格再动手。"
+      >
         {capabilities && (
           <div className="space-y-3">
             <div className="flex flex-wrap gap-2">
@@ -296,19 +301,19 @@ export function OrderConsolidationWorkspace() {
             {capabilities.dimensions
               .filter((d) => !d.available && d.unavailableReason)
               .map((d) => (
-                <p key={d.code} className="text-xs text-muted-foreground">
+                <p key={d.code} className="text-muted-foreground text-xs">
                   <strong>{d.label}</strong>：{d.unavailableReason}
                 </p>
               ))}
-            <p className="text-xs text-muted-foreground">{capabilities.notes}</p>
-            <p className="text-xs text-muted-foreground">{capabilities.downstreamGaps}</p>
+            <p className="text-muted-foreground text-xs">{capabilities.notes}</p>
+            <p className="text-muted-foreground text-xs">{capabilities.downstreamGaps}</p>
           </div>
         )}
 
         {ruleMissing || !rule ? (
           <Notice tone="warning" title="本租户尚未登记合单规则">
-            合单会真实改变包裹形态与逐单回传口径合单会真实改变包裹形态与逐单回传口径，本模块**不提供隐含默认值** ——
-            先登记规则，才能落合并单。
+            合单会真实改变包裹形态与逐单回传口径合单会真实改变包裹形态与逐单回传口径，本模块**不提供隐含默认值**
+            —— 先登记规则，才能落合并单。
           </Notice>
         ) : (
           <RuleEditor rule={rule} onSaved={load} />
@@ -378,9 +383,9 @@ export function OrderConsolidationWorkspace() {
                 {blocked}
               </Notice>
             )}
-            <p className="text-sm text-muted-foreground">
-              候选 {candidates.candidateCount} 笔 · 件数合计 {candidates.candidateQty} · 单独发运费合计{' '}
-              {money(candidates.separateShippingTotal)}
+            <p className="text-muted-foreground text-sm">
+              候选 {candidates.candidateCount} 笔 · 件数合计 {candidates.candidateQty} ·
+              单独发运费合计 {money(candidates.separateShippingTotal)}
             </p>
 
             {candidates.candidates.length === 0 ? (
@@ -391,7 +396,7 @@ export function OrderConsolidationWorkspace() {
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead className="text-left text-xs text-muted-foreground">
+                  <thead className="text-muted-foreground text-left text-xs">
                     <tr>
                       <th className="p-2">选</th>
                       <th className="p-2">订单号</th>
@@ -435,8 +440,10 @@ export function OrderConsolidationWorkspace() {
 
             {candidates.excluded.length > 0 && (
               <div>
-                <p className="text-sm font-medium">未进入候选的订单（{candidates.excluded.length}）</p>
-                <ul className="mt-1 space-y-1 text-xs text-muted-foreground">
+                <p className="text-sm font-medium">
+                  未进入候选的订单（{candidates.excluded.length}）
+                </p>
+                <ul className="text-muted-foreground mt-1 space-y-1 text-xs">
                   {candidates.excluded.map((e) => (
                     <li key={e.orderId}>
                       {e.orderNo} — {excludedText(e)}
@@ -447,10 +454,7 @@ export function OrderConsolidationWorkspace() {
             )}
 
             <div className="flex flex-wrap items-end gap-3">
-              <FormField
-                id="cand-quote"
-                label="合并运费报价（留空 = 节省不可计算，不是 0）"
-              >
+              <FormField id="cand-quote" label="合并运费报价（留空 = 节省不可计算，不是 0）">
                 <Input
                   id="cand-quote"
                   value={quote}
@@ -463,7 +467,9 @@ export function OrderConsolidationWorkspace() {
                 合并选中的 {selected.length} 笔
               </Button>
               {!canSubmit && candidates.candidateCount >= 2 && !candidates.ruleBlockedReason && (
-                <p className="text-xs text-muted-foreground">至少勾选两笔订单才能合单（本模块是 N→1）。</p>
+                <p className="text-muted-foreground text-xs">
+                  至少勾选两笔订单才能合单（本模块是 N→1）。
+                </p>
               )}
             </div>
           </div>
@@ -471,7 +477,10 @@ export function OrderConsolidationWorkspace() {
       </SectionCard>
 
       {/* ------------------------------------------------ 3. 合并单 */}
-      <SectionCard title="合并单" description="一次合单 = 一个包裹；跨店铺徽标决定后面要分别回传几张平台单。">
+      <SectionCard
+        title="合并单"
+        description="一次合单 = 一个包裹；跨店铺徽标决定后面要分别回传几张平台单。"
+      >
         <div className="flex flex-wrap gap-2">
           <Input
             className="max-w-xs"
@@ -510,12 +519,15 @@ export function OrderConsolidationWorkspace() {
         </div>
 
         {page && page.items.length === 0 ? (
-          <EmptyState title="还没有合并单" description="在上方检索候选订单并合并后，这里会出现记录。" />
+          <EmptyState
+            title="还没有合并单"
+            description="在上方检索候选订单并合并后，这里会出现记录。"
+          />
         ) : (
           page && (
             <div className="mt-3 overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="text-left text-xs text-muted-foreground">
+                <thead className="text-muted-foreground text-left text-xs">
                   <tr>
                     <th className="p-2">合单号</th>
                     <th className="p-2">状态</th>
@@ -567,13 +579,10 @@ export function OrderConsolidationWorkspace() {
               label="运费节省合计"
               value={page.freightSavingTotal === null ? '未报价' : money(page.freightSavingTotal)}
             />
-            <Button
-              onClick={() => setPageNo(Math.max(0, pageNo - 1))}
-              disabled={pageNo === 0}
-            >
+            <Button onClick={() => setPageNo(Math.max(0, pageNo - 1))} disabled={pageNo === 0}>
               上一页
             </Button>
-            <span className="text-xs text-muted-foreground">第 {pageNo + 1} 页</span>
+            <span className="text-muted-foreground text-xs">第 {pageNo + 1} 页</span>
             <Button
               onClick={() => setPageNo(pageNo + 1)}
               disabled={(pageNo + 1) * PAGE_SIZE >= page.total}
@@ -592,7 +601,10 @@ export function OrderConsolidationWorkspace() {
         >
           <div className="flex flex-wrap gap-2">
             {detail.consolidation.status === 'PLANNED' && (
-              <Button onClick={() => void advance(detail.consolidation.id, 'CONFIRMED')} disabled={busy}>
+              <Button
+                onClick={() => void advance(detail.consolidation.id, 'CONFIRMED')}
+                disabled={busy}
+              >
                 确认合并
               </Button>
             )}
@@ -618,7 +630,7 @@ export function OrderConsolidationWorkspace() {
             <p className="text-sm font-medium">成员订单（各原订单的关联记录）</p>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="text-left text-xs text-muted-foreground">
+                <thead className="text-muted-foreground text-left text-xs">
                   <tr>
                     <th className="p-2">订单号</th>
                     <th className="p-2">平台归属</th>
@@ -649,7 +661,9 @@ export function OrderConsolidationWorkspace() {
                               {task.status !== 'CONFIRMED' && (
                                 <Button
                                   size="sm"
-                                  onClick={() => void writeback(detail.consolidation.id, m.id, task)}
+                                  onClick={() =>
+                                    void writeback(detail.consolidation.id, m.id, task)
+                                  }
                                   disabled={busy}
                                 >
                                   登记物流号
@@ -670,7 +684,7 @@ export function OrderConsolidationWorkspace() {
 
           <div className="mt-4">
             <p className="text-sm font-medium">事件流</p>
-            <ul className="mt-1 space-y-1 text-xs text-muted-foreground">
+            <ul className="text-muted-foreground mt-1 space-y-1 text-xs">
               {detail.events.map((e) => (
                 <li key={e.id}>
                   {isoText(e.occurredAt)} · {e.detail || e.eventType}
@@ -712,7 +726,7 @@ export function OrderConsolidationWorkspace() {
           writebacks && (
             <div className="mt-3 overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="text-left text-xs text-muted-foreground">
+                <thead className="text-muted-foreground text-left text-xs">
                   <tr>
                     <th className="p-2">平台</th>
                     <th className="p-2">平台单号</th>
@@ -763,9 +777,10 @@ function RuleEditor({
   const [form, setForm] = useState({
     maxOrdersPerConsolidation: rule.maxOrdersPerConsolidation,
     allowCrossShop: rule.allowCrossShop,
-    maxWindowHours: rule.maxWindowHours === null || rule.maxWindowHours === undefined
-      ? ''
-      : String(rule.maxWindowHours),
+    maxWindowHours:
+      rule.maxWindowHours === null || rule.maxWindowHours === undefined
+        ? ''
+        : String(rule.maxWindowHours),
     requireSameCurrency: rule.requireSameCurrency,
     requireSamePaymentMethod: rule.requireSamePaymentMethod,
   });

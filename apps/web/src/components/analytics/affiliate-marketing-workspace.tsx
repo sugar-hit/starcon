@@ -98,7 +98,9 @@ export function AnalyticsAffiliateMarketingWorkspace() {
   const [drillError, setDrillError] = useState('');
   const [capabilities, setCapabilities] = useState<AffiliateMarketingCapabilities | null>(null);
   const [definitions, setDefinitions] = useState<AffiliateMarketingMetricDefinitionView[]>([]);
-  const [refreshResults, setRefreshResults] = useState<AffiliateMarketingRefreshResult[] | null>(null);
+  const [refreshResults, setRefreshResults] = useState<AffiliateMarketingRefreshResult[] | null>(
+    null,
+  );
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -408,7 +410,9 @@ export function AnalyticsAffiliateMarketingWorkspace() {
                     {data.attributionRules.map((rule) => (
                       <tr key={rule.ruleCode} className="border-border border-b">
                         <td className="py-2 pr-3">{rule.ruleCode || '—'}</td>
-                        <td className="py-2 pr-3">{attributionModelLabel(rule.attributionModel)}</td>
+                        <td className="py-2 pr-3">
+                          {attributionModelLabel(rule.attributionModel)}
+                        </td>
                         <td className="py-2 pr-3">{poolWeightBasisLabel(rule.poolWeightBasis)}</td>
                         <td className="py-2 pr-3 text-right">
                           {rule.attributionWindowDays ?? '—'}
@@ -431,7 +435,10 @@ export function AnalyticsAffiliateMarketingWorkspace() {
           >
             <div className="space-y-4">
               {data.slots.map((row) => (
-                <SlotRowCard key={`${row.slotType}-${row.slotKey}-${row.attributionRuleCode}`} row={row} />
+                <SlotRowCard
+                  key={`${row.slotType}-${row.slotKey}-${row.attributionRuleCode}`}
+                  row={row}
+                />
               ))}
             </div>
           </SectionCard>
@@ -560,9 +567,7 @@ export function AnalyticsAffiliateMarketingWorkspace() {
                       <td className="py-2 pr-3">{definition.displayName}</td>
                       <td className="py-2 pr-3">{metricUnitLabel(definition.unit)}</td>
                       <td className="py-2 pr-3">{definition.aggregation}</td>
-                      <td className="text-copy-13 py-2 pr-3">
-                        {metricFormulaText(definition)}
-                      </td>
+                      <td className="text-copy-13 py-2 pr-3">{metricFormulaText(definition)}</td>
                       <td className="py-2 pr-3">
                         <Badge tone={definition.available ? 'success' : 'warning'}>
                           {definition.available ? '可用' : '本轮不可用'}
@@ -598,12 +603,14 @@ export function AnalyticsAffiliateMarketingWorkspace() {
                 </ul>
               </div>
               <div>
-                <h4 className="text-copy-13 text-muted-foreground mb-1">确实拿不到（归谁管 + 替代口径）</h4>
+                <h4 className="text-copy-13 text-muted-foreground mb-1">
+                  确实拿不到（归谁管 + 替代口径）
+                </h4>
                 <ul className="text-copy-13 text-muted-foreground list-disc pl-5">
                   {notDeliveredLines(capabilities).map((item) => (
                     <li key={item.dimension}>
-                      <span className="text-foreground">{item.description}</span>
-                      ：{item.impact}（归 {item.ownerModule} 管）
+                      <span className="text-foreground">{item.description}</span>：{item.impact}（归{' '}
+                      {item.ownerModule} 管）
                     </li>
                   ))}
                 </ul>
@@ -738,7 +745,7 @@ function SlotRowCard({ row }: { row: AffiliateMarketingSlotRow }) {
                       availability: 'NOT_AVAILABLE',
                       availabilityNote: '本轮不可用',
                     }
-                  }
+              }
             />
             {gmv.map((entry) => (
               <MetricLine

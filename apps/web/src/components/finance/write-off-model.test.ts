@@ -116,7 +116,9 @@ describe('金额只原样展示', () => {
 });
 
 describe('核销精确到明细行', () => {
-  const allocation = (over: Partial<FinanceWriteOffAllocationRow>): FinanceWriteOffAllocationRow => ({
+  const allocation = (
+    over: Partial<FinanceWriteOffAllocationRow>,
+  ): FinanceWriteOffAllocationRow => ({
     id: '33333333-3333-3333-3333-333333333333',
     writeOffId: '11111111-1111-1111-1111-111111111111',
     receiptId: '22222222-2222-2222-2222-222222222222',
@@ -150,7 +152,9 @@ describe('核销精确到明细行', () => {
 });
 
 describe('自动匹配：三个条件都要看得见', () => {
-  const candidate = (over: Partial<FinanceWriteOffMatchCandidate>): FinanceWriteOffMatchCandidate => ({
+  const candidate = (
+    over: Partial<FinanceWriteOffMatchCandidate>,
+  ): FinanceWriteOffMatchCandidate => ({
     receivableLineId: '55555555-5555-5555-5555-555555555555',
     receivableId: '44444444-4444-4444-4444-444444444444',
     receivableNo: 'AR-1',
@@ -170,7 +174,11 @@ describe('自动匹配：三个条件都要看得见', () => {
   it('命中原因逐条展示订单号、金额与日期三个条件', () => {
     const hint = matchConditionHint(
       candidate({
-        reasons: ['订单号完全相等：ORD-1', '该明细行未核销余额 = 100（金额条件）', '确认日期同日（日期条件）'],
+        reasons: [
+          '订单号完全相等：ORD-1',
+          '该明细行未核销余额 = 100（金额条件）',
+          '确认日期同日（日期条件）',
+        ],
       }),
     );
     expect(hint).toContain('订单号');
@@ -180,7 +188,9 @@ describe('自动匹配：三个条件都要看得见', () => {
 });
 
 describe('预收余额：两段口径不重复计数', () => {
-  const summary = (over: Partial<FinanceWriteOffAdvanceCurrencySummary>): FinanceWriteOffAdvanceCurrencySummary => ({
+  const summary = (
+    over: Partial<FinanceWriteOffAdvanceCurrencySummary>,
+  ): FinanceWriteOffAdvanceCurrencySummary => ({
     currency: 'USD',
     parkedAmount: 300,
     flaggedAmount: 0,

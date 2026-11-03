@@ -121,9 +121,7 @@ export function fetchTransaction(id: string) {
  * <p>⚠️ 这是**实时算出来**的核对结果，页面原样显示，不在前端重算。
  */
 export function fetchTransactionReconciliation(settlementId: string) {
-  return api<FinanceTransactionReconciliation>(
-    `${base}/reconciliation${query({ settlementId })}`,
-  );
+  return api<FinanceTransactionReconciliation>(`${base}/reconciliation${query({ settlementId })}`);
 }
 
 /**
@@ -307,9 +305,7 @@ export function formatOrderReference(value: string | null | undefined): string {
  * 「分类口径 / 笔数 / 币种 / 符号 / 周期」是**口径层面**的结论 ——
  * 两件事分开说，页面不能把「金额平了」当成「账对了」。
  */
-export function reconciliationHint(
-  check: FinanceTransactionReconciliation,
-): string {
+export function reconciliationHint(check: FinanceTransactionReconciliation): string {
   return [
     `明细合计 ${formatTransactionMoney(check.lineTotal, check.currency)}`,
     `汇总合计 ${formatTransactionMoney(check.summaryTotal, check.currency)}`,

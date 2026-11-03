@@ -255,7 +255,9 @@ export function entryModeLabel(mode: string | null | undefined): string {
 }
 
 /** 录入方式的色标。 */
-export function entryModeTone(mode: string | null | undefined): 'success' | 'warning' | 'info' | 'neutral' {
+export function entryModeTone(
+  mode: string | null | undefined,
+): 'success' | 'warning' | 'info' | 'neutral' {
   switch (mode) {
     case 'MANUAL':
       return 'info';
@@ -337,7 +339,8 @@ export function validateSourceInput(input: {
   else if (!/^[A-Za-z0-9_]{2,32}$/.test(input.code.trim()))
     problems.push('来源代码请用 2~32 位字母、数字或下划线');
   if (!input.name.trim()) problems.push('来源名称必填');
-  if (input.kind !== 'MANUAL' && input.kind !== 'EXTERNAL') problems.push('来源类型只能是手工录入或外部拉取');
+  if (input.kind !== 'MANUAL' && input.kind !== 'EXTERNAL')
+    problems.push('来源类型只能是手工录入或外部拉取');
   if (input.kind === 'MANUAL' && input.endpoint.trim())
     problems.push('手工录入来源不应配地址：留了就是「配了却用不上」的死配置');
   return problems;
@@ -448,7 +451,11 @@ export function updateRateSource(
     version: number;
   },
 ): Promise<RateSource> {
-  return api<RateSource>(`catalog/exchange-rates/sources/${encodeURIComponent(code)}`, 'PUT', input);
+  return api<RateSource>(
+    `catalog/exchange-rates/sources/${encodeURIComponent(code)}`,
+    'PUT',
+    input,
+  );
 }
 
 /** 手工录入一条汇率。 */

@@ -83,14 +83,18 @@ export function ServiceTicketProcessWorkspace() {
   const { session } = useIdentity();
   const writable = session.permissions.includes('crm.service_ticket.update');
 
-  const [capabilities, setCapabilities] = useState<CrmServiceTicketProcessCapabilities | null>(null);
+  const [capabilities, setCapabilities] = useState<CrmServiceTicketProcessCapabilities | null>(
+    null,
+  );
   const [queue, setQueue] = useState<CrmServiceTicketProcessQueuePage | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [ticket, setTicket] = useState<CrmServiceTicketProcessTicket | null>(null);
   const [notes, setNotes] = useState<CrmServiceTicketProcessNotePage | null>(null);
   const [actions, setActions] = useState<CrmServiceTicketProcessActionPage | null>(null);
   const [links, setLinks] = useState<CrmServiceTicketProcessLinkPage | null>(null);
-  const [resolutions, setResolutions] = useState<CrmServiceTicketProcessResolutionPage | null>(null);
+  const [resolutions, setResolutions] = useState<CrmServiceTicketProcessResolutionPage | null>(
+    null,
+  );
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -226,7 +230,10 @@ export function ServiceTicketProcessWorkspace() {
   );
 
   const available = useMemo(() => new Set(ticket?.availableActions ?? []), [ticket]);
-  const canDo = useCallback((action: string) => writable && available.has(action), [available, writable]);
+  const canDo = useCallback(
+    (action: string) => writable && available.has(action),
+    [available, writable],
+  );
 
   const summary = queue?.summary;
   const sla = ticket?.sla;
@@ -263,7 +270,9 @@ export function ServiceTicketProcessWorkspace() {
                         <Badge tone="success">可用</Badge>
                         <span className="text-copy-13 font-medium">{dimension.label}</span>
                       </div>
-                      <p className="text-copy-12 text-muted-foreground mt-1">依据：{dimension.basis}</p>
+                      <p className="text-copy-12 text-muted-foreground mt-1">
+                        依据：{dimension.basis}
+                      </p>
                       <p className="text-copy-12 text-muted-foreground mt-1">{dimension.impact}</p>
                     </div>
                   ))}
@@ -311,7 +320,7 @@ export function ServiceTicketProcessWorkspace() {
                 </div>
               ))}
             </div>
-            <div className="bg-warning-soft text-warning rounded-md p-3 text-copy-12">
+            <div className="bg-warning-soft text-warning text-copy-12 rounded-md p-3">
               {capabilities.closeVersusResolutionNote}
             </div>
             <p className="text-copy-12 text-muted-foreground">{capabilities.slaBasisNote}</p>
@@ -437,7 +446,11 @@ export function ServiceTicketProcessWorkspace() {
               <StatCard label="待买家" value={summary.waitingBuyer} polarity="neutral" />
               <StatCard label="已关闭" value={summary.closed} polarity="neutral" />
               <StatCard label="暂停中" value={summary.paused} polarity="neutral" />
-              <StatCard label="已确认解决" value={summary.resolutionConfirmed} polarity="positive" />
+              <StatCard
+                label="已确认解决"
+                value={summary.resolutionConfirmed}
+                polarity="positive"
+              />
             </div>
           ) : null}
 
@@ -470,7 +483,9 @@ export function ServiceTicketProcessWorkspace() {
                 >
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge tone="neutral">{row.ticketNo}</Badge>
-                    <Badge tone="info">{serviceTicketProcessTypeLabel(row.ticketType, row.ticketTypeLabel)}</Badge>
+                    <Badge tone="info">
+                      {serviceTicketProcessTypeLabel(row.ticketType, row.ticketTypeLabel)}
+                    </Badge>
                     <Badge tone={serviceTicketProcessPriorityTone(row.priority)}>
                       {serviceTicketProcessPriorityLabel(row.priority, row.priorityLabel)}
                     </Badge>
@@ -489,8 +504,9 @@ export function ServiceTicketProcessWorkspace() {
                     <span>关联售后单：{row.caseNo ?? '—'}</span>
                     <span>
                       回复时限：
-                      {serviceTicketProcessSlaStateLabel(row.sla?.replyState ?? 'NO_DEADLINE')} ·{' '}
-                      {serviceTicketProcessRemainingText(row.sla?.replyRemainingSeconds ?? 0)}
+                      {serviceTicketProcessSlaStateLabel(
+                        row.sla?.replyState ?? 'NO_DEADLINE',
+                      )} · {serviceTicketProcessRemainingText(row.sla?.replyRemainingSeconds ?? 0)}
                     </span>
                   </div>
                 </button>
@@ -540,12 +556,12 @@ export function ServiceTicketProcessWorkspace() {
           >
             <div className="space-y-4">
               {notice ? (
-                <div className="bg-success-soft text-success rounded-md p-3 text-copy-12">
+                <div className="bg-success-soft text-success text-copy-12 rounded-md p-3">
                   {notice}
                 </div>
               ) : null}
               {actionError ? (
-                <div className="bg-destructive-soft text-destructive flex items-center gap-2 rounded-md p-3 text-copy-12">
+                <div className="bg-destructive-soft text-destructive text-copy-12 flex items-center gap-2 rounded-md p-3">
                   <TriangleAlert className="h-4 w-4" />
                   {actionError}
                 </div>
@@ -562,7 +578,7 @@ export function ServiceTicketProcessWorkspace() {
                 />
               </div>
 
-              <div className="bg-warning-soft text-warning flex items-start gap-2 rounded-md p-3 text-copy-12">
+              <div className="bg-warning-soft text-warning text-copy-12 flex items-start gap-2 rounded-md p-3">
                 <CircleSlash className="mt-0.5 h-4 w-4 shrink-0" />
                 <div>
                   <div>{ticket.closeVersusResolutionNote}</div>
@@ -611,14 +627,13 @@ export function ServiceTicketProcessWorkspace() {
                   </div>
                 </div>
               </div>
-              {sla?.note ? (
-                <p className="text-copy-12 text-muted-foreground">{sla.note}</p>
-              ) : null}
+              {sla?.note ? <p className="text-copy-12 text-muted-foreground">{sla.note}</p> : null}
               {ticket.pause?.paused ? (
-                <div className="bg-info-soft text-info flex items-center gap-2 rounded-md p-3 text-copy-12">
+                <div className="bg-info-soft text-info text-copy-12 flex items-center gap-2 rounded-md p-3">
                   <PauseCircle className="h-4 w-4" />
                   <span>
-                    SLA 暂停中（{serviceTicketProcessSlaTargetLabel(ticket.pause?.slaTarget ?? '')}）：
+                    SLA 暂停中（{serviceTicketProcessSlaTargetLabel(ticket.pause?.slaTarget ?? '')}
+                    ）：
                     {ticket.pause?.pauseReason} · 自 {ticket.pause?.pausedAt}
                   </span>
                 </div>
@@ -1051,7 +1066,9 @@ export function ServiceTicketProcessWorkspace() {
 
               {/* 升级 */}
               <div className="space-y-2">
-                <div className="text-copy-13 font-medium">升级（转投诉 / 转纠纷 ⇒ 下游 11 售后）</div>
+                <div className="text-copy-13 font-medium">
+                  升级（转投诉 / 转纠纷 ⇒ 下游 11 售后）
+                </div>
                 <div className="grid gap-3 md:grid-cols-3">
                   <Field label="升级类型">
                     <select
@@ -1110,22 +1127,26 @@ export function ServiceTicketProcessWorkspace() {
                   {actions.rows
                     .filter((row): row is NonNullable<typeof row> => row !== null)
                     .map((row) => (
-                    <div key={row.id} className="rounded-md border p-3">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Badge tone="neutral">{serviceTicketProcessActionLabel(row.actionType, row.actionTypeLabel)}</Badge>
-                        {row.fromStatus && row.toStatus ? (
+                      <div key={row.id} className="rounded-md border p-3">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge tone="neutral">
+                            {serviceTicketProcessActionLabel(row.actionType, row.actionTypeLabel)}
+                          </Badge>
+                          {row.fromStatus && row.toStatus ? (
+                            <span className="text-copy-12 text-muted-foreground">
+                              {serviceTicketProcessStatusLabel(row.fromStatus)} →{' '}
+                              {serviceTicketProcessStatusLabel(row.toStatus)}
+                            </span>
+                          ) : null}
                           <span className="text-copy-12 text-muted-foreground">
-                            {serviceTicketProcessStatusLabel(row.fromStatus)} →{' '}
-                            {serviceTicketProcessStatusLabel(row.toStatus)}
+                            {row.occurredAt}
                           </span>
+                        </div>
+                        {row.detail ? (
+                          <p className="text-copy-13 mt-1 whitespace-pre-wrap">{row.detail}</p>
                         ) : null}
-                        <span className="text-copy-12 text-muted-foreground">{row.occurredAt}</span>
                       </div>
-                      {row.detail ? (
-                        <p className="text-copy-13 mt-1 whitespace-pre-wrap">{row.detail}</p>
-                      ) : null}
-                    </div>
-                  ))}
+                    ))}
                 </div>
               ) : (
                 <p className="text-copy-13 text-muted-foreground">
@@ -1134,28 +1155,27 @@ export function ServiceTicketProcessWorkspace() {
               )}
             </SectionCard>
 
-            <SectionCard
-              title={`备注与回复（${notes?.total ?? 0} 条）`}
-              description={notes?.note}
-            >
+            <SectionCard title={`备注与回复（${notes?.total ?? 0} 条）`} description={notes?.note}>
               {notes && notes.rows.length > 0 ? (
                 <div className="space-y-2">
                   {notes.rows
                     .filter((row): row is NonNullable<typeof row> => row !== null)
                     .map((row) => (
-                    <div key={row.id} className="rounded-md border p-3">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Badge tone={row.noteType === 'REPLY' ? 'info' : 'neutral'}>
-                          {row.noteTypeLabel}
-                        </Badge>
-                        {row.replyChannelLabel ? (
-                          <Badge tone="neutral">{row.replyChannelLabel}</Badge>
-                        ) : null}
-                        <span className="text-copy-12 text-muted-foreground">{row.createdAt}</span>
+                      <div key={row.id} className="rounded-md border p-3">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge tone={row.noteType === 'REPLY' ? 'info' : 'neutral'}>
+                            {row.noteTypeLabel}
+                          </Badge>
+                          {row.replyChannelLabel ? (
+                            <Badge tone="neutral">{row.replyChannelLabel}</Badge>
+                          ) : null}
+                          <span className="text-copy-12 text-muted-foreground">
+                            {row.createdAt}
+                          </span>
+                        </div>
+                        <p className="text-copy-13 mt-1 whitespace-pre-wrap">{row.content}</p>
                       </div>
-                      <p className="text-copy-13 mt-1 whitespace-pre-wrap">{row.content}</p>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               ) : (
                 <p className="text-copy-13 text-muted-foreground">
@@ -1164,49 +1184,50 @@ export function ServiceTicketProcessWorkspace() {
               )}
             </SectionCard>
 
-            <SectionCard
-              title={`关联单据（${links?.total ?? 0} 条）`}
-              description={links?.note}
-            >
+            <SectionCard title={`关联单据（${links?.total ?? 0} 条）`} description={links?.note}>
               {links && links.rows.length > 0 ? (
                 <div className="space-y-2">
                   {links.rows
                     .filter((row): row is NonNullable<typeof row> => row !== null)
                     .map((row) => (
-                    <div key={row.id} className="rounded-md border p-3">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Badge tone="neutral">{row.linkTypeLabel}</Badge>
-                        <span className="text-copy-13">{row.orderNo ?? row.caseNo ?? '—'}</span>
+                      <div key={row.id} className="rounded-md border p-3">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge tone="neutral">{row.linkTypeLabel}</Badge>
+                          <span className="text-copy-13">{row.orderNo ?? row.caseNo ?? '—'}</span>
+                        </div>
+                        {row.caseStatus ? (
+                          <p className="text-copy-12 text-muted-foreground mt-1">
+                            售后单状态：{row.caseStatus}
+                            {row.caseType ? `（${row.caseType}）` : ''}
+                          </p>
+                        ) : null}
+                        {row.orderStatus ? (
+                          <p className="text-copy-12 text-muted-foreground mt-1">
+                            订单状态：{row.orderStatus}
+                            {row.orderPaymentStatus ? ` · 支付 ${row.orderPaymentStatus}` : ''}
+                            {row.orderFulfillmentStatus
+                              ? ` · 履约 ${row.orderFulfillmentStatus}`
+                              : ''}
+                            {row.orderAftersalesStatus
+                              ? ` · 售后 ${row.orderAftersalesStatus}`
+                              : ''}
+                          </p>
+                        ) : null}
+                        {row.orderAmount ? (
+                          <p className="text-copy-12 text-muted-foreground mt-1">
+                            金额：{row.orderAmount} {row.orderCurrency ?? ''}
+                          </p>
+                        ) : null}
+                        {row.factsNote ? (
+                          <p className="text-copy-12 text-warning mt-1">⚠️ {row.factsNote}</p>
+                        ) : null}
+                        {row.lastSyncNote ? (
+                          <p className="text-copy-12 text-muted-foreground mt-1">
+                            最近更新：{row.lastSyncNote}
+                          </p>
+                        ) : null}
                       </div>
-                      {row.caseStatus ? (
-                        <p className="text-copy-12 text-muted-foreground mt-1">
-                          售后单状态：{row.caseStatus}
-                          {row.caseType ? `（${row.caseType}）` : ''}
-                        </p>
-                      ) : null}
-                      {row.orderStatus ? (
-                        <p className="text-copy-12 text-muted-foreground mt-1">
-                          订单状态：{row.orderStatus}
-                          {row.orderPaymentStatus ? ` · 支付 ${row.orderPaymentStatus}` : ''}
-                          {row.orderFulfillmentStatus ? ` · 履约 ${row.orderFulfillmentStatus}` : ''}
-                          {row.orderAftersalesStatus ? ` · 售后 ${row.orderAftersalesStatus}` : ''}
-                        </p>
-                      ) : null}
-                      {row.orderAmount ? (
-                        <p className="text-copy-12 text-muted-foreground mt-1">
-                          金额：{row.orderAmount} {row.orderCurrency ?? ''}
-                        </p>
-                      ) : null}
-                      {row.factsNote ? (
-                        <p className="text-copy-12 text-warning mt-1">⚠️ {row.factsNote}</p>
-                      ) : null}
-                      {row.lastSyncNote ? (
-                        <p className="text-copy-12 text-muted-foreground mt-1">
-                          最近更新：{row.lastSyncNote}
-                        </p>
-                      ) : null}
-                    </div>
-                  ))}
+                    ))}
                 </div>
               ) : (
                 <p className="text-copy-13 text-muted-foreground">
@@ -1224,35 +1245,40 @@ export function ServiceTicketProcessWorkspace() {
                   {resolutions.rows
                     .filter((row): row is NonNullable<typeof row> => row !== null)
                     .map((row) => (
-                    <div key={row.id} className="rounded-md border p-3">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Badge tone={row.active ? 'success' : 'neutral'}>
-                          {serviceTicketProcessResolutionLabel(row.resolutionType, row.resolutionTypeLabel)}
-                        </Badge>
-                        {row.active ? null : <Badge tone="neutral">已撤销</Badge>}
-                        <span className="text-copy-12 text-muted-foreground">{row.confirmedAt}</span>
-                      </div>
-                      {row.resultNote ? (
-                        <p className="text-copy-13 mt-1 whitespace-pre-wrap">{row.resultNote}</p>
-                      ) : null}
-                      {row.active && writable ? (
-                        <div className="mt-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            disabled={busy}
-                            onClick={() =>
-                              void run('撤销解决确认', () =>
-                                revokeServiceTicketProcessResolution(ticket.id, row.id),
-                              )
-                            }
-                          >
-                            撤销这条确认
-                          </Button>
+                      <div key={row.id} className="rounded-md border p-3">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge tone={row.active ? 'success' : 'neutral'}>
+                            {serviceTicketProcessResolutionLabel(
+                              row.resolutionType,
+                              row.resolutionTypeLabel,
+                            )}
+                          </Badge>
+                          {row.active ? null : <Badge tone="neutral">已撤销</Badge>}
+                          <span className="text-copy-12 text-muted-foreground">
+                            {row.confirmedAt}
+                          </span>
                         </div>
-                      ) : null}
-                    </div>
-                  ))}
+                        {row.resultNote ? (
+                          <p className="text-copy-13 mt-1 whitespace-pre-wrap">{row.resultNote}</p>
+                        ) : null}
+                        {row.active && writable ? (
+                          <div className="mt-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={busy}
+                              onClick={() =>
+                                void run('撤销解决确认', () =>
+                                  revokeServiceTicketProcessResolution(ticket.id, row.id),
+                                )
+                              }
+                            >
+                              撤销这条确认
+                            </Button>
+                          </div>
+                        ) : null}
+                      </div>
+                    ))}
                 </div>
               ) : (
                 <p className="text-copy-13 text-muted-foreground">

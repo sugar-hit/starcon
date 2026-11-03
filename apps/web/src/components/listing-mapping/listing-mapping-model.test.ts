@@ -155,9 +155,9 @@ describe('4.1.2.1 候选不是映射', () => {
 
   it('标题相似度恒带「需人工确认」，精确命中不带', () => {
     expect(candidate().requiresConfirmation).toBe(true);
-    expect(
-      candidate({ rule: 'SKU_CODE', requiresConfirmation: false }).requiresConfirmation,
-    ).toBe(false);
+    expect(candidate({ rule: 'SKU_CODE', requiresConfirmation: false }).requiresConfirmation).toBe(
+      false,
+    );
   });
 
   it('裁决状态有中文文案', () => {

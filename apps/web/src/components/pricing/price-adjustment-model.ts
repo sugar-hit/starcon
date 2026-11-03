@@ -40,11 +40,7 @@ import { api } from '../inventory/api';
 
 /** 调价单状态。与后端 {@code PriceAdjustmentModels.Status} 逐字对应。 */
 export type PriceAdjustmentStatus =
-  | 'DRAFT'
-  | 'PENDING_APPROVAL'
-  | 'APPROVED'
-  | 'EXECUTED'
-  | 'REJECTED';
+  'DRAFT' | 'PENDING_APPROVAL' | 'APPROVED' | 'EXECUTED' | 'REJECTED';
 
 /** 当前价来源。与后端 {@code PriceAdjustmentModels.PriceSource} 逐字对应。 */
 export type PriceAdjustmentPriceSource = 'PRICE_OBSERVATION' | 'BATCH_ADJUSTMENT';
@@ -56,11 +52,7 @@ export type PriceAdjustmentApprovalDecision = 'SUBMIT_FOR_APPROVAL' | 'EXEMPT';
 export type PriceAdjustmentApprovalSource = 'RULE' | 'DEFAULT' | 'UNCONTROLLED';
 
 /** 台账排序。与后端 {@code Sort} 逐字对应。 */
-export type PriceAdjustmentSort =
-  | 'NEWEST'
-  | 'OLDEST'
-  | 'AMOUNT_DESC'
-  | 'AMOUNT_ASC';
+export type PriceAdjustmentSort = 'NEWEST' | 'OLDEST' | 'AMOUNT_DESC' | 'AMOUNT_ASC';
 
 /** 目标店铺（平台 + 站点）。 */
 export interface ShopRef {
@@ -289,16 +281,44 @@ export const PRICE_ADJUSTMENT_SECTION: PriceAdjustmentSectionDescriptor = {
     { id: 'skuId', label: 'SKU', hint: '被调价的那个 SKU（UUID）', kind: 'text', required: true },
     { id: 'platformCode', label: '平台', hint: '平台码，如 AMAZON', kind: 'text', required: true },
     { id: 'siteCode', label: '站点', hint: '店铺站点码，如 US', kind: 'text', required: true },
-    { id: 'currency', label: '售价币种', hint: '三位大写字母，如 USD', kind: 'text', required: true },
+    {
+      id: 'currency',
+      label: '售价币种',
+      hint: '三位大写字母，如 USD',
+      kind: 'text',
+      required: true,
+    },
     { id: 'costCurrency', label: '成本币种', hint: '空 = 与售价同币种', kind: 'text' },
     { id: 'fxRate', label: '汇率', hint: '1 成本币种 = X 售价币种（跨币种必填）', kind: 'number' },
-    { id: 'oldPrice', label: '旧价', hint: '你看到的那个价（留空 = 以服务端解析到的当前价为准）', kind: 'number' },
-    { id: 'newPrice', label: '新价', hint: '人输入的新价，2 位小数 HALF_UP 落定', kind: 'number', required: true },
+    {
+      id: 'oldPrice',
+      label: '旧价',
+      hint: '你看到的那个价（留空 = 以服务端解析到的当前价为准）',
+      kind: 'number',
+    },
+    {
+      id: 'newPrice',
+      label: '新价',
+      hint: '人输入的新价，2 位小数 HALF_UP 落定',
+      kind: 'number',
+      required: true,
+    },
     { id: 'quantity', label: '数量', hint: '用于阶梯与运费，空 = 1', kind: 'number' },
     { id: 'platformFeeRate', label: '平台费率（手工假设）', hint: '0.15 = 15%', kind: 'number' },
-    { id: 'logisticsCostPerUnit', label: '物流每单位运费（手工假设）', hint: '每单位尾程运费', kind: 'number' },
+    {
+      id: 'logisticsCostPerUnit',
+      label: '物流每单位运费（手工假设）',
+      hint: '每单位尾程运费',
+      kind: 'number',
+    },
     { id: 'title', label: '标题', hint: '提交审批实例时作为单据标题', kind: 'text' },
-    { id: 'reason', label: '调价原因', hint: '必填 —— 事后要能看懂这次为什么调', kind: 'textarea', required: true },
+    {
+      id: 'reason',
+      label: '调价原因',
+      hint: '必填 —— 事后要能看懂这次为什么调',
+      kind: 'textarea',
+      required: true,
+    },
     { id: 'note', label: '备注', hint: '补充说明', kind: 'textarea' },
   ],
 };
@@ -503,7 +523,10 @@ export function validatePriceAdjustmentRequest(
     return { field: 'costCurrency', message: '币种必须是三位大写字母' };
   }
   if (!request.newPrice || request.newPrice <= 0) {
-    return { field: 'newPrice', message: '新价必须大于 0 —— 把价格改成 0 就是「免费」，那不是调价' };
+    return {
+      field: 'newPrice',
+      message: '新价必须大于 0 —— 把价格改成 0 就是「免费」，那不是调价',
+    };
   }
   if (request.oldPrice !== null && request.oldPrice < 0) {
     return { field: 'oldPrice', message: '旧价不能为负' };
@@ -628,11 +651,10 @@ export function submitPriceAdjustment(
   expectedVersion: number,
   comment?: string,
 ): Promise<PriceAdjustmentDetail> {
-  return api<PriceAdjustmentDetail>(
-    `catalog/price-adjustments/${id}/submit`,
-    'POST',
-    { expectedVersion, comment },
-  );
+  return api<PriceAdjustmentDetail>(`catalog/price-adjustments/${id}/submit`, 'POST', {
+    expectedVersion,
+    comment,
+  });
 }
 
 /** 执行（已批 → 已执行）。🔴 必须带上你读到的版本号。 */
@@ -641,11 +663,10 @@ export function executePriceAdjustment(
   expectedVersion: number,
   comment?: string,
 ): Promise<PriceAdjustmentDetail> {
-  return api<PriceAdjustmentDetail>(
-    `catalog/price-adjustments/${id}/execute`,
-    'POST',
-    { expectedVersion, comment },
-  );
+  return api<PriceAdjustmentDetail>(`catalog/price-adjustments/${id}/execute`, 'POST', {
+    expectedVersion,
+    comment,
+  });
 }
 
 /** 驳回（草稿 / 待审 → 已驳回）。🔴 必须带上你读到的版本号。 */

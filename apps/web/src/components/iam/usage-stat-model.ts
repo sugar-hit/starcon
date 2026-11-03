@@ -127,8 +127,7 @@ export function describeBillingState(row: {
   entitlementUnit: string | null;
   entitlementPeriod: string | null;
 }): string {
-  if (row.state === 'UNDETERMINED')
-    return '尚未接通计量，判定不了（不等于「没超限」）';
+  if (row.state === 'UNDETERMINED') return '尚未接通计量，判定不了（不等于「没超限」）';
   if (row.state === 'UNLIMITED' || row.entitlementUnlimited) return '不限量';
   const unit = row.entitlementUnit ?? '';
   const scope = row.entitlementPeriod
@@ -247,7 +246,8 @@ export function summarizeTrend(points: UsageTrendPoint[]): {
       tenantCode: first?.tenantCode ?? '',
       tenantName: first?.tenantName ?? '',
       entitlementKind: first?.entitlementKind ?? '',
-      kindLabel: ENTITLEMENT_KIND_LABELS[first?.entitlementKind ?? ''] ?? first?.entitlementKind ?? '',
+      kindLabel:
+        ENTITLEMENT_KIND_LABELS[first?.entitlementKind ?? ''] ?? first?.entitlementKind ?? '',
       points: sorted.map((point) => ({
         periodStart: point.periodStart,
         periodEnd: point.periodEnd,
@@ -264,7 +264,10 @@ export function groupReportByTenant(rows: UsageReportRow[]): {
   tenantName: string;
   rows: UsageReportRow[];
 }[] {
-  const groups = new Map<string, { tenantCode: string; tenantName: string; rows: UsageReportRow[] }>();
+  const groups = new Map<
+    string,
+    { tenantCode: string; tenantName: string; rows: UsageReportRow[] }
+  >();
   for (const row of rows) {
     const key = row.tenantCode;
     const bucket = groups.get(key);

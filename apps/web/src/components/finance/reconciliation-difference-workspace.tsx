@@ -432,7 +432,7 @@ export function ReconciliationDifferenceWorkspace() {
               </FormField>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full text-copy-13">
+              <table className="text-copy-13 w-full">
                 <thead>
                   <tr className="text-muted-foreground border-b text-left">
                     <th className="py-2 pr-3">单号</th>
@@ -452,7 +452,9 @@ export function ReconciliationDifferenceWorkspace() {
                       onClick={() => selectDiff(row)}
                     >
                       <td className="py-2 pr-3">{row.reference || '—'}</td>
-                      <td className="py-2 pr-3">{reconciliationDiffTypeLabel(row.differenceType)}</td>
+                      <td className="py-2 pr-3">
+                        {reconciliationDiffTypeLabel(row.differenceType)}
+                      </td>
                       <td className="py-2 pr-3">
                         {formatReconciliationDiffDifference(
                           row.differenceAmount,
@@ -508,7 +510,10 @@ export function ReconciliationDifferenceWorkspace() {
           description="🔴 跨币种绝不相加：每个币种一行，差额算不出来就写「汇率不可得」"
         >
           {queue && queue.currencies.length === 0 ? (
-            <EmptyState title="还没有汇总" description="先跑一次上游对账任务，产生差异后这里才有数。" />
+            <EmptyState
+              title="还没有汇总"
+              description="先跑一次上游对账任务，产生差异后这里才有数。"
+            />
           ) : (
             <div className="space-y-3">
               {queue?.currencies.map((c) => (
@@ -517,9 +522,7 @@ export function ReconciliationDifferenceWorkspace() {
                     <Badge tone="primary">{c.currency}</Badge>
                     {!c.exchangeRateAvailable ? <Badge tone="warning">汇率不可得</Badge> : null}
                   </div>
-                  <p className="text-copy-13 mt-1">
-                    {reconciliationDiffCurrencySummaryLabel(c)}
-                  </p>
+                  <p className="text-copy-13 mt-1">{reconciliationDiffCurrencySummaryLabel(c)}</p>
                 </div>
               ))}
             </div>
@@ -537,7 +540,7 @@ export function ReconciliationDifferenceWorkspace() {
             />
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-copy-13">
+              <table className="text-copy-13 w-full">
                 <thead>
                   <tr className="text-muted-foreground border-b text-left">
                     <th className="py-2 pr-3">归因分类</th>
@@ -586,10 +589,22 @@ export function ReconciliationDifferenceWorkspace() {
             ) : (
               <div className="space-y-3">
                 <div className="grid gap-3 sm:grid-cols-4">
-                  <StatCard label="归因分类" value={selected.category ? (selected.categoryLabel ?? '—') : '未分类'} />
-                  <StatCard label="责任人" value={reconciliationDiffAssigneeLabel(selected.assigneeId)} />
+                  <StatCard
+                    label="归因分类"
+                    value={selected.category ? (selected.categoryLabel ?? '—') : '未分类'}
+                  />
+                  <StatCard
+                    label="责任人"
+                    value={reconciliationDiffAssigneeLabel(selected.assigneeId)}
+                  />
                   <StatCard label="调整分录" value={`${selected.adjustmentCount} 条`} />
-                  <StatCard label="平台侧" value={formatReconciliationDiffMoney(selected.externalAmount, selected.currency)} />
+                  <StatCard
+                    label="平台侧"
+                    value={formatReconciliationDiffMoney(
+                      selected.externalAmount,
+                      selected.currency,
+                    )}
+                  />
                 </div>
                 <p className="text-muted-foreground text-copy-12">
                   归因（上游）：{selected.attribution || '—'}；上游原因：{selected.reason || '—'}
@@ -662,7 +677,10 @@ export function ReconciliationDifferenceWorkspace() {
                     </select>
                   </FormField>
                   <div className="space-y-1">
-                    <label htmlFor="rd-category-reason" className="text-label-13 text-foreground block">
+                    <label
+                      htmlFor="rd-category-reason"
+                      className="text-label-13 text-foreground block"
+                    >
                       分类理由<span className="text-destructive ml-1">*</span>
                     </label>
                     <textarea
@@ -790,7 +808,10 @@ export function ReconciliationDifferenceWorkspace() {
             </SectionCard>
 
             <div className="space-y-4">
-              <SectionCard title="调整分录" description="凭证或说明，至少有一个 · 一次性事实，不可改写">
+              <SectionCard
+                title="调整分录"
+                description="凭证或说明，至少有一个 · 一次性事实，不可改写"
+              >
                 {!detail || detail.adjustments.length === 0 ? (
                   <EmptyState
                     title="还没有调整分录"
@@ -798,7 +819,7 @@ export function ReconciliationDifferenceWorkspace() {
                   />
                 ) : (
                   <div className="overflow-x-auto">
-                    <table className="w-full text-copy-13">
+                    <table className="text-copy-13 w-full">
                       <thead>
                         <tr className="text-muted-foreground border-b text-left">
                           <th className="py-2 pr-3">#</th>
@@ -828,7 +849,10 @@ export function ReconciliationDifferenceWorkspace() {
 
               <SectionCard title="闭环时间线" description="append-only 举证 · 每一步都留痕">
                 {!detail || detail.events.length === 0 ? (
-                  <EmptyState title="还没有处理记录" description="认领或分类之后，这里会记下每一步。" />
+                  <EmptyState
+                    title="还没有处理记录"
+                    description="认领或分类之后，这里会记下每一步。"
+                  />
                 ) : (
                   <ul className="space-y-2">
                     {detail.events.map((e) => (

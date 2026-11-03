@@ -29,10 +29,9 @@ export default function CrmReviewRequestsPage() {
         <h1 className="text-copy-20 font-semibold">索评（Request a Review）</h1>
         <p className="text-muted-foreground text-copy-13">
           按规则向<strong>已签收订单的买家</strong>发起索评，支持按
-          <strong>店铺 / 时间 / 物流状态</strong>批量执行。{' '}
-          <strong>索评频次必须受限</strong>：每买家上限、每订单上限与冷却窗口是数据库层的硬闸，
-          超限的索评请求会被<strong>拒绝并留下原因</strong>，而不是悄悄发出去 ——
-          过度索评会被买家投诉甚至平台处罚。
+          <strong>店铺 / 时间 / 物流状态</strong>批量执行。 <strong>索评频次必须受限</strong>
+          ：每买家上限、每订单上限与冷却窗口是数据库层的硬闸， 超限的索评请求会被
+          <strong>拒绝并留下原因</strong>，而不是悄悄发出去 —— 过度索评会被买家投诉甚至平台处罚。
         </p>
       </header>
 

@@ -128,9 +128,7 @@ export function savePolicy(input: AddressPaymentPolicyInput): Promise<AddressPay
   return api<AddressPaymentPolicy>(path('/policy'), 'PUT', input);
 }
 
-export function fetchEmbargoRules(
-  params: EmbargoParams,
-): Promise<AddressPaymentEmbargoRulePage> {
+export function fetchEmbargoRules(params: EmbargoParams): Promise<AddressPaymentEmbargoRulePage> {
   return api<AddressPaymentEmbargoRulePage>(path('/embargo-rules', params));
 }
 
@@ -467,7 +465,8 @@ export function paymentRulePageText(page: PageMeta): string {
 /** 按判读顺序排列七项明细（后端返回的是按 itemCode 排序的，不是判读顺序）。 */
 export function sortItems(items: AddressPaymentCheckItem[]): AddressPaymentCheckItem[] {
   return [...items].sort(
-    (left, right) => ITEM_ORDER.indexOf(left.itemCode as never) - ITEM_ORDER.indexOf(right.itemCode as never),
+    (left, right) =>
+      ITEM_ORDER.indexOf(left.itemCode as never) - ITEM_ORDER.indexOf(right.itemCode as never),
   );
 }
 

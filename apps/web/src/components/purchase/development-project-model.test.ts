@@ -64,7 +64,9 @@ describe('开发立项展示口径', () => {
     expect(statusLabel({ status: 'MASS_PRODUCTION', statusLabel: '量产' })).toBe('量产');
     expect(statusLabel({ status: 'TERMINATED', statusLabel: '终止' })).toBe('终止');
     // 「终止」与「量产」是两个状态 —— 折叠成「结束」会让人以为还能恢复。
-    expect(statusLabel({ status: 'TERMINATED' })).not.toBe(statusLabel({ status: 'MASS_PRODUCTION' }));
+    expect(statusLabel({ status: 'TERMINATED' })).not.toBe(
+      statusLabel({ status: 'MASS_PRODUCTION' }),
+    );
   });
 
   it('终止是危险色，量产是成功色', () => {
@@ -102,11 +104,36 @@ describe('开发立项展示口径', () => {
 describe('开发立项状态机的界面口径', () => {
   const options: DevelopmentProjectOptions = {
     statuses: [
-      { value: 'EVALUATION', label: '评估', terminal: false, allowedTargets: ['APPROVED', 'TERMINATED'] },
-      { value: 'APPROVED', label: '立项', terminal: false, allowedTargets: ['IN_DEVELOPMENT', 'TERMINATED'] },
-      { value: 'IN_DEVELOPMENT', label: '开发中', terminal: false, allowedTargets: ['SAMPLING', 'PILOT', 'MASS_PRODUCTION', 'TERMINATED'] },
-      { value: 'SAMPLING', label: '打样', terminal: false, allowedTargets: ['PILOT', 'MASS_PRODUCTION', 'TERMINATED'] },
-      { value: 'PILOT', label: '试产', terminal: false, allowedTargets: ['MASS_PRODUCTION', 'TERMINATED'] },
+      {
+        value: 'EVALUATION',
+        label: '评估',
+        terminal: false,
+        allowedTargets: ['APPROVED', 'TERMINATED'],
+      },
+      {
+        value: 'APPROVED',
+        label: '立项',
+        terminal: false,
+        allowedTargets: ['IN_DEVELOPMENT', 'TERMINATED'],
+      },
+      {
+        value: 'IN_DEVELOPMENT',
+        label: '开发中',
+        terminal: false,
+        allowedTargets: ['SAMPLING', 'PILOT', 'MASS_PRODUCTION', 'TERMINATED'],
+      },
+      {
+        value: 'SAMPLING',
+        label: '打样',
+        terminal: false,
+        allowedTargets: ['PILOT', 'MASS_PRODUCTION', 'TERMINATED'],
+      },
+      {
+        value: 'PILOT',
+        label: '试产',
+        terminal: false,
+        allowedTargets: ['MASS_PRODUCTION', 'TERMINATED'],
+      },
       { value: 'MASS_PRODUCTION', label: '量产', terminal: false, allowedTargets: ['TERMINATED'] },
       { value: 'TERMINATED', label: '终止', terminal: true, allowedTargets: [] },
     ],

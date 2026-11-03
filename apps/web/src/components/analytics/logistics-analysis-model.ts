@@ -214,7 +214,9 @@ export function freightScopeNote(response: LogisticsFreightPerOrderResponse | nu
  */
 export function categoryScopeNote(response: LogisticsCategoryCostResponse | null): string {
   if (!response) return '';
-  const parts = ['⚠️ 类目维度**只覆盖头程分摊部分**：尾程运费落在运单上，一票可能多 SKU，没有 SKU 维度 ⇒ 那一段进不了类目。'];
+  const parts = [
+    '⚠️ 类目维度**只覆盖头程分摊部分**：尾程运费落在运单上，一票可能多 SKU，没有 SKU 维度 ⇒ 那一段进不了类目。',
+  ];
   if (response.unattributedLineCount > 0) {
     parts.push(
       `有 ${response.unattributedLineCount} 条分摊明细行**挂不上类目**（单列「未归属」，不摊进任何类目）。`,

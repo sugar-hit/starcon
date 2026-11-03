@@ -290,8 +290,22 @@ describe('空态与能力声明', () => {
   it('未交付的维度被挑出来', () => {
     const caps = {
       dimensions: [
-        { dimension: 'a', description: '', available: true, source: '', ownerModule: '', impact: '' },
-        { dimension: 'b', description: '', available: false, source: '', ownerModule: '5.1.1.1', impact: '' },
+        {
+          dimension: 'a',
+          description: '',
+          available: true,
+          source: '',
+          ownerModule: '',
+          impact: '',
+        },
+        {
+          dimension: 'b',
+          description: '',
+          available: false,
+          source: '',
+          ownerModule: '5.1.1.1',
+          impact: '',
+        },
       ],
     } as ListingPublishTaskCapabilities;
     expect(unavailableDimensions(caps).map((d) => d.dimension)).toEqual(['b']);

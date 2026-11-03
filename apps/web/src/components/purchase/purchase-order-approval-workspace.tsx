@@ -427,14 +427,17 @@ export function PurchaseOrderApprovalWorkspace() {
                           )}
                         </td>
                         <td className="p-2">
-                          <button className="underline" onClick={() => void openDetail(row.orderId)}>
+                          <button
+                            className="underline"
+                            onClick={() => void openDetail(row.orderId)}
+                          >
                             {row.orderNo}
                           </button>
                         </td>
                         <td className="p-2">
                           {row.supplierCode} · {row.supplierName}
                         </td>
-                        <td className="p-2 whitespace-nowrap">
+                        <td className="whitespace-nowrap p-2">
                           {fmtAmount(row.orderAmount)} {row.currency}
                         </td>
                         <td className="p-2">
@@ -505,7 +508,10 @@ export function PurchaseOrderApprovalWorkspace() {
       )}
 
       {view === 'rules' && (
-        <SectionCard title="审批规则" description="（采购员分级, 币种, 金额区间）⇒ 要求的审批层级与人数">
+        <SectionCard
+          title="审批规则"
+          description="（采购员分级, 币种, 金额区间）⇒ 要求的审批层级与人数"
+        >
           {configError && (
             <Notice tone="danger" title="加载失败">
               {configError}
@@ -537,7 +543,7 @@ export function PurchaseOrderApprovalWorkspace() {
                     <tr key={rule.id} className="border-t">
                       <td className="p-2">{rule.ruleNo}</td>
                       <td className="p-2">{rule.ruleName}</td>
-                      <td className="p-2 whitespace-nowrap">{ruleBandText(rule)}</td>
+                      <td className="whitespace-nowrap p-2">{ruleBandText(rule)}</td>
                       <td className="p-2">{approvalTierLabel(rule.requiredTier)}</td>
                       <td className="p-2">{rule.requiredApprovals} 人</td>
                       <td className="p-2">
@@ -601,7 +607,10 @@ export function PurchaseOrderApprovalWorkspace() {
             )}
           </SectionCard>
 
-          <SectionCard title="审批人与层级" description="层级 + 金额授权区间：两者都够才批得了这一笔">
+          <SectionCard
+            title="审批人与层级"
+            description="层级 + 金额授权区间：两者都够才批得了这一笔"
+          >
             {!members || members.approvers.length === 0 ? (
               <EmptyState
                 icon={<Users className="size-6" />}
@@ -624,7 +633,7 @@ export function PurchaseOrderApprovalWorkspace() {
                       <tr key={approver.id} className="border-t">
                         <td className="p-2">{approver.userName || approver.userId}</td>
                         <td className="p-2">{approvalTierLabel(approver.approvalTier)}</td>
-                        <td className="p-2 whitespace-nowrap">{approverBandText(approver)}</td>
+                        <td className="whitespace-nowrap p-2">{approverBandText(approver)}</td>
                         <td className="p-2">
                           <Badge tone={approver.status === 'ACTIVE' ? 'success' : 'neutral'}>
                             {approver.status === 'ACTIVE' ? '启用' : '停用'}
@@ -692,8 +701,9 @@ export function PurchaseOrderApprovalWorkspace() {
                           {step.approverName || step.approverUserId}
                         </p>
                         <p className="text-muted-foreground">
-                          {approvalTierLabel(step.approvalTier)} · 依据「{step.ruleName || '无'}」 · 金额{' '}
-                          {fmtAmount(step.orderAmount)} {step.currency} · {fmtDateTime(step.occurredAt)}
+                          {approvalTierLabel(step.approvalTier)} · 依据「{step.ruleName || '无'}」 ·
+                          金额 {fmtAmount(step.orderAmount)} {step.currency} ·{' '}
+                          {fmtDateTime(step.occurredAt)}
                         </p>
                         {step.note && <p>意见：{step.note}</p>}
                       </li>
@@ -734,7 +744,9 @@ export function PurchaseOrderApprovalWorkspace() {
                   </p>
                 )}
                 {detail.receiptRelease.releaseNote && (
-                  <p className="text-muted-foreground text-xs">{detail.receiptRelease.releaseNote}</p>
+                  <p className="text-muted-foreground text-xs">
+                    {detail.receiptRelease.releaseNote}
+                  </p>
                 )}
               </SectionCard>
             </div>
@@ -779,7 +791,11 @@ export function PurchaseOrderApprovalWorkspace() {
                 id="approval-note"
                 value={decideNote}
                 onChange={(e) => setDecideNote(e.target.value)}
-                placeholder={decideAction === 'APPROVE' ? '例如：同意，按合同价下单' : '例如：单价比报价高，退回重报'}
+                placeholder={
+                  decideAction === 'APPROVE'
+                    ? '例如：同意，按合同价下单'
+                    : '例如：单价比报价高，退回重报'
+                }
               />
             </FormField>
           </div>
@@ -830,7 +846,11 @@ export function PurchaseOrderApprovalWorkspace() {
                 id="batch-note"
                 value={batchNote}
                 onChange={(e) => setBatchNote(e.target.value)}
-                placeholder={batchAction === 'APPROVE' ? '例如：本月集中采购，同意' : '例如：单价偏高，退回重报'}
+                placeholder={
+                  batchAction === 'APPROVE'
+                    ? '例如：本月集中采购，同意'
+                    : '例如：单价偏高，退回重报'
+                }
               />
             </FormField>
           </div>

@@ -2,15 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { RefreshCw } from 'lucide-react';
-import {
-  Button,
-  EmptyState,
-  Input,
-  Notice,
-  PageHeader,
-  SectionCard,
-  StatCard,
-} from '@starcon/ui';
+import { Button, EmptyState, Input, Notice, PageHeader, SectionCard, StatCard } from '@starcon/ui';
 import {
   STATUS_OPTIONS,
   RESERVATION_STATUS_OPTIONS,
@@ -145,9 +137,9 @@ export function OrderSplitWorkspace() {
     lineAmount: '',
     note: '',
   });
-  const [lines, setLines] = useState<{ ref: string; skuRef: string; qty: string; amount: string }[]>(
-    [],
-  );
+  const [lines, setLines] = useState<
+    { ref: string; skuRef: string; qty: string; amount: string }[]
+  >([]);
   const [ruleForm, setRuleForm] = useState({
     primaryStrategy: 'WAREHOUSE',
     maxUnitsPerSplit: '8',
@@ -219,7 +211,12 @@ export function OrderSplitWorkspace() {
   const addLine = useCallback(() => {
     setLines((current) => [
       ...current,
-      { ref: form.lineRef.trim(), skuRef: form.skuRef.trim(), qty: form.lineQty.trim(), amount: form.lineAmount.trim() },
+      {
+        ref: form.lineRef.trim(),
+        skuRef: form.skuRef.trim(),
+        qty: form.lineQty.trim(),
+        amount: form.lineAmount.trim(),
+      },
     ]);
     setForm((f) => ({ ...f, lineRef: '', skuRef: '', lineQty: '', lineAmount: '' }));
   }, [form.lineRef, form.skuRef, form.lineQty, form.lineAmount]);
@@ -333,9 +330,7 @@ export function OrderSplitWorkspace() {
   const ackReservation = useCallback(
     async (splitId: string, unitId: string, status: 'ACKNOWLEDGED' | 'REJECTED') => {
       const text = window.prompt(
-        status === 'ACKNOWLEDGED'
-          ? 'warehouse 侧返回的预占号'
-          : '下游拒绝原因',
+        status === 'ACKNOWLEDGED' ? 'warehouse 侧返回的预占号' : '下游拒绝原因',
         status === 'ACKNOWLEDGED' ? 'RSV-0001' : '',
       );
       if (text === null) return;
@@ -433,14 +428,19 @@ export function OrderSplitWorkspace() {
         </Button>
       }
     >
-      {actionError ? <Notice tone="danger" title="操作未完成">
+      {actionError ? (
+        <Notice tone="danger" title="操作未完成">
           {actionError}
-        </Notice> : null}
+        </Notice>
+      ) : null}
 
       {/* ---------------------------------------------------- ① 能力与规则 */}
       <SectionCard title="能力与拆单规则">
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          <StatCard label="规则" value={ruleMissing ? '未登记' : rule?.enabled ? '已启用' : '已停用'} />
+          <StatCard
+            label="规则"
+            value={ruleMissing ? '未登记' : rule?.enabled ? '已启用' : '已停用'}
+          />
           <StatCard label="主维度" value={rule ? strategyText(rule.primaryStrategy) : '—'} />
           <StatCard
             label="🔴 预占上游库存"
@@ -454,8 +454,8 @@ export function OrderSplitWorkspace() {
 
         {capabilities ? (
           <Notice tone="warning" title="请注意">
-            🔴 <strong>本模块不预占上游库存</strong>：7 预占（inventory_reservation 等）在
-            warehouse 的独立库里，按模块边界纪律不得跨库读写。页面上的预占指令是
+            🔴 <strong>本模块不预占上游库存</strong>：7 预占（inventory_reservation 等）在 warehouse
+            的独立库里，按模块边界纪律不得跨库读写。页面上的预占指令是
             <strong>指令登记</strong>，真实预占要由 warehouse 侧的授权 API 建立。
             订单总金额与买家视角不变，且拆单
             <strong>不产生新的销售订单</strong>（creates_sales_order 由数据库约束恒为 false）。
@@ -481,8 +481,8 @@ export function OrderSplitWorkspace() {
 
         {ruleMissing ? (
           <Notice tone="warning" title="请注意">
-            本租户尚未登记拆单规则。拆单会真实改变包裹形态、发货时效与逐单元回传口径，
-            「没配规则 = 默认全拆」会把一次运营疏忽变成一批错发的货，所以本模块不提供隐含默认值。
+            本租户尚未登记拆单规则。拆单会真实改变包裹形态、发货时效与逐单元回传口径， 「没配规则 =
+            默认全拆」会把一次运营疏忽变成一批错发的货，所以本模块不提供隐含默认值。
           </Notice>
         ) : null}
 
@@ -549,7 +549,9 @@ export function OrderSplitWorkspace() {
           </Button>
           <Button
             variant="secondary"
-            onClick={() => setRuleForm({ ...ruleForm, splitByTimeliness: !ruleForm.splitByTimeliness })}
+            onClick={() =>
+              setRuleForm({ ...ruleForm, splitByTimeliness: !ruleForm.splitByTimeliness })
+            }
           >
             {ruleForm.splitByTimeliness ? '关闭按时效拆' : '开启按时效拆'}
           </Button>
@@ -624,7 +626,9 @@ export function OrderSplitWorkspace() {
                     <td className="p-2">{qty(s.availableQty)}</td>
                     <td className="p-2">{isoText(s.collectedAt)}</td>
                     <td className="p-2">
-                      {s.stockSource === 'MODULE_7_1_1_3' ? `7.1.1.3（${s.sourceReference}）` : '租户维护'}
+                      {s.stockSource === 'MODULE_7_1_1_3'
+                        ? `7.1.1.3（${s.sourceReference}）`
+                        : '租户维护'}
                     </td>
                   </tr>
                 ))}
@@ -646,10 +650,16 @@ export function OrderSplitWorkspace() {
 
         <div className="grid gap-3 md:grid-cols-3 xl:grid-cols-4">
           <Field label="订单引用 *">
-            <Input value={form.orderRef} onChange={(e) => setForm({ ...form, orderRef: e.target.value })} />
+            <Input
+              value={form.orderRef}
+              onChange={(e) => setForm({ ...form, orderRef: e.target.value })}
+            />
           </Field>
           <Field label="我方单号">
-            <Input value={form.orderNo} onChange={(e) => setForm({ ...form, orderNo: e.target.value })} />
+            <Input
+              value={form.orderNo}
+              onChange={(e) => setForm({ ...form, orderNo: e.target.value })}
+            />
           </Field>
           <Field label="币种 *">
             <Input
@@ -672,7 +682,10 @@ export function OrderSplitWorkspace() {
             />
           </Field>
           <Field label="店铺码">
-            <Input value={form.shopCode} onChange={(e) => setForm({ ...form, shopCode: e.target.value })} />
+            <Input
+              value={form.shopCode}
+              onChange={(e) => setForm({ ...form, shopCode: e.target.value })}
+            />
           </Field>
           <Field label="平台单号">
             <Input
@@ -707,13 +720,22 @@ export function OrderSplitWorkspace() {
           <div className="mb-2 text-sm font-medium">订单行快照 *</div>
           <div className="grid gap-2 md:grid-cols-4">
             <Field label="行引用">
-              <Input value={form.lineRef} onChange={(e) => setForm({ ...form, lineRef: e.target.value })} />
+              <Input
+                value={form.lineRef}
+                onChange={(e) => setForm({ ...form, lineRef: e.target.value })}
+              />
             </Field>
             <Field label="SKU 引用">
-              <Input value={form.skuRef} onChange={(e) => setForm({ ...form, skuRef: e.target.value })} />
+              <Input
+                value={form.skuRef}
+                onChange={(e) => setForm({ ...form, skuRef: e.target.value })}
+              />
             </Field>
             <Field label="数量">
-              <Input value={form.lineQty} onChange={(e) => setForm({ ...form, lineQty: e.target.value })} />
+              <Input
+                value={form.lineQty}
+                onChange={(e) => setForm({ ...form, lineQty: e.target.value })}
+              />
             </Field>
             <Field label="行金额">
               <Input
@@ -763,7 +785,11 @@ export function OrderSplitWorkspace() {
         </div>
 
         <div className="flex gap-2">
-          <Button variant="secondary" onClick={() => void runPreview()} disabled={busy || !canWrite}>
+          <Button
+            variant="secondary"
+            onClick={() => void runPreview()}
+            disabled={busy || !canWrite}
+          >
             预览拆单（无副作用）
           </Button>
           <Button onClick={() => void runSplit()} disabled={busy || !canWrite}>
@@ -773,10 +799,7 @@ export function OrderSplitWorkspace() {
 
         {preview ? (
           <div className="grid gap-3">
-            <Notice
-              tone={preview.amountConserved ? 'info' : 'danger'}
-              title="🔴 金额守恒"
-            >
+            <Notice tone={preview.amountConserved ? 'info' : 'danger'} title="🔴 金额守恒">
               🔴 金额守恒：分摊 <strong>{money(preview.allocatedTotal)}</strong> + 尾差{' '}
               <strong>{residualText(preview.residualTotal)}</strong> ={' '}
               <strong>{money(preview.orderTotalAmount)}</strong>
@@ -785,9 +808,11 @@ export function OrderSplitWorkspace() {
               拆分维度：{strategyText(preview.strategy)}；订单内容来源：
               {preview.orderSource === 'SALES_ORDER' ? 'sales_order 真值' : '请求快照'}。
             </Notice>
-            {preview.blockedReason ? <Notice tone="warning" title="现在还不能落拆单">
-              {preview.blockedReason}
-            </Notice> : null}
+            {preview.blockedReason ? (
+              <Notice tone="warning" title="现在还不能落拆单">
+                {preview.blockedReason}
+              </Notice>
+            ) : null}
 
             {preview.units.length === 0 ? (
               <EmptyState
@@ -816,7 +841,11 @@ export function OrderSplitWorkspace() {
                         <td className="p-2">{u.warehouseRef}</td>
                         <td className="p-2">{u.carrierCode || '—'}</td>
                         <td className="p-2">
-                          {u.shipByAt ? isoText(u.shipByAt) : u.shipByHours === null || u.shipByHours === undefined ? '未知' : `${u.shipByHours}h`}
+                          {u.shipByAt
+                            ? isoText(u.shipByAt)
+                            : u.shipByHours === null || u.shipByHours === undefined
+                              ? '未知'
+                              : `${u.shipByHours}h`}
                         </td>
                         <td className="p-2">{u.platformCode || '—'}</td>
                         <td className="p-2">{u.lineCount}</td>
@@ -920,7 +949,10 @@ export function OrderSplitWorkspace() {
         </div>
 
         {!page || page.items.length === 0 ? (
-          <EmptyState title="还没有拆单记录" description="上面登记好仓与库存分布，落一次拆单就会出现在这里。" />
+          <EmptyState
+            title="还没有拆单记录"
+            description="上面登记好仓与库存分布，落一次拆单就会出现在这里。"
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -999,15 +1031,9 @@ export function OrderSplitWorkspace() {
             <StatCard label="状态" value={splitStatusText(detail.split.status)} />
             <StatCard label="拆分维度" value={strategyText(detail.split.strategy)} />
             <StatCard label="履约单元" value={String(detail.split.unitCount)} />
-            <StatCard
-              label="🔴 产生新销售订单"
-              value={detail.createsSalesOrder ? '是' : '否'}
-            />
+            <StatCard label="🔴 产生新销售订单" value={detail.createsSalesOrder ? '是' : '否'} />
           </div>
-          <Notice
-            tone={detail.amountConserved ? 'info' : 'danger'}
-            title="🔴 金额守恒"
-          >
+          <Notice tone={detail.amountConserved ? 'info' : 'danger'} title="🔴 金额守恒">
             🔴 金额守恒：分摊 <strong>{money(detail.split.allocatedAmountTotal)}</strong> + 尾差{' '}
             <strong>{residualText(detail.split.residualAmountTotal)}</strong> ={' '}
             <strong>{money(detail.split.orderTotalAmount)}</strong>；订单总额在拆分前后不变。
@@ -1033,7 +1059,8 @@ export function OrderSplitWorkspace() {
                 disabled={busy}
                 onClick={() => {
                   const reason = window.prompt('作废原因（必填）');
-                  if (reason && reason.trim()) void advance(detail.split.id, 'CANCELLED', reason.trim());
+                  if (reason && reason.trim())
+                    void advance(detail.split.id, 'CANCELLED', reason.trim());
                 }}
               >
                 作废
@@ -1058,7 +1085,9 @@ export function OrderSplitWorkspace() {
               </thead>
               <tbody>
                 {detail.units.map((u) => {
-                  const wb = detail.writebackTasks.find((t: SplitWritebackTask) => t.unitId === u.id);
+                  const wb = detail.writebackTasks.find(
+                    (t: SplitWritebackTask) => t.unitId === u.id,
+                  );
                   return (
                     <tr key={u.id} className="border-t">
                       <td className="p-2">#{u.unitSeq}</td>
@@ -1091,7 +1120,9 @@ export function OrderSplitWorkspace() {
           </div>
 
           <div>
-            <div className="mb-2 text-sm font-medium">单元行级明细（尾差就落在某一行的 residual 上）</div>
+            <div className="mb-2 text-sm font-medium">
+              单元行级明细（尾差就落在某一行的 residual 上）
+            </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
@@ -1119,7 +1150,9 @@ export function OrderSplitWorkspace() {
           </div>
 
           <div>
-            <div className="mb-2 text-sm font-medium">逐行逐仓候选依据（落库，可回答「当时为什么这么拆」）</div>
+            <div className="mb-2 text-sm font-medium">
+              逐行逐仓候选依据（落库，可回答「当时为什么这么拆」）
+            </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
@@ -1262,7 +1295,10 @@ export function OrderSplitWorkspace() {
               被拒 {reservations?.rejectedCount ?? 0}）
             </div>
             {!reservations || reservations.items.length === 0 ? (
-              <EmptyState title="没有预占指令" description="落一次拆单就会按履约单元自动登记预占指令。" />
+              <EmptyState
+                title="没有预占指令"
+                description="落一次拆单就会按履约单元自动登记预占指令。"
+              />
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">

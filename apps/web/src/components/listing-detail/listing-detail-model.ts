@@ -128,12 +128,7 @@ export interface ListingContentSnapshotView {
 
 /** 🔴 差异状态。`UNAVAILABLE` 与 `SAME` 是两件不同的事，见文件头第 1 条。 */
 export type DiffStatus =
-  | 'DIFFERENT'
-  | 'SAME'
-  | 'PLATFORM_ONLY'
-  | 'INTERNAL_ONLY'
-  | 'UNAVAILABLE'
-  | 'UNKNOWN';
+  'DIFFERENT' | 'SAME' | 'PLATFORM_ONLY' | 'INTERNAL_ONLY' | 'UNAVAILABLE' | 'UNKNOWN';
 
 export type DiffGroup = 'CONTENT' | 'PRICE_STOCK' | 'PLATFORM_SIDE' | 'REGISTRY' | 'MAPPING';
 
@@ -358,9 +353,7 @@ export function operationStatusLabel(status: string): string {
 
 /** 🔴 UNKNOWN 的语义是「不知道平台上到底成没成」，不是「没成」。文案不许压成「失败」。 */
 export function operationStatusHint(status: string): string {
-  return status === 'UNKNOWN'
-    ? '平台没给回执：先查证再决定重发（2.5.1.2）'
-    : '';
+  return status === 'UNKNOWN' ? '平台没给回执：先查证再决定重发（2.5.1.2）' : '';
 }
 
 // ================================================================ 差异呈现
@@ -512,8 +505,7 @@ export function quantityText(value: ListingNumber, emptyLabel = '平台未回报
 /** 评分：null = 平台没评分，与 0 分（真的零分）不同。 */
 export function ratingText(rating: ListingNumber, count: ListingNumber): string {
   if (rating === null || rating === undefined) return '平台未评分';
-  const suffix =
-    count === null || count === undefined ? '' : `（${count} 条评论）`;
+  const suffix = count === null || count === undefined ? '' : `（${count} 条评论）`;
   return `${rating}${suffix}`;
 }
 
@@ -559,9 +551,7 @@ export function fetchPublishHistory(id: string): Promise<ListingPublishRecordVie
 }
 
 export function fetchPlatformOperations(id: string): Promise<ListingPlatformOperationView[]> {
-  return api<ListingPlatformOperationView[]>(
-    `channel/listing-details/${id}/platform-operations`,
-  );
+  return api<ListingPlatformOperationView[]>(`channel/listing-details/${id}/platform-operations`);
 }
 
 export function saveContentSnapshot(

@@ -167,9 +167,9 @@ export function StockoutAlertWorkspace() {
         referenceId: referenceId || null,
       });
       setNotice(
-        `评估完成：缺货侧命中 ${result.stockoutProblemCount} 行，饥饿侧命中 ${result.starvationProblemCount} 行；`
-          + `因全网缺货而未列入饥饿清单 ${result.excludedByStockoutCount} 个店铺组合；`
-          + `判不出来 ${result.unknownDemandCount} 行。${result.note}`,
+        `评估完成：缺货侧命中 ${result.stockoutProblemCount} 行，饥饿侧命中 ${result.starvationProblemCount} 行；` +
+          `因全网缺货而未列入饥饿清单 ${result.excludedByStockoutCount} 个店铺组合；` +
+          `判不出来 ${result.unknownDemandCount} 行。${result.note}`,
       );
       await load();
     } catch (e) {
@@ -233,7 +233,8 @@ export function StockoutAlertWorkspace() {
    */
   const shopOptions = useMemo(() => {
     const map = new Map<string, string>();
-    for (const row of starvationRows) map.set(row.referenceId, row.referenceLabel || row.referenceId);
+    for (const row of starvationRows)
+      map.set(row.referenceId, row.referenceLabel || row.referenceId);
     return [...map.entries()].map(([id, label]) => ({ id, label }));
   }, [starvationRows]);
 
@@ -259,12 +260,7 @@ export function StockoutAlertWorkspace() {
         description="7.8.2.2 · 「没货卖」与「没分到货」是两种问题，处置完全不同 —— 本页把它们分成两张清单，不混。"
         actions={
           <div className="flex flex-wrap gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => void load()}
-              disabled={loading}
-            >
+            <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
               <RefreshCw className="mr-1 h-3.5 w-3.5" />
               {loading ? '加载中…' : '刷新'}
             </Button>
@@ -322,7 +318,7 @@ export function StockoutAlertWorkspace() {
                 className={
                   d.available
                     ? 'border-control-border bg-card text-foreground rounded border px-2 py-0.5'
-                    : 'border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-400 rounded border px-2 py-0.5'
+                    : 'rounded border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-amber-700 dark:text-amber-400'
                 }
               >
                 {d.dimension}：{d.available ? '已接入' : `未交付（归属 ${d.ownerModule}）`}
@@ -336,7 +332,9 @@ export function StockoutAlertWorkspace() {
         <StatCard
           label="饥饿店铺"
           value={starvations === null ? '—' : starvations.summary.starvedCount}
-          polarity={starvations !== null && starvations.summary.starvedCount > 0 ? 'negative' : 'neutral'}
+          polarity={
+            starvations !== null && starvations.summary.starvedCount > 0 ? 'negative' : 'neutral'
+          }
           comparisonLabel={
             starvations === null ? '加载中' : starvationSummaryText(starvations.summary)
           }
@@ -346,7 +344,9 @@ export function StockoutAlertWorkspace() {
           value={stockouts === null ? '—' : stockouts.summary.networkStockedOutCount}
           unit="行"
           polarity={
-            stockouts !== null && stockouts.summary.networkStockedOutCount > 0 ? 'negative' : 'neutral'
+            stockouts !== null && stockouts.summary.networkStockedOutCount > 0
+              ? 'negative'
+              : 'neutral'
           }
           comparisonLabel={
             stockouts === null
@@ -616,8 +616,7 @@ export function StockoutAlertWorkspace() {
                     <td className="py-1 text-xs">
                       <div>{rootCauseLabels[row.rootCause] ?? row.rootCause}</div>
                       <div className="text-muted-foreground">
-                        优先级{' '}
-                        {row.memberPriority === null ? '尚未回填' : row.memberPriority}
+                        优先级 {row.memberPriority === null ? '尚未回填' : row.memberPriority}
                         {row.floorStatus
                           ? ` · 保底 ${row.floorStatus}${
                               row.floorShortfallQuantity

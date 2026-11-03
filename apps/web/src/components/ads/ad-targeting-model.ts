@@ -421,7 +421,9 @@ export function fetchAdTargetingOptions(): Promise<AdTargetingOptions> {
   return api<AdTargetingOptions>(`${BASE}/options`);
 }
 
-export function fetchAdTargetings(query: AdTargetingListQuery = {}): Promise<AdTargetingSettingPage> {
+export function fetchAdTargetings(
+  query: AdTargetingListQuery = {},
+): Promise<AdTargetingSettingPage> {
   return api<AdTargetingSettingPage>(`${BASE}${queryString(query)}`);
 }
 

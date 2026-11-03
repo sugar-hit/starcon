@@ -166,7 +166,7 @@ export function ListingCollectWorkspace() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center gap-2 py-16 text-muted-foreground">
+      <div className="text-muted-foreground flex items-center justify-center gap-2 py-16">
         <Loader2 className="size-4 animate-spin" />
         <span className="text-label-13">正在加载链接采集…</span>
       </div>
@@ -177,7 +177,7 @@ export function ListingCollectWorkspace() {
     return (
       <SectionCard title="链接采集">
         <EmptyState
-          icon={<TriangleAlert className="size-8 text-destructive" />}
+          icon={<TriangleAlert className="text-destructive size-8" />}
           title="链接采集加载失败"
           description={error}
           action={
@@ -219,7 +219,7 @@ export function ListingCollectWorkspace() {
       {/* ---- 🔴 去重提示 ---- */}
       {notice && (
         <div className="border-brand/40 bg-brand-soft/40 flex items-start gap-2 rounded-lg border px-4 py-3">
-          <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-brand" />
+          <CheckCircle2 className="text-brand mt-0.5 size-4 shrink-0" />
           <p className="text-label-13">{notice}</p>
         </div>
       )}
@@ -227,18 +227,18 @@ export function ListingCollectWorkspace() {
       {/* ---- 🔴 两条边界的界面措辞（后端给原文，前端原样展示） ---- */}
       {caps && (
         <div className="border-brand/40 bg-brand-soft/40 rounded-lg border px-4 py-3">
-          <p className="text-foreground mb-1 text-label-13 font-medium">链接采集的三条硬边界</p>
-          <ul className="text-muted-foreground space-y-1 text-label-12">
+          <p className="text-foreground text-label-13 mb-1 font-medium">链接采集的三条硬边界</p>
+          <ul className="text-muted-foreground text-label-12 space-y-1">
             <li className="flex items-start gap-2">
-              <ShieldCheck className="mt-0.5 size-3.5 shrink-0 text-brand" />
+              <ShieldCheck className="text-brand mt-0.5 size-3.5 shrink-0" />
               <span>{caps.draftNote}</span>
             </li>
             <li className="flex items-start gap-2">
-              <ImageIcon className="mt-0.5 size-3.5 shrink-0 text-brand" />
+              <ImageIcon className="text-brand mt-0.5 size-3.5 shrink-0" />
               <span>{caps.mediaNote}</span>
             </li>
             <li className="flex items-start gap-2">
-              <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-brand" />
+              <CheckCircle2 className="text-brand mt-0.5 size-3.5 shrink-0" />
               <span>{caps.dedupNote}</span>
             </li>
           </ul>
@@ -248,8 +248,8 @@ export function ListingCollectWorkspace() {
       {/* ---- 未接入维度明账 ---- */}
       {caps && unavailableDimensions(caps).length > 0 && (
         <div className="border-warning/40 bg-warning/5 rounded-lg border px-4 py-3">
-          <p className="text-warning mb-1 text-label-13 font-medium">部分能力未接入</p>
-          <ul className="text-muted-foreground space-y-1 text-label-12">
+          <p className="text-warning text-label-13 mb-1 font-medium">部分能力未接入</p>
+          <ul className="text-muted-foreground text-label-12 space-y-1">
             {unavailableDimensions(caps).map((d) => (
               <li key={d.dimension}>
                 <span className="text-foreground">{d.description}</span>
@@ -300,9 +300,7 @@ export function ListingCollectWorkspace() {
               )}
             </Button>
           </div>
-          <p className="text-muted-foreground text-label-12">
-            🔴 {DRAFT_ONLY_NOTE}
-          </p>
+          <p className="text-muted-foreground text-label-12">🔴 {DRAFT_ONLY_NOTE}</p>
         </div>
       </SectionCard>
 
@@ -312,13 +310,13 @@ export function ListingCollectWorkspace() {
         description="草稿内容来自来源页面的原文（JSON-LD / Open Graph / 规格表），不是我们编辑的。"
       >
         {collecting ? (
-          <div className="flex items-center justify-center gap-2 px-4 py-12 text-muted-foreground">
+          <div className="text-muted-foreground flex items-center justify-center gap-2 px-4 py-12">
             <Loader2 className="size-4 animate-spin" />
             <span className="text-label-13">正在抓取来源页面…</span>
           </div>
         ) : !activeTask ? (
           <EmptyState
-            icon={<ImageIcon className="size-8 text-muted-foreground" />}
+            icon={<ImageIcon className="text-muted-foreground size-8" />}
             title="还没有采集结果"
             description="在上面粘贴一个商品链接开始采集，或从下面的采集历史里选一条。"
           />
@@ -329,8 +327,9 @@ export function ListingCollectWorkspace() {
                 {collectStateLabel(activeTask.state)}
               </Badge>
               <span className="text-muted-foreground text-label-12">
-                {activeTask.sourceName}（{activeTask.sourceCode}） · {attemptLabel(activeTask.attemptNo)} ·
-                抓取于 {capturedAtLabel(activeTask.capturedAt)}
+                {activeTask.sourceName}（{activeTask.sourceCode}） ·{' '}
+                {attemptLabel(activeTask.attemptNo)} · 抓取于{' '}
+                {capturedAtLabel(activeTask.capturedAt)}
               </span>
               {canRetry(activeTask) && (
                 <Button
@@ -360,7 +359,7 @@ export function ListingCollectWorkspace() {
                 <div>
                   <p className="text-muted-foreground text-label-12">来源 URL</p>
                   <a
-                    className="text-brand inline-flex items-center gap-1 text-label-13 underline"
+                    className="text-brand text-label-13 inline-flex items-center gap-1 underline"
                     href={activeDraft.sourceUrl}
                     target="_blank"
                     rel="noreferrer"
@@ -369,7 +368,7 @@ export function ListingCollectWorkspace() {
                     <ExternalLink className="size-3" />
                   </a>
                   {activeDraft.normalizedUrl !== activeDraft.sourceUrl && (
-                    <p className="text-muted-foreground mt-1 text-label-12">
+                    <p className="text-muted-foreground text-label-12 mt-1">
                       规范化 URL（去跟踪参数后的去重键）：{activeDraft.normalizedUrl}
                     </p>
                   )}
@@ -383,7 +382,7 @@ export function ListingCollectWorkspace() {
                   <div className="space-y-1">
                     <p className="text-muted-foreground text-label-12">主图</p>
                     <a
-                      className="text-brand inline-flex items-center gap-1 text-label-12 underline"
+                      className="text-brand text-label-12 inline-flex items-center gap-1 underline"
                       href={activeDraft.mainImageUrl}
                       target="_blank"
                       rel="noreferrer"
@@ -399,7 +398,7 @@ export function ListingCollectWorkspace() {
                     <p className="text-muted-foreground text-label-12">
                       附图（{activeDraft.imageUrls.length - 1} 张）
                     </p>
-                    <ul className="text-muted-foreground space-y-0.5 text-label-12">
+                    <ul className="text-muted-foreground text-label-12 space-y-0.5">
                       {activeDraft.imageUrls.slice(1).map((image) => (
                         <li key={image}>
                           <a
@@ -420,10 +419,10 @@ export function ListingCollectWorkspace() {
 
                 {specRows.length > 0 && (
                   <div>
-                    <p className="text-foreground mb-1 text-label-13 font-medium">规格</p>
+                    <p className="text-foreground text-label-13 mb-1 font-medium">规格</p>
                     <dl className="space-y-1">
                       {specRows.map((row) => (
-                        <div key={row.name} className="flex gap-2 text-label-12">
+                        <div key={row.name} className="text-label-12 flex gap-2">
                           <dt className="text-muted-foreground min-w-24 shrink-0">{row.name}</dt>
                           <dd className="text-foreground">{row.value}</dd>
                         </div>
@@ -434,10 +433,10 @@ export function ListingCollectWorkspace() {
 
                 {attributeRows.length > 0 && (
                   <div>
-                    <p className="text-foreground mb-1 text-label-13 font-medium">属性</p>
+                    <p className="text-foreground text-label-13 mb-1 font-medium">属性</p>
                     <dl className="space-y-1">
                       {attributeRows.map((row) => (
-                        <div key={row.name} className="flex gap-2 text-label-12">
+                        <div key={row.name} className="text-label-12 flex gap-2">
                           <dt className="text-muted-foreground min-w-24 shrink-0">{row.name}</dt>
                           <dd className="text-foreground">{row.value}</dd>
                         </div>
@@ -448,14 +447,15 @@ export function ListingCollectWorkspace() {
 
                 {activeDraft.description && (
                   <div>
-                    <p className="text-foreground mb-1 text-label-13 font-medium">描述</p>
+                    <p className="text-foreground text-label-13 mb-1 font-medium">描述</p>
                     <p className="text-muted-foreground text-label-12">{activeDraft.description}</p>
                   </div>
                 )}
 
                 <div>
                   <p className="text-muted-foreground text-label-12">
-                    🔴 来源页面原文标价：{sourcePriceLabel(
+                    🔴 来源页面原文标价：
+                    {sourcePriceLabel(
                       activeDraft.sourcePriceAmount,
                       activeDraft.sourcePriceCurrency,
                     )}
@@ -475,7 +475,7 @@ export function ListingCollectWorkspace() {
         extra={
           <div className="flex items-center gap-2">
             <select
-              className="border-border bg-background text-foreground h-8 rounded-md border px-2 text-label-12"
+              className="border-border bg-background text-foreground text-label-12 h-8 rounded-md border px-2"
               value={stateFilter}
               onChange={(e) => {
                 setStateFilter(e.target.value);
@@ -488,7 +488,7 @@ export function ListingCollectWorkspace() {
               <option value="FAILED">采集失败</option>
             </select>
             <select
-              className="border-border bg-background text-foreground h-8 rounded-md border px-2 text-label-12"
+              className="border-border bg-background text-foreground text-label-12 h-8 rounded-md border px-2"
               value={sourceFilter}
               onChange={(e) => {
                 setSourceFilter(e.target.value);
@@ -508,7 +508,7 @@ export function ListingCollectWorkspace() {
       >
         {rows.length === 0 ? (
           <EmptyState
-            icon={<ImageIcon className="size-8 text-muted-foreground" />}
+            icon={<ImageIcon className="text-muted-foreground size-8" />}
             title="没有采集记录"
             description={emptyCollectsMessage()}
           />
@@ -536,7 +536,7 @@ export function ListingCollectWorkspace() {
                     </span>
                   </div>
                   {row.state === 'FAILED' && row.errorMessage && (
-                    <p className="text-destructive mt-1 text-label-12">{row.errorMessage}</p>
+                    <p className="text-destructive text-label-12 mt-1">{row.errorMessage}</p>
                   )}
                 </button>
               </li>

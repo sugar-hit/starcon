@@ -146,7 +146,9 @@ describe('11.3.2.1 换货授权前端模型', () => {
       // 两种形态都要归到危险，否则空串会被 default 分支当成正常值渲染出去。
       expect(reservationTone('')).toBe('danger');
       expect(reservationTone(undefined)).toBe('danger');
-      expect(reservationBadge(line({ reservationStatus: '', reservationNo: '' }))).toContain('危险');
+      expect(reservationBadge(line({ reservationStatus: '', reservationNo: '' }))).toContain(
+        '危险',
+      );
     });
   });
 
@@ -175,7 +177,9 @@ describe('11.3.2.1 换货授权前端模型', () => {
     });
 
     it('后端给了标签就用后端的，前端不另写一份词表', () => {
-      expect(decisionBadge(row({ decisionLabel: '部分批准（库存不足）' }))).toBe('部分批准（库存不足）');
+      expect(decisionBadge(row({ decisionLabel: '部分批准（库存不足）' }))).toBe(
+        '部分批准（库存不足）',
+      );
       // 后端没给标签时才回落到前端词表。
       expect(decisionBadge(row({ decisionLabel: '', decision: 'PARTIALLY_APPROVED' }))).toBe(
         '部分批准（库存不足）',
@@ -224,9 +228,7 @@ describe('11.3.2.1 换货授权前端模型', () => {
 
     it('下游已交付时不再显示提醒', () => {
       expect(
-        downstreamNotices(
-          caps({ outboundHandoffDelivered: true, oldGoodsReturnDelivered: true }),
-        ),
+        downstreamNotices(caps({ outboundHandoffDelivered: true, oldGoodsReturnDelivered: true })),
       ).toEqual([]);
     });
 

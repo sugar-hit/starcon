@@ -123,9 +123,11 @@ export function fetchDropshipMarginCapabilities(): Promise<DropshipMarginCapabil
   return api<DropshipMarginCapabilities>(`${base}/capabilities`);
 }
 
-export function fetchDropshipFeeRates(params: {
-  keyword?: string;
-} & DropshipMarginPageParams): Promise<DropshipFeeRatePage> {
+export function fetchDropshipFeeRates(
+  params: {
+    keyword?: string;
+  } & DropshipMarginPageParams,
+): Promise<DropshipFeeRatePage> {
   return api<DropshipFeeRatePage>(`${base}/fee-rates${query(params)}`);
 }
 
@@ -133,9 +135,11 @@ export function saveDropshipFeeRate(input: DropshipFeeRateInput): Promise<Dropsh
   return api<DropshipFeeRateRow>(`${base}/fee-rates`, 'POST', input);
 }
 
-export function fetchDropshipFxRates(params: {
-  baseCurrency?: string;
-} & DropshipMarginPageParams): Promise<DropshipFxRatePage> {
+export function fetchDropshipFxRates(
+  params: {
+    baseCurrency?: string;
+  } & DropshipMarginPageParams,
+): Promise<DropshipFxRatePage> {
   return api<DropshipFxRatePage>(`${base}/fx-rates${query(params)}`);
 }
 
@@ -143,9 +147,11 @@ export function saveDropshipFxRate(input: DropshipFxRateInput): Promise<Dropship
   return api<DropshipFxRateRow>(`${base}/fx-rates`, 'POST', input);
 }
 
-export function fetchDropshipCycles(params: {
-  supplierCode?: string;
-} & DropshipMarginPageParams): Promise<DropshipSettlementCyclePage> {
+export function fetchDropshipCycles(
+  params: {
+    supplierCode?: string;
+  } & DropshipMarginPageParams,
+): Promise<DropshipSettlementCyclePage> {
   return api<DropshipSettlementCyclePage>(`${base}/cycles${query(params)}`);
 }
 
@@ -159,10 +165,7 @@ export function evaluateDropshipMarginFacts(params: {
   periodStart: string;
   periodEnd: string;
 }): Promise<DropshipMarginEvaluateResult> {
-  return api<DropshipMarginEvaluateResult>(
-    `${base}/facts/evaluate${query(params)}`,
-    'POST',
-  );
+  return api<DropshipMarginEvaluateResult>(`${base}/facts/evaluate${query(params)}`, 'POST');
 }
 
 export function fetchDropshipMarginFacts(
@@ -181,10 +184,7 @@ export function evaluateDropshipLossAlerts(params: {
   periodStart: string;
   periodEnd: string;
 }): Promise<DropshipMarginEvaluateResult> {
-  return api<DropshipMarginEvaluateResult>(
-    `${base}/alerts/evaluate${query(params)}`,
-    'POST',
-  );
+  return api<DropshipMarginEvaluateResult>(`${base}/alerts/evaluate${query(params)}`, 'POST');
 }
 
 export function fetchDropshipLossAlerts(
@@ -253,31 +253,23 @@ export function completeDropshipPayableTask(
   return api<DropshipPayableTaskRow>(`${base}/tasks/${taskId}/complete`, 'POST', input);
 }
 
-export function fetchDropshipMarginEvents(params: {
-  statementId?: string;
-} & DropshipMarginPageParams): Promise<DropshipMarginEventPage> {
+export function fetchDropshipMarginEvents(
+  params: {
+    statementId?: string;
+  } & DropshipMarginPageParams,
+): Promise<DropshipMarginEventPage> {
   return api<DropshipMarginEventPage>(`${base}/events${query(params)}`);
 }
 
 // ------------------------------------------------------------ 词表与标签
 
-export const LOSS_VERDICTS = [
-  'LOSS_CONFIRMED',
-  'NOT_LOSS',
-  'UNDETERMINED_NO_FEE',
-] as const;
+export const LOSS_VERDICTS = ['LOSS_CONFIRMED', 'NOT_LOSS', 'UNDETERMINED_NO_FEE'] as const;
 
 export const REPORT_GROUP_BYS = ['SHOP', 'SUPPLIER', 'SKU', 'ORDER'] as const;
 
 export const STATEMENT_STATUSES = ['DRAFT', 'FINALIZED', 'DISPUTED', 'CLOSED'] as const;
 
-export const PAYABLE_TASK_STATUSES = [
-  'OPEN',
-  'CLAIMED',
-  'SENT',
-  'ACKNOWLEDGED',
-  'FAILED',
-] as const;
+export const PAYABLE_TASK_STATUSES = ['OPEN', 'CLAIMED', 'SENT', 'ACKNOWLEDGED', 'FAILED'] as const;
 
 export const ALERT_STATUSES = ['OPEN', 'ACKNOWLEDGED', 'RESOLVED', 'DISMISSED'] as const;
 
@@ -520,16 +512,16 @@ export function reconciliationBuckets(row: DropshipReconciliationRow): Reconcili
       payable: Number(row.undeterminedPayable),
       note:
         row.undeterminedOrderCount > 0
-          ? `${row.undeterminedOrderCount} 行${FX_UNSET_HINT}，未登记应付 `
-            + `${moneyText(row.undeterminedPayable, '各自原币')}，不并入上方合计`
+          ? `${row.undeterminedOrderCount} 行${FX_UNSET_HINT}，未登记应付 ` +
+            `${moneyText(row.undeterminedPayable, '各自原币')}，不并入上方合计`
           : '本单全部行都已折算（或原币即结算币），没有未登记桶',
     },
     feeUnregistered: {
       orderCount: row.feeUnregisteredOrderCount,
       note:
         row.feeUnregisteredOrderCount > 0
-          ? `${row.feeUnregisteredOrderCount} 行${UNDETERMINED_HINT}，合计里的平台费 `
-            + `${moneyText(row.totalPlatformFee, currency)} 不含这部分的平台费（未登记不等于 0）`
+          ? `${row.feeUnregisteredOrderCount} 行${UNDETERMINED_HINT}，合计里的平台费 ` +
+            `${moneyText(row.totalPlatformFee, currency)} 不含这部分的平台费（未登记不等于 0）`
           : '本单全部行都已登记平台费率',
     },
   };

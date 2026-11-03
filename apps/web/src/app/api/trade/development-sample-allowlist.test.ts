@@ -30,7 +30,9 @@ import { proxy } from '../../../lib/api-proxy';
 
 // 相对**本文件**定位：vitest 从仓库根或 apps/web 跑时 cwd 都不同，用 cwd 会静默读空。
 const SOURCE = readFileSync(
-  fileURLToPath(new URL('../../../components/purchase/development-sample-model.ts', import.meta.url)),
+  fileURLToPath(
+    new URL('../../../components/purchase/development-sample-model.ts', import.meta.url),
+  ),
   'utf8',
 );
 
@@ -159,14 +161,11 @@ it('更新与删除子资源的形状被放行', async () => {
   });
   expect(put.status, `PUT ${ID} 未被放行`).toBe(200);
 
-  const putSample = await PUT(
-    request(`trade/development-samples/${ID}/samples/${ID}`, 'PUT'),
-    {
-      params: Promise.resolve({
-        path: `trade/development-samples/${ID}/samples/${ID}`.split('/'),
-      }),
-    },
-  );
+  const putSample = await PUT(request(`trade/development-samples/${ID}/samples/${ID}`, 'PUT'), {
+    params: Promise.resolve({
+      path: `trade/development-samples/${ID}/samples/${ID}`.split('/'),
+    }),
+  });
   expect(putSample.status, `PUT samples/${ID} 未被放行`).toBe(200);
 
   const del = await DELETE(request(`trade/development-samples/${ID}/cost/lines/${ID}`, 'DELETE'), {

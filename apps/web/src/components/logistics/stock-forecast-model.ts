@@ -468,7 +468,9 @@ export enum AvailabilityState {
 export function availabilityState(line: ForecastAvailabilityLine): AvailabilityState {
   if (!line.sellableKnown || line.sellable === null || line.sellable === undefined)
     return AvailabilityState.UNAVAILABLE;
-  return line.sellable >= line.requestedQuantity ? AvailabilityState.ENOUGH : AvailabilityState.SHORT;
+  return line.sellable >= line.requestedQuantity
+    ? AvailabilityState.ENOUGH
+    : AvailabilityState.SHORT;
 }
 
 /** 可用性口径的中文说明；口径缺失时明说「不可用」，不用 0 顶。 */

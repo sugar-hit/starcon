@@ -2718,9 +2718,7 @@ function WebhookDedupPanel({
     setDetailError('');
     setBusy(true);
     try {
-      setDetail(
-        await api<WebhookDedupDetail>(`channel/webhook-dedup/${event.firstReceiptId}`),
-      );
+      setDetail(await api<WebhookDedupDetail>(`channel/webhook-dedup/${event.firstReceiptId}`));
     } catch (e) {
       setDetailError(e instanceof Error ? e.message : '去重详情加载失败，请重试');
     } finally {
@@ -2788,18 +2786,19 @@ function WebhookDedupPanel({
           <div>
             <p className="text-copy-14 font-medium">去重视图</p>
             <p className="text-copy-12 text-muted-foreground mt-1">
-              以（回调入口，外部事件 ID）为准归并。同一入口下同一条事件只处理一次，重推次数与首次处理结果都在这里。
+              以（回调入口，外部事件
+              ID）为准归并。同一入口下同一条事件只处理一次，重推次数与首次处理结果都在这里。
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <label className="relative block">
               <span className="sr-only">按事件 ID 或平台筛选</span>
-              <Search className="text-muted-foreground pointer-events-none absolute top-2 left-2 h-4 w-4" />
+              <Search className="text-muted-foreground pointer-events-none absolute left-2 top-2 h-4 w-4" />
               <input
                 value={term}
                 onChange={(e) => setTerm(e.target.value)}
                 placeholder="事件 ID / 平台 / 账号"
-                className="border-border bg-card text-copy-13 h-8 w-56 rounded-md border pr-2 pl-8"
+                className="border-border bg-card text-copy-13 h-8 w-56 rounded-md border pl-8 pr-2"
               />
             </label>
             <Button
@@ -2865,12 +2864,7 @@ function WebhookDedupPanel({
                       </p>
                     )}
                   </button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    disabled={busy}
-                    onClick={() => void toggle(e)}
-                  >
+                  <Button size="sm" variant="ghost" disabled={busy} onClick={() => void toggle(e)}>
                     {expanded === e.firstReceiptId ? '收起' : '投递明细'}
                   </Button>
                 </div>
@@ -2938,8 +2932,8 @@ function WebhookDedupPanel({
         <div className="bg-card rounded-md border p-4">
           <p className="text-copy-14 font-medium">按事件认领</p>
           <p className="text-copy-12 text-muted-foreground mt-1">
-            下游业务服务按外部事件 ID 消费时走这条路径，而不是逐条接收记录。重复的投递连同它的
-            id 都拿不到，没有路径能创建出第二条业务记录；同一事件第二次认领会被拒绝。
+            下游业务服务按外部事件 ID 消费时走这条路径，而不是逐条接收记录。重复的投递连同它的 id
+            都拿不到，没有路径能创建出第二条业务记录；同一事件第二次认领会被拒绝。
           </p>
           <ul className="mt-2 space-y-1">
             {events
@@ -2960,8 +2954,7 @@ function WebhookDedupPanel({
                     disabled={busy}
                     onClick={() =>
                       void run(
-                        () =>
-                          api(`channel/webhook-dedup/${e.firstReceiptId}/claim`, 'POST', {}),
+                        () => api(`channel/webhook-dedup/${e.firstReceiptId}/claim`, 'POST', {}),
                         '已按业务事件认领，同一事件再次认领会被拒绝',
                       )
                     }

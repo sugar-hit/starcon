@@ -170,23 +170,30 @@ export function OrderAddressPaymentCheckWorkspace() {
     setLoading(true);
     setError('');
     try {
-      const [capabilities, overview, policyResult, checkResult, embargoResult, countryResult, paymentResult] =
-        await Promise.all([
-          fetchCapabilities(),
-          fetchOverview(),
-          // 策略没登记就是 404，那是「未配置」而不是错误：用 catch 降级成 null，
-          // 这样页面能显示「尚未登记校验策略」并给出登记表单。
-          fetchPolicy().catch(() => null),
-          fetchChecks({
-            keyword: keyword || undefined,
-            riskLevel: filterRisk || undefined,
-            deliveryStatus: filterDelivery || undefined,
-            page,
-                  }),
-          fetchEmbargoRules({ page: 0, size: PAGE_SIZE }),
-          fetchCountryRules({ page: 0, size: PAGE_SIZE }),
-          fetchPaymentRules({ page: 0, size: PAGE_SIZE }),
-        ]);
+      const [
+        capabilities,
+        overview,
+        policyResult,
+        checkResult,
+        embargoResult,
+        countryResult,
+        paymentResult,
+      ] = await Promise.all([
+        fetchCapabilities(),
+        fetchOverview(),
+        // 策略没登记就是 404，那是「未配置」而不是错误：用 catch 降级成 null，
+        // 这样页面能显示「尚未登记校验策略」并给出登记表单。
+        fetchPolicy().catch(() => null),
+        fetchChecks({
+          keyword: keyword || undefined,
+          riskLevel: filterRisk || undefined,
+          deliveryStatus: filterDelivery || undefined,
+          page,
+        }),
+        fetchEmbargoRules({ page: 0, size: PAGE_SIZE }),
+        fetchCountryRules({ page: 0, size: PAGE_SIZE }),
+        fetchPaymentRules({ page: 0, size: PAGE_SIZE }),
+      ]);
       setCaps(capabilities);
       setSummary(overview);
       setPolicy(policyResult);
@@ -195,7 +202,11 @@ export function OrderAddressPaymentCheckWorkspace() {
         setMissingPolicy(policyResult.missingReferencePolicy);
       }
       setChecks(checkResult.items);
-      setCheckPage({ total: checkResult.total, page: checkResult.page, totalPages: checkResult.totalPages });
+      setCheckPage({
+        total: checkResult.total,
+        page: checkResult.page,
+        totalPages: checkResult.totalPages,
+      });
       setEmbargoes(embargoResult.items);
       setEmbargoPage({
         total: embargoResult.total,
@@ -276,7 +287,8 @@ export function OrderAddressPaymentCheckWorkspace() {
     try {
       const saved = await savePolicy({
         policyName: policyName.trim(),
-        missingReferencePolicy: missingPolicy as AddressPaymentPolicyInput['missingReferencePolicy'],
+        missingReferencePolicy:
+          missingPolicy as AddressPaymentPolicyInput['missingReferencePolicy'],
       });
       setNotice(
         `校验策略「${saved.policyName}」已保存为第 ${saved.version} 版。` +
@@ -385,8 +397,16 @@ export function OrderAddressPaymentCheckWorkspace() {
         }
       />
 
-      {error ? <Notice tone="danger" title="操作失败">{error}</Notice> : null}
-      {notice ? <Notice tone="success" title="已完成">{notice}</Notice> : null}
+      {error ? (
+        <Notice tone="danger" title="操作失败">
+          {error}
+        </Notice>
+      ) : null}
+      {notice ? (
+        <Notice tone="success" title="已完成">
+          {notice}
+        </Notice>
+      ) : null}
 
       {/* ------------------------------------------------ 能力与缺口 */}
       <SectionCard
@@ -394,7 +414,7 @@ export function OrderAddressPaymentCheckWorkspace() {
         description="哪几项真接通、哪几项靠租户维护、哪几项现在判不了。"
       >
         {loading ? (
-          <p className="text-sm text-muted-foreground">加载中…</p>
+          <p className="text-muted-foreground text-sm">加载中…</p>
         ) : !caps ? (
           <EmptyState title="能力声明加载失败" description="请确认 trade 服务可用后刷新。" />
         ) : (
@@ -431,7 +451,7 @@ export function OrderAddressPaymentCheckWorkspace() {
                   {caps.items.map((item) => (
                     <tr key={item.code} className="border-b align-top">
                       <td className="py-2 pr-3">{item.label}</td>
-                      <td className="py-2 pr-3 text-muted-foreground">{item.source}</td>
+                      <td className="text-muted-foreground py-2 pr-3">{item.source}</td>
                       <td className="py-2 pr-3">
                         <span
                           className={`rounded border px-2 py-1 text-xs ${
@@ -441,10 +461,10 @@ export function OrderAddressPaymentCheckWorkspace() {
                           {item.available ? '已接通' : '未接通'}
                         </span>
                       </td>
-                      <td className="py-2 pr-3 text-muted-foreground">
+                      <td className="text-muted-foreground py-2 pr-3">
                         {item.available ? '—' : item.ownerModule}
                       </td>
-                      <td className="py-2 text-muted-foreground">
+                      <td className="text-muted-foreground py-2">
                         {item.available ? item.thresholdSource : item.impact}
                       </td>
                     </tr>
@@ -462,7 +482,11 @@ export function OrderAddressPaymentCheckWorkspace() {
       {/* ------------------------------------------------ 概览 */}
       {summary ? (
         <div className="grid gap-3 md:grid-cols-4">
-          <StatCard label="累计校验" value={String(summary.totalChecks)} comparisonLabel="张订单次校验" />
+          <StatCard
+            label="累计校验"
+            value={String(summary.totalChecks)}
+            comparisonLabel="张订单次校验"
+          />
           <StatCard
             label="货到付款"
             value={String(summary.codChecks)}
@@ -487,13 +511,13 @@ export function OrderAddressPaymentCheckWorkspace() {
         description="每租户一条。没登记就报「未配置」，不给隐含默认值。"
       >
         {loading ? (
-          <p className="text-sm text-muted-foreground">加载中…</p>
+          <p className="text-muted-foreground text-sm">加载中…</p>
         ) : (
           <div className="space-y-4">
             {policy ? (
               <Notice tone="success" title={`已登记（第 ${policy.version} 版）`}>
-                {policy.policyName} · 缺参照口径：{missingPolicyText(policy.missingReferencePolicy)} ·
-                更新时间 {isoText(policy.updatedAt)}
+                {policy.policyName} · 缺参照口径：{missingPolicyText(policy.missingReferencePolicy)}{' '}
+                · 更新时间 {isoText(policy.updatedAt)}
               </Notice>
             ) : (
               <Notice tone="warning" title="尚未登记校验策略">
@@ -510,7 +534,7 @@ export function OrderAddressPaymentCheckWorkspace() {
                 hint="缺参照即不出结论 = 有任何一项没量到就不给「可投递」"
               >
                 <select
-                  className="h-9 w-full rounded border bg-background px-2 text-sm"
+                  className="bg-background h-9 w-full rounded border px-2 text-sm"
                   value={missingPolicy}
                   onChange={(e) => setMissingPolicy(e.target.value)}
                 >
@@ -548,7 +572,7 @@ export function OrderAddressPaymentCheckWorkspace() {
             </FormField>
             <FormField id="ap-embargo-level" label="禁运强度">
               <select
-                className="h-9 w-full rounded border bg-background px-2 text-sm"
+                className="bg-background h-9 w-full rounded border px-2 text-sm"
                 value={embargoLevel}
                 onChange={(e) => setEmbargoLevel(e.target.value)}
               >
@@ -561,7 +585,7 @@ export function OrderAddressPaymentCheckWorkspace() {
             </FormField>
             <FormField id="ap-embargo-source" label="来源">
               <select
-                className="h-9 w-full rounded border bg-background px-2 text-sm"
+                className="bg-background h-9 w-full rounded border px-2 text-sm"
                 value={embargoSource}
                 onChange={(e) => setEmbargoSource(e.target.value)}
               >
@@ -601,20 +625,24 @@ export function OrderAddressPaymentCheckWorkspace() {
                     <tr key={rule.id} className="border-b">
                       <td className="py-2 pr-3 font-mono">{rule.countryCode}</td>
                       <td className="py-2 pr-3">{embargoLevelText(rule.embargoLevel)}</td>
-                      <td className="py-2 pr-3 text-muted-foreground">{ruleSourceText(rule.source)}</td>
+                      <td className="text-muted-foreground py-2 pr-3">
+                        {ruleSourceText(rule.source)}
+                      </td>
                       <td className="py-2 pr-3">{rule.reason || '—'}</td>
-                      <td className="py-2 text-muted-foreground">
+                      <td className="text-muted-foreground py-2">
                         {rule.effectiveFrom || '不限'} ~ {rule.effectiveTo || '不限'}
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              <p className="mt-2 text-xs text-muted-foreground">{embargoPageText({
-                total: embargoPage.total,
-                page: embargoPage.page,
-                            totalPages: embargoPage.totalPages,
-              })}</p>
+              <p className="text-muted-foreground mt-2 text-xs">
+                {embargoPageText({
+                  total: embargoPage.total,
+                  page: embargoPage.page,
+                  totalPages: embargoPage.totalPages,
+                })}
+              </p>
             </div>
           )}
         </div>
@@ -650,7 +678,7 @@ export function OrderAddressPaymentCheckWorkspace() {
                 disabled={!postcodeRequired}
               />
             </FormField>
-            <div className="grid gap-3 md:grid-cols-3 text-sm">
+            <div className="grid gap-3 text-sm md:grid-cols-3">
               <label className="flex items-center gap-2">
                 <input
                   type="checkbox"
@@ -725,7 +753,7 @@ export function OrderAddressPaymentCheckWorkspace() {
                           {rule.postcodeRequired ? rule.postcodePattern : '不要求'}
                         </td>
                         <td className="py-2 pr-3">≥ {rule.streetMinLength} 字</td>
-                        <td className="py-2 text-muted-foreground">
+                        <td className="text-muted-foreground py-2">
                           {[
                             rule.cityRequired ? '城市' : null,
                             rule.regionRequired ? '省份' : null,
@@ -738,11 +766,13 @@ export function OrderAddressPaymentCheckWorkspace() {
                     ))}
                   </tbody>
                 </table>
-                <p className="mt-2 text-xs text-muted-foreground">{countryRulePageText({
-                  total: countryPage.total,
-                  page: countryPage.page,
-                                totalPages: countryPage.totalPages,
-                })}</p>
+                <p className="text-muted-foreground mt-2 text-xs">
+                  {countryRulePageText({
+                    total: countryPage.total,
+                    page: countryPage.page,
+                    totalPages: countryPage.totalPages,
+                  })}
+                </p>
               </div>
             )}
           </div>
@@ -756,7 +786,7 @@ export function OrderAddressPaymentCheckWorkspace() {
             <div className="grid gap-3 md:grid-cols-3">
               <FormField id="ap-rule-method" label="付款方式">
                 <select
-                  className="h-9 w-full rounded border bg-background px-2 text-sm"
+                  className="bg-background h-9 w-full rounded border px-2 text-sm"
                   value={ruleMethod}
                   onChange={(e) => setRuleMethod(e.target.value)}
                 >
@@ -769,7 +799,7 @@ export function OrderAddressPaymentCheckWorkspace() {
               </FormField>
               <FormField id="ap-rule-status" label="观察到的支付状态">
                 <select
-                  className="h-9 w-full rounded border bg-background px-2 text-sm"
+                  className="bg-background h-9 w-full rounded border px-2 text-sm"
                   value={ruleStatus}
                   onChange={(e) => setRuleStatus(e.target.value)}
                 >
@@ -782,7 +812,7 @@ export function OrderAddressPaymentCheckWorkspace() {
               </FormField>
               <FormField id="ap-rule-severity" label="结论">
                 <select
-                  className="h-9 w-full rounded border bg-background px-2 text-sm"
+                  className="bg-background h-9 w-full rounded border px-2 text-sm"
                   value={ruleSeverity}
                   onChange={(e) => setRuleSeverity(e.target.value)}
                 >
@@ -822,16 +852,18 @@ export function OrderAddressPaymentCheckWorkspace() {
                         <td className="py-2 pr-3">{paymentMethodText(rule.paymentMethod)}</td>
                         <td className="py-2 pr-3">{paymentStatusText(rule.observedStatus)}</td>
                         <td className="py-2 pr-3">{ruleSeverityText(rule.expectedSeverity)}</td>
-                        <td className="py-2 text-muted-foreground">{rule.reason || '—'}</td>
+                        <td className="text-muted-foreground py-2">{rule.reason || '—'}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
-                <p className="mt-2 text-xs text-muted-foreground">{paymentRulePageText({
-                  total: paymentPage.total,
-                  page: paymentPage.page,
-                                totalPages: paymentPage.totalPages,
-                })}</p>
+                <p className="text-muted-foreground mt-2 text-xs">
+                  {paymentRulePageText({
+                    total: paymentPage.total,
+                    page: paymentPage.page,
+                    totalPages: paymentPage.totalPages,
+                  })}
+                </p>
               </div>
             )}
           </div>
@@ -854,7 +886,7 @@ export function OrderAddressPaymentCheckWorkspace() {
               hint="本服务没有支付状态事实（12 财务未交付），由调用方提供"
             >
               <select
-                className="h-9 w-full rounded border bg-background px-2 text-sm"
+                className="bg-background h-9 w-full rounded border px-2 text-sm"
                 value={paymentStatus}
                 onChange={(e) => setPaymentStatus(e.target.value)}
               >
@@ -868,7 +900,7 @@ export function OrderAddressPaymentCheckWorkspace() {
             </FormField>
             <FormField id="ap-payment-source" label="观察值来源">
               <select
-                className="h-9 w-full rounded border bg-background px-2 text-sm"
+                className="bg-background h-9 w-full rounded border px-2 text-sm"
                 value={paymentStatusSource}
                 onChange={(e) => setPaymentStatusSource(e.target.value)}
                 disabled={!paymentStatus}
@@ -896,7 +928,7 @@ export function OrderAddressPaymentCheckWorkspace() {
             </FormField>
             <FormField id="ap-filter-risk" label="风险等级">
               <select
-                className="h-9 w-full rounded border bg-background px-2 text-sm"
+                className="bg-background h-9 w-full rounded border px-2 text-sm"
                 value={filterRisk}
                 onChange={(e) => setFilterRisk(e.target.value)}
               >
@@ -910,7 +942,7 @@ export function OrderAddressPaymentCheckWorkspace() {
             </FormField>
             <FormField id="ap-filter-delivery" label="校验结果">
               <select
-                className="h-9 w-full rounded border bg-background px-2 text-sm"
+                className="bg-background h-9 w-full rounded border px-2 text-sm"
                 value={filterDelivery}
                 onChange={(e) => setFilterDelivery(e.target.value)}
               >
@@ -924,7 +956,7 @@ export function OrderAddressPaymentCheckWorkspace() {
             </FormField>
           </div>
           {loading ? (
-            <p className="text-sm text-muted-foreground">加载中…</p>
+            <p className="text-muted-foreground text-sm">加载中…</p>
           ) : checks.length === 0 ? (
             <EmptyState
               title="还没有校验记录"
@@ -974,7 +1006,7 @@ export function OrderAddressPaymentCheckWorkspace() {
                         命中 {check.flaggedCount} / 缺参照 {check.noReferenceCount} / 未交付{' '}
                         {check.upstreamUnavailableCount}
                       </td>
-                      <td className="py-2 pr-3 text-muted-foreground">
+                      <td className="text-muted-foreground py-2 pr-3">
                         {isoText(check.assessedReferenceAt)}
                       </td>
                       <td className="py-2">
@@ -987,11 +1019,13 @@ export function OrderAddressPaymentCheckWorkspace() {
                 </tbody>
               </table>
               <div className="mt-3 flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">{pageText({
-                  total: checkPage.total,
-                  page: checkPage.page,
-                                totalPages: checkPage.totalPages,
-                })}</span>
+                <span className="text-muted-foreground">
+                  {pageText({
+                    total: checkPage.total,
+                    page: checkPage.page,
+                    totalPages: checkPage.totalPages,
+                  })}
+                </span>
                 <div className="flex gap-2">
                   <Button
                     size="sm"
@@ -1032,7 +1066,9 @@ export function OrderAddressPaymentCheckWorkspace() {
               <StatCard
                 label="风险等级"
                 value={riskText(detail.check.riskLevel)}
-                comparisonLabel={detail.check.codFlagged ? '货到付款专属最高档' : '按命中严重度定档'}
+                comparisonLabel={
+                  detail.check.codFlagged ? '货到付款专属最高档' : '按命中严重度定档'
+                }
               />
               <StatCard
                 label="订单金额"
@@ -1091,7 +1127,7 @@ export function OrderAddressPaymentCheckWorkspace() {
                           </span>
                         </td>
                         <td className="py-2 pr-3">{severityText(item.severity)}</td>
-                        <td className="py-2 pr-3 text-muted-foreground">
+                        <td className="text-muted-foreground py-2 pr-3">
                           {evidenceText(item.evidenceSource)}
                         </td>
                         <td className="py-2 pr-3">
@@ -1102,7 +1138,7 @@ export function OrderAddressPaymentCheckWorkspace() {
                             observed
                           )}
                         </td>
-                        <td className="py-2 text-muted-foreground">
+                        <td className="text-muted-foreground py-2">
                           {item.explanation}
                           {item.evidenceReference ? `（${item.evidenceReference}）` : ''}
                         </td>
@@ -1112,7 +1148,7 @@ export function OrderAddressPaymentCheckWorkspace() {
                 </tbody>
               </table>
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               判定基准时刻 {isoText(detail.check.assessedReferenceAt)} · 策略「
               {detail.check.policyName}」第 {detail.check.policyVersion} 版 · 命中{' '}
               {detail.check.flaggedCount} 条（BLOCK {detail.check.blockedCount} / WARN{' '}
@@ -1132,7 +1168,7 @@ export function OrderAddressPaymentCheckWorkspace() {
         </SectionCard>
       ) : null}
 
-      <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+      <div className="text-muted-foreground flex flex-wrap gap-3 text-xs">
         <span className="inline-flex items-center gap-1">
           <ShieldCheck className="h-3 w-3" /> 可投递
         </span>

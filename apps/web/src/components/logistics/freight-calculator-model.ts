@@ -273,11 +273,7 @@ export function fetchRateCards(countryCode?: string): Promise<RateCardOverview> 
 
 /** 试算（无副作用）。金额全部来自服务端，页面不做运算。 */
 export function estimateFreight(input: FreightEstimateInput): Promise<FreightEstimateResult> {
-  return api<FreightEstimateResult>(
-    'channel/freight/estimate',
-    'POST',
-    toEstimateRequest(input),
-  );
+  return api<FreightEstimateResult>('channel/freight/estimate', 'POST', toEstimateRequest(input));
 }
 
 /** 试算并落库（下游 9.3.2.1 分仓、5.2.3.2 费用测算引用的是它）。 */

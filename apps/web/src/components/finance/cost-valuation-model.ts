@@ -121,7 +121,9 @@ export function fetchCostValuationComparison(
 }
 
 /** 指定单价列表（真分页 + 真筛选）。 */
-export function fetchCostValuationSpecifiedCosts(params: { skuId?: string; currency?: string } = {}) {
+export function fetchCostValuationSpecifiedCosts(
+  params: { skuId?: string; currency?: string } = {},
+) {
   return api<FinanceCostValuationSpecifiedCostPage>(
     `${base}/specified-costs${query({ skuId: params.skuId, currency: params.currency })}`,
   );

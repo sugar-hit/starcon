@@ -156,10 +156,7 @@ export function ListingClaimWorkspace() {
     }),
     [source, targetShopId, targetMarketplaceId, note, fields],
   );
-  const payload: ClaimListingRequest | null = useMemo(
-    () => buildClaimRequest(draft),
-    [draft],
-  );
+  const payload: ClaimListingRequest | null = useMemo(() => buildClaimRequest(draft), [draft]);
 
   const active = useMemo(
     () => claims.find((c) => c.claimId === activeId) ?? null,
@@ -182,7 +179,7 @@ export function ListingClaimWorkspace() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center gap-2 py-16 text-muted-foreground">
+      <div className="text-muted-foreground flex items-center justify-center gap-2 py-16">
         <Loader2 className="size-4 animate-spin" />
         <span className="text-label-13">正在加载商品认领…</span>
       </div>
@@ -193,7 +190,7 @@ export function ListingClaimWorkspace() {
     return (
       <SectionCard title="商品认领">
         <EmptyState
-          icon={<TriangleAlert className="size-8 text-destructive" />}
+          icon={<TriangleAlert className="text-destructive size-8" />}
           title="商品认领加载失败"
           description={error}
           action={
@@ -224,18 +221,18 @@ export function ListingClaimWorkspace() {
       {/* ---- 🔴 两条边界的界面措辞（后端给原文，前端原样展示） ---- */}
       {caps && (
         <div className="border-brand/40 bg-brand-soft/40 rounded-lg border px-4 py-3">
-          <p className="text-foreground mb-1 text-label-13 font-medium">跨店搬家的两条硬边界</p>
-          <ul className="text-muted-foreground space-y-1 text-label-12">
+          <p className="text-foreground text-label-13 mb-1 font-medium">跨店搬家的两条硬边界</p>
+          <ul className="text-muted-foreground text-label-12 space-y-1">
             <li className="flex items-start gap-2">
-              <ShieldCheck className="mt-0.5 size-3.5 shrink-0 text-brand" />
+              <ShieldCheck className="text-brand mt-0.5 size-3.5 shrink-0" />
               <span>{caps.sourceUntouchedNote}</span>
             </li>
             <li className="flex items-start gap-2">
-              <PackagePlus className="mt-0.5 size-3.5 shrink-0 text-brand" />
+              <PackagePlus className="text-brand mt-0.5 size-3.5 shrink-0" />
               <span>{caps.draftNote}</span>
             </li>
             <li className="flex items-start gap-2">
-              <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-brand" />
+              <CheckCircle2 className="text-brand mt-0.5 size-3.5 shrink-0" />
               <span>{caps.publishTaskNote}</span>
             </li>
           </ul>
@@ -245,8 +242,8 @@ export function ListingClaimWorkspace() {
       {/* ---- 未接入维度明账 ---- */}
       {caps && unavailableDimensions(caps).length > 0 && (
         <div className="border-warning/40 bg-warning/5 rounded-lg border px-4 py-3">
-          <p className="text-warning mb-1 text-label-13 font-medium">部分能力未接入</p>
-          <ul className="text-muted-foreground space-y-1 text-label-12">
+          <p className="text-warning text-label-13 mb-1 font-medium">部分能力未接入</p>
+          <ul className="text-muted-foreground text-label-12 space-y-1">
             {unavailableDimensions(caps).map((d) => (
               <li key={d.dimension}>
                 <span className="text-foreground">{d.description}</span>
@@ -271,7 +268,7 @@ export function ListingClaimWorkspace() {
         <div className="space-y-5 px-4 py-4">
           {/* ① 源商品 */}
           <div>
-            <p className="text-foreground mb-2 text-label-13 font-medium">① 源 listing</p>
+            <p className="text-foreground text-label-13 mb-2 font-medium">① 源 listing</p>
             <div className="flex flex-wrap gap-2">
               <Input
                 className="max-w-sm"
@@ -291,10 +288,11 @@ export function ListingClaimWorkspace() {
                 <p className="text-foreground text-label-13">
                   {source.title}
                   <span className="text-muted-foreground">
-                    （{source.shopCode} / {source.marketplaceCode ?? '未归站点'} / {source.externalItemId}）
+                    （{source.shopCode} / {source.marketplaceCode ?? '未归站点'} /{' '}
+                    {source.externalItemId}）
                   </span>
                 </p>
-                <p className="text-muted-foreground mt-1 text-label-12">
+                <p className="text-muted-foreground text-label-12 mt-1">
                   状态 {source.status} · 审核 {source.reviewStatus} · 映射 {source.mappingStatus}
                 </p>
               </div>
@@ -315,7 +313,7 @@ export function ListingClaimWorkspace() {
                           setTargetShopId('');
                           setTargetMarketplaceId('');
                         }}
-                        className="border-border hover:border-foreground/40 hover:text-foreground text-muted-foreground w-full rounded-md border px-3 py-1.5 text-left text-label-13"
+                        className="border-border hover:border-foreground/40 hover:text-foreground text-muted-foreground text-label-13 w-full rounded-md border px-3 py-1.5 text-left"
                       >
                         {c.title}
                         <span className="text-muted-foreground">
@@ -331,10 +329,10 @@ export function ListingClaimWorkspace() {
 
           {/* ② 目标店铺与站点 */}
           <div>
-            <p className="text-foreground mb-2 text-label-13 font-medium">② 目标店铺与站点</p>
+            <p className="text-foreground text-label-13 mb-2 font-medium">② 目标店铺与站点</p>
             <div className="grid gap-3 sm:grid-cols-2">
               <select
-                className="border-control-border bg-card h-9 rounded-md border px-2 text-copy-13"
+                className="border-control-border bg-card text-copy-13 h-9 rounded-md border px-2"
                 value={targetShopId}
                 onChange={(e) => {
                   setTargetShopId(e.target.value);
@@ -350,7 +348,7 @@ export function ListingClaimWorkspace() {
                 ))}
               </select>
               <select
-                className="border-control-border bg-card h-9 rounded-md border px-2 text-copy-13"
+                className="border-control-border bg-card text-copy-13 h-9 rounded-md border px-2"
                 value={targetMarketplaceId}
                 onChange={(e) => setTargetMarketplaceId(e.target.value)}
                 disabled={busy || !targetShop}
@@ -364,12 +362,12 @@ export function ListingClaimWorkspace() {
               </select>
             </div>
             {source && targetShops.length === 0 && (
-              <p className="text-warning mt-2 text-label-12">
+              <p className="text-warning text-label-12 mt-2">
                 没有别的可迁入店铺。跨店搬家要求目标店铺与源店铺**不同**。
               </p>
             )}
             {targetShop && targetSites.length === 0 && (
-              <p className="text-warning mt-2 text-label-12">
+              <p className="text-warning text-label-12 mt-2">
                 目标店铺没有启用任何站点。请先在 2.3.1.1 启用站点。
               </p>
             )}
@@ -377,7 +375,7 @@ export function ListingClaimWorkspace() {
 
           {/* ③ 字段决策 */}
           <div>
-            <p className="text-foreground mb-2 text-label-13 font-medium">
+            <p className="text-foreground text-label-13 mb-2 font-medium">
               ③ 保留 / 重写的内容字段
               <span className="text-muted-foreground font-normal">
                 （没给决策的字段不会被复用；售价与库存不在此列）
@@ -392,8 +390,8 @@ export function ListingClaimWorkspace() {
                     key={option.value}
                     className="border-border flex flex-wrap items-center gap-2 rounded-md border px-3 py-2"
                   >
-                    <span className="text-foreground w-24 text-label-13">{option.label}</span>
-                    <span className="text-muted-foreground min-w-40 flex-1 text-label-12">
+                    <span className="text-foreground text-label-13 w-24">{option.label}</span>
+                    <span className="text-muted-foreground text-label-12 min-w-40 flex-1">
                       {option.hint}
                     </span>
                     <div className="flex gap-1">
@@ -408,8 +406,8 @@ export function ListingClaimWorkspace() {
                             onClick={() => setFieldMode(option.value, d.value)}
                             className={
                               current?.mode === d.value
-                                ? 'border-brand bg-brand-soft text-brand rounded-md border px-2.5 py-1 text-label-12'
-                                : 'border-border text-muted-foreground hover:border-foreground/40 hover:text-foreground rounded-md border px-2.5 py-1 text-label-12'
+                                ? 'border-brand bg-brand-soft text-brand text-label-12 rounded-md border px-2.5 py-1'
+                                : 'border-border text-muted-foreground hover:border-foreground/40 hover:text-foreground text-label-12 rounded-md border px-2.5 py-1'
                             }
                           >
                             {d.label}
@@ -434,9 +432,9 @@ export function ListingClaimWorkspace() {
               })}
             </div>
             {crossSite.length > 0 && (
-              <p className="text-warning mt-2 text-label-12">
-                目标站点与源站点不同：{crossSite.join('、')} 与**站点**绑定，
-                沿用源值等于在目标 listing 上写一个假事实 —— 请改为「重写」或「跳过」。
+              <p className="text-warning text-label-12 mt-2">
+                目标站点与源站点不同：{crossSite.join('、')} 与**站点**绑定， 沿用源值等于在目标
+                listing 上写一个假事实 —— 请改为「重写」或「跳过」。
               </p>
             )}
           </div>
@@ -476,10 +474,13 @@ export function ListingClaimWorkspace() {
       </SectionCard>
 
       {/* ---- 认领记录 ---- */}
-      <SectionCard title="认领记录" description="每一次跨店搬家的事实：源商品、目标草稿、逐字段决策。">
+      <SectionCard
+        title="认领记录"
+        description="每一次跨店搬家的事实：源商品、目标草稿、逐字段决策。"
+      >
         {claims.length === 0 ? (
           <EmptyState
-            icon={<PackagePlus className="size-8 text-muted-foreground" />}
+            icon={<PackagePlus className="text-muted-foreground size-8" />}
             title="还没有认领记录"
             description={emptyClaimsMessage()}
           />
@@ -493,8 +494,8 @@ export function ListingClaimWorkspace() {
                     onClick={() => setActiveId(c.claimId)}
                     className={
                       c.claimId === activeId
-                        ? 'border-brand bg-brand-soft/40 text-foreground w-full rounded-md border px-3 py-2 text-left text-label-13'
-                        : 'border-border hover:border-foreground/40 hover:text-foreground text-muted-foreground w-full rounded-md border px-3 py-2 text-left text-label-13'
+                        ? 'border-brand bg-brand-soft/40 text-foreground text-label-13 w-full rounded-md border px-3 py-2 text-left'
+                        : 'border-border hover:border-foreground/40 hover:text-foreground text-muted-foreground text-label-13 w-full rounded-md border px-3 py-2 text-left'
                     }
                   >
                     <span className="text-foreground">{c.sourceTitle}</span>
@@ -534,8 +535,8 @@ export function ListingClaimWorkspace() {
                       {active.sourceVersion}
                     </p>
                     <p className="text-muted-foreground text-label-12">
-                      现在：状态 {active.sourceCurrentStatus} · 审核 {active.sourceCurrentReviewStatus} · 版本{' '}
-                      {active.sourceCurrentVersion}
+                      现在：状态 {active.sourceCurrentStatus} · 审核{' '}
+                      {active.sourceCurrentReviewStatus} · 版本 {active.sourceCurrentVersion}
                     </p>
                   </div>
                   <div className="border-border rounded-md border px-3 py-2">
@@ -549,20 +550,24 @@ export function ListingClaimWorkspace() {
                       {active.targetPlatformStockState}
                     </p>
                     <p className="text-muted-foreground text-label-12">
-                      变体 {active.variantCount} 条（已映射 {active.mappedVariantCount} 条）· 待发布任务{' '}
-                      {active.publishTaskId ?? '—'}
+                      变体 {active.variantCount} 条（已映射 {active.mappedVariantCount} 条）·
+                      待发布任务 {active.publishTaskId ?? '—'}
                     </p>
                     {pendingPlatformItemIdNote(active) && (
-                      <p className="text-warning text-label-12">{pendingPlatformItemIdNote(active)}</p>
+                      <p className="text-warning text-label-12">
+                        {pendingPlatformItemIdNote(active)}
+                      </p>
                     )}
                   </div>
                 </div>
 
                 {/* 逐字段决策 */}
                 <div>
-                  <p className="text-foreground mb-1 text-label-13 font-medium">逐字段决策</p>
+                  <p className="text-foreground text-label-13 mb-1 font-medium">逐字段决策</p>
                   {active.fields.length === 0 ? (
-                    <p className="text-muted-foreground text-label-12">这次认领没有记录字段决策。</p>
+                    <p className="text-muted-foreground text-label-12">
+                      这次认领没有记录字段决策。
+                    </p>
                   ) : (
                     <ul className="space-y-1">
                       {active.fields.map((f) => (
@@ -570,7 +575,8 @@ export function ListingClaimWorkspace() {
                           <span className="text-foreground">
                             {FIELD_OPTIONS.find((o) => o.value === f.field)?.label ?? f.field}
                           </span>
-                          ：{decisionLabel(f.decision)} · 源值来自 {sourceOriginLabel(f.sourceOrigin)}
+                          ：{decisionLabel(f.decision)} · 源值来自{' '}
+                          {sourceOriginLabel(f.sourceOrigin)}
                           {f.note ? ` · ${f.note}` : ''}
                         </li>
                       ))}

@@ -11,7 +11,14 @@ import {
   Segmented,
   StatCard,
 } from '@starcon/ui';
-import { CircleAlert, Languages, Loader2, RefreshCw, ShieldCheck, TriangleAlert } from 'lucide-react';
+import {
+  CircleAlert,
+  Languages,
+  Loader2,
+  RefreshCw,
+  ShieldCheck,
+  TriangleAlert,
+} from 'lucide-react';
 import {
   confirmTranslation,
   createTask,
@@ -219,29 +226,19 @@ export function TextTranslationWorkspace() {
   // 词表 / 规则 / 模板 / 已发布 / 目标语言：按需加载，切换标签页时再取。
   useEffect(() => {
     if (tab === 'glossary' && glossary.length === 0) {
-      fetchGlossary({})
-        .then(setGlossary)
-        .catch(fail);
+      fetchGlossary({}).then(setGlossary).catch(fail);
     }
     if (tab === 'banned' && bannedTerms.length === 0) {
-      fetchBannedTerms({})
-        .then(setBannedTerms)
-        .catch(fail);
+      fetchBannedTerms({}).then(setBannedTerms).catch(fail);
     }
     if (tab === 'rules' && rules.length === 0) {
-      fetchRules({})
-        .then(setRules)
-        .catch(fail);
+      fetchRules({}).then(setRules).catch(fail);
     }
     if (tab === 'templates' && templates.length === 0) {
-      fetchTemplates({})
-        .then(setTemplates)
-        .catch(fail);
+      fetchTemplates({}).then(setTemplates).catch(fail);
     }
     if (tab === 'published' && published.length === 0) {
-      fetchPublished(undefined, 0, PAGE_SIZE)
-        .then(setPublished)
-        .catch(fail);
+      fetchPublished(undefined, 0, PAGE_SIZE).then(setPublished).catch(fail);
     }
   }, [tab, glossary.length, bannedTerms.length, rules.length, templates.length, published.length]);
 
@@ -319,7 +316,11 @@ export function TextTranslationWorkspace() {
         description="多语言翻译、术语与品牌词保护、违禁词规避建议、客服回复草稿。翻译结果必须人工确认后才能发布。"
         actions={
           <Button onClick={() => void load()} disabled={loading}>
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
             刷新
           </Button>
         }
@@ -340,7 +341,11 @@ export function TextTranslationWorkspace() {
 
       {overview && (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard label="任务总数" value={overview.total} icon={<Languages className="h-4 w-4" />} />
+          <StatCard
+            label="任务总数"
+            value={overview.total}
+            icon={<Languages className="h-4 w-4" />}
+          />
           <StatCard label="待复核" value={overview.drafted} />
           <StatCard label="已确认" value={overview.confirmed} />
           <StatCard label="已发布" value={overview.published} />
@@ -540,7 +545,7 @@ export function TextTranslationWorkspace() {
                     <span className="text-muted-foreground text-copy-13">
                       {task.sourceLocale} → {task.targetLocale}
                     </span>
-                    <span className="text-muted-foreground min-w-0 flex-1 truncate text-copy-13">
+                    <span className="text-muted-foreground text-copy-13 min-w-0 flex-1 truncate">
                       {task.sourceText}
                     </span>
                     {task.checkFailed > 0 && (
@@ -591,7 +596,11 @@ export function TextTranslationWorkspace() {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  <Button variant="secondary" disabled={busy} onClick={() => void onGenerate(detail.task.id)}>
+                  <Button
+                    variant="secondary"
+                    disabled={busy}
+                    onClick={() => void onGenerate(detail.task.id)}
+                  >
                     AI 生成译文
                   </Button>
                   <Button
@@ -654,7 +663,9 @@ export function TextTranslationWorkspace() {
                 </div>
 
                 <label className="block space-y-1 text-sm">
-                  <span className="text-muted-foreground">译文（可人工编辑，保存时追加新版本）</span>
+                  <span className="text-muted-foreground">
+                    译文（可人工编辑，保存时追加新版本）
+                  </span>
                   <textarea
                     className="border-border bg-background min-h-32 w-full rounded-md border p-2 text-sm"
                     value={draftText}
@@ -701,7 +712,7 @@ export function TextTranslationWorkspace() {
                       ))}
                     </div>
                     {detail.confidence.explanation.length > 0 && (
-                      <ul className="text-muted-foreground list-disc space-y-1 pl-5 text-copy-13">
+                      <ul className="text-muted-foreground text-copy-13 list-disc space-y-1 pl-5">
                         {detail.confidence.explanation.map((line) => (
                           <li key={line}>{line}</li>
                         ))}
@@ -733,7 +744,7 @@ export function TextTranslationWorkspace() {
                     {detail.violations.map((v) => (
                       <div
                         key={`${v.ruleCode}-${v.matchedItem}`}
-                        className="border-border rounded-md border p-3 text-copy-13"
+                        className="border-border text-copy-13 rounded-md border p-3"
                       >
                         <Badge tone={v.severity === 'BLOCK' ? 'danger' : 'warning'}>
                           {v.severity === 'BLOCK' ? '拦住发布' : '警告'}
@@ -989,7 +1000,7 @@ export function TextTranslationWorkspace() {
                 <div key={t.id} className="border-border rounded-md border p-3">
                   <div className="flex flex-wrap items-center gap-3">
                     <span className="font-medium">{t.templateName}</span>
-                    <span className="text-muted-foreground font-mono text-label-12">
+                    <span className="text-muted-foreground text-label-12 font-mono">
                       {t.templateCode}
                     </span>
                     {t.targetLocale && <Badge tone="neutral">{t.targetLocale}</Badge>}
@@ -1022,7 +1033,7 @@ export function TextTranslationWorkspace() {
                     </Button>
                   </div>
                   <div className="text-copy-13 mt-2 whitespace-pre-wrap">{t.body}</div>
-                  <div className="text-muted-foreground mt-1 text-label-12">
+                  <div className="text-muted-foreground text-label-12 mt-1">
                     变量：{t.variables.join(' / ') || '（无）'}
                   </div>
                 </div>
@@ -1056,9 +1067,7 @@ export function TextTranslationWorkspace() {
                   <span className="text-muted-foreground text-copy-13">
                     {t.sourceLocale} → {t.targetLocale}
                   </span>
-                  <span className="min-w-0 flex-1 truncate text-copy-13">
-                    {t.currentDraftText}
-                  </span>
+                  <span className="text-copy-13 min-w-0 flex-1 truncate">{t.currentDraftText}</span>
                 </div>
               ))}
             </div>
@@ -1081,12 +1090,10 @@ export function TextTranslationWorkspace() {
                   <div className="text-copy-13 font-medium">{c.name}</div>
                   <div className="text-muted-foreground text-copy-13">{c.evidence}</div>
                   {c.note && (
-                    <div className="text-muted-foreground mt-1 text-label-12">{c.note}</div>
+                    <div className="text-muted-foreground text-label-12 mt-1">{c.note}</div>
                   )}
                 </div>
-                {!c.available && c.ownerModule && (
-                  <Badge tone="neutral">归 {c.ownerModule}</Badge>
-                )}
+                {!c.available && c.ownerModule && <Badge tone="neutral">归 {c.ownerModule}</Badge>}
               </div>
             ))}
           </div>
@@ -1101,7 +1108,7 @@ export function TextTranslationWorkspace() {
                   <Badge tone="neutral">{g.moduleId}</Badge>
                   <span className="text-copy-13">{g.name}</span>
                   <span className="text-muted-foreground text-label-12">{g.relation}</span>
-                  <span className="text-muted-foreground flex-1 text-label-12">{g.note}</span>
+                  <span className="text-muted-foreground text-label-12 flex-1">{g.note}</span>
                 </div>
               ))}
             </div>
@@ -1132,10 +1139,10 @@ export function TextTranslationWorkspace() {
           </label>
           <Button
             onClick={() => {
-              const type = (
-                document.getElementById('source-ref-type') as HTMLSelectElement | null
-              )?.value;
-              const id = (document.getElementById('source-ref-id') as HTMLInputElement | null)?.value;
+              const type = (document.getElementById('source-ref-type') as HTMLSelectElement | null)
+                ?.value;
+              const id = (document.getElementById('source-ref-id') as HTMLInputElement | null)
+                ?.value;
               if (!type || !id) {
                 setSourceError('上游类型与上游 id 都要填。');
                 return;
@@ -1163,7 +1170,10 @@ export function TextTranslationWorkspace() {
               />
             ) : (
               sourceCandidates.items.map((c) => (
-                <div key={`${c.refType}-${c.refId}-${c.locale}`} className="border-border rounded-md border p-3">
+                <div
+                  key={`${c.refType}-${c.refId}-${c.locale}`}
+                  className="border-border rounded-md border p-3"
+                >
                   <div className="text-copy-13 font-medium">{c.name || '（无标题）'}</div>
                   <div className="text-muted-foreground text-label-12">{c.locale}</div>
                   <div className="text-copy-13 mt-1 whitespace-pre-wrap">{c.description}</div>
@@ -1183,10 +1193,8 @@ function CheckLine({ check }: { check: TextCheckRow }) {
     <div className="border-border flex flex-wrap items-start gap-2 rounded-md border p-2">
       <Badge tone={BADGE_TONE[verdictTone(check.verdict)]}>{verdictLabel(check.verdict)}</Badge>
       <span className="text-copy-13 font-medium">{check.ruleLabel}</span>
-      {check.matchedItem && (
-        <span className="text-copy-13 font-mono">{check.matchedItem}</span>
-      )}
-      <span className="text-muted-foreground flex-1 text-copy-13">{check.detail}</span>
+      {check.matchedItem && <span className="text-copy-13 font-mono">{check.matchedItem}</span>}
+      <span className="text-muted-foreground text-copy-13 flex-1">{check.detail}</span>
     </div>
   );
 }

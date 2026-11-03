@@ -15,13 +15,13 @@
 
 **边界（硬规定）**：
 
-| 允许                                        | 禁止                                                       |
-| ------------------------------------------- | ---------------------------------------------------------- |
-| `fetch` / `merge origin/main` / `push` 集成头 | ❌ push 到 `main`                                         |
-| 同步后刷新台账 `sync.mjs`                    | ❌ 在 `main` 上提交任何东西                                |
-| 同步后跑**快速预检**（编译 + typecheck）       | ❌ 跑全量 `mvnw verify`（那是流水线每批一次的 L2）         |
-| 合并冲突时**如实上报**                        | ❌ 自行解冲突（`merge-union` 只覆盖契约/台账两类文件）       |
-|                                             | ❌ 动 `origin/integration/module-dev` 以外任何分支          |
+| 允许                                          | 禁止                                                   |
+| --------------------------------------------- | ------------------------------------------------------ |
+| `fetch` / `merge origin/main` / `push` 集成头 | ❌ push 到 `main`                                      |
+| 同步后刷新台账 `sync.mjs`                     | ❌ 在 `main` 上提交任何东西                            |
+| 同步后跑**快速预检**（编译 + typecheck）      | ❌ 跑全量 `mvnw verify`（那是流水线每批一次的 L2）     |
+| 合并冲突时**如实上报**                        | ❌ 自行解冲突（`merge-union` 只覆盖契约/台账两类文件） |
+|                                               | ❌ 动 `origin/integration/module-dev` 以外任何分支     |
 
 ⚠️ **本任务不改任何业务代码。** 它只搬运 commit。
 
@@ -52,11 +52,11 @@ cd "$PROJECT_ROOT"
 node tools/module-progress/lane.mjs gate status
 ```
 
-| `gate` | `stale` | 动作                                                          |
-| ------ | ------- | ------------------------------------------------------------- |
-| `free` | false   | `gate acquire` 继续                                          |
+| `gate` | `stale` | 动作                                                                              |
+| ------ | ------- | --------------------------------------------------------------------------------- |
+| `free` | false   | `gate acquire` 继续                                                               |
 | `held` | false   | **有活着的流水线 tick 持闸** ⇒ **等它释放**（见下「等闸」），不抢、不清、不 force |
-| `held` | true    | 持闸者已崩（超 TTL）⇒ 可以 `acquire` 接管                    |
+| `held` | true    | 持闸者已崩（超 TTL）⇒ 可以 `acquire` 接管                                         |
 
 ⚠️ **必须走 `gate status` 的 `stale` 字段判据，不要自己按 ageSeconds 猜。**
 ⚠️ **收尾必须 `node tools/module-progress/lane.mjs gate release`** ——

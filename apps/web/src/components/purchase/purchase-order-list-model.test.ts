@@ -69,9 +69,7 @@ describe('查询串拼装', () => {
         promisedFrom: '2026-10-05',
         promisedTo: '2026-10-20',
       }),
-    ).toBe(
-      '?createdFrom=2026-10-01T00%3A00%3A00Z&promisedFrom=2026-10-05&promisedTo=2026-10-20',
-    );
+    ).toBe('?createdFrom=2026-10-01T00%3A00%3A00Z&promisedFrom=2026-10-05&promisedTo=2026-10-20');
   });
 });
 
@@ -169,9 +167,9 @@ describe('批量操作的前置条件', () => {
 
 describe('批量结果的逐单成败', () => {
   it('全成功时只报成功数', () => {
-    expect(
-      batchResultText({ requested: 2, succeeded: 2, failures: [], note: '' }),
-    ).toBe('已处理 2 张采购单');
+    expect(batchResultText({ requested: 2, succeeded: 2, failures: [], note: '' })).toBe(
+      '已处理 2 张采购单',
+    );
   });
 
   it('有失败时把原因原样带出来，而不是只留一个布尔', () => {

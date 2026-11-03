@@ -196,10 +196,16 @@ export function swapLayouts(
   if (!dragged || !target || draggedId === targetId) return components;
   const next = components.map((component) => {
     if (component.componentId === draggedId) {
-      return { ...component, layout: { ...target.layout, w: dragged.layout.w, h: dragged.layout.h } };
+      return {
+        ...component,
+        layout: { ...target.layout, w: dragged.layout.w, h: dragged.layout.h },
+      };
     }
     if (component.componentId === targetId) {
-      return { ...component, layout: { ...dragged.layout, w: target.layout.w, h: target.layout.h } };
+      return {
+        ...component,
+        layout: { ...dragged.layout, w: target.layout.w, h: target.layout.h },
+      };
     }
     return component;
   });
@@ -230,10 +236,7 @@ export function toLayoutRequest(components: BoardComponentView[]): BoardLayoutSa
 }
 
 /** 布局是否**真的**变了（用来决定要不要提示「未保存」）。 */
-export function layoutChanged(
-  before: BoardComponentView[],
-  after: BoardComponentView[],
-): boolean {
+export function layoutChanged(before: BoardComponentView[], after: BoardComponentView[]): boolean {
   if (before.length !== after.length) return true;
   const byId = new Map(before.map((component) => [component.componentId, component]));
   for (const component of after) {

@@ -142,7 +142,14 @@ describe('库存调整单 · 行状态', () => {
 describe('库存调整单 · 不可用的原因码', () => {
   it('不可用的码不进入可选列表', () => {
     const options = [
-      { value: 'DAMAGE', label: '损坏', description: '', available: true, ownerModule: '', note: '' },
+      {
+        value: 'DAMAGE',
+        label: '损坏',
+        description: '',
+        available: true,
+        ownerModule: '',
+        note: '',
+      },
       {
         value: 'PLATFORM_VARIANCE',
         label: '平台仓差异',

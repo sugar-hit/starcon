@@ -76,8 +76,9 @@ export const fetchReturnDispositionCapabilities = () =>
 // 待处置的质量状态指令（11.2.3.1 产出，本模块消费）
 // ==========================================================================
 
-export const fetchPendingInstructions = (params: { page?: number; size?: number; skuCode?: string } = {}) =>
-  call<ReturnInventoryDispositionInstructionPage>(`${base}/instructions${query(params)}`);
+export const fetchPendingInstructions = (
+  params: { page?: number; size?: number; skuCode?: string } = {},
+) => call<ReturnInventoryDispositionInstructionPage>(`${base}/instructions${query(params)}`);
 
 // ==========================================================================
 // 处置选项（候选来源库位 + 候选目标库位，来自 warehouse 的真数据）
@@ -90,14 +91,16 @@ export const fetchDispositionOptions = (params: { skuId?: string; targetState?: 
 // 处置单
 // ==========================================================================
 
-export const fetchReturnDispositions = (params: {
-  page?: number;
-  size?: number;
-  status?: string;
-  targetState?: string;
-  skuCode?: string;
-  keyword?: string;
-} = {}) => call<ReturnInventoryDispositionPage>(`${base}${query(params)}`);
+export const fetchReturnDispositions = (
+  params: {
+    page?: number;
+    size?: number;
+    status?: string;
+    targetState?: string;
+    skuCode?: string;
+    keyword?: string;
+  } = {},
+) => call<ReturnInventoryDispositionPage>(`${base}${query(params)}`);
 
 export const fetchReturnDisposition = (id: string) =>
   call<ReturnInventoryDispositionDetail>(`${base}/${id}`);
@@ -117,7 +120,10 @@ export const updateReturnInventoryDisposition = (
     body: JSON.stringify(body),
   });
 
-export const submitReturnInventoryDisposition = (id: string, body: ReturnInventoryDispositionSubmit) =>
+export const submitReturnInventoryDisposition = (
+  id: string,
+  body: ReturnInventoryDispositionSubmit,
+) =>
   call<ReturnInventoryDispositionDetail>(`${base}/${id}/submit`, {
     method: 'POST',
     body: JSON.stringify(body),
@@ -132,19 +138,28 @@ export const approveReturnInventoryDisposition = (
     body: JSON.stringify(body),
   });
 
-export const rejectReturnInventoryDisposition = (id: string, body: ReturnInventoryDispositionDecision) =>
+export const rejectReturnInventoryDisposition = (
+  id: string,
+  body: ReturnInventoryDispositionDecision,
+) =>
   call<ReturnInventoryDispositionDetail>(`${base}/${id}/reject`, {
     method: 'POST',
     body: JSON.stringify(body),
   });
 
-export const cancelReturnInventoryDisposition = (id: string, body: ReturnInventoryDispositionCancel) =>
+export const cancelReturnInventoryDisposition = (
+  id: string,
+  body: ReturnInventoryDispositionCancel,
+) =>
   call<ReturnInventoryDispositionDetail>(`${base}/${id}/cancel`, {
     method: 'POST',
     body: JSON.stringify(body),
   });
 
-export const executeReturnInventoryDisposition = (id: string, body: ReturnInventoryDispositionExecute) =>
+export const executeReturnInventoryDisposition = (
+  id: string,
+  body: ReturnInventoryDispositionExecute,
+) =>
   call<ReturnInventoryDispositionDetail>(`${base}/${id}/execute`, {
     method: 'POST',
     body: JSON.stringify(body),
@@ -185,7 +200,8 @@ export const canSubmit = (status: string) => status === 'DRAFT';
 export const canApprove = (status: string) => status === 'PENDING_APPROVAL';
 
 /** 当前状态能不能执行（已批或执行失败可重试）。 */
-export const canExecute = (status: string) => status === 'APPROVED' || status === 'EXECUTION_FAILED';
+export const canExecute = (status: string) =>
+  status === 'APPROVED' || status === 'EXECUTION_FAILED';
 
 /** 当前状态能不能撤销（终态不可撤销）。 */
 export const canCancel = (status: string) =>
@@ -217,10 +233,12 @@ export const requiresTargetLocation = (targetState: string) => targetState !== '
  * <p>⚠️ 页面据此显示「待 12 财务确认」而不是 0 ——
  * 12 财务服务尚未交付，损耗金额恒为 null；填 0 会让财务以为这批报废货零损耗。
  */
-export const financePending = (loss: {
-  financeLossAmount: number | null;
-  financeReference: string | null;
-} | null) => !!loss && loss.financeLossAmount === null && !loss.financeReference;
+export const financePending = (
+  loss: {
+    financeLossAmount: number | null;
+    financeReference: string | null;
+  } | null,
+) => !!loss && loss.financeLossAmount === null && !loss.financeReference;
 
 /** 处置单状态的中文标签。 */
 export const statusLabel = (status: string): string =>

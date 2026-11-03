@@ -246,7 +246,9 @@ describe('汇总条', () => {
     } as unknown as AftersalesCaseCapabilities;
     expect(bulkMaxSize(caps, 50)).toBe(100);
     expect(bulkMaxSize(null, 50)).toBe(50);
-    expect(bulkMaxSize({ bulkOperations: [] } as unknown as AftersalesCaseCapabilities, 50)).toBe(50);
+    expect(bulkMaxSize({ bulkOperations: [] } as unknown as AftersalesCaseCapabilities, 50)).toBe(
+      50,
+    );
   });
 });
 
@@ -267,8 +269,22 @@ describe('批量结果逐条回报', () => {
   it('成功数 / 失败数分开说，不压成一个布尔值', () => {
     const text = bulkSummaryText(
       result([
-        { caseId: '1', caseNo: 'AS1', success: true, outcome: 'AUTHORIZED', detail: '已批准', reference: 'x' },
-        { caseId: '2', caseNo: 'AS2', success: false, outcome: 'AMOUNT_EXCEEDS', detail: '授权金额超过申请金额', reference: null },
+        {
+          caseId: '1',
+          caseNo: 'AS1',
+          success: true,
+          outcome: 'AUTHORIZED',
+          detail: '已批准',
+          reference: 'x',
+        },
+        {
+          caseId: '2',
+          caseNo: 'AS2',
+          success: false,
+          outcome: 'AMOUNT_EXCEEDS',
+          detail: '授权金额超过申请金额',
+          reference: null,
+        },
       ]),
     );
     expect(text).toContain('成功 1 / 2');
@@ -277,10 +293,20 @@ describe('批量结果逐条回报', () => {
 
   it('失败项给人话原因，成功项带产物引用', () => {
     const ok: AftersalesBulkItemResult = {
-      caseId: '1', caseNo: 'AS1', success: true, outcome: 'AUTHORIZED', detail: '已批准', reference: 'auth-1',
+      caseId: '1',
+      caseNo: 'AS1',
+      success: true,
+      outcome: 'AUTHORIZED',
+      detail: '已批准',
+      reference: 'auth-1',
     };
     const ko: AftersalesBulkItemResult = {
-      caseId: '2', caseNo: 'AS2', success: false, outcome: 'ALREADY_TICKETED', detail: '已转过工单（工单号 TK1）', reference: null,
+      caseId: '2',
+      caseNo: 'AS2',
+      success: false,
+      outcome: 'ALREADY_TICKETED',
+      detail: '已转过工单（工单号 TK1）',
+      reference: null,
     };
     expect(bulkItemText(ok)).toContain('auth-1');
     expect(bulkItemText(ko)).toContain('TK1');

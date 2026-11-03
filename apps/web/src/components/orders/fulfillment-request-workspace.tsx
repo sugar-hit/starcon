@@ -91,7 +91,10 @@ export function FulfillmentRequestWorkspace() {
   const [detail, setDetail] = useState<FulfillmentRequestDetail | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const [filters, setFilters] = useState<FulfillmentRequestListParams>({ page: 0, size: PAGE_SIZE });
+  const [filters, setFilters] = useState<FulfillmentRequestListParams>({
+    page: 0,
+    size: PAGE_SIZE,
+  });
   const [loading, setLoading] = useState(true);
   const [listError, setListError] = useState('');
   const [detailError, setDetailError] = useState('');
@@ -243,7 +246,7 @@ export function FulfillmentRequestWorkspace() {
                 yesText="是（落在 PostgreSQL，重启后可继续）"
               />
             </div>
-            <details className="text-xs text-muted-foreground">
+            <details className="text-muted-foreground text-xs">
               <summary className="cursor-pointer">上下游逐项可用性</summary>
               <ul className="mt-2 space-y-1">
                 {capabilities.dimensions.map((d) => (
@@ -259,7 +262,7 @@ export function FulfillmentRequestWorkspace() {
             </details>
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">{loading ? '加载中…' : '暂无数据'}</p>
+          <p className="text-muted-foreground text-sm">{loading ? '加载中…' : '暂无数据'}</p>
         )}
       </SectionCard>
 
@@ -300,9 +303,7 @@ export function FulfillmentRequestWorkspace() {
               <input
                 type="checkbox"
                 checked={Boolean(filters.overdueOnly)}
-                onChange={(e) =>
-                  setFilters({ ...filters, overdueOnly: e.target.checked, page: 0 })
-                }
+                onChange={(e) => setFilters({ ...filters, overdueOnly: e.target.checked, page: 0 })}
               />
               已超时
             </label>
@@ -310,7 +311,7 @@ export function FulfillmentRequestWorkspace() {
         </div>
 
         {loading ? (
-          <p className="text-sm text-muted-foreground">加载中…</p>
+          <p className="text-muted-foreground text-sm">加载中…</p>
         ) : !page || page.items.length === 0 ? (
           <EmptyState
             title="还没有履约请求"
@@ -319,7 +320,7 @@ export function FulfillmentRequestWorkspace() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="border-b text-xs text-muted-foreground">
+              <thead className="text-muted-foreground border-b text-xs">
                 <tr>
                   <th className="py-2 pr-3">请求号</th>
                   <th className="py-2 pr-3">进度</th>
@@ -334,7 +335,7 @@ export function FulfillmentRequestWorkspace() {
                 {page.items.map((row) => (
                   <tr
                     key={row.id}
-                    className="cursor-pointer border-b last:border-0 hover:bg-muted/50"
+                    className="hover:bg-muted/50 cursor-pointer border-b last:border-0"
                     onClick={() => void openDetail(row.id)}
                   >
                     <td className="py-2 pr-3 font-mono text-xs">{row.requestCode}</td>
@@ -381,14 +382,14 @@ export function FulfillmentRequestWorkspace() {
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-mono text-xs">{row.requestCode}</span>
                     <span>{row.currentStepLabel} 卡住</span>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-muted-foreground text-xs">
                       第 {row.attempt} 次尝试 · v{row.processVersion}
                     </span>
                     <Button variant="ghost" onClick={() => void openDetail(row.id)}>
                       看详情
                     </Button>
                   </div>
-                  <p className="mt-1 text-xs text-muted-foreground">
+                  <p className="text-muted-foreground mt-1 text-xs">
                     {row.blockedReasonCodeLabel}：{row.blockedReason || '未写明'}
                   </p>
                   <div className="mt-2 flex gap-2">
@@ -398,11 +399,7 @@ export function FulfillmentRequestWorkspace() {
                       onChange={(e) => setRetryReason(e.target.value)}
                     />
                     <Button
-                      disabled={
-                        busy ||
-                        retryReason.trim().length === 0 ||
-                        row.id !== selectedId
-                      }
+                      disabled={busy || retryReason.trim().length === 0 || row.id !== selectedId}
                       onClick={() =>
                         void act('重试', async () => {
                           const result = await retryRequest(row.id, {
@@ -431,7 +428,7 @@ export function FulfillmentRequestWorkspace() {
           <div className="flex items-center gap-2">
             <select
               aria-label="扫描哪一步"
-              className="rounded-md border bg-background px-2 py-1 text-sm"
+              className="bg-background rounded-md border px-2 py-1 text-sm"
               value={scanStep}
               onChange={(e) => setScanStep(e.target.value as FulfillmentStepLiteral)}
             >
@@ -447,8 +444,10 @@ export function FulfillmentRequestWorkspace() {
               onClick={() =>
                 void act('扫描超时', async () => {
                   const result = await scanTimeouts({ stepKind: scanStep, limit: 100 });
-                  return `扫描「${STEP_LABELS[scanStep]}」步 ${result.scanned} 条，`
-                    + `挂起 ${result.blocked.length} 条，跳过 ${result.skipped.length} 条。`;
+                  return (
+                    `扫描「${STEP_LABELS[scanStep]}」步 ${result.scanned} 条，` +
+                    `挂起 ${result.blocked.length} 条，跳过 ${result.skipped.length} 条。`
+                  );
                 })
               }
             >
@@ -465,7 +464,7 @@ export function FulfillmentRequestWorkspace() {
               <li key={row.id} className="rounded border p-2">
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-xs">{row.requestId?.slice(0, 8)}</span>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-muted-foreground text-xs">
                     第 {row.attempt} 次尝试 · {row.detectionKindLabel}
                   </span>
                 </div>
@@ -488,11 +487,14 @@ export function FulfillmentRequestWorkspace() {
             </Notice>
           )}
           {!detail ? (
-            <p className="text-sm text-muted-foreground">加载中…</p>
+            <p className="text-muted-foreground text-sm">加载中…</p>
           ) : (
             <div className="space-y-4 text-sm">
               <div className="grid gap-2 sm:grid-cols-4">
-                <Field label="状态" value={`${detail.request.currentStepLabel} · ${detail.request.statusLabel}`} />
+                <Field
+                  label="状态"
+                  value={`${detail.request.currentStepLabel} · ${detail.request.statusLabel}`}
+                />
                 <Field label="版本（推进时必须带上）" value={`v${detail.request.processVersion}`} />
                 <Field label="第几次尝试" value={String(detail.request.attempt)} />
                 <Field label="当前步截止" value={iso(detail.request.deadlineAt)} />
@@ -501,7 +503,7 @@ export function FulfillmentRequestWorkspace() {
               <StepActions detail={detail} busy={busy} act={act} />
 
               <div>
-                <h4 className="mb-1 text-xs font-semibold text-muted-foreground">流程状态记录</h4>
+                <h4 className="text-muted-foreground mb-1 text-xs font-semibold">流程状态记录</h4>
                 <ul className="space-y-1">
                   {detail.steps.map((s) => (
                     <li key={s.id} className="text-xs">
@@ -509,12 +511,14 @@ export function FulfillmentRequestWorkspace() {
                       {s.finishedAt ? ` · ${iso(s.finishedAt)}` : ''}
                     </li>
                   ))}
-                  {detail.steps.length === 0 && <li className="text-xs text-muted-foreground">尚无</li>}
+                  {detail.steps.length === 0 && (
+                    <li className="text-muted-foreground text-xs">尚无</li>
+                  )}
                 </ul>
               </div>
 
               <div>
-                <h4 className="mb-1 text-xs font-semibold text-muted-foreground">
+                <h4 className="text-muted-foreground mb-1 text-xs font-semibold">
                   锁定预占指令（下游 7.2 · 本模块未锁任何库存）
                 </h4>
                 <ul className="space-y-1">
@@ -524,13 +528,13 @@ export function FulfillmentRequestWorkspace() {
                     </li>
                   ))}
                   {detail.reservations.length === 0 && (
-                    <li className="text-xs text-muted-foreground">尚未发出预占指令</li>
+                    <li className="text-muted-foreground text-xs">尚未发出预占指令</li>
                   )}
                 </ul>
               </div>
 
               <div>
-                <h4 className="mb-1 text-xs font-semibold text-muted-foreground">
+                <h4 className="text-muted-foreground mb-1 text-xs font-semibold">
                   出库单指令（下游 8.3.1 · 本模块未派单）
                 </h4>
                 <ul className="space-y-1">
@@ -540,13 +544,13 @@ export function FulfillmentRequestWorkspace() {
                     </li>
                   ))}
                   {detail.outboundOrders.length === 0 && (
-                    <li className="text-xs text-muted-foreground">尚未发出库单指令</li>
+                    <li className="text-muted-foreground text-xs">尚未发出库单指令</li>
                   )}
                 </ul>
               </div>
 
               <div>
-                <h4 className="mb-1 text-xs font-semibold text-muted-foreground">编排作业</h4>
+                <h4 className="text-muted-foreground mb-1 text-xs font-semibold">编排作业</h4>
                 <ul className="space-y-1">
                   {detail.workOrders.map((w) => (
                     <li key={w.id} className="text-xs">
@@ -555,13 +559,15 @@ export function FulfillmentRequestWorkspace() {
                     </li>
                   ))}
                   {detail.workOrders.length === 0 && (
-                    <li className="text-xs text-muted-foreground">尚未编排作业</li>
+                    <li className="text-muted-foreground text-xs">尚未编排作业</li>
                   )}
                 </ul>
               </div>
 
               <div>
-                <h4 className="mb-1 text-xs font-semibold text-muted-foreground">事件流（append-only）</h4>
+                <h4 className="text-muted-foreground mb-1 text-xs font-semibold">
+                  事件流（append-only）
+                </h4>
                 <ul className="space-y-1">
                   {detail.events.map((e) => (
                     <li key={e.id} className="text-xs">
@@ -684,7 +690,7 @@ function BlockButton({
     <div className="w-full space-y-2 rounded border p-3">
       <textarea
         aria-label="挂起原因"
-        className="w-full rounded-md border bg-background px-3 py-2 text-sm min-h-20"
+        className="bg-background min-h-20 w-full rounded-md border px-3 py-2 text-sm"
         placeholder="挂起原因（必填）：如 warehouse 回执缺货"
         value={reason}
         onChange={(e) => setReason(e.target.value)}
@@ -737,7 +743,7 @@ function CancelButton({
     );
   }
   return (
-    <div className="w-full space-y-2 rounded border border-destructive/40 p-3">
+    <div className="border-destructive/40 w-full space-y-2 rounded border p-3">
       <Input
         placeholder="取消原因（必填）：取消等于把货停在半路"
         value={reason}
@@ -781,9 +787,9 @@ type FulfillmentStatusLiteral =
   | 'BLOCKED'
   | 'CANCELLED';
 
-function nextAction(row: FulfillmentRequestRow):
-  | { to: FulfillmentStatusLiteral; step: FulfillmentStepLiteral; label: string }
-  | null {
+function nextAction(
+  row: FulfillmentRequestRow,
+): { to: FulfillmentStatusLiteral; step: FulfillmentStepLiteral; label: string } | null {
   switch (row.status) {
     case 'DRAFT':
       return { to: 'RESERVING', step: 'RESERVE', label: '预占中' };
@@ -851,7 +857,7 @@ function BoundaryRow({
 function Field({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className="text-muted-foreground text-xs">{label}</div>
       <div>{value}</div>
     </div>
   );

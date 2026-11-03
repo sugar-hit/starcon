@@ -207,7 +207,9 @@ export function WorkbenchLayoutWorkspace() {
                           {card.label}
                           <span className="text-muted-foreground ml-2 text-xs">{card.module}</span>
                         </p>
-                        <p className="text-copy-12 text-muted-foreground mt-0.5">{card.description}</p>
+                        <p className="text-copy-12 text-muted-foreground mt-0.5">
+                          {card.description}
+                        </p>
                       </div>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
@@ -215,7 +217,9 @@ export function WorkbenchLayoutWorkspace() {
                         <input
                           type="checkbox"
                           checked={visible}
-                          onChange={(event) => layout.setCardVisible(card.key, event.target.checked)}
+                          onChange={(event) =>
+                            layout.setCardVisible(card.key, event.target.checked)
+                          }
                           aria-label={`在「${card.label}」卡片区显示这张卡`}
                         />
                         显示

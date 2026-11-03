@@ -194,10 +194,7 @@ export function createPrepayment(input: FinancePrepaymentInput) {
 }
 
 /** 登记一笔预付款抵扣（**不改**应付单的已付金额 —— 那是 12.2.2.1 的写入口）。 */
-export function allocatePrepayment(
-  prepaymentId: string,
-  input: FinancePrepaymentAllocationInput,
-) {
+export function allocatePrepayment(prepaymentId: string, input: FinancePrepaymentAllocationInput) {
   return api<FinancePrepaymentDetail>(
     `${prepaymentBase}/${encodeURIComponent(prepaymentId)}/allocations`,
     'POST',

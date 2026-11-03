@@ -187,7 +187,9 @@ describe('4.1.2.3 筛选与分页', () => {
   });
 
   it('总数为 0 时摘要就说 0，不显示「第 1-0 条」', () => {
-    expect(pageSummary({ items: [], total: 0, page: 0, size: 50, currentInPage: 0 })).toBe('共 0 条');
+    expect(pageSummary({ items: [], total: 0, page: 0, size: 50, currentInPage: 0 })).toBe(
+      '共 0 条',
+    );
     expect(pageSummary(null)).toBe('共 0 条');
   });
 });

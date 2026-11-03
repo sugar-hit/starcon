@@ -45,9 +45,7 @@ describe('12.5.1.1 会计科目 · 前端模型', () => {
     expect(accountBalanceDirectionLabel('CREDIT')).toBe('贷方');
     expect(accountBalanceDirectionLabel('UNKNOWN')).toBe('UNKNOWN');
     // 可读名不得由类别推导：资产不必就是借方。
-    expect(accountBalanceDirectionLabel('CREDIT')).not.toBe(
-      accountSubjectCategoryLabel('ASSET'),
-    );
+    expect(accountBalanceDirectionLabel('CREDIT')).not.toBe(accountSubjectCategoryLabel('ASSET'));
   });
 
   it('税务属性各有一个可读名', () => {

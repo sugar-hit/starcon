@@ -103,17 +103,25 @@ export function UsageStatWorkspace() {
       return;
     }
     try {
-      const [capabilitiesView, optionsView, reportRows, trendPoints, billingRows, capacityRows, coverageRows, collectionRows] =
-        await Promise.all([
-          api<UsageCapabilitiesView>('identity/saas-usage/capabilities'),
-          api<UsageOptionsView>('identity/saas-usage/options'),
-          api<UsageReportRow[]>(`identity/saas-usage/report${query}`),
-          api<UsageTrendPoint[]>(`identity/saas-usage/trend${query}`),
-          api<UsageBillingRow[]>(`identity/saas-usage/billing-basis${query}`),
-          api<UsageCapacityRow[]>(`identity/saas-usage/capacity?periodType=${periodType.trim()}`),
-          api<UsageCoverageRow[]>('identity/saas-usage/coverage'),
-          api<UsageCollectionRow[]>(`identity/saas-usage/collections${query}`),
-        ]);
+      const [
+        capabilitiesView,
+        optionsView,
+        reportRows,
+        trendPoints,
+        billingRows,
+        capacityRows,
+        coverageRows,
+        collectionRows,
+      ] = await Promise.all([
+        api<UsageCapabilitiesView>('identity/saas-usage/capabilities'),
+        api<UsageOptionsView>('identity/saas-usage/options'),
+        api<UsageReportRow[]>(`identity/saas-usage/report${query}`),
+        api<UsageTrendPoint[]>(`identity/saas-usage/trend${query}`),
+        api<UsageBillingRow[]>(`identity/saas-usage/billing-basis${query}`),
+        api<UsageCapacityRow[]>(`identity/saas-usage/capacity?periodType=${periodType.trim()}`),
+        api<UsageCoverageRow[]>('identity/saas-usage/coverage'),
+        api<UsageCollectionRow[]>(`identity/saas-usage/collections${query}`),
+      ]);
       setCapabilities(capabilitiesView);
       setOptions(optionsView);
       setReport(reportRows);
@@ -198,19 +206,19 @@ export function UsageStatWorkspace() {
       </div>
 
       <div className="flex flex-wrap items-end gap-3">
-        <label className="flex flex-col gap-1 text-copy-12">
+        <label className="text-copy-12 flex flex-col gap-1">
           <span className="text-muted-foreground">目标租户 ID（留空 = 全部）</span>
           <input
-            className="border rounded px-2 py-1 font-mono text-copy-12"
+            className="text-copy-12 rounded border px-2 py-1 font-mono"
             value={tenantId}
             onChange={(e) => setTenantId(e.target.value)}
             placeholder="租户 ID"
           />
         </label>
-        <label className="flex flex-col gap-1 text-copy-12">
+        <label className="text-copy-12 flex flex-col gap-1">
           <span className="text-muted-foreground">维度</span>
           <select
-            className="border rounded px-2 py-1 text-copy-12"
+            className="text-copy-12 rounded border px-2 py-1"
             value={kind}
             onChange={(e) => setKind(e.target.value)}
           >
@@ -222,10 +230,10 @@ export function UsageStatWorkspace() {
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-copy-12">
+        <label className="text-copy-12 flex flex-col gap-1">
           <span className="text-muted-foreground">统计周期</span>
           <select
-            className="border rounded px-2 py-1 text-copy-12"
+            className="text-copy-12 rounded border px-2 py-1"
             value={periodType}
             onChange={(e) => setPeriodType(e.target.value)}
           >
@@ -302,12 +310,17 @@ export function UsageStatWorkspace() {
               </p>
               <ul className="mt-2 space-y-1">
                 {group.rows.map((row) => (
-                  <li key={`${row.entitlementCode}-${row.periodType}-${row.periodStart}`} className="text-copy-12">
+                  <li
+                    key={`${row.entitlementCode}-${row.periodType}-${row.periodStart}`}
+                    className="text-copy-12"
+                  >
                     {describeReportRow(row)}
                     <span className="text-muted-foreground">
                       {' '}
                       · {formatPeriodRange(row.periodType, row.periodStart, row.periodEnd)}
-                      {row.utilization !== null ? ` · 利用率 ${formatUtilization(row.utilization)}` : ''}
+                      {row.utilization !== null
+                        ? ` · 利用率 ${formatUtilization(row.utilization)}`
+                        : ''}
                       {row.overLimit ? ' · 已超限' : ''}
                     </span>
                   </li>
@@ -449,8 +462,8 @@ export function UsageStatWorkspace() {
           )}
           {unwired.length > 0 && (
             <p className="text-copy-12 text-warning">
-              尚未接通的维度：{unwired.join('、')}。这些维度在计费依据里是「判定不了」，
-              不是「用量 0」——来源系统没登记，本模块不用 0 冒充量过了。
+              尚未接通的维度：{unwired.join('、')}。这些维度在计费依据里是「判定不了」， 不是「用量
+              0」——来源系统没登记，本模块不用 0 冒充量过了。
             </p>
           )}
         </div>

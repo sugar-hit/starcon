@@ -104,14 +104,18 @@ export function AdTargetingsWorkspace() {
   const [detail, setDetail] = useState<AdTargetingDetail | null>(null);
 
   // ---- 写表单 ----
-  const [createInput, setCreateInput] = useState<AdTargetingCreateInput>(emptyAdTargetingCreateInput);
+  const [createInput, setCreateInput] = useState<AdTargetingCreateInput>(
+    emptyAdTargetingCreateInput,
+  );
   const [createErrors, setCreateErrors] = useState<string[]>([]);
   const [interpretInput, setInterpretInput] = useState<AdTargetingInterpretInput>(
     emptyAdTargetingInterpretInput,
   );
   const [interpretErrors, setInterpretErrors] = useState<string[]>([]);
   const [interpretResult, setInterpretResult] = useState<AdTargetingInterpretResult | null>(null);
-  const [metricInput, setMetricInput] = useState<AdTargetingMetricInput>(emptyAdTargetingMetricInput);
+  const [metricInput, setMetricInput] = useState<AdTargetingMetricInput>(
+    emptyAdTargetingMetricInput,
+  );
   const [metricErrors, setMetricErrors] = useState<string[]>([]);
   const [metricResult, setMetricResult] = useState<AdTargetingMetricBatchResult | null>(null);
   const [narrowReason, setNarrowReason] = useState('');
@@ -370,7 +374,7 @@ export function AdTargetingsWorkspace() {
       </header>
 
       {error ? (
-        <p className="rounded border border-destructive/40 p-2 text-destructive text-sm">{error}</p>
+        <p className="border-destructive/40 text-destructive rounded border p-2 text-sm">{error}</p>
       ) : null}
 
       {/* ================= 能力声明 ================= */}
@@ -392,13 +396,17 @@ export function AdTargetingsWorkspace() {
                     <td className="p-2">{d.dimension}</td>
                     <td className="p-2">
                       {d.description}
-                      {d.available ? '' : <div className="text-muted-foreground text-xs">{d.impact}</div>}
+                      {d.available ? (
+                        ''
+                      ) : (
+                        <div className="text-muted-foreground text-xs">{d.impact}</div>
+                      )}
                     </td>
                     <td className="p-2">
                       {d.available ? (
-                        <span className="text-emerald-600 text-xs">已交付</span>
+                        <span className="text-xs text-emerald-600">已交付</span>
                       ) : (
-                        <span className="text-amber-600 text-xs">未交付</span>
+                        <span className="text-xs text-amber-600">未交付</span>
                       )}
                     </td>
                     <td className="p-2 text-xs">
@@ -409,9 +417,15 @@ export function AdTargetingsWorkspace() {
                 ))}
               </tbody>
             </table>
-            <p className="text-muted-foreground text-xs whitespace-pre-line">{capabilities.interpretationNote}</p>
-            <p className="text-muted-foreground text-xs whitespace-pre-line">{capabilities.platformWritebackNote}</p>
-            <p className="text-muted-foreground text-xs whitespace-pre-line">{capabilities.guardrails.note}</p>
+            <p className="text-muted-foreground whitespace-pre-line text-xs">
+              {capabilities.interpretationNote}
+            </p>
+            <p className="text-muted-foreground whitespace-pre-line text-xs">
+              {capabilities.platformWritebackNote}
+            </p>
+            <p className="text-muted-foreground whitespace-pre-line text-xs">
+              {capabilities.guardrails.note}
+            </p>
           </div>
         ) : (
           <p className="text-muted-foreground text-sm">正在读能力声明…</p>
@@ -493,13 +507,17 @@ export function AdTargetingsWorkspace() {
               ))}
             </select>
           </Field>
-          <button type="button" className="rounded border px-2 py-1 text-sm" onClick={() => void load()}>
+          <button
+            type="button"
+            className="rounded border px-2 py-1 text-sm"
+            onClick={() => void load()}
+          >
             刷新
           </button>
         </div>
 
         {summary ? (
-          <p className="text-muted-foreground text-xs whitespace-pre-line">
+          <p className="text-muted-foreground whitespace-pre-line text-xs">
             汇总：共 {summary.total} 条，覆盖 {summary.campaignCount} 个活动，其中{' '}
             {summary.pendingWritebackCount} 条标着「本地已改、尚未回写平台」。
             {summary.note}
@@ -511,7 +529,8 @@ export function AdTargetingsWorkspace() {
         ) : settings.length === 0 ? (
           <p className="text-muted-foreground text-sm">
             没有符合条件的定位设置。这**不等于**「没有投放」—— 定位设置来自平台原文解读与人工登记；
-            先用下面的「解读平台原文」把上游的 targeting_settings 拆成定位维度，或者换个筛选条件再看看。
+            先用下面的「解读平台原文」把上游的 targeting_settings
+            拆成定位维度，或者换个筛选条件再看看。
           </p>
         ) : (
           <table className="w-full text-sm">
@@ -563,7 +582,7 @@ export function AdTargetingsWorkspace() {
                   </td>
                   <td className="p-2">
                     {row.pendingPlatformWriteback ? (
-                      <span className="text-amber-600 text-xs">待回写平台</span>
+                      <span className="text-xs text-amber-600">待回写平台</span>
                     ) : (
                       <span className="text-muted-foreground text-xs">—</span>
                     )}
@@ -807,7 +826,9 @@ export function AdTargetingsWorkspace() {
         ) : null}
         {interpretResult ? (
           <div className="flex flex-col gap-2">
-            <p className="text-muted-foreground text-xs whitespace-pre-line">{interpretResult.note}</p>
+            <p className="text-muted-foreground whitespace-pre-line text-xs">
+              {interpretResult.note}
+            </p>
             {interpretResult.items.length === 0 ? (
               <p className="text-muted-foreground text-sm">平台原文里没有可解读的定位内容。</p>
             ) : (
@@ -823,15 +844,19 @@ export function AdTargetingsWorkspace() {
                 </thead>
                 <tbody>
                   {interpretResult.items.map((row, index) => (
-                    <tr key={`${row.dimension}-${row.dimensionValue}-${index}`} className="border-b">
+                    <tr
+                      key={`${row.dimension}-${row.dimensionValue}-${index}`}
+                      className="border-b"
+                    >
                       <td className="p-2">
-                        {row.recognized ? dimensionLabel(row.dimension) : '未识别'}：{row.dimensionValue}
+                        {row.recognized ? dimensionLabel(row.dimension) : '未识别'}：
+                        {row.dimensionValue}
                       </td>
                       <td className="p-2">
                         {row.recognized ? (
-                          <span className="text-emerald-600 text-xs">已识别</span>
+                          <span className="text-xs text-emerald-600">已识别</span>
                         ) : (
-                          <span className="text-amber-600 text-xs">未识别</span>
+                          <span className="text-xs text-amber-600">未识别</span>
                         )}
                       </td>
                       <td className="p-2 text-xs">
@@ -847,7 +872,7 @@ export function AdTargetingsWorkspace() {
                             )
                           : '—'}
                       </td>
-                      <td className="p-2 text-xs whitespace-pre-line">{row.note}</td>
+                      <td className="whitespace-pre-line p-2 text-xs">{row.note}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -958,7 +983,9 @@ export function AdTargetingsWorkspace() {
 
         {effects ? (
           <>
-            <p className="text-muted-foreground text-xs whitespace-pre-line">{effects.summary.note}</p>
+            <p className="text-muted-foreground whitespace-pre-line text-xs">
+              {effects.summary.note}
+            </p>
             {effects.items.length === 0 ? (
               <p className="text-muted-foreground text-sm">
                 这个区间 / 筛选下**没有定位效果数据** ⇒ 没有可比的效果，也没有建议。
@@ -982,10 +1009,15 @@ export function AdTargetingsWorkspace() {
                 </thead>
                 <tbody>
                   {effects.items.map((row) => (
-                    <tr key={`${row.campaignId}-${row.groupId ?? 'campaign'}-${row.dimension}-${row.dimensionValue}-${row.currency}`} className="border-b">
+                    <tr
+                      key={`${row.campaignId}-${row.groupId ?? 'campaign'}-${row.dimension}-${row.dimensionValue}-${row.currency}`}
+                      className="border-b"
+                    >
                       <td className="p-2">
                         {dimensionLabel(row.dimension)}：{row.dimensionValue}
-                        <div className="text-muted-foreground text-xs">{scopeLabel(row.scopeKind)}</div>
+                        <div className="text-muted-foreground text-xs">
+                          {scopeLabel(row.scopeKind)}
+                        </div>
                       </td>
                       <td className="p-2">
                         {row.campaignName}
@@ -995,7 +1027,8 @@ export function AdTargetingsWorkspace() {
                       </td>
                       <td className="p-2">{row.currency}</td>
                       <td className="p-2">
-                        {countText(row.impressions)} / {countText(row.clicks)} / {countText(row.conversions)}
+                        {countText(row.impressions)} / {countText(row.clicks)} /{' '}
+                        {countText(row.conversions)}
                       </td>
                       <td className="p-2">
                         {money(row.spend, row.currency)} / {money(row.sales, row.currency)}
@@ -1008,7 +1041,9 @@ export function AdTargetingsWorkspace() {
                       </td>
                       <td className="p-2">
                         {money(row.wastedSpend, row.currency)}
-                        <div className="text-muted-foreground text-xs">{percentText(row.wastedRatio)}</div>
+                        <div className="text-muted-foreground text-xs">
+                          {percentText(row.wastedRatio)}
+                        </div>
                       </td>
                       <td className="p-2">{percentText(row.spendShare)}</td>
                       <td className="p-2 text-xs">{timestampText(row.dataAsOf)}</td>
@@ -1066,13 +1101,16 @@ export function AdTargetingsWorkspace() {
             样本不足的建议标成「别照做」。
           </p>
         ) : suggestions.items.length === 0 ? (
-          <p className="text-muted-foreground text-sm whitespace-pre-line">{suggestions.note}</p>
+          <p className="text-muted-foreground whitespace-pre-line text-sm">{suggestions.note}</p>
         ) : (
           <>
-            <p className="text-muted-foreground text-xs whitespace-pre-line">{suggestions.note}</p>
+            <p className="text-muted-foreground whitespace-pre-line text-xs">{suggestions.note}</p>
             <ul className="flex flex-col gap-3">
               {suggestions.items.map((s, index) => (
-                <li key={`${s.ruleId}-${s.campaignId}-${s.dimension}-${s.dimensionValue}-${index}`} className="rounded border p-3">
+                <li
+                  key={`${s.ruleId}-${s.campaignId}-${s.dimension}-${s.dimensionValue}-${index}`}
+                  className="rounded border p-3"
+                >
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-medium">
                       {dimensionLabel(s.dimension)}：{s.dimensionValue}
@@ -1080,25 +1118,33 @@ export function AdTargetingsWorkspace() {
                     <span className={`text-xs ${suggestionSeverityTone(s.severity)}`}>
                       {suggestionSeverityLabel(s.severity)}
                     </span>
-                    <span className="rounded border px-1 text-xs">{suggestionRuleLabel(s.ruleId)}</span>
-                    <span className="rounded border px-1 text-xs">建议：{suggestionActionLabel(s.action)}</span>
+                    <span className="rounded border px-1 text-xs">
+                      {suggestionRuleLabel(s.ruleId)}
+                    </span>
+                    <span className="rounded border px-1 text-xs">
+                      建议：{suggestionActionLabel(s.action)}
+                    </span>
                     {!s.actionable ? (
                       <span className="rounded border border-amber-600 px-1 text-xs text-amber-600">
                         样本不足，别照做
                       </span>
                     ) : null}
                   </div>
-                  <p className="text-muted-foreground text-xs">{s.campaignName} · {s.groupName ?? '活动级'}</p>
+                  <p className="text-muted-foreground text-xs">
+                    {s.campaignName} · {s.groupName ?? '活动级'}
+                  </p>
                   <ul className="mt-1 list-disc pl-5 text-xs">
                     {s.evidence.map((e) => (
                       <li key={e}>{e}</li>
                     ))}
                   </ul>
-                  <p className="text-muted-foreground mt-1 text-xs whitespace-pre-line">{s.basis}</p>
+                  <p className="text-muted-foreground mt-1 whitespace-pre-line text-xs">
+                    {s.basis}
+                  </p>
                   {s.bidFactor !== null ? (
                     <p className="text-xs">建议出价系数：{bidFactorText(s.bidFactor)}</p>
                   ) : null}
-                  <p className="text-muted-foreground mt-1 text-xs whitespace-pre-line">{s.note}</p>
+                  <p className="text-muted-foreground mt-1 whitespace-pre-line text-xs">{s.note}</p>
                 </li>
               ))}
             </ul>
@@ -1109,12 +1155,14 @@ export function AdTargetingsWorkspace() {
       {/* ================= 🔴 时段画像（供下游 14.2.1.2） ================= */}
       <Section title="时段画像（供下游分时策略复用）">
         {!dayparts ? (
-          <p className="text-muted-foreground text-sm">点上面的「读建议与时段画像」读取时段画像。</p>
+          <p className="text-muted-foreground text-sm">
+            点上面的「读建议与时段画像」读取时段画像。
+          </p>
         ) : dayparts.items.length === 0 ? (
-          <p className="text-muted-foreground text-sm whitespace-pre-line">{dayparts.note}</p>
+          <p className="text-muted-foreground whitespace-pre-line text-sm">{dayparts.note}</p>
         ) : (
           <>
-            <p className="text-muted-foreground text-xs whitespace-pre-line">{dayparts.note}</p>
+            <p className="text-muted-foreground whitespace-pre-line text-xs">{dayparts.note}</p>
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-muted-foreground border-b text-left text-xs">
@@ -1128,17 +1176,28 @@ export function AdTargetingsWorkspace() {
               </thead>
               <tbody>
                 {dayparts.items.map((row, index) => (
-                  <tr key={`${row.campaignId}-${row.groupId ?? 'campaign'}-${row.dimensionValue}-${index}`} className="border-b">
+                  <tr
+                    key={`${row.campaignId}-${row.groupId ?? 'campaign'}-${row.dimensionValue}-${index}`}
+                    className="border-b"
+                  >
                     <td className="p-2">{row.dimensionValue}</td>
                     <td className="p-2">
                       {row.campaignName}
-                      <div className="text-muted-foreground text-xs">{row.groupName ?? '活动级'}</div>
+                      <div className="text-muted-foreground text-xs">
+                        {row.groupName ?? '活动级'}
+                      </div>
                     </td>
                     <td className="p-2 text-xs">
-                      {daypartWindowText(row.startHour, row.endHour, row.hours, row.crossesMidnight)}
+                      {daypartWindowText(
+                        row.startHour,
+                        row.endHour,
+                        row.hours,
+                        row.crossesMidnight,
+                      )}
                     </td>
                     <td className="p-2">
-                      {countText(row.impressions)} / {countText(row.clicks)} / {countText(row.conversions)}
+                      {countText(row.impressions)} / {countText(row.clicks)} /{' '}
+                      {countText(row.conversions)}
                     </td>
                     <td className="p-2">
                       {money(row.spend, row.currency)} / {money(row.sales, row.currency)}
@@ -1301,7 +1360,7 @@ export function AdTargetingsWorkspace() {
           <div className="flex flex-col gap-1">
             <h3 className="text-sm font-medium">下游入口</h3>
             {detail.entries.map((e) => (
-              <p key={e.entry} className="text-muted-foreground text-xs whitespace-pre-line">
+              <p key={e.entry} className="text-muted-foreground whitespace-pre-line text-xs">
                 {e.label}：{e.available ? '已交付' : '未交付'} · {e.source}
                 {e.ownerModule ? ` · 责任模块 ${e.ownerModule}` : ''}
                 {e.impact ? ` · ${e.impact}` : ''}
@@ -1340,7 +1399,7 @@ export function AdTargetingsWorkspace() {
             )}
           </div>
 
-          <p className="text-muted-foreground text-xs whitespace-pre-line">{detail.note}</p>
+          <p className="text-muted-foreground whitespace-pre-line text-xs">{detail.note}</p>
         </Section>
       ) : null}
     </main>

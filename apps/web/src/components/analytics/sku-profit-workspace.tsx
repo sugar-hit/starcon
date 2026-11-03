@@ -171,7 +171,12 @@ export function AnalyticsSkuProfitWorkspace() {
         </div>
         <div className="text-copy-13 text-muted-foreground flex items-center gap-3">
           <span>{rangeText(from, to)}</span>
-          <Button variant="outline" size="sm" disabled={loading || busy} onClick={() => void load()}>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={loading || busy}
+            onClick={() => void load()}
+          >
             <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
             刷新
           </Button>
@@ -266,7 +271,10 @@ export function AnalyticsSkuProfitWorkspace() {
 
       {state === 'loading' && (
         <SectionCard>
-          <EmptyState title="正在读取 SKU 利润…" description="读取期间页面上的「数据截至」仍然有效。" />
+          <EmptyState
+            title="正在读取 SKU 利润…"
+            description="读取期间页面上的「数据截至」仍然有效。"
+          />
         </SectionCard>
       )}
 
@@ -320,11 +328,8 @@ export function AnalyticsSkuProfitWorkspace() {
                 </thead>
                 <tbody>
                   {data.rows.map((row) => (
-                    <tr
-                      key={`${row.skuCode}|${row.currency}`}
-                      className="border-border border-b"
-                    >
-                      <td className="py-2 pr-3 whitespace-nowrap">
+                    <tr key={`${row.skuCode}|${row.currency}`} className="border-border border-b">
+                      <td className="whitespace-nowrap py-2 pr-3">
                         <button
                           type="button"
                           className="text-primary underline-offset-2 hover:underline"
@@ -337,25 +342,27 @@ export function AnalyticsSkuProfitWorkspace() {
                         </button>
                       </td>
                       <td className="py-2 pr-3">{row.currency}</td>
-                      <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                      <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                         {amountText(
                           row.components.find((c) => c.component === 'REVENUE')?.amount ?? null,
                           row.currency,
                         )}
                       </td>
-                      <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                      <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                         {amountText(row.totalCost, row.currency)}
                       </td>
-                      <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                      <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                         {netProfitText(row.netProfit, row.currency)}
                       </td>
-                      <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                      <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                         {netMarginText(row.netMargin)}
                       </td>
                       <td className="py-2 pr-3">
                         <Badge tone={netProfitTone(row)}>{netProfitLabel(row)}</Badge>
                         {isCrossMode(row) && <Badge tone="warning">跨模式口径</Badge>}
-                        <div className="text-copy-13 text-muted-foreground mt-1 max-w-md">{row.note}</div>
+                        <div className="text-copy-13 text-muted-foreground mt-1 max-w-md">
+                          {row.note}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -371,13 +378,18 @@ export function AnalyticsSkuProfitWorkspace() {
           >
             <div className="space-y-4">
               {data.rows.map((row) => (
-                <div key={`${row.skuCode}|${row.currency}`} className="border-border rounded-lg border px-4 py-3">
+                <div
+                  key={`${row.skuCode}|${row.currency}`}
+                  className="border-border rounded-lg border px-4 py-3"
+                >
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-copy-14 text-foreground font-medium">
                       {row.skuCode} · {row.currency}
                     </span>
                     {isCrossMode(row) && (
-                      <span className="text-copy-13 text-muted-foreground">{crossModeNote(row)}</span>
+                      <span className="text-copy-13 text-muted-foreground">
+                        {crossModeNote(row)}
+                      </span>
                     )}
                   </div>
                   <dl className="text-copy-13 mt-3 grid grid-cols-1 gap-x-6 gap-y-1 sm:grid-cols-2 lg:grid-cols-4">
@@ -455,16 +467,16 @@ export function AnalyticsSkuProfitWorkspace() {
                         {(waterfall?.steps ?? []).map((step) => (
                           <tr key={step.component} className="border-border border-b">
                             <td className="py-2 pr-3 tabular-nums">{step.step}</td>
-                            <td className="py-2 pr-3 whitespace-nowrap">
+                            <td className="whitespace-nowrap py-2 pr-3">
                               {step.sign} {step.label}
                             </td>
-                            <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                            <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                               {waterfallStepText(step)}
                             </td>
-                            <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                            <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                               {waterfallCumulativeText(step)}
                             </td>
-                            <td className="py-2 pr-3 text-muted-foreground">{step.reason ?? ''}</td>
+                            <td className="text-muted-foreground py-2 pr-3">{step.reason ?? ''}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -512,16 +524,16 @@ export function AnalyticsSkuProfitWorkspace() {
                             className="border-border border-b"
                           >
                             <td className="py-2 pr-3">{item.componentLabel}</td>
-                            <td className="py-2 pr-3 whitespace-nowrap">{orderModeText(item)}</td>
+                            <td className="whitespace-nowrap py-2 pr-3">{orderModeText(item)}</td>
                             <td className="py-2 pr-3">{orderScopeText(item)}</td>
-                            <td className="py-2 pr-3 whitespace-nowrap">{item.periodStart}</td>
-                            <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">
+                            <td className="whitespace-nowrap py-2 pr-3">{item.periodStart}</td>
+                            <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
                               {amountText(item.amount, item.currency)}
                             </td>
                             <td className="py-2 pr-3 text-right tabular-nums">
                               {quantityText(item.quantity)}
                             </td>
-                            <td className="py-2 pr-3 text-muted-foreground">
+                            <td className="text-muted-foreground py-2 pr-3">
                               {item.sourceService} · {item.sourceReference}
                             </td>
                           </tr>
@@ -536,7 +548,11 @@ export function AnalyticsSkuProfitWorkspace() {
                     size="sm"
                     disabled={busy || ordersPageIndex === 0}
                     onClick={() =>
-                      void loadOrders(ordersSku, orders?.currency ?? '', Math.max(ordersPageIndex - 1, 0))
+                      void loadOrders(
+                        ordersSku,
+                        orders?.currency ?? '',
+                        Math.max(ordersPageIndex - 1, 0),
+                      )
                     }
                   >
                     上一页
@@ -547,7 +563,9 @@ export function AnalyticsSkuProfitWorkspace() {
                     disabled={
                       busy || !orders || (ordersPageIndex + 1) * orders.size >= orders.total
                     }
-                    onClick={() => void loadOrders(ordersSku, orders?.currency ?? '', ordersPageIndex + 1)}
+                    onClick={() =>
+                      void loadOrders(ordersSku, orders?.currency ?? '', ordersPageIndex + 1)
+                    }
                   >
                     下一页
                   </Button>
@@ -562,7 +580,7 @@ export function AnalyticsSkuProfitWorkspace() {
               title="能力声明"
               description="哪些上游真接通、哪些确实算不出来、归谁管 —— **「算不出来」与「等于 0」在页面上分开说**。"
             >
-              <div className="space-y-3 text-copy-13">
+              <div className="text-copy-13 space-y-3">
                 <div>
                   <span className="text-muted-foreground">覆盖的成本项：</span>
                   <span className="text-foreground">{capabilitiesComponents(capabilities)}</span>

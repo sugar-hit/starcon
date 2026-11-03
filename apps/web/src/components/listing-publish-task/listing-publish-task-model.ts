@@ -243,9 +243,7 @@ export function stageLabel(stage: string): string {
 }
 
 /** 阶段徽章色调。 */
-export function stageTone(
-  stage: string,
-): 'neutral' | 'info' | 'success' | 'warning' | 'danger' {
+export function stageTone(stage: string): 'neutral' | 'info' | 'success' | 'warning' | 'danger' {
   switch (stage) {
     case 'SUCCEEDED':
       return 'success';
@@ -334,7 +332,9 @@ export function taskLabel(task: {
   marketplaceCode: string | null;
   locale: string | null;
 }): string {
-  const scope = [task.platformCode, task.shopCode, task.marketplaceCode].filter(Boolean).join(' / ');
+  const scope = [task.platformCode, task.shopCode, task.marketplaceCode]
+    .filter(Boolean)
+    .join(' / ');
   return task.locale ? `${scope}（${task.locale}）` : scope;
 }
 

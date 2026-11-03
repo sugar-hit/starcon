@@ -100,7 +100,9 @@ describe('13.1.1.1 经营总览 · 模型', () => {
     });
 
     it('未登记的指标与没有数据的指标说法不同', () => {
-      expect(availabilityText(card({ availability: 'NOT_REGISTERED' }))).toBe('该指标未在口径表登记');
+      expect(availabilityText(card({ availability: 'NOT_REGISTERED' }))).toBe(
+        '该指标未在口径表登记',
+      );
     });
   });
 

@@ -196,7 +196,10 @@ export async function republish(body: {
   return api<RepublishReceipt>('channel/listing-status-events/actions/republish', 'POST', body);
 }
 
-export async function acknowledgeQueueItem(queueId: string, note?: string): Promise<ListingStatusQueueRow> {
+export async function acknowledgeQueueItem(
+  queueId: string,
+  note?: string,
+): Promise<ListingStatusQueueRow> {
   return api<ListingStatusQueueRow>(
     `channel/listing-status-events/queue/${queueId}/acknowledge`,
     'POST',
@@ -204,10 +207,17 @@ export async function acknowledgeQueueItem(queueId: string, note?: string): Prom
   );
 }
 
-export async function resolveQueueItem(queueId: string, note?: string): Promise<ListingStatusQueueRow> {
-  return api<ListingStatusQueueRow>(`channel/listing-status-events/queue/${queueId}/resolve`, 'POST', {
-    note: note ?? '',
-  });
+export async function resolveQueueItem(
+  queueId: string,
+  note?: string,
+): Promise<ListingStatusQueueRow> {
+  return api<ListingStatusQueueRow>(
+    `channel/listing-status-events/queue/${queueId}/resolve`,
+    'POST',
+    {
+      note: note ?? '',
+    },
+  );
 }
 
 // ================================================================ 纯函数（可单测）
@@ -299,9 +309,7 @@ export function operationStatusLabel(status: string, verification: string): stri
     case 'FAILED':
       return '平台执行失败';
     case 'UNKNOWN':
-      return verification === 'STILL_UNKNOWN'
-        ? '结果未知（需 2.5.1.2 核验）'
-        : '结果未知';
+      return verification === 'STILL_UNKNOWN' ? '结果未知（需 2.5.1.2 核验）' : '结果未知';
     default:
       return status;
   }

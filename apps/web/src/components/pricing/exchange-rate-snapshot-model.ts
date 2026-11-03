@@ -301,7 +301,9 @@ export function directionLabel(direction: string | null | undefined): string {
 }
 
 /** 换算方向的色标。 */
-export function directionTone(direction: string | null | undefined): 'success' | 'info' | 'neutral' {
+export function directionTone(
+  direction: string | null | undefined,
+): 'success' | 'info' | 'neutral' {
   switch (direction) {
     case 'BASE_TO_QUOTE':
       return 'success';

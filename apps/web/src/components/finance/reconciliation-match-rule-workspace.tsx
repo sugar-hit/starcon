@@ -138,17 +138,14 @@ export function ReconciliationMatchRuleWorkspace() {
     setMonitoring(await fetchMatchRateMonitoring());
   }, []);
 
-  const loadSelected = useCallback(
-    async (ruleId: string) => {
-      const [eventPage, snapshotPage] = await Promise.all([
-        fetchMatchRuleEvents(ruleId, { page: 0, size: PAGE_SIZE }),
-        fetchMatchRateSnapshots(ruleId, { page: 0, size: PAGE_SIZE }),
-      ]);
-      setEvents(eventPage);
-      setSnapshots(snapshotPage);
-    },
-    [],
-  );
+  const loadSelected = useCallback(async (ruleId: string) => {
+    const [eventPage, snapshotPage] = await Promise.all([
+      fetchMatchRuleEvents(ruleId, { page: 0, size: PAGE_SIZE }),
+      fetchMatchRateSnapshots(ruleId, { page: 0, size: PAGE_SIZE }),
+    ]);
+    setEvents(eventPage);
+    setSnapshots(snapshotPage);
+  }, []);
 
   useEffect(() => {
     let alive = true;
@@ -433,7 +430,7 @@ export function ReconciliationMatchRuleWorkspace() {
                 ))}
               </datalist>
               <div className="overflow-x-auto">
-                <table className="w-full text-copy-13">
+                <table className="text-copy-13 w-full">
                   <thead>
                     <tr className="text-muted-foreground border-b text-left">
                       <th className="py-2 pr-3">规则号</th>
@@ -724,7 +721,9 @@ export function ReconciliationMatchRuleWorkspace() {
                     ? '—（没有启用中的规则）'
                     : `${monitoring.matchRateTarget}%`
                 }
-                comparisonLabel={monitoring.ruleNo ? `口径规则 ${monitoring.ruleNo}` : '没有口径规则'}
+                comparisonLabel={
+                  monitoring.ruleNo ? `口径规则 ${monitoring.ruleNo}` : '没有口径规则'
+                }
               />
               <StatCard
                 label="口径"
@@ -751,7 +750,7 @@ export function ReconciliationMatchRuleWorkspace() {
                 />
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full text-copy-13">
+                  <table className="text-copy-13 w-full">
                     <thead>
                       <tr className="text-muted-foreground border-b text-left">
                         <th className="py-2 pr-3">币种</th>
@@ -780,17 +779,16 @@ export function ReconciliationMatchRuleWorkspace() {
             <div>
               <p className="text-label-13 mb-1">未匹配原因分布</p>
               {monitoring.reasons.length === 0 ? (
-                <EmptyState title="没有未匹配原因" description="这一批全部配上了（或还没有结果）。" />
+                <EmptyState
+                  title="没有未匹配原因"
+                  description="这一批全部配上了（或还没有结果）。"
+                />
               ) : (
                 <ul className="space-y-1">
                   {monitoring.reasons.map((r) => (
                     <li key={`${r.currency}-${r.reasonType}`} className="text-copy-13">
-                      <Badge tone={matchRuleReasonTone(r.reasonType)}>
-                        {r.reasonLabel}
-                      </Badge>
-                      <span className="text-muted-foreground ml-2">
-                        {matchRateReasonHint(r)}
-                      </span>
+                      <Badge tone={matchRuleReasonTone(r.reasonType)}>{r.reasonLabel}</Badge>
+                      <span className="text-muted-foreground ml-2">{matchRateReasonHint(r)}</span>
                     </li>
                   ))}
                 </ul>
@@ -838,7 +836,7 @@ export function ReconciliationMatchRuleWorkspace() {
           <SectionCard title="匹配率快照历史" description="一次监控事实，不可改写">
             {snapshots && snapshots.items.length > 0 ? (
               <div className="overflow-x-auto">
-                <table className="w-full text-copy-13">
+                <table className="text-copy-13 w-full">
                   <thead>
                     <tr className="text-muted-foreground border-b text-left">
                       <th className="py-2 pr-3">币种</th>
@@ -889,4 +887,3 @@ export function ReconciliationMatchRuleWorkspace() {
     </div>
   );
 }
-

@@ -15,7 +15,10 @@ import {
   severityTone,
   supplierDisplayName,
 } from './quality-analysis-model';
-import type { CostCurrencyBreakdown, CostItem } from '../../../../../packages/api-contracts/src/index';
+import type {
+  CostCurrencyBreakdown,
+  CostItem,
+} from '../../../../../packages/api-contracts/src/index';
 
 /**
  * 11.5.2.1 质量分析的纯展示派生逻辑。

@@ -34,7 +34,9 @@ import { DELETE, GET, POST } from './[...path]/route';
 
 // 相对**本文件**定位：vitest 从仓库根或 apps/web 跑时 cwd 都不同，用 cwd 会静默读空。
 const SOURCE = readFileSync(
-  fileURLToPath(new URL('../../../components/integrations/finance-software-model.ts', import.meta.url)),
+  fileURLToPath(
+    new URL('../../../components/integrations/finance-software-model.ts', import.meta.url),
+  ),
   'utf8',
 );
 
@@ -147,9 +149,14 @@ it('写动作的 POST 形状被放行，且真的转发到 8089', async () => {
     expect(response.status, `POST ${path} 未被放行`).toBe(200);
   }
 
-  const exportResponse = await POST(request('platform/finance-software/voucher-files/export', 'POST'), {
-    params: Promise.resolve({ path: ['platform', 'finance-software', 'voucher-files', 'export'] }),
-  });
+  const exportResponse = await POST(
+    request('platform/finance-software/voucher-files/export', 'POST'),
+    {
+      params: Promise.resolve({
+        path: ['platform', 'finance-software', 'voucher-files', 'export'],
+      }),
+    },
+  );
   expect(exportResponse.status).toBe(200);
   expect(fetcher).toHaveBeenCalledWith(
     expect.stringContaining(':8089/platform/finance-software/voucher-files/export'),

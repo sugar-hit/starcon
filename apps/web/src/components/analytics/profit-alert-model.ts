@@ -296,8 +296,10 @@ export function pageState(response: ProfitAlertPage | null, error: string): Page
 export function emptyText(response: ProfitAlertPage | null): string {
   if (!response) return '';
   if (response.alerts.length === 0 && response.undecided.length === 0) {
-    return '这个时间窗口里没有命中任何阈值，也没有判不出来的条目。'
-      + '⚠️ 注意：**没有命中 ≠ 没有异常** —— 先确认利润事实已经投影过（看页面顶部的「数据截至」）。';
+    return (
+      '这个时间窗口里没有命中任何阈值，也没有判不出来的条目。' +
+      '⚠️ 注意：**没有命中 ≠ 没有异常** —— 先确认利润事实已经投影过（看页面顶部的「数据截至」）。'
+    );
   }
   if (response.alerts.length === 0) {
     return '这个时间窗口里没有命中阈值，但有判不出来的条目 —— 见下方「判不出来」清单。';
@@ -315,8 +317,10 @@ export function undecidedNote(response: ProfitAlertPage | null): string {
   if (!response) return '';
   const count = response.summary.undecidedCount;
   if (count === 0) return '';
-  return `${count} 条**判不出来**（不是「没异常」）：成本项缺失 / 历史期数不足 / 订单毛利算不出来 —— `
-    + '每条都写明了原因。判不出来的东西不会被当成正常，也不会进通知。';
+  return (
+    `${count} 条**判不出来**（不是「没异常」）：成本项缺失 / 历史期数不足 / 订单毛利算不出来 —— ` +
+    '每条都写明了原因。判不出来的东西不会被当成正常，也不会进通知。'
+  );
 }
 
 /** 一条「判不出来」记录的归属说明。 */

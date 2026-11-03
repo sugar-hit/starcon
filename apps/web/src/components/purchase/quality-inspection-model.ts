@@ -80,7 +80,9 @@ export function fetchOptions() {
   return api<IncomingQualityInspectionOptions>(`${base}/options`);
 }
 
-export function fetchTemplates(params: { keyword?: string; status?: string; page?: number; size?: number } = {}) {
+export function fetchTemplates(
+  params: { keyword?: string; status?: string; page?: number; size?: number } = {},
+) {
   const parts: string[] = [];
   if (params.keyword?.trim()) parts.push(`keyword=${encodeURIComponent(params.keyword.trim())}`);
   if (params.status) parts.push(`status=${encodeURIComponent(params.status)}`);
@@ -141,11 +143,7 @@ export function createOrder(input: IncomingOrderInput) {
 
 /** 录入逐项检验结论。 */
 export function recordItem(orderId: string, input: IncomingOrderItemInput) {
-  return api<IncomingOrderItemRow>(
-    `${base}/${encodeURIComponent(orderId)}/items`,
-    'POST',
-    input,
-  );
+  return api<IncomingOrderItemRow>(`${base}/${encodeURIComponent(orderId)}/items`, 'POST', input);
 }
 
 /** 登记让步接收（原因与权限码缺一会被后端拒）。 */
@@ -195,8 +193,7 @@ export function balanceIsBalanced(row: {
   concessionQuantity: number;
   lotSize: number;
 }): boolean {
-  const sum =
-    row.qualifiedQuantity + row.defectiveQuantity + row.concessionQuantity;
+  const sum = row.qualifiedQuantity + row.defectiveQuantity + row.concessionQuantity;
   return Math.abs(sum - row.lotSize) < 1e-6;
 }
 
@@ -324,7 +321,5 @@ export function totalDeducted(items: IncomingOrderItemRow[]): number {
 
 /** 让步接收量合计。 */
 export function totalConcession(concessions: IncomingConcessionRow[]): number {
-  return (
-    Math.round(concessions.reduce((sum, c) => sum + (c.quantity ?? 0), 0) * 1e6) / 1e6
-  );
+  return Math.round(concessions.reduce((sum, c) => sum + (c.quantity ?? 0), 0) * 1e6) / 1e6;
 }

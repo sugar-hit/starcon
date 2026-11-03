@@ -21,7 +21,9 @@ import { GET, POST, PUT } from './[...path]/route';
  */
 
 const SOURCE = readFileSync(
-  fileURLToPath(new URL('../../../components/orders/fulfillment-quality-model.ts', import.meta.url)),
+  fileURLToPath(
+    new URL('../../../components/orders/fulfillment-quality-model.ts', import.meta.url),
+  ),
   'utf8',
 );
 

@@ -331,15 +331,40 @@ export function PlatformViolationsWorkspace({ focus }: Props) {
 
       {/* ---- 统计卡：处理状态分布（服务端算的计数，覆盖整个筛选结果集） ---- */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <StatCard label="未处理" value={violations?.pendingCount ?? 0} polarity="negative" icon={<ShieldAlert className="size-4" />} />
-        <StatCard label="处理中" value={violations?.inProgressCount ?? 0} polarity="neutral" icon={<Loader2 className="size-4" />} />
-        <StatCard label="已整改" value={violations?.rectifiedCount ?? 0} polarity="positive" icon={<ScrollText className="size-4" />} />
-        <StatCard label="申诉中" value={violations?.appealingCount ?? 0} polarity="neutral" icon={<Gavel className="size-4" />} />
-        <StatCard label="已关闭" value={violations?.closedCount ?? 0} polarity="neutral" icon={<CircleAlert className="size-4" />} />
+        <StatCard
+          label="未处理"
+          value={violations?.pendingCount ?? 0}
+          polarity="negative"
+          icon={<ShieldAlert className="size-4" />}
+        />
+        <StatCard
+          label="处理中"
+          value={violations?.inProgressCount ?? 0}
+          polarity="neutral"
+          icon={<Loader2 className="size-4" />}
+        />
+        <StatCard
+          label="已整改"
+          value={violations?.rectifiedCount ?? 0}
+          polarity="positive"
+          icon={<ScrollText className="size-4" />}
+        />
+        <StatCard
+          label="申诉中"
+          value={violations?.appealingCount ?? 0}
+          polarity="neutral"
+          icon={<Gavel className="size-4" />}
+        />
+        <StatCard
+          label="已关闭"
+          value={violations?.closedCount ?? 0}
+          polarity="neutral"
+          icon={<CircleAlert className="size-4" />}
+        />
       </div>
 
       {error && (
-        <div className="border-destructive-soft bg-destructive-soft text-destructive rounded-md border px-4 py-3 text-copy-13">
+        <div className="border-destructive-soft bg-destructive-soft text-destructive text-copy-13 rounded-md border px-4 py-3">
           {error}
         </div>
       )}
@@ -391,7 +416,11 @@ export function PlatformViolationsWorkspace({ focus }: Props) {
         description="店铺清单来自本服务自己的店铺目录（2.1.1.1），不是写死的常量。"
       >
         {shopItems.length === 0 ? (
-          <EmptyState icon={<ShieldAlert className="size-8" />} title="还没有店铺" description={empty.description} />
+          <EmptyState
+            icon={<ShieldAlert className="size-8" />}
+            title="还没有店铺"
+            description={empty.description}
+          />
         ) : (
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {shopItems.map((shop) => (
@@ -443,7 +472,7 @@ export function PlatformViolationsWorkspace({ focus }: Props) {
             }}
           />
           <select
-            className="border-input bg-background h-9 rounded-md border px-2 text-copy-13"
+            className="border-input bg-background text-copy-13 h-9 rounded-md border px-2"
             value={status}
             onChange={(e) => {
               setStatus(e.target.value);
@@ -457,7 +486,7 @@ export function PlatformViolationsWorkspace({ focus }: Props) {
             ))}
           </select>
           <select
-            className="border-input bg-background h-9 rounded-md border px-2 text-copy-13"
+            className="border-input bg-background text-copy-13 h-9 rounded-md border px-2"
             value={measure}
             onChange={(e) => {
               setMeasure(e.target.value);
@@ -507,8 +536,8 @@ export function PlatformViolationsWorkspace({ focus }: Props) {
                   <span className="text-copy-13 text-foreground font-medium">{item.title}</span>
                 </div>
                 <div className="text-copy-12 text-muted-foreground mt-1">
-                  {item.shopCode} · 平台通知 id {item.externalNoticeId} · 处罚 {item.penaltyCount} 条 · 涉及主体{' '}
-                  {item.subjectCount} 个 · 整改 {item.remediationCount} 条（未完结{' '}
+                  {item.shopCode} · 平台通知 id {item.externalNoticeId} · 处罚 {item.penaltyCount}{' '}
+                  条 · 涉及主体 {item.subjectCount} 个 · 整改 {item.remediationCount} 条（未完结{' '}
                   {item.openRemediationCount} 条）· 发生于 {item.occurredAt}
                 </div>
               </button>
@@ -519,7 +548,8 @@ export function PlatformViolationsWorkspace({ focus }: Props) {
         {violations && violations.total > PAGE_SIZE && (
           <div className="mt-4 flex items-center justify-between">
             <span className="text-copy-12 text-muted-foreground">
-              第 {violations.page + 1} / {Math.ceil(violations.total / PAGE_SIZE)} 页，共 {violations.total} 条
+              第 {violations.page + 1} / {Math.ceil(violations.total / PAGE_SIZE)} 页，共{' '}
+              {violations.total} 条
             </span>
             <div className="flex gap-2">
               <Button
@@ -560,7 +590,11 @@ export function PlatformViolationsWorkspace({ focus }: Props) {
           扣款合计：{totalsText(penalties?.totalsByCurrency)}
         </div>
         {(penalties?.items ?? []).length === 0 ? (
-          <EmptyState icon={<Gavel className="size-8" />} title="还没有处罚记录" description="记一条处罚措施（警告 / 下架 / 限制销售 / 扣款 / 停号）后会出现在这里。" />
+          <EmptyState
+            icon={<Gavel className="size-8" />}
+            title="还没有处罚记录"
+            description="记一条处罚措施（警告 / 下架 / 限制销售 / 扣款 / 停号）后会出现在这里。"
+          />
         ) : (
           <div className="space-y-2">
             {(penalties?.items ?? []).map((item) => (
@@ -585,22 +619,34 @@ export function PlatformViolationsWorkspace({ focus }: Props) {
       </SectionCard>
 
       {/* ---- 整改跟踪 ---- */}
-      <SectionCard title="整改跟踪" description="整改要求（内容 / 期限 / 状态）与整改凭证（只追加）。">
+      <SectionCard
+        title="整改跟踪"
+        description="整改要求（内容 / 期限 / 状态）与整改凭证（只追加）。"
+      >
         {(remediations?.items ?? []).length === 0 ? (
-          <EmptyState icon={<ScrollText className="size-8" />} title="还没有整改要求" description="在违规详情里加一条整改要求后会出现在这里。" />
+          <EmptyState
+            icon={<ScrollText className="size-8" />}
+            title="还没有整改要求"
+            description="在违规详情里加一条整改要求后会出现在这里。"
+          />
         ) : (
           <div className="space-y-2">
             {(remediations?.items ?? []).map((item) => (
               <div key={item.remediationId} className="border-border rounded-md border px-3 py-2">
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge tone={item.status === 'VERIFIED' ? 'success' : item.overdue ? 'danger' : 'neutral'}>
+                  <Badge
+                    tone={
+                      item.status === 'VERIFIED' ? 'success' : item.overdue ? 'danger' : 'neutral'
+                    }
+                  >
                     {remediationStatusLabel(item.status)}
                   </Badge>
                   {item.overdue && <Badge tone="danger">已逾期</Badge>}
                   <span className="text-copy-13 text-foreground">{item.requirement}</span>
                 </div>
                 <div className="text-copy-12 text-muted-foreground mt-1">
-                  期限 {item.dueAt ?? '未设'} · 责任人 {item.ownerRef || '未指定'} · 凭证 {item.evidenceCount} 份
+                  期限 {item.dueAt ?? '未设'} · 责任人 {item.ownerRef || '未指定'} · 凭证{' '}
+                  {item.evidenceCount} 份
                 </div>
               </div>
             ))}
@@ -614,20 +660,32 @@ export function PlatformViolationsWorkspace({ focus }: Props) {
         description="每批平台通知同步都留一条记录：取到 / 写入 / 跳过（幂等）/ 失败各是几条。"
       >
         {(syncRuns?.items ?? []).length === 0 ? (
-          <EmptyState icon={<PackageSearch className="size-8" />} title="还没有同步记录" description="跑一次平台通知同步后会出现在这里。" />
+          <EmptyState
+            icon={<PackageSearch className="size-8" />}
+            title="还没有同步记录"
+            description="跑一次平台通知同步后会出现在这里。"
+          />
         ) : (
           <div className="space-y-2">
             {(syncRuns?.items ?? []).map((item) => (
               <div key={item.runId} className="border-border rounded-md border px-3 py-2">
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge tone={item.status === 'SUCCEEDED' ? 'success' : item.status === 'PARTIAL' ? 'warning' : 'neutral'}>
+                  <Badge
+                    tone={
+                      item.status === 'SUCCEEDED'
+                        ? 'success'
+                        : item.status === 'PARTIAL'
+                          ? 'warning'
+                          : 'neutral'
+                    }
+                  >
                     {item.status}
                   </Badge>
                   <span className="text-copy-13 text-foreground">{item.shopCode}</span>
                 </div>
                 <div className="text-copy-12 text-muted-foreground mt-1">
-                  开始 {item.startedAt} · 取到 {item.fetchedCount} 条 · 写入 {item.writtenCount} 条 · 跳过{' '}
-                  {item.skippedCount} 条（幂等）· 失败 {item.failedCount} 条
+                  开始 {item.startedAt} · 取到 {item.fetchedCount} 条 · 写入 {item.writtenCount} 条
+                  · 跳过 {item.skippedCount} 条（幂等）· 失败 {item.failedCount} 条
                 </div>
               </div>
             ))}
@@ -661,7 +719,9 @@ export function PlatformViolationsWorkspace({ focus }: Props) {
                 </span>
               </div>
 
-              <div className="text-copy-13 text-muted-foreground">{detail.violation.description}</div>
+              <div className="text-copy-13 text-muted-foreground">
+                {detail.violation.description}
+              </div>
 
               {/* 处理状态机：只给服务端算出的合法下一步 */}
               <div className="flex flex-wrap gap-2">
@@ -671,7 +731,12 @@ export function PlatformViolationsWorkspace({ focus }: Props) {
                   </span>
                 ) : (
                   detail.violation.nextStatuses.map((next) => (
-                    <Button key={next} size="sm" disabled={busy} onClick={() => void doTransition(next)}>
+                    <Button
+                      key={next}
+                      size="sm"
+                      disabled={busy}
+                      onClick={() => void doTransition(next)}
+                    >
                       转到「{statusLabel(next)}」
                     </Button>
                   ))
@@ -704,7 +769,13 @@ export function PlatformViolationsWorkspace({ focus }: Props) {
                     size="sm"
                     variant="secondary"
                     disabled={busy}
-                    onClick={() => void doAddPenalty({ measure: 'WARNING', penaltyAmount: null, penaltyCurrency: null })}
+                    onClick={() =>
+                      void doAddPenalty({
+                        measure: 'WARNING',
+                        penaltyAmount: null,
+                        penaltyCurrency: null,
+                      })
+                    }
                   >
                     记一条警告
                   </Button>
@@ -712,7 +783,13 @@ export function PlatformViolationsWorkspace({ focus }: Props) {
                     size="sm"
                     variant="secondary"
                     disabled={busy}
-                    onClick={() => void doAddPenalty({ measure: 'SUSPEND_ACCOUNT', penaltyAmount: null, penaltyCurrency: null })}
+                    onClick={() =>
+                      void doAddPenalty({
+                        measure: 'SUSPEND_ACCOUNT',
+                        penaltyAmount: null,
+                        penaltyCurrency: null,
+                      })
+                    }
                   >
                     记一条停号
                   </Button>
@@ -740,7 +817,8 @@ export function PlatformViolationsWorkspace({ focus }: Props) {
                 </div>
                 {detail.subjects.length === 0 ? (
                   <div className="text-copy-12 text-muted-foreground">
-                    还没挂涉及主体。一张违规**常涉及多个商品** —— 挂上才能批量定位受影响 listing 与库存。
+                    还没挂涉及主体。一张违规**常涉及多个商品** —— 挂上才能批量定位受影响 listing
+                    与库存。
                   </div>
                 ) : (
                   detail.subjects.map((item) => (
@@ -757,15 +835,27 @@ export function PlatformViolationsWorkspace({ focus }: Props) {
                     </div>
                   ))
                 )}
-                <Button size="sm" variant="secondary" disabled={busy} onClick={() => void doAttachSubjects()}>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  disabled={busy}
+                  onClick={() => void doAttachSubjects()}
+                >
                   挂一个涉及主体
                 </Button>
               </div>
 
               {/* 批量定位受影响 listing 与库存 */}
               <div className="space-y-2">
-                <div className="text-copy-13 text-foreground font-medium">受影响 listing 与库存</div>
-                <Button size="sm" variant="secondary" disabled={busy} onClick={() => void doLocateAffected()}>
+                <div className="text-copy-13 text-foreground font-medium">
+                  受影响 listing 与库存
+                </div>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  disabled={busy}
+                  onClick={() => void doLocateAffected()}
+                >
                   批量定位
                 </Button>
                 {affected && (
@@ -774,10 +864,15 @@ export function PlatformViolationsWorkspace({ focus }: Props) {
                       定位到 {affected.listingCount} 个 listing · {affected.note}
                     </div>
                     {affected.listings.map((item) => (
-                      <div key={item.listingId} className="border-border rounded-md border px-3 py-2">
+                      <div
+                        key={item.listingId}
+                        className="border-border rounded-md border px-3 py-2"
+                      >
                         <div className="flex flex-wrap items-center gap-2">
                           <Badge tone="neutral">{item.statusLabel}</Badge>
-                          <span className="text-copy-13 text-foreground">{item.externalItemId}</span>
+                          <span className="text-copy-13 text-foreground">
+                            {item.externalItemId}
+                          </span>
                         </div>
                         <div className="text-copy-12 text-muted-foreground mt-1">{item.title}</div>
                       </div>
@@ -799,7 +894,12 @@ export function PlatformViolationsWorkspace({ focus }: Props) {
                         <div className="text-copy-12 text-muted-foreground mt-1">{item.note}</div>
                       </div>
                     ))}
-                    <Button size="sm" variant="secondary" disabled={busy} onClick={() => void doDelist()}>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      disabled={busy}
+                      onClick={() => void doDelist()}
+                    >
                       批量下架这批 listing（下游 4 刊登 · 4.1.1.1）
                     </Button>
                   </div>
@@ -815,9 +915,20 @@ export function PlatformViolationsWorkspace({ focus }: Props) {
                   <div className="text-copy-12 text-muted-foreground">还没有整改要求。</div>
                 ) : (
                   detail.remediations.map((item) => (
-                    <div key={item.remediationId} className="border-border rounded-md border px-3 py-2">
+                    <div
+                      key={item.remediationId}
+                      className="border-border rounded-md border px-3 py-2"
+                    >
                       <div className="flex flex-wrap items-center gap-2">
-                        <Badge tone={item.status === 'VERIFIED' ? 'success' : item.overdue ? 'danger' : 'neutral'}>
+                        <Badge
+                          tone={
+                            item.status === 'VERIFIED'
+                              ? 'success'
+                              : item.overdue
+                                ? 'danger'
+                                : 'neutral'
+                          }
+                        >
                           {remediationStatusLabel(item.status)}
                         </Badge>
                         {item.overdue && <Badge tone="danger">已逾期</Badge>}
@@ -850,7 +961,12 @@ export function PlatformViolationsWorkspace({ focus }: Props) {
                     </div>
                   ))
                 )}
-                <Button size="sm" variant="secondary" disabled={busy} onClick={() => void doAddRemediation()}>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  disabled={busy}
+                  onClick={() => void doAddRemediation()}
+                >
                   加一条整改要求
                 </Button>
               </div>
@@ -864,7 +980,10 @@ export function PlatformViolationsWorkspace({ focus }: Props) {
                   <div className="text-copy-12 text-muted-foreground">还没有整改凭证。</div>
                 ) : (
                   detail.evidence.map((item) => (
-                    <div key={item.evidenceId} className="border-border rounded-md border px-3 py-2">
+                    <div
+                      key={item.evidenceId}
+                      className="border-border rounded-md border px-3 py-2"
+                    >
                       <div className="flex flex-wrap items-center gap-2">
                         <Badge tone="neutral">{item.evidenceType}</Badge>
                         <span className="text-copy-13 text-foreground">{item.evidenceRef}</span>

@@ -103,10 +103,7 @@ export function createAttribution(request: AttributionCreate): Promise<Attributi
 }
 
 /** 登记 / 替换照片（整单替换）。只提交**对象键 + 内容指纹**，不传二进制。 */
-export function registerPhotos(
-  id: string,
-  photos: PhotoRegister[],
-): Promise<AttributionDetail> {
+export function registerPhotos(id: string, photos: PhotoRegister[]): Promise<AttributionDetail> {
   const payload: PhotoRegisterRequest = { photos };
   return call(`${base}/attributions/${id}/photos`, {
     method: 'PUT',
@@ -126,7 +123,11 @@ export function comparePhotos(
   rightPhotoId: string,
   comparisonNote?: string,
 ): Promise<AttributionDetail> {
-  const payload: PhotoCompareRequest = { leftPhotoId, rightPhotoId, comparisonNote: comparisonNote ?? '' };
+  const payload: PhotoCompareRequest = {
+    leftPhotoId,
+    rightPhotoId,
+    comparisonNote: comparisonNote ?? '',
+  };
   return call(`${base}/attributions/${id}/photos/compare`, {
     method: 'POST',
     body: JSON.stringify(payload),

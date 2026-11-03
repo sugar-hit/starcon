@@ -47,7 +47,9 @@ import {
 export function BackfillWorkspace() {
   const [connections, setConnections] = useState<ConnectionView[]>([]);
   const [tasks, setTasks] = useState<Awaited<ReturnType<typeof fetchTasks>>>([]);
-  const [capabilities, setCapabilities] = useState<Awaited<ReturnType<typeof fetchCapabilities>> | null>(null);
+  const [capabilities, setCapabilities] = useState<Awaited<
+    ReturnType<typeof fetchCapabilities>
+  > | null>(null);
   const [form, setForm] = useState<BackfillForm>(emptyBackfillForm());
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -139,12 +141,18 @@ export function BackfillWorkspace() {
       />
 
       {error && (
-        <div role="alert" className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800">
+        <div
+          role="alert"
+          className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800"
+        >
           {error}
         </div>
       )}
       {notice && (
-        <div role="status" className="rounded-lg border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-900">
+        <div
+          role="status"
+          className="rounded-lg border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-900"
+        >
           {notice}
         </div>
       )}
@@ -166,7 +174,10 @@ export function BackfillWorkspace() {
         />
       </div>
 
-      <SectionCard title="发起补拉" description="按连接 + 站点 + 资源类型 + 时间窗发起；幂等键相同则拿回同一个任务。">
+      <SectionCard
+        title="发起补拉"
+        description="按连接 + 站点 + 资源类型 + 时间窗发起；幂等键相同则拿回同一个任务。"
+      >
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <label className="space-y-1 text-sm">
             <span className="font-medium">连接</span>
@@ -189,7 +200,9 @@ export function BackfillWorkspace() {
             <select
               className="w-full rounded-md border border-slate-300 px-2 py-1.5"
               value={form.resourceType}
-              onChange={(e) => patch({ resourceType: e.target.value as BackfillForm['resourceType'] })}
+              onChange={(e) =>
+                patch({ resourceType: e.target.value as BackfillForm['resourceType'] })
+              }
             >
               {Object.entries(RESOURCE_TYPE_LABELS).map(([code, label]) => (
                 <option key={code} value={code}>
@@ -204,7 +217,9 @@ export function BackfillWorkspace() {
             <select
               className="w-full rounded-md border border-slate-300 px-2 py-1.5"
               value={form.triggerSource}
-              onChange={(e) => patch({ triggerSource: e.target.value as BackfillForm['triggerSource'] })}
+              onChange={(e) =>
+                patch({ triggerSource: e.target.value as BackfillForm['triggerSource'] })
+              }
             >
               {Object.entries(TRIGGER_LABELS).map(([code, label]) => (
                 <option key={code} value={code}>
@@ -237,7 +252,9 @@ export function BackfillWorkspace() {
             <select
               className="w-full rounded-md border border-slate-300 px-2 py-1.5"
               value={form.paginationMode}
-              onChange={(e) => patch({ paginationMode: e.target.value as BackfillForm['paginationMode'] })}
+              onChange={(e) =>
+                patch({ paginationMode: e.target.value as BackfillForm['paginationMode'] })
+              }
             >
               <option value="TIME_INCREMENTAL">支持按时间增量（一次轮询即可覆盖）</option>
               <option value="RECENT_N_SCAN">只提供「最近 N 条」（需分段轮询）</option>
@@ -280,11 +297,16 @@ export function BackfillWorkspace() {
       </SectionCard>
 
       {capabilities && (
-        <SectionCard title="能力声明" description="未交付的环节显式标记，界面据此禁用而不是让人点了才报错。">
+        <SectionCard
+          title="能力声明"
+          description="未交付的环节显式标记，界面据此禁用而不是让人点了才报错。"
+        >
           <ul className="space-y-2 text-sm">
             {capabilities.capabilities.map((c) => (
               <li key={c.key} className="flex items-start gap-2">
-                <Badge tone={c.available ? 'success' : 'neutral'}>{c.available ? '可用' : '未交付'}</Badge>
+                <Badge tone={c.available ? 'success' : 'neutral'}>
+                  {c.available ? '可用' : '未交付'}
+                </Badge>
                 <span>
                   {c.description}
                   {!c.available && c.ownerModule && (
@@ -323,9 +345,13 @@ export function BackfillWorkspace() {
                 {tasks.map((t) => (
                   <tr key={t.id} className="border-b border-slate-100 align-top">
                     <td className="py-2 pr-3">
-                      <div>{t.platformCode} · {t.authorizedAccount}</div>
+                      <div>
+                        {t.platformCode} · {t.authorizedAccount}
+                      </div>
                       <div className="text-xs text-slate-500">
-                        {RESOURCE_TYPE_LABELS[t.resourceType as keyof typeof RESOURCE_TYPE_LABELS] ?? t.resourceType}
+                        {RESOURCE_TYPE_LABELS[
+                          t.resourceType as keyof typeof RESOURCE_TYPE_LABELS
+                        ] ?? t.resourceType}
                       </div>
                     </td>
                     <td className="py-2 pr-3 text-xs">
@@ -333,20 +359,23 @@ export function BackfillWorkspace() {
                       <div className="text-slate-500">→ {formatInstant(t.windowEnd)}</div>
                     </td>
                     <td className="py-2 pr-3 text-xs">
-                      {TRIGGER_LABELS[t.triggerSource as keyof typeof TRIGGER_LABELS] ?? t.triggerSource}
+                      {TRIGGER_LABELS[t.triggerSource as keyof typeof TRIGGER_LABELS] ??
+                        t.triggerSource}
                     </td>
                     <td className="py-2 pr-3 text-xs">
-                      <div>{t.paginationMode === 'RECENT_N_SCAN' ? '只给最近 N 条' : '按时间增量'}</div>
-                      {t.delayedDiscovery && (
-                        <Badge tone="warning">补拉可能延迟发现</Badge>
-                      )}
+                      <div>
+                        {t.paginationMode === 'RECENT_N_SCAN' ? '只给最近 N 条' : '按时间增量'}
+                      </div>
+                      {t.delayedDiscovery && <Badge tone="warning">补拉可能延迟发现</Badge>}
                     </td>
                     <td className="py-2 pr-3 text-xs">{countHint(t)}</td>
                     <td className="py-2 pr-3">
                       <Badge tone={statusTone(t.status)}>
                         {STATUS_LABELS[t.status as keyof typeof STATUS_LABELS] ?? t.status}
                       </Badge>
-                      {t.lastError && <div className="mt-1 text-xs text-red-700">{t.lastError}</div>}
+                      {t.lastError && (
+                        <div className="mt-1 text-xs text-red-700">{t.lastError}</div>
+                      )}
                     </td>
                     <td className="py-2 pr-3">
                       {(t.status === 'PENDING' || t.status === 'RUNNING') && (

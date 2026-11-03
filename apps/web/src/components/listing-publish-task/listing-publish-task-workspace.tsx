@@ -409,7 +409,8 @@ export function ListingPublishTaskWorkspace() {
               <p>🔴 {detail.asyncReviewNote}</p>
               {detail.contentSnapshotTitle && (
                 <p>
-                  当时冻结的内容：<span className="text-foreground">{detail.contentSnapshotTitle}</span>
+                  当时冻结的内容：
+                  <span className="text-foreground">{detail.contentSnapshotTitle}</span>
                 </p>
               )}
               {detail.externalItemId && (
@@ -444,10 +445,10 @@ export function ListingPublishTaskWorkspace() {
                 groups.map((group) => (
                   <div key={group.phase} className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-foreground text-label-13 font-medium">{group.phase}</span>
-                      {group.steps.length === 0 && (
-                        <Badge tone="warning">没有独立步骤行</Badge>
-                      )}
+                      <span className="text-foreground text-label-13 font-medium">
+                        {group.phase}
+                      </span>
+                      {group.steps.length === 0 && <Badge tone="warning">没有独立步骤行</Badge>}
                     </div>
                     {group.note && group.steps.length === 0 && (
                       <p className="text-muted-foreground text-copy-12">{group.note}</p>
@@ -458,7 +459,9 @@ export function ListingPublishTaskWorkspace() {
                         className="border-border bg-muted/20 rounded-md border px-3 py-2"
                       >
                         <div className="flex flex-wrap items-center gap-2">
-                          <Badge tone={stepStateTone(step.state)}>{stepStateLabel(step.state)}</Badge>
+                          <Badge tone={stepStateTone(step.state)}>
+                            {stepStateLabel(step.state)}
+                          </Badge>
                           <span className="text-foreground text-label-13">{step.stepKey}</span>
                           <Badge tone="neutral">{stepScopeLabel(step.scope)}</Badge>
                           {step.attemptCount > 0 && (
@@ -520,13 +523,18 @@ export function ListingPublishTaskWorkspace() {
               ) : (
                 <ul className="space-y-1">
                   {detail.errors.map((error, index) => (
-                    <li key={`${error.scope}-${error.stepKey ?? 'task'}-${index}`} className="flex gap-2">
+                    <li
+                      key={`${error.scope}-${error.stepKey ?? 'task'}-${index}`}
+                      className="flex gap-2"
+                    >
                       <Badge tone={error.scope === 'TASK' ? 'danger' : 'warning'}>
                         {errorScopeLabel(error.scope)}
                       </Badge>
                       <span className="text-copy-12 text-foreground">{errorLine(error)}</span>
                       {error.occurredAt && (
-                        <span className="text-muted-foreground text-copy-12">{timeLabel(error.occurredAt)}</span>
+                        <span className="text-muted-foreground text-copy-12">
+                          {timeLabel(error.occurredAt)}
+                        </span>
                       )}
                     </li>
                   ))}

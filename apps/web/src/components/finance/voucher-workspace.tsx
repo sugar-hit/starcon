@@ -408,10 +408,7 @@ export function VoucherWorkspace() {
 
   if (loading && !page) {
     return (
-      <PageHeader
-        title="凭证管理"
-        description="12.5.2.1 · 生成与管理会计凭证，过账后只能红冲"
-      />
+      <PageHeader title="凭证管理" description="12.5.2.1 · 生成与管理会计凭证，过账后只能红冲" />
     );
   }
 
@@ -437,7 +434,11 @@ export function VoucherWorkspace() {
         </Notice>
       ) : null}
 
-      {notice ? <Notice tone="success" title="操作完成">{notice}</Notice> : null}
+      {notice ? (
+        <Notice tone="success" title="操作完成">
+          {notice}
+        </Notice>
+      ) : null}
       {actionError ? (
         <Notice tone="danger" title="操作失败">
           {actionError}
@@ -455,8 +456,8 @@ export function VoucherWorkspace() {
             <b>本页不会替你核对科目是否存在</b>。
           </li>
           <li>
-            <b>会计期间只能关、不能重开</b>：重开已关期间是高风险操作且必须审批留痕，
-            属 12.5.1.2（未交付）。
+            <b>会计期间只能关、不能重开</b>：重开已关期间是高风险操作且必须审批留痕， 属
+            12.5.1.2（未交付）。
           </li>
         </ul>
       </Notice>
@@ -468,7 +469,7 @@ export function VoucherWorkspace() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b text-left text-xs text-muted-foreground">
+                  <tr className="text-muted-foreground border-b text-left text-xs">
                     <th className="py-2 pr-3">期间</th>
                     <th className="py-2 pr-3">区间</th>
                     <th className="py-2 pr-3">本位币</th>
@@ -490,7 +491,7 @@ export function VoucherWorkspace() {
                           {voucherPeriodStatusLabel(period.status)}
                         </Badge>
                       </td>
-                      <td className="py-2 pr-3 text-xs text-muted-foreground">
+                      <td className="text-muted-foreground py-2 pr-3 text-xs">
                         {period.closedReason || '—'}
                       </td>
                       <td className="py-2 pr-3 text-right">
@@ -546,7 +547,7 @@ export function VoucherWorkspace() {
         description="业务事件 → 借贷科目：自动生成凭证要借哪个科目、贷哪个科目"
       >
         <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             会计科目体系是<b>租户自定</b>的，系统<b>不预置任何一行映射</b>，也绝不内置科目常量。
             没有登记映射 ⇒ 自动生成生成不出凭证（服务端会如实报错）。
           </p>
@@ -554,7 +555,7 @@ export function VoucherWorkspace() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b text-left text-xs text-muted-foreground">
+                  <tr className="text-muted-foreground border-b text-left text-xs">
                     <th className="py-2 pr-3">业务事件</th>
                     <th className="py-2 pr-3">细分</th>
                     <th className="py-2 pr-3">借方科目</th>
@@ -569,11 +570,15 @@ export function VoucherWorkspace() {
                       <td className="py-2 pr-3 font-mono text-xs">{mapping.eventKind}</td>
                       <td className="py-2 pr-3">
                         <span className="font-mono text-xs">{mapping.debitSubjectCode}</span>
-                        <span className="ml-2 text-muted-foreground">{mapping.debitSubjectName}</span>
+                        <span className="text-muted-foreground ml-2">
+                          {mapping.debitSubjectName}
+                        </span>
                       </td>
                       <td className="py-2 pr-3">
                         <span className="font-mono text-xs">{mapping.creditSubjectCode}</span>
-                        <span className="ml-2 text-muted-foreground">{mapping.creditSubjectName}</span>
+                        <span className="text-muted-foreground ml-2">
+                          {mapping.creditSubjectName}
+                        </span>
                       </td>
                       <td className="py-2 pr-3">
                         {mapping.enabled ? (
@@ -588,20 +593,16 @@ export function VoucherWorkspace() {
               </table>
             </div>
           ) : (
-            <EmptyState
-              title="还没有登记任何映射"
-              description="自动生成凭证需要先登记借贷科目"
-            />
+            <EmptyState title="还没有登记任何映射" description="自动生成凭证需要先登记借贷科目" />
           )}
 
           <div className="grid gap-2 sm:grid-cols-6">
             <select
-              className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+              className="border-input bg-background h-9 rounded-md border px-2 text-sm"
               value={mapSourceType}
               onChange={(e) => {
                 setMapSourceType(e.target.value);
-                const kinds =
-                  SOURCE_TYPES.find((t) => t.key === e.target.value)?.kinds ?? [];
+                const kinds = SOURCE_TYPES.find((t) => t.key === e.target.value)?.kinds ?? [];
                 setMapEventKind(kinds[0]?.key ?? '');
               }}
             >
@@ -612,7 +613,7 @@ export function VoucherWorkspace() {
               ))}
             </select>
             <select
-              className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+              className="border-input bg-background h-9 rounded-md border px-2 text-sm"
               value={mapEventKind}
               onChange={(e) => setMapEventKind(e.target.value)}
             >
@@ -662,7 +663,7 @@ export function VoucherWorkspace() {
               }}
             />
             <select
-              className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+              className="border-input bg-background h-9 rounded-md border px-2 text-sm"
               value={status}
               onChange={(e) => {
                 setStatus(e.target.value);
@@ -677,7 +678,7 @@ export function VoucherWorkspace() {
               ))}
             </select>
             <select
-              className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+              className="border-input bg-background h-9 rounded-md border px-2 text-sm"
               value={currency}
               onChange={(e) => {
                 setCurrency(e.target.value);
@@ -692,7 +693,7 @@ export function VoucherWorkspace() {
               ))}
             </select>
             <select
-              className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+              className="border-input bg-background h-9 rounded-md border px-2 text-sm"
               value={periodFilter}
               onChange={(e) => {
                 setPeriodFilter(e.target.value);
@@ -724,7 +725,7 @@ export function VoucherWorkspace() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b text-left text-xs text-muted-foreground">
+                  <tr className="text-muted-foreground border-b text-left text-xs">
                     <th className="py-2 pr-3">币种</th>
                     <th className="py-2 pr-3">借方合计</th>
                     <th className="py-2 pr-3">贷方合计</th>
@@ -759,7 +760,7 @@ export function VoucherWorkspace() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b text-left text-xs text-muted-foreground">
+                  <tr className="text-muted-foreground border-b text-left text-xs">
                     <th className="py-2 pr-3">凭证号</th>
                     <th className="py-2 pr-3">期间</th>
                     <th className="py-2 pr-3">业务日期</th>
@@ -782,7 +783,7 @@ export function VoucherWorkspace() {
                       <td className="py-2 pr-3">
                         {voucherSourceTypeLabel(row.sourceType)}
                         {row.sourceNo ? (
-                          <span className="ml-1 font-mono text-xs text-muted-foreground">
+                          <span className="text-muted-foreground ml-1 font-mono text-xs">
                             {row.sourceNo}
                           </span>
                         ) : null}
@@ -812,9 +813,7 @@ export function VoucherWorkspace() {
           ) : (
             <EmptyState
               title={
-                keyword || status || currency || periodFilter
-                  ? '没有符合条件的凭证'
-                  : '还没有凭证'
+                keyword || status || currency || periodFilter ? '没有符合条件的凭证' : '还没有凭证'
               }
               description={
                 keyword || status || currency || periodFilter
@@ -827,7 +826,8 @@ export function VoucherWorkspace() {
           {page && page.total > page.size ? (
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">
-                第 {page.page + 1} / {Math.max(1, Math.ceil(page.total / page.size))} 页 · 共 {page.total} 张
+                第 {page.page + 1} / {Math.max(1, Math.ceil(page.total / page.size))} 页 · 共{' '}
+                {page.total} 张
               </span>
               <div className="flex gap-2">
                 <Button
@@ -855,7 +855,7 @@ export function VoucherWorkspace() {
         <div className="space-y-4">
           <div className="grid gap-2 sm:grid-cols-4">
             <select
-              className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+              className="border-input bg-background h-9 rounded-md border px-2 text-sm"
               value={draftPeriodId}
               onChange={(e) => setDraftPeriodId(e.target.value)}
             >
@@ -886,7 +886,7 @@ export function VoucherWorkspace() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b text-left text-xs text-muted-foreground">
+                <tr className="text-muted-foreground border-b text-left text-xs">
                   <th className="py-2 pr-3">方向</th>
                   <th className="py-2 pr-3">科目编码</th>
                   <th className="py-2 pr-3">科目名称</th>
@@ -900,7 +900,7 @@ export function VoucherWorkspace() {
                   <tr key={index} className="border-b last:border-0">
                     <td className="py-2 pr-3">
                       <select
-                        className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+                        className="border-input bg-background h-9 rounded-md border px-2 text-sm"
                         value={line.lineType}
                         onChange={(e) =>
                           setDraftLines((lines) =>
@@ -948,7 +948,9 @@ export function VoucherWorkspace() {
                         value={line.summary}
                         onChange={(e) =>
                           setDraftLines((lines) =>
-                            lines.map((l, i) => (i === index ? { ...l, summary: e.target.value } : l)),
+                            lines.map((l, i) =>
+                              i === index ? { ...l, summary: e.target.value } : l,
+                            ),
                           )
                         }
                       />
@@ -959,7 +961,9 @@ export function VoucherWorkspace() {
                         value={line.amount}
                         onChange={(e) =>
                           setDraftLines((lines) =>
-                            lines.map((l, i) => (i === index ? { ...l, amount: e.target.value } : l)),
+                            lines.map((l, i) =>
+                              i === index ? { ...l, amount: e.target.value } : l,
+                            ),
                           )
                         }
                       />
@@ -1000,15 +1004,18 @@ export function VoucherWorkspace() {
       </SectionCard>
 
       {/* ---------------- 5. 自动生成 ---------------- */}
-      <SectionCard title="由业务事件自动生成" description="发货 / 收货 / 收付款 / 费用计提 → 草稿凭证">
+      <SectionCard
+        title="由业务事件自动生成"
+        description="发货 / 收货 / 收付款 / 费用计提 → 草稿凭证"
+      >
         <div className="space-y-3">
-          <p className="text-sm text-muted-foreground">
-            金额、币种、来源单号都取自<b>真实业务事实</b>；借贷科目来自上面登记的映射。
-            生成的是<b>草稿</b>，仍要过账才进账。
+          <p className="text-muted-foreground text-sm">
+            金额、币种、来源单号都取自<b>真实业务事实</b>；借贷科目来自上面登记的映射。 生成的是
+            <b>草稿</b>，仍要过账才进账。
           </p>
           <div className="grid gap-2 sm:grid-cols-4">
             <select
-              className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+              className="border-input bg-background h-9 rounded-md border px-2 text-sm"
               value={genSourceType}
               onChange={(e) => {
                 setGenSourceType(e.target.value);
@@ -1023,7 +1030,7 @@ export function VoucherWorkspace() {
               ))}
             </select>
             <select
-              className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+              className="border-input bg-background h-9 rounded-md border px-2 text-sm"
               value={genEventKind}
               onChange={(e) => setGenEventKind(e.target.value)}
             >
@@ -1039,7 +1046,7 @@ export function VoucherWorkspace() {
               onChange={(e) => setGenSourceId(e.target.value)}
             />
             <select
-              className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+              className="border-input bg-background h-9 rounded-md border px-2 text-sm"
               value={genPeriodId}
               onChange={(e) => setGenPeriodId(e.target.value)}
             >
@@ -1062,7 +1069,7 @@ export function VoucherWorkspace() {
         <div className="space-y-3">
           <div className="grid gap-2 sm:grid-cols-3">
             <select
-              className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+              className="border-input bg-background h-9 rounded-md border px-2 text-sm"
               value={exportFormat}
               onChange={(e) => setExportFormat(e.target.value)}
             >
@@ -1070,7 +1077,7 @@ export function VoucherWorkspace() {
               <option value="JSON">JSON</option>
             </select>
             <select
-              className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+              className="border-input bg-background h-9 rounded-md border px-2 text-sm"
               value={exportPeriodId}
               onChange={(e) => setExportPeriodId(e.target.value)}
             >
@@ -1087,7 +1094,7 @@ export function VoucherWorkspace() {
             </Button>
           </div>
           {exportContent ? (
-            <pre className="max-h-96 overflow-auto rounded-md border bg-muted/40 p-3 text-xs">
+            <pre className="bg-muted/40 max-h-96 overflow-auto rounded-md border p-3 text-xs">
               {exportContent}
             </pre>
           ) : null}
@@ -1102,14 +1109,14 @@ export function VoucherWorkspace() {
               <Badge tone={voucherStatusTone(voucher.status)}>
                 {voucherStatusLabel(voucher.status)}
               </Badge>
-              <span className="text-sm text-muted-foreground">
+              <span className="text-muted-foreground text-sm">
                 {voucher.periodCode} · {voucher.voucherDate} · {voucher.description}
               </span>
               <span className="font-mono text-sm">
                 {formatVoucherMoney(voucher.totalDebit, voucher.currency)}
               </span>
               {voucher.reversalVoucherId ? (
-                <span className="text-xs text-muted-foreground">
+                <span className="text-muted-foreground text-xs">
                   已被一张红冲凭证冲掉（原凭证的原始事实一字未改）
                 </span>
               ) : null}
@@ -1119,7 +1126,7 @@ export function VoucherWorkspace() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b text-left text-xs text-muted-foreground">
+                    <tr className="text-muted-foreground border-b text-left text-xs">
                       <th className="py-2 pr-3">行</th>
                       <th className="py-2 pr-3">方向</th>
                       <th className="py-2 pr-3">科目编码</th>
@@ -1144,7 +1151,7 @@ export function VoucherWorkspace() {
                         <td className="py-2 pr-3 font-mono text-xs">
                           {formatVoucherQuantity(line.quantity)}
                         </td>
-                        <td className="py-2 pr-3 text-xs text-muted-foreground">
+                        <td className="text-muted-foreground py-2 pr-3 text-xs">
                           {line.auxiliaryName || '—'}
                         </td>
                       </tr>
@@ -1153,7 +1160,10 @@ export function VoucherWorkspace() {
                 </table>
               </div>
             ) : (
-              <EmptyState title="这张凭证还没有分录行" description="草稿可以直接改，过账后就冻结了" />
+              <EmptyState
+                title="这张凭证还没有分录行"
+                description="草稿可以直接改，过账后就冻结了"
+              />
             )}
 
             {/* 动作：草稿可过账 / 可作废；已过账只能红冲。 */}
@@ -1193,7 +1203,7 @@ export function VoucherWorkspace() {
                 </Button>
               ) : null}
               {!voucherEditable(voucher) && !voucherReversible(voucher) ? (
-                <span className="text-sm text-muted-foreground">
+                <span className="text-muted-foreground text-sm">
                   这张凭证已是终态（{voucherStatusLabel(voucher.status)}），没有可执行的动作。
                 </span>
               ) : null}
@@ -1205,7 +1215,7 @@ export function VoucherWorkspace() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b text-left text-xs text-muted-foreground">
+                      <tr className="text-muted-foreground border-b text-left text-xs">
                         <th className="py-2 pr-3">事件</th>
                         <th className="py-2 pr-3">前 → 后</th>
                         <th className="py-2 pr-3">说明</th>
@@ -1223,7 +1233,7 @@ export function VoucherWorkspace() {
                             {event.reason}
                             {event.detail ? ` · ${event.detail}` : ''}
                           </td>
-                          <td className="py-2 pr-3 text-xs text-muted-foreground">
+                          <td className="text-muted-foreground py-2 pr-3 text-xs">
                             {event.occurredAt}
                           </td>
                         </tr>
@@ -1238,10 +1248,10 @@ export function VoucherWorkspace() {
       ) : null}
 
       {caps ? (
-        <p className="text-xs text-muted-foreground">
+        <p className="text-muted-foreground text-xs">
           能力声明：{caps.capabilities.length} 项已接通，
-          {caps.downstreamGaps.length} 项上游缺口（12.5.1.1 会计科目、12.5.1.2 会计期间、
-          12.5.2.2 财务报表）尚未交付。
+          {caps.downstreamGaps.length} 项上游缺口（12.5.1.1 会计科目、12.5.1.2 会计期间、 12.5.2.2
+          财务报表）尚未交付。
         </p>
       ) : null}
     </div>

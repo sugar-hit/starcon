@@ -62,13 +62,7 @@ const base = 'trade/mass-productions';
 
 /** 量产计划状态。 */
 export type MassProductionPlanStatus =
-  | 'DRAFT'
-  | 'DECIDED'
-  | 'BOM_FROZEN'
-  | 'SKU_FILED'
-  | 'RELEASED'
-  | 'CLOSED'
-  | 'CANCELLED';
+  'DRAFT' | 'DECIDED' | 'BOM_FROZEN' | 'SKU_FILED' | 'RELEASED' | 'CLOSED' | 'CANCELLED';
 
 /** 量产决策结论。 */
 export type MassProductionDecision = 'GO' | 'HOLD';
@@ -78,12 +72,7 @@ export type MassProductionDecisionSource = 'TRIAL_RECOMMENDATION' | 'MANUAL_OVER
 
 /** SKU 建档请求状态。 */
 export type MassProductionFilingStatus =
-  | 'PENDING'
-  | 'SUBMITTED'
-  | 'CONFIRMED'
-  | 'PARTIAL'
-  | 'FAILED'
-  | 'UNKNOWN';
+  'PENDING' | 'SUBMITTED' | 'CONFIRMED' | 'PARTIAL' | 'FAILED' | 'UNKNOWN';
 
 /** 建档属性行的覆写状态。 */
 export type MassProductionAttributeState = 'SET' | 'CLEAR' | 'INHERIT';
@@ -103,8 +92,7 @@ export function massProductionPlanQuery(params: MassProductionPlanParams): strin
   const parts: string[] = [];
   if (params.status) parts.push(`status=${encodeURIComponent(params.status)}`);
   if (params.trialOrderId) parts.push(`trialOrderId=${encodeURIComponent(params.trialOrderId)}`);
-  if (params.keyword?.trim())
-    parts.push(`keyword=${encodeURIComponent(params.keyword.trim())}`);
+  if (params.keyword?.trim()) parts.push(`keyword=${encodeURIComponent(params.keyword.trim())}`);
   if (params.page !== undefined) parts.push(`page=${params.page}`);
   if (params.size !== undefined) parts.push(`size=${params.size}`);
   return parts.length ? `?${parts.join('&')}` : '';
@@ -305,7 +293,9 @@ export function fetchMassProductionBomVersionCandidates(keyword?: string) {
 }
 
 export function fetchMassProductionSpuCandidates(keyword?: string) {
-  return api<MassProductionCatalogSpuRow[]>(`${base}/spu-candidates${massProductionSpuQuery(keyword)}`);
+  return api<MassProductionCatalogSpuRow[]>(
+    `${base}/spu-candidates${massProductionSpuQuery(keyword)}`,
+  );
 }
 
 export function fetchMassProductionSpuAttributes(spuId: string) {
@@ -343,9 +333,7 @@ export function fetchMassProductionBomLines(planId: string) {
 }
 
 export function fetchMassProductionSkuFiling(planId: string) {
-  return api<MassProductionSkuFilingRow | null>(
-    `${base}/${encodeURIComponent(planId)}/sku-filing`,
-  );
+  return api<MassProductionSkuFilingRow | null>(`${base}/${encodeURIComponent(planId)}/sku-filing`);
 }
 
 export function createMassProductionSkuFiling(planId: string, input: MassProductionSkuFilingInput) {

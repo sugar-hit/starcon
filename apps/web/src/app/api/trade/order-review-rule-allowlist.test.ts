@@ -25,9 +25,7 @@ import { GET, POST, PUT } from './[...path]/route';
 
 // 相对**本文件**定位：vitest 从仓库根或 apps/web 跑时 cwd 都不同，用 cwd 会静默读空。
 const SOURCE = readFileSync(
-  fileURLToPath(
-    new URL('../../../components/orders/order-review-rule-model.ts', import.meta.url),
-  ),
+  fileURLToPath(new URL('../../../components/orders/order-review-rule-model.ts', import.meta.url)),
   'utf8',
 );
 
@@ -204,10 +202,11 @@ it('审单规则与判定留痕没有删除端点 —— 删除不是本模块�
     ),
   ) as { paths: Record<string, Record<string, unknown>> };
   const reviewPaths = Object.keys(spec.paths).filter((p) => p.startsWith('/trade/order-review'));
-  expect(reviewPaths.length, '契约里一条 order-review 路径都没有，判定本身失效了').toBeGreaterThan(0);
+  expect(reviewPaths.length, '契约里一条 order-review 路径都没有，判定本身失效了').toBeGreaterThan(
+    0,
+  );
   const deletable = reviewPaths.filter((p) => spec.paths[p]?.delete);
-  expect(deletable, '审单凭据可以被删掉了：判定留痕是客服向买家解释的依据')
-    .toEqual([]);
+  expect(deletable, '审单凭据可以被删掉了：判定留痕是客服向买家解释的依据').toEqual([]);
 });
 
 /**

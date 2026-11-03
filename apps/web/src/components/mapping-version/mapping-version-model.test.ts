@@ -165,7 +165,14 @@ describe('未交付段：不画 0', () => {
   it('能力声明里 available=false 的维度被逐条挑出来', () => {
     const missing = unavailableDimensions({
       dimensions: [
-        { dimension: 'version_list', description: '', available: true, source: '', ownerModule: '', impact: '' },
+        {
+          dimension: 'version_list',
+          description: '',
+          available: true,
+          source: '',
+          ownerModule: '',
+          impact: '',
+        },
         {
           dimension: 'affected_orders',
           description: '',

@@ -25,7 +25,9 @@ import { GET as iamGet } from './iam/[...path]/route';
 // 相对**本文件**定位：vitest 从仓库根或 apps/web 跑时 cwd 都不同，用 cwd 会静默读空。
 // 本文件在 `app/api/` 下（比 `app/api/iam/` 浅一层），所以是 `../../components/...`。
 const SOURCE = readFileSync(
-  fileURLToPath(new URL('../../components/notifications/alert-rule-workspace.tsx', import.meta.url)),
+  fileURLToPath(
+    new URL('../../components/notifications/alert-rule-workspace.tsx', import.meta.url),
+  ),
   'utf8',
 );
 

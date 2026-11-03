@@ -169,7 +169,11 @@ export function OrderInterceptWorkspace() {
         setMissingPolicy(policyResult.missingReferencePolicy);
       }
       setChecks(checkResult.items);
-      setCheckPage({ total: checkResult.total, page: checkResult.page, totalPages: checkResult.totalPages });
+      setCheckPage({
+        total: checkResult.total,
+        page: checkResult.page,
+        totalPages: checkResult.totalPages,
+      });
       setRestrictions(restrictionResult.items);
       setRestrictionPage({
         total: restrictionResult.total,
@@ -177,7 +181,11 @@ export function OrderInterceptWorkspace() {
         totalPages: restrictionResult.totalPages,
       });
       setCosts(costResult.items);
-      setCostPage({ total: costResult.total, page: costResult.page, totalPages: costResult.totalPages });
+      setCostPage({
+        total: costResult.total,
+        page: costResult.page,
+        totalPages: costResult.totalPages,
+      });
     } catch (e) {
       setError(errorText(e));
     } finally {
@@ -342,13 +350,24 @@ export function OrderInterceptWorkspace() {
         }
       />
 
-      {error ? <Notice tone="danger" title="操作失败">{error}</Notice> : null}
-      {notice ? <Notice tone="success" title="已完成">{notice}</Notice> : null}
+      {error ? (
+        <Notice tone="danger" title="操作失败">
+          {error}
+        </Notice>
+      ) : null}
+      {notice ? (
+        <Notice tone="success" title="已完成">
+          {notice}
+        </Notice>
+      ) : null}
 
       {/* ------------------------------------------------ 能力与缺口 */}
-      <SectionCard title="能力与上下游缺口" description="哪几项真接通、哪几项靠租户维护、哪几项现在判不了。">
+      <SectionCard
+        title="能力与上下游缺口"
+        description="哪几项真接通、哪几项靠租户维护、哪几项现在判不了。"
+      >
         {loading ? (
-          <p className="text-sm text-muted-foreground">加载中…</p>
+          <p className="text-muted-foreground text-sm">加载中…</p>
         ) : !caps ? (
           <EmptyState title="能力声明加载失败" description="请确认 trade 服务可用后刷新。" />
         ) : (
@@ -364,7 +383,8 @@ export function OrderInterceptWorkspace() {
                 地址校验（9.2.2.1）：{caps.addressValidationAvailable ? '可用' : '未交付'}
               </span>
               <span className="rounded border px-2 py-1 text-xs">
-                店铺维度：{caps.shopScopeSupported ? '支持' : '不支持（sales_order 无 shop_code 列）'}
+                店铺维度：
+                {caps.shopScopeSupported ? '支持' : '不支持（sales_order 无 shop_code 列）'}
               </span>
               <span className="rounded border px-2 py-1 text-xs">
                 拦截策略：{caps.policyConfigured ? '已登记' : '尚未登记'}
@@ -384,7 +404,7 @@ export function OrderInterceptWorkspace() {
                   {caps.checks.map((c) => (
                     <tr key={c.code} className="border-b align-top">
                       <td className="py-2 pr-3 font-medium">{c.label}</td>
-                      <td className="py-2 pr-3 text-muted-foreground">{c.source}</td>
+                      <td className="text-muted-foreground py-2 pr-3">{c.source}</td>
                       <td className="py-2 pr-3">
                         {c.upstreamDelivered ? (
                           <span className="text-xs text-emerald-600">真接通</span>
@@ -392,14 +412,18 @@ export function OrderInterceptWorkspace() {
                           <span className="text-xs text-amber-600">未接通</span>
                         )}
                       </td>
-                      <td className="py-2 text-muted-foreground">{c.gap ?? '—'}</td>
+                      <td className="text-muted-foreground py-2">{c.gap ?? '—'}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-            <Notice tone="info" title="判定顺序">{caps.determinationOrder}</Notice>
-            <Notice tone="info" title="上游与下游缺口">{caps.gaps}</Notice>
+            <Notice tone="info" title="判定顺序">
+              {caps.determinationOrder}
+            </Notice>
+            <Notice tone="info" title="上游与下游缺口">
+              {caps.gaps}
+            </Notice>
           </div>
         )}
       </SectionCard>
@@ -419,10 +443,7 @@ export function OrderInterceptWorkspace() {
       ) : null}
 
       {/* ------------------------------------------------ 拦截策略 */}
-      <SectionCard
-        title="拦截策略"
-        description="每租户一条。阈值是运营口径，改这里而不是改代码。"
-      >
+      <SectionCard title="拦截策略" description="每租户一条。阈值是运营口径，改这里而不是改代码。">
         <div className="grid gap-3 md:grid-cols-3">
           <FormField id="keyword" label="策略名称">
             <Input value={policyName} onChange={(e) => setPolicyName(e.target.value)} />
@@ -467,9 +488,10 @@ export function OrderInterceptWorkspace() {
             保存策略
           </Button>
           {policy ? (
-            <span className="text-xs text-muted-foreground">
-              当前第 {policy.version} 版 · 缺参照口径：{missingPolicyText(policy.missingReferencePolicy)}{' '}
-              · 容忍度 {rate(policy.belowCostToleranceRate)}
+            <span className="text-muted-foreground text-xs">
+              当前第 {policy.version} 版 · 缺参照口径：
+              {missingPolicyText(policy.missingReferencePolicy)} · 容忍度{' '}
+              {rate(policy.belowCostToleranceRate)}
             </span>
           ) : (
             <span className="text-xs text-amber-600">
@@ -499,7 +521,10 @@ export function OrderInterceptWorkspace() {
                 ))}
               </select>
             </FormField>
-            <FormField id="r-target" label={rKind === 'SHIPPING_COUNTRY' ? '收货国码（ISO alpha-2）' : '订单来源'}>
+            <FormField
+              id="r-target"
+              label={rKind === 'SHIPPING_COUNTRY' ? '收货国码（ISO alpha-2）' : '订单来源'}
+            >
               <Input value={rTarget} onChange={(e) => setRTarget(e.target.value)} />
             </FormField>
             <FormField id="fraud-threshold" label="强度">
@@ -536,7 +561,7 @@ export function OrderInterceptWorkspace() {
             登记限制
           </Button>
           {loading ? (
-            <p className="mt-3 text-sm text-muted-foreground">加载中…</p>
+            <p className="text-muted-foreground mt-3 text-sm">加载中…</p>
           ) : restrictions.length === 0 ? (
             <EmptyState
               title="限制清单为空"
@@ -560,16 +585,16 @@ export function OrderInterceptWorkspace() {
                       <td className="py-2 pr-3 font-mono text-xs">{r.restrictionTarget}</td>
                       <td className="py-2 pr-3">
                         {restrictionEffectText(r.restrictionEffect)}
-                        <div className="text-xs text-muted-foreground">
+                        <div className="text-muted-foreground text-xs">
                           {restrictionSourceText(r.restrictionSource)}
                         </div>
                       </td>
-                      <td className="py-2 text-muted-foreground">{r.reason || '—'}</td>
+                      <td className="text-muted-foreground py-2">{r.reason || '—'}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              <p className="mt-2 text-xs text-muted-foreground">
+              <p className="text-muted-foreground mt-2 text-xs">
                 {restrictionPageText({
                   items: restrictions,
                   total: restrictionPage.total,
@@ -601,7 +626,7 @@ export function OrderInterceptWorkspace() {
             登记成本基线
           </Button>
           {loading ? (
-            <p className="mt-3 text-sm text-muted-foreground">加载中…</p>
+            <p className="text-muted-foreground mt-3 text-sm">加载中…</p>
           ) : costs.length === 0 ? (
             <EmptyState
               title="没有成本基线"
@@ -624,12 +649,14 @@ export function OrderInterceptWorkspace() {
                       <td className="py-2 pr-3">
                         {money(c.unitCost)} {c.currency}
                       </td>
-                      <td className="py-2 text-xs text-muted-foreground">{isoText(c.capturedAt)}</td>
+                      <td className="text-muted-foreground py-2 text-xs">
+                        {isoText(c.capturedAt)}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              <p className="mt-2 text-xs text-muted-foreground">
+              <p className="text-muted-foreground mt-2 text-xs">
                 {skuCostPageText({
                   items: costs,
                   total: costPage.total,
@@ -667,7 +694,10 @@ export function OrderInterceptWorkspace() {
       </SectionCard>
 
       {/* ------------------------------------------------ 拦截清单 */}
-      <SectionCard title="拦截清单" description="建议处置与最终处置分行显示；「建议取消」永远带「尚无人工结论」。">
+      <SectionCard
+        title="拦截清单"
+        description="建议处置与最终处置分行显示；「建议取消」永远带「尚无人工结论」。"
+      >
         <div className="mb-3 flex flex-wrap items-end gap-3">
           <FormField id="c-sku" label="关键字（订单号 / 策略名）">
             <Input value={keyword} onChange={(e) => setKeyword(e.target.value)} className="w-56" />
@@ -720,7 +750,7 @@ export function OrderInterceptWorkspace() {
         </div>
 
         {loading ? (
-          <p className="text-sm text-muted-foreground">加载中…</p>
+          <p className="text-muted-foreground text-sm">加载中…</p>
         ) : checks.length === 0 ? (
           <EmptyState
             title="还没有拦截记录"
@@ -773,8 +803,15 @@ export function OrderInterceptWorkspace() {
                 ))}
               </tbody>
             </table>
-            <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
-              <span>{pageText({ items: checks, ...checkPage, size: PAGE_SIZE, totalPages: checkPage.totalPages } as never)}</span>
+            <div className="text-muted-foreground mt-2 flex items-center gap-3 text-xs">
+              <span>
+                {pageText({
+                  items: checks,
+                  ...checkPage,
+                  size: PAGE_SIZE,
+                  totalPages: checkPage.totalPages,
+                } as never)}
+              </span>
               <Button
                 variant="outline"
                 disabled={page <= 0}
@@ -802,10 +839,15 @@ export function OrderInterceptWorkspace() {
         >
           <div className="space-y-4">
             <div className="grid gap-3 md:grid-cols-4">
-              <StatCard label="建议处置" value={recommendedText(detail.check.recommendedDisposition)} />
+              <StatCard
+                label="建议处置"
+                value={recommendedText(detail.check.recommendedDisposition)}
+              />
               <StatCard label="最终处置" value={finalText(detail.check.finalDisposition)} />
-              <StatCard label="命中 / BLOCK / 缺参照"
-                value={`${detail.check.flaggedCount} / ${detail.check.blockedCount} / ${detail.check.missingCount}`} />
+              <StatCard
+                label="命中 / BLOCK / 缺参照"
+                value={`${detail.check.flaggedCount} / ${detail.check.blockedCount} / ${detail.check.missingCount}`}
+              />
               <StatCard label="判定基准时刻" value={isoText(detail.check.assessedReferenceAt)} />
             </div>
 
@@ -852,13 +894,15 @@ export function OrderInterceptWorkspace() {
                           <div className="text-muted-foreground">命中 {f.matchCount} 处</div>
                         ) : null}
                         {f.evidenceReference ? (
-                          <div className="font-mono text-muted-foreground">{f.evidenceReference}</div>
+                          <div className="text-muted-foreground font-mono">
+                            {f.evidenceReference}
+                          </div>
                         ) : null}
                       </td>
-                      <td className="py-2 pr-3 text-xs text-muted-foreground">
+                      <td className="text-muted-foreground py-2 pr-3 text-xs">
                         {evidenceText(f.evidenceSource)}
                       </td>
-                      <td className="py-2 text-xs text-muted-foreground">{f.explanation}</td>
+                      <td className="text-muted-foreground py-2 text-xs">{f.explanation}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -868,8 +912,8 @@ export function OrderInterceptWorkspace() {
             {detail.disposition ? (
               <Notice tone="info" title="人工处置留痕">
                 人工处置留痕：{finalText(detail.disposition.decision)} ·{' '}
-                {reasonCodeText(detail.disposition.reasonCode)} · 处置人 {detail.disposition.disposedBy}{' '}
-                · {isoText(detail.disposition.disposedAt)}
+                {reasonCodeText(detail.disposition.reasonCode)} · 处置人{' '}
+                {detail.disposition.disposedBy} · {isoText(detail.disposition.disposedAt)}
                 {detail.disposition.note ? ` · ${detail.disposition.note}` : ''}
               </Notice>
             ) : null}
@@ -917,7 +961,7 @@ export function OrderInterceptWorkspace() {
                 >
                   提交处置留痕
                 </Button>
-                <p className="mt-2 text-xs text-muted-foreground">
+                <p className="text-muted-foreground mt-2 text-xs">
                   刻意**不提供**批量处置与「一键放行」：批量处置正是加粗句点名要避免的那种动作。
                 </p>
               </div>

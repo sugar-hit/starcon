@@ -83,9 +83,8 @@ export function AdCouponWorkspace() {
   const [redeemInput, setRedeemInput] = useState<AdRedeemInputState>(emptyAdRedeemInput);
   const [redeemErrors, setRedeemErrors] = useState<string[]>([]);
 
-  const [channelInput, setChannelInput] = useState<AdCouponChannelInputState>(
-    emptyAdCouponChannelInput,
-  );
+  const [channelInput, setChannelInput] =
+    useState<AdCouponChannelInputState>(emptyAdCouponChannelInput);
   const [channelErrors, setChannelErrors] = useState<string[]>([]);
 
   const [generateCount, setGenerateCount] = useState('10');
@@ -196,15 +195,13 @@ export function AdCouponWorkspace() {
           current.coupon.thresholdAmount === null ? '' : String(current.coupon.thresholdAmount),
         maxDiscountAmount:
           current.coupon.maxDiscountAmount === null ? '' : String(current.coupon.maxDiscountAmount),
-        buyQuantity:
-          current.coupon.buyQuantity === null ? '' : String(current.coupon.buyQuantity),
+        buyQuantity: current.coupon.buyQuantity === null ? '' : String(current.coupon.buyQuantity),
         giftQuantity:
           current.coupon.giftQuantity === null ? '' : String(current.coupon.giftQuantity),
         currency: current.coupon.currency,
         startAt: localDateTimeInput(current.coupon.startAt),
         endAt: localDateTimeInput(current.coupon.endAt),
-        totalStock:
-          current.coupon.totalStock === null ? '0' : String(current.coupon.totalStock),
+        totalStock: current.coupon.totalStock === null ? '0' : String(current.coupon.totalStock),
         perUserLimit:
           current.coupon.perUserLimit === null ? '' : String(current.coupon.perUserLimit),
         codePrefix: '',
@@ -376,15 +373,11 @@ export function AdCouponWorkspace() {
         channelType: channelInput.channelType,
         placement: channelInput.placement.trim(),
         planStartAt:
-          channelInput.planStartAt === ''
-            ? null
-            : new Date(channelInput.planStartAt).toISOString(),
+          channelInput.planStartAt === '' ? null : new Date(channelInput.planStartAt).toISOString(),
         planEndAt:
           channelInput.planEndAt === '' ? null : new Date(channelInput.planEndAt).toISOString(),
         plannedReach:
-          channelInput.plannedReach.trim() === ''
-            ? undefined
-            : Number(channelInput.plannedReach),
+          channelInput.plannedReach.trim() === '' ? undefined : Number(channelInput.plannedReach),
         status: channelInput.status,
         note: channelInput.note,
       });
@@ -403,8 +396,8 @@ export function AdCouponWorkspace() {
         <h1 className="text-2xl font-semibold">优惠券</h1>
         <p className="text-muted-foreground max-w-4xl text-sm">
           管理<strong>折扣码 / 满减 / 买赠</strong>三类券：<strong>生成码</strong>、
-          <strong>设置库存与限领</strong>、<strong>投放渠道（站内 / 站外 / 社媒）</strong>，
-          以及<strong>领取与核销</strong>跟踪。<strong>核销必须与订单绑定</strong> ——
+          <strong>设置库存与限领</strong>、<strong>投放渠道（站内 / 站外 / 社媒）</strong>， 以及
+          <strong>领取与核销</strong>跟踪。<strong>核销必须与订单绑定</strong> ——
           否则评估不了活动真实效果与补贴成本。
         </p>
       </header>
@@ -725,7 +718,7 @@ export function AdCouponWorkspace() {
             </button>
           </div>
 
-          <h3 className="font-medium text-sm">核销统计（真聚合）</h3>
+          <h3 className="text-sm font-medium">核销统计（真聚合）</h3>
           <div className="grid gap-2 text-sm md:grid-cols-4">
             <p>
               <span className="text-muted-foreground text-xs">已生成 / 已领 / 已核销</span>
@@ -748,13 +741,15 @@ export function AdCouponWorkspace() {
             <p>
               <span className="text-muted-foreground text-xs">不可测算笔数</span>
               <br />
-              <span className={detail.statistics.unmeasurableRedemptions > 0 ? 'text-amber-600' : ''}>
+              <span
+                className={detail.statistics.unmeasurableRedemptions > 0 ? 'text-amber-600' : ''}
+              >
                 {detail.statistics.unmeasurableRedemptions} 笔
               </span>
             </p>
           </div>
           {detail.statistics.unmeasurableRedemptions > 0 ? (
-            <p className="text-amber-600 text-xs">
+            <p className="text-xs text-amber-600">
               ⛔ 这 {detail.statistics.unmeasurableRedemptions} 笔核销的补贴成本**不可测算**
               （买赠券缺成本价，成本价在 05 定价，跨服务不可读）—— 页面**不会**把它们显示成 0。
             </p>
@@ -785,7 +780,7 @@ export function AdCouponWorkspace() {
             </table>
           ) : null}
 
-          <h3 className="font-medium text-sm">投放渠道与投放计划</h3>
+          <h3 className="text-sm font-medium">投放渠道与投放计划</h3>
           {channels.length === 0 ? (
             <p className="text-muted-foreground text-sm">
               这张券还没有登记投放渠道。用下面的表单登记：站内 / 站外 / 社媒 + 投放位 + 投放时间窗。
@@ -821,7 +816,7 @@ export function AdCouponWorkspace() {
             </table>
           )}
 
-          <h3 className="font-medium text-sm">券码（生成码）</h3>
+          <h3 className="text-sm font-medium">券码（生成码）</h3>
           <div className="flex items-end gap-2">
             <Field label="生成张数（受剩余库存约束，超库存会被服务端拒绝）">
               <input
@@ -865,7 +860,7 @@ export function AdCouponWorkspace() {
             </table>
           )}
 
-          <h3 className="font-medium text-sm">最近领取记录</h3>
+          <h3 className="text-sm font-medium">最近领取记录</h3>
           {detail.recentClaims.length === 0 ? (
             <p className="text-muted-foreground text-sm">还没有领取记录。</p>
           ) : (
@@ -895,7 +890,7 @@ export function AdCouponWorkspace() {
             </table>
           )}
 
-          <h3 className="font-medium text-sm">最近核销记录（绑定订单标识）</h3>
+          <h3 className="text-sm font-medium">最近核销记录（绑定订单标识）</h3>
           {detail.recentRedemptions.length === 0 ? (
             <p className="text-muted-foreground text-sm">还没有核销记录。</p>
           ) : (
@@ -952,18 +947,14 @@ export function AdCouponWorkspace() {
               <input
                 className="rounded border px-2 py-1"
                 value={claimInput.recipientKey}
-                onChange={(e) =>
-                  setClaimInput({ ...claimInput, recipientKey: e.target.value })
-                }
+                onChange={(e) => setClaimInput({ ...claimInput, recipientKey: e.target.value })}
               />
             </Field>
             <Field label="领取渠道">
               <select
                 className="rounded border px-2 py-1"
                 value={claimInput.channelType}
-                onChange={(e) =>
-                  setClaimInput({ ...claimInput, channelType: e.target.value })
-                }
+                onChange={(e) => setClaimInput({ ...claimInput, channelType: e.target.value })}
               >
                 <option value="ON_SITE">站内</option>
                 <option value="OFF_SITE">站外</option>
@@ -1018,9 +1009,7 @@ export function AdCouponWorkspace() {
               <input
                 className="rounded border px-2 py-1"
                 value={redeemInput.orderAmount}
-                onChange={(e) =>
-                  setRedeemInput({ ...redeemInput, orderAmount: e.target.value })
-                }
+                onChange={(e) => setRedeemInput({ ...redeemInput, orderAmount: e.target.value })}
               />
             </Field>
           </div>
@@ -1049,9 +1038,7 @@ export function AdCouponWorkspace() {
               <select
                 className="rounded border px-2 py-1"
                 value={channelInput.channelType}
-                onChange={(e) =>
-                  setChannelInput({ ...channelInput, channelType: e.target.value })
-                }
+                onChange={(e) => setChannelInput({ ...channelInput, channelType: e.target.value })}
               >
                 {(options?.channelTypes ?? []).map((o) => (
                   <option key={o.code} value={o.code}>
@@ -1064,18 +1051,14 @@ export function AdCouponWorkspace() {
               <input
                 className="rounded border px-2 py-1"
                 value={channelInput.placement}
-                onChange={(e) =>
-                  setChannelInput({ ...channelInput, placement: e.target.value })
-                }
+                onChange={(e) => setChannelInput({ ...channelInput, placement: e.target.value })}
               />
             </Field>
             <Field label="计划触达量（可空）">
               <input
                 className="rounded border px-2 py-1"
                 value={channelInput.plannedReach}
-                onChange={(e) =>
-                  setChannelInput({ ...channelInput, plannedReach: e.target.value })
-                }
+                onChange={(e) => setChannelInput({ ...channelInput, plannedReach: e.target.value })}
               />
             </Field>
             <Field label="投放开始时间">
@@ -1083,9 +1066,7 @@ export function AdCouponWorkspace() {
                 className="rounded border px-2 py-1"
                 type="datetime-local"
                 value={channelInput.planStartAt}
-                onChange={(e) =>
-                  setChannelInput({ ...channelInput, planStartAt: e.target.value })
-                }
+                onChange={(e) => setChannelInput({ ...channelInput, planStartAt: e.target.value })}
               />
             </Field>
             <Field label="投放结束时间">
@@ -1093,9 +1074,7 @@ export function AdCouponWorkspace() {
                 className="rounded border px-2 py-1"
                 type="datetime-local"
                 value={channelInput.planEndAt}
-                onChange={(e) =>
-                  setChannelInput({ ...channelInput, planEndAt: e.target.value })
-                }
+                onChange={(e) => setChannelInput({ ...channelInput, planEndAt: e.target.value })}
               />
             </Field>
             <Field label="投放状态">

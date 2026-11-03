@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import type { CrmMessageOrderContext, CrmMessageSummary } from '../../../../../packages/api-contracts/src/index';
+import type {
+  CrmMessageOrderContext,
+  CrmMessageSummary,
+} from '../../../../../packages/api-contracts/src/index';
 import {
   batchActionLabel,
   directionLabel,

@@ -318,7 +318,9 @@ export async function fetchRegistration(id: string): Promise<TaxRegistrationView
   return api<TaxRegistrationView>(`${BASE}/registrations/${id}`);
 }
 
-export async function createRegistration(input: TaxRegistrationInput): Promise<TaxRegistrationView> {
+export async function createRegistration(
+  input: TaxRegistrationInput,
+): Promise<TaxRegistrationView> {
   return api<TaxRegistrationView>(`${BASE}/registrations`, 'POST', input);
 }
 
@@ -501,9 +503,10 @@ export function subjectText(
  *             'NO_FILTER_MATCH' 当前筛选条件下没有匹配 /
  *             'NO_REGISTRATION' 有店铺但**一条登记都没有**
  */
-export function emptyState(
-  kind: 'NO_SHOP' | 'NO_FILTER_MATCH' | 'NO_REGISTRATION',
-): { title: string; description: string } {
+export function emptyState(kind: 'NO_SHOP' | 'NO_FILTER_MATCH' | 'NO_REGISTRATION'): {
+  title: string;
+  description: string;
+} {
   switch (kind) {
     case 'NO_SHOP':
       return {
@@ -521,8 +524,8 @@ export function emptyState(
       return {
         title: '还没有任何税务登记',
         description:
-          '在这个租户下还没有录过一条税务登记。选一个店铺（或法人）和一个辖区，把税号、VAT 号、'
-          + 'EPR 注册号与有效期录进来 —— 录进来的登记才能算出「缺什么」。',
+          '在这个租户下还没有录过一条税务登记。选一个店铺（或法人）和一个辖区，把税号、VAT 号、' +
+          'EPR 注册号与有效期录进来 —— 录进来的登记才能算出「缺什么」。',
       };
     default:
       return { title: '', description: '' };

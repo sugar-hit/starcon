@@ -305,7 +305,10 @@ export function effectiveWindow(row: ListingBundleBindingRow): string {
  */
 export function formatMoment(value: string | null | undefined): string {
   if (!value) return '—';
-  return value.replace('T', ' ').replace(/\.\d+/, '').replace(/([+-]\d{2}:\d{2}|Z)$/, ' $1');
+  return value
+    .replace('T', ' ')
+    .replace(/\.\d+/, '')
+    .replace(/([+-]\d{2}:\d{2}|Z)$/, ' $1');
 }
 
 /**
@@ -406,38 +409,21 @@ export function fetchSellableCheck(
   );
 }
 
-export function saveBinding(
-  input: SaveBundleBindingInput,
-): Promise<ListingBundleBindingDetail> {
-  return api<ListingBundleBindingDetail>(
-    'channel/bundle-components/bindings',
-    'POST',
-    input,
-  );
+export function saveBinding(input: SaveBundleBindingInput): Promise<ListingBundleBindingDetail> {
+  return api<ListingBundleBindingDetail>('channel/bundle-components/bindings', 'POST', input);
 }
 
 export function addComponent(input: SaveBundleComponentInput): Promise<ListingBundleComponentRow> {
-  return api<ListingBundleComponentRow>(
-    'channel/bundle-components/components',
-    'POST',
-    input,
-  );
+  return api<ListingBundleComponentRow>('channel/bundle-components/components', 'POST', input);
 }
 
 export function updateComponent(
   id: string,
   input: SaveBundleComponentInput,
 ): Promise<ListingBundleComponentRow> {
-  return api<ListingBundleComponentRow>(
-    `channel/bundle-components/components/${id}`,
-    'PUT',
-    input,
-  );
+  return api<ListingBundleComponentRow>(`channel/bundle-components/components/${id}`, 'PUT', input);
 }
 
 export function removeComponent(id: string): Promise<ListingBundleComponentDetail> {
-  return api<ListingBundleComponentDetail>(
-    `channel/bundle-components/components/${id}`,
-    'DELETE',
-  );
+  return api<ListingBundleComponentDetail>(`channel/bundle-components/components/${id}`, 'DELETE');
 }

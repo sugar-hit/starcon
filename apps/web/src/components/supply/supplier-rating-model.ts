@@ -24,12 +24,7 @@ export type SupplierRatingPeriodType = 'MONTHLY' | 'QUARTERLY';
 export type SupplierRatingGrade = 'A' | 'B' | 'C' | 'D';
 
 /** 五个评级维度。 */
-export type SupplierRatingDimensionKey =
-  | 'DELIVERY'
-  | 'QUALITY'
-  | 'RESPONSE'
-  | 'PRICE'
-  | 'SERVICE';
+export type SupplierRatingDimensionKey = 'DELIVERY' | 'QUALITY' | 'RESPONSE' | 'PRICE' | 'SERVICE';
 
 /** 评级变动的来源。 */
 export type SupplierRatingChangeType = 'PERIOD_ROLL' | 'RECOMPUTE' | 'MANUAL_ADJUSTMENT';
@@ -318,7 +313,9 @@ export function gradeLabel(grade: string | null | undefined): string {
 }
 
 /** 等级的展示色。 */
-export function gradeTone(grade: string | null | undefined): 'success' | 'warning' | 'danger' | 'neutral' {
+export function gradeTone(
+  grade: string | null | undefined,
+): 'success' | 'warning' | 'danger' | 'neutral' {
   switch (grade) {
     case 'A':
       return 'success';
@@ -390,7 +387,10 @@ export function weightLabel(weight: string | number | null | undefined): string 
 }
 
 /** 周期区间 → 展示串。 */
-export function periodText(start: string | null | undefined, end: string | null | undefined): string {
+export function periodText(
+  start: string | null | undefined,
+  end: string | null | undefined,
+): string {
   if (!start || !end) return '本期';
   return `${start.slice(0, 10)} ~ ${end.slice(0, 10)}`;
 }
@@ -552,9 +552,7 @@ export function fetchSupplierRatingOverview(
   return api<SupplierRatingOverview>(`trade/supplier-ratings/overview?${query.toString()}`);
 }
 
-export function fetchSupplierRatingPolicy(
-  periodType: string,
-): Promise<SupplierRatingPolicy> {
+export function fetchSupplierRatingPolicy(periodType: string): Promise<SupplierRatingPolicy> {
   return api<SupplierRatingPolicy>(`trade/supplier-ratings/policy?periodType=${periodType}`);
 }
 
@@ -573,9 +571,7 @@ export function saveSupplierRatingPolicy(
   });
 }
 
-export function fetchSupplierRatings(
-  filters: SupplierRatingFilters,
-): Promise<SupplierRatingPage> {
+export function fetchSupplierRatings(filters: SupplierRatingFilters): Promise<SupplierRatingPage> {
   const query = new URLSearchParams();
   if (filters.periodType) query.set('periodType', filters.periodType);
   if (filters.periodStart) query.set('periodStart', filters.periodStart);
@@ -612,11 +608,10 @@ export function adjustSupplierRating(
   resultId: string,
   input: SupplierRatingAdjustmentInput,
 ): Promise<SupplierRatingRow> {
-  return api<SupplierRatingRow>(
-    `trade/supplier-ratings/ratings/${resultId}/adjustment`,
-    'POST',
-    { adjustment: Number(input.adjustment), reason: input.reason.trim() },
-  );
+  return api<SupplierRatingRow>(`trade/supplier-ratings/ratings/${resultId}/adjustment`, 'POST', {
+    adjustment: Number(input.adjustment),
+    reason: input.reason.trim(),
+  });
 }
 
 export function fetchSupplierRatingChanges(

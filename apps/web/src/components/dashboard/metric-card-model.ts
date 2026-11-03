@@ -282,7 +282,12 @@ function groupThousands(text: string): string {
  * @param minFractionDigits 至少保留的小数位数（金额固定 2 位）
  * @param trimFraction 是否去掉多余的尾随零（数量用）
  */
-function formatScaled(scaled: bigint, scale: number, minFractionDigits: number, trimFraction: boolean): string {
+function formatScaled(
+  scaled: bigint,
+  scale: number,
+  minFractionDigits: number,
+  trimFraction: boolean,
+): string {
   const negative = scaled < 0n;
   const abs = negative ? -scaled : scaled;
   const divisor = 10n ** BigInt(scale);
@@ -461,7 +466,9 @@ export function comparisonLine(comparison: MetricCardComparison | null | undefin
 
 /** 每个币种一行（多币种时主值给不出时的兜底展示）。 */
 export function currencyRows(card: MetricCardEntry): NonNullable<MetricCardAmount>[] {
-  return (card.values ?? []).filter((value): value is NonNullable<MetricCardAmount> => value !== null);
+  return (card.values ?? []).filter(
+    (value): value is NonNullable<MetricCardAmount> => value !== null,
+  );
 }
 
 /**

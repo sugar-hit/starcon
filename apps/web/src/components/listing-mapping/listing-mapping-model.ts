@@ -510,11 +510,10 @@ export function decideCandidate(
   decision: string,
   reason?: string,
 ): Promise<CandidateDecisionResult> {
-  return api<CandidateDecisionResult>(
-    `channel/listing-mappings/candidates/${id}/decide`,
-    'POST',
-    { decision, reason: reason ?? '' },
-  );
+  return api<CandidateDecisionResult>(`channel/listing-mappings/candidates/${id}/decide`, 'POST', {
+    decision,
+    reason: reason ?? '',
+  });
 }
 
 export function resolveVariants(

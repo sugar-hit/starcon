@@ -32,9 +32,7 @@ import { GET, POST, PUT } from './[...path]/route';
  */
 
 const SOURCE = readFileSync(
-  fileURLToPath(
-    new URL('../../../components/finance/payment-execution-model.ts', import.meta.url),
-  ),
+  fileURLToPath(new URL('../../../components/finance/payment-execution-model.ts', import.meta.url)),
   'utf8',
 );
 

@@ -350,7 +350,8 @@ function LibraryTab({ options }: { options: InfluencerOptions | null }) {
               handle: form.handle,
               category: form.category,
               followerCount: form.followerCount.trim() === '' ? null : Number(form.followerCount),
-              engagementRate: form.engagementRate.trim() === '' ? null : Number(form.engagementRate),
+              engagementRate:
+                form.engagementRate.trim() === '' ? null : Number(form.engagementRate),
               gmv: form.gmv.trim() === '' ? null : Number(form.gmv),
               gmvCurrency: form.gmvCurrency,
               refundRate: form.refundRate.trim() === '' ? null : Number(form.refundRate),
@@ -365,7 +366,8 @@ function LibraryTab({ options }: { options: InfluencerOptions | null }) {
               handle: form.handle,
               category: form.category,
               followerCount: form.followerCount.trim() === '' ? null : Number(form.followerCount),
-              engagementRate: form.engagementRate.trim() === '' ? null : Number(form.engagementRate),
+              engagementRate:
+                form.engagementRate.trim() === '' ? null : Number(form.engagementRate),
               gmv: form.gmv.trim() === '' ? null : Number(form.gmv),
               gmvCurrency: form.gmvCurrency,
               refundRate: form.refundRate.trim() === '' ? null : Number(form.refundRate),
@@ -486,8 +488,7 @@ function LibraryTab({ options }: { options: InfluencerOptions | null }) {
               value={query.minEngagementRate ?? ''}
               onChange={(e) =>
                 applyFilter({
-                  minEngagementRate:
-                    e.target.value === '' ? undefined : Number(e.target.value),
+                  minEngagementRate: e.target.value === '' ? undefined : Number(e.target.value),
                 })
               }
             />
@@ -500,8 +501,7 @@ function LibraryTab({ options }: { options: InfluencerOptions | null }) {
               value={query.maxEngagementRate ?? ''}
               onChange={(e) =>
                 applyFilter({
-                  maxEngagementRate:
-                    e.target.value === '' ? undefined : Number(e.target.value),
+                  maxEngagementRate: e.target.value === '' ? undefined : Number(e.target.value),
                 })
               }
             />
@@ -674,7 +674,10 @@ function LibraryTab({ options }: { options: InfluencerOptions | null }) {
               </ul>
             ) : null}
             <div className="flex gap-2">
-              <button className="rounded border px-3 py-1 text-sm" onClick={() => void submitForm()}>
+              <button
+                className="rounded border px-3 py-1 text-sm"
+                onClick={() => void submitForm()}
+              >
                 保存
               </button>
               <button
@@ -757,7 +760,9 @@ function LibraryTab({ options }: { options: InfluencerOptions | null }) {
                           合计 {effectMoney(row.gmvFromCooperations, row.gmvCurrency)}
                         </div>
                       </td>
-                      <td className="py-1 text-xs">{tagCodeList(row.tagCodes).join('、') || '—'}</td>
+                      <td className="py-1 text-xs">
+                        {tagCodeList(row.tagCodes).join('、') || '—'}
+                      </td>
                       <td className="py-1">
                         <div>{influencerStatusLabel(row.status)}</div>
                         <div className="text-muted-foreground text-xs">
@@ -877,9 +882,7 @@ function DetailPanel({
                 </span>
                 <button
                   className="rounded border px-2 py-0.5 text-xs"
-                  onClick={() =>
-                    void run(() => untagInfluencer(detail.influencer.id, tag.id))
-                  }
+                  onClick={() => void run(() => untagInfluencer(detail.influencer.id, tag.id))}
                 >
                   移除
                 </button>
@@ -1116,7 +1119,9 @@ function BlacklistTab() {
                   </td>
                   <td className="py-1">{timestampText(row.effectiveAt)}</td>
                   <td className="py-1">{timestampText(row.releasedAt)}</td>
-                  <td className="text-muted-foreground py-1 text-xs">{row.releasedReason || '—'}</td>
+                  <td className="text-muted-foreground py-1 text-xs">
+                    {row.releasedReason || '—'}
+                  </td>
                   <td className="py-1">{row.status === 'ACTIVE' ? '生效中' : '已解除'}</td>
                 </tr>
               ))}
@@ -1272,7 +1277,10 @@ function TagsTab() {
                   onChange={(e) => setGroupForm({ ...groupForm, description: e.target.value })}
                 />
               </Field>
-              <button className="rounded border px-3 py-1 text-sm" onClick={() => void submitGroup()}>
+              <button
+                className="rounded border px-3 py-1 text-sm"
+                onClick={() => void submitGroup()}
+              >
                 保存
               </button>
               <button
@@ -1427,8 +1435,7 @@ function RatingTab() {
           ruleForm.weightEngagement.trim() === '' ? null : Number(ruleForm.weightEngagement),
         weightRefund: ruleForm.weightRefund.trim() === '' ? null : Number(ruleForm.weightRefund),
         gmvCap: ruleForm.gmvCap.trim() === '' ? null : Number(ruleForm.gmvCap),
-        engagementCap:
-          ruleForm.engagementCap.trim() === '' ? null : Number(ruleForm.engagementCap),
+        engagementCap: ruleForm.engagementCap.trim() === '' ? null : Number(ruleForm.engagementCap),
         refundCap: ruleForm.refundCap.trim() === '' ? null : Number(ruleForm.refundCap),
         status: ruleForm.status,
         note: ruleForm.note,
@@ -1553,10 +1560,16 @@ function RatingTab() {
                   onChange={(e) => setRuleForm({ ...ruleForm, refundCap: e.target.value })}
                 />
               </Field>
-              <button className="rounded border px-3 py-1 text-sm" onClick={() => void submitRule()}>
+              <button
+                className="rounded border px-3 py-1 text-sm"
+                onClick={() => void submitRule()}
+              >
                 保存并重算评级
               </button>
-              <button className="rounded border px-3 py-1 text-sm" onClick={() => setRuleForm(null)}>
+              <button
+                className="rounded border px-3 py-1 text-sm"
+                onClick={() => setRuleForm(null)}
+              >
                 取消
               </button>
             </div>
@@ -1644,10 +1657,16 @@ function RatingTab() {
                   onChange={(e) => setTierForm({ ...tierForm, sortOrder: e.target.value })}
                 />
               </Field>
-              <button className="rounded border px-3 py-1 text-sm" onClick={() => void submitTier()}>
+              <button
+                className="rounded border px-3 py-1 text-sm"
+                onClick={() => void submitTier()}
+              >
                 保存
               </button>
-              <button className="rounded border px-3 py-1 text-sm" onClick={() => setTierForm(null)}>
+              <button
+                className="rounded border px-3 py-1 text-sm"
+                onClick={() => setTierForm(null)}
+              >
                 取消
               </button>
             </div>

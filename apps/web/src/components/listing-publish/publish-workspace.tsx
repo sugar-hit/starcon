@@ -1,14 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  Badge,
-  Button,
-  EmptyState,
-  Input,
-  PageHeader,
-  SectionCard,
-} from '@starcon/ui';
+import { Badge, Button, EmptyState, Input, PageHeader, SectionCard } from '@starcon/ui';
 import {
   ArrowDown,
   ArrowUp,
@@ -86,10 +79,7 @@ export function PublishWorkspace() {
   const [error, setError] = useState<string | null>(null);
 
   const loadBatchTasks = useCallback(async (batchId: string) => {
-    const [all, failed] = await Promise.all([
-      fetchTasks(batchId),
-      fetchTasks(batchId, 'FAILED'),
-    ]);
+    const [all, failed] = await Promise.all([fetchTasks(batchId), fetchTasks(batchId, 'FAILED')]);
     setTasks(all);
     setFailedTasks(failed);
   }, []);
@@ -106,8 +96,7 @@ export function PublishWorkspace() {
       setCaps(capsResult);
       setRateLimits(limits);
       setBatches(batchList);
-      const nextActive =
-        activeBatchId ?? (batchList.length > 0 ? batchList[0]!.batchId : null);
+      const nextActive = activeBatchId ?? (batchList.length > 0 ? batchList[0]!.batchId : null);
       setActiveBatchId(nextActive);
       if (nextActive) await loadBatchTasks(nextActive);
     } catch (e) {
@@ -122,20 +111,17 @@ export function PublishWorkspace() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const run = useCallback(
-    async (work: () => Promise<void>) => {
-      setBusy(true);
-      setError(null);
-      try {
-        await work();
-      } catch (e) {
-        setError(e instanceof Error ? e.message : '操作失败，请重试');
-      } finally {
-        setBusy(false);
-      }
-    },
-    [],
-  );
+  const run = useCallback(async (work: () => Promise<void>) => {
+    setBusy(true);
+    setError(null);
+    try {
+      await work();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '操作失败，请重试');
+    } finally {
+      setBusy(false);
+    }
+  }, []);
 
   const activeBatch = useMemo(
     () => batches.find((b) => b.batchId === activeBatchId) ?? null,
@@ -164,7 +150,7 @@ export function PublishWorkspace() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center gap-2 py-16 text-muted-foreground">
+      <div className="text-muted-foreground flex items-center justify-center gap-2 py-16">
         <Loader2 className="size-4 animate-spin" />
         <span className="text-label-13">正在加载批量发布…</span>
       </div>
@@ -175,7 +161,7 @@ export function PublishWorkspace() {
     return (
       <SectionCard title="批量发布">
         <EmptyState
-          icon={<TriangleAlert className="size-8 text-destructive" />}
+          icon={<TriangleAlert className="text-destructive size-8" />}
           title="批量发布加载失败"
           description={error}
           action={
@@ -205,8 +191,8 @@ export function PublishWorkspace() {
 
       {caps && unavailableDimensions(caps).length > 0 && (
         <div className="border-warning/40 bg-warning/5 rounded-lg border px-4 py-3">
-          <p className="text-warning mb-1 text-label-13 font-medium">部分能力未接入</p>
-          <ul className="text-muted-foreground space-y-1 text-label-12">
+          <p className="text-warning text-label-13 mb-1 font-medium">部分能力未接入</p>
+          <ul className="text-muted-foreground text-label-12 space-y-1">
             {unavailableDimensions(caps).map((d) => (
               <li key={d.dimension}>
                 <span className="text-foreground">{d.description}</span>
@@ -230,13 +216,13 @@ export function PublishWorkspace() {
       >
         {rateLimits.length === 0 ? (
           <EmptyState
-            icon={<TriangleAlert className="size-8 text-warning" />}
+            icon={<TriangleAlert className="text-warning size-8" />}
             title="还没有配置任何平台的限流配额"
             description="限流参数是数据而不是服务层写死的常量。没有配置的平台，本批次一条都不会派发（fail-closed），以免触发平台限流并影响店铺安全。"
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-label-13">
+            <table className="text-label-13 w-full text-left">
               <thead className="text-muted-foreground border-border border-b">
                 <tr>
                   <th className="px-4 py-2 font-medium">平台 / 店铺</th>
@@ -311,14 +297,12 @@ export function PublishWorkspace() {
             onChange={(e) => setFilters({ ...filters, search: e.target.value })}
           />
         </div>
-        <div className="text-muted-foreground flex flex-wrap items-center gap-4 px-4 pb-4 text-label-13">
+        <div className="text-muted-foreground text-label-13 flex flex-wrap items-center gap-4 px-4 pb-4">
           <label className="flex items-center gap-2">
             <input
               type="checkbox"
               checked={filters.hasPendingDraft}
-              onChange={(e) =>
-                setFilters({ ...filters, hasPendingDraft: e.target.checked })
-              }
+              onChange={(e) => setFilters({ ...filters, hasPendingDraft: e.target.checked })}
             />
             只发有内容草稿的（4.2.1.2）
           </label>
@@ -373,7 +357,7 @@ export function PublishWorkspace() {
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-label-13">
+            <table className="text-label-13 w-full text-left">
               <thead className="text-muted-foreground border-border border-b">
                 <tr>
                   <th className="px-4 py-2 font-medium">创建时间</th>
@@ -398,9 +382,7 @@ export function PublishWorkspace() {
                         {batchStateLabel(batch.state)}
                       </Badge>
                     </td>
-                    <td className="text-foreground px-4 py-2">
-                      {progressSummary(batch)}
-                    </td>
+                    <td className="text-foreground px-4 py-2">{progressSummary(batch)}</td>
                     <td className="px-4 py-2">
                       <Button
                         size="sm"
@@ -516,10 +498,10 @@ export function PublishWorkspace() {
         >
           {dispatch && (
             <div className="border-border bg-muted/30 border-b px-4 py-3">
-              <p className="text-foreground mb-1 text-label-13 font-medium">
+              <p className="text-foreground text-label-13 mb-1 font-medium">
                 本轮派发 {dispatch.totalDispatched} 条 · 因限流跳过 {dispatch.totalSkipped} 条
               </p>
-              <ul className="text-muted-foreground space-y-0.5 text-label-12">
+              <ul className="text-muted-foreground text-label-12 space-y-0.5">
                 {dispatchSummary(dispatch).map((line) => (
                   <li key={line}>{line}</li>
                 ))}
@@ -527,7 +509,7 @@ export function PublishWorkspace() {
             </div>
           )}
           {lastAction && (
-            <div className="border-border bg-info/5 text-info border-b px-4 py-2 text-label-13">
+            <div className="border-border bg-info/5 text-info text-label-13 border-b px-4 py-2">
               {lastAction}
             </div>
           )}
@@ -539,7 +521,7 @@ export function PublishWorkspace() {
             />
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-label-13">
+              <table className="text-label-13 w-full text-left">
                 <thead className="text-muted-foreground border-border border-b">
                   <tr>
                     <th className="px-4 py-2 font-medium">顺序</th>
@@ -566,14 +548,10 @@ export function PublishWorkspace() {
                         <span className="text-muted-foreground"> / {task.shopCode}</span>
                       </td>
                       <td className="px-4 py-2">
-                        <Badge tone={taskStateTone(task.state)}>
-                          {taskStateLabel(task.state)}
-                        </Badge>
+                        <Badge tone={taskStateTone(task.state)}>{taskStateLabel(task.state)}</Badge>
                       </td>
                       <td className="px-4 py-2">{task.attempts}</td>
-                      <td className="text-destructive px-4 py-2">
-                        {task.failureReason ?? '—'}
-                      </td>
+                      <td className="text-destructive px-4 py-2">{task.failureReason ?? '—'}</td>
                       <td className="px-4 py-2">
                         {task.state === 'PENDING' ? (
                           <div className="flex items-center gap-1">
@@ -592,8 +570,7 @@ export function PublishWorkspace() {
                               aria-label="下移"
                               disabled={
                                 busy ||
-                                task.position ===
-                                  reorderable[reorderable.length - 1]?.position
+                                task.position === reorderable[reorderable.length - 1]?.position
                               }
                               onClick={() => moveTask(task.taskId, 1)}
                             >

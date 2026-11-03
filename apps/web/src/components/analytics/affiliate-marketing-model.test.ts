@@ -90,9 +90,7 @@ function slot(overrides: Partial<AffiliateMarketingSlotRow> = {}): AffiliateMark
   };
 }
 
-function response(
-  overrides: Partial<AffiliateMarketingResponse> = {},
-): AffiliateMarketingResponse {
+function response(overrides: Partial<AffiliateMarketingResponse> = {}): AffiliateMarketingResponse {
   return {
     from: '2026-01-30',
     to: '2026-01-31',
@@ -301,9 +299,7 @@ describe('关联营销效果 · 口径目录与时间范围', () => {
       ownerModule: '13.3.2.2',
       description: '同币种、同一条归因规则',
     };
-    expect(metricFormulaText(definition)).toBe(
-      `${METRIC_ATTRIBUTED_GMV} ÷ ${METRIC_SPEND}`,
-    );
+    expect(metricFormulaText(definition)).toBe(`${METRIC_ATTRIBUTED_GMV} ÷ ${METRIC_SPEND}`);
   });
 
   it('汇总型指标显示「窗口内相加」', () => {

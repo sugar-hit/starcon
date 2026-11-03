@@ -16,7 +16,8 @@ import {
   SEVERITY_LABELS,
   SEVERITY_ORDER,
   SEVERITY_TONES,
-  SUMMARY_PATH,  backlogTotal,
+  SUMMARY_PATH,
+  backlogTotal,
   buildQuery,
   filterCards,
   formatDuration,
@@ -151,8 +152,8 @@ export function SyncHealthWorkspace() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-copy-13 text-muted-foreground">
           同步与 API 健康是**跨系统排查的起点**：用户反馈「没同步 / 没订单」时，
-          <b>第一个该看的页面</b>，而不是让人在五个页面里找。
-          本页只读 —— 连接状态、最近同步、失败计数、限流命中、队列积压一屏可见，
+          <b>第一个该看的页面</b>，而不是让人在五个页面里找。 本页只读 ——
+          连接状态、最近同步、失败计数、限流命中、队列积压一屏可见，
           <b>处置动作一律回到归属系统完成</b>。
         </p>
         <Button variant="ghost" size="sm" onClick={() => void load()} disabled={busy}>
@@ -179,7 +180,7 @@ export function SyncHealthWorkspace() {
         <p
           key={notice}
           role="status"
-          className="border-warning/40 bg-warning/5 rounded-md border p-3 text-copy-12"
+          className="border-warning/40 bg-warning/5 text-copy-12 rounded-md border p-3"
         >
           {notice}
         </p>
@@ -196,17 +197,17 @@ export function SyncHealthWorkspace() {
             </div>
             <div className="rounded-md border p-3">
               <p className="text-copy-12 text-muted-foreground">红 · 先处理</p>
-              <p className="text-copy-15 font-medium text-destructive">{summary.redCount} 条</p>
+              <p className="text-copy-15 text-destructive font-medium">{summary.redCount} 条</p>
             </div>
             <div className="rounded-md border p-3">
               <p className="text-copy-12 text-muted-foreground">黄 · 预警</p>
-              <p className="text-copy-15 font-medium text-warning-foreground">
+              <p className="text-copy-15 text-warning-foreground font-medium">
                 {summary.yellowCount} 条
               </p>
             </div>
             <div className="rounded-md border p-3">
               <p className="text-copy-12 text-muted-foreground">绿 · 正常</p>
-              <p className="text-copy-15 font-medium text-success-foreground">
+              <p className="text-copy-15 text-success-foreground font-medium">
                 {summary.greenCount} 条
               </p>
             </div>
@@ -237,17 +238,19 @@ export function SyncHealthWorkspace() {
             <ul className="space-y-1">
               {summary.failureByReason.map((entry) => (
                 <li key={entry.reason} className="text-copy-12 text-muted-foreground">
-                  {FAILURE_REASON_LABELS[entry.reason] ?? entry.reason} · {formatFailureCount(entry)}
+                  {FAILURE_REASON_LABELS[entry.reason] ?? entry.reason} ·{' '}
+                  {formatFailureCount(entry)}
                 </li>
               ))}
             </ul>
           )}
-          <p className="text-copy-12 text-muted-foreground">数据截至 {formatTimestamp(summary.dataAsOf)}。</p>
+          <p className="text-copy-12 text-muted-foreground">
+            数据截至 {formatTimestamp(summary.dataAsOf)}。
+          </p>
           {summary.cardsTruncated && (
-            <p className="text-copy-12 rounded-md border border-warning/40 bg-warning/5 p-3">
+            <p className="text-copy-12 border-warning/40 bg-warning/5 rounded-md border p-3">
               ⚠️ 这个租户有 {summary.totalConnections} 条连接，超出了单次装载上限 ——
-              上面的红黄绿分布**只覆盖了前一部分**，剩下的连接还没被判。
-              这不是「它们都正常」。
+              上面的红黄绿分布**只覆盖了前一部分**，剩下的连接还没被判。 这不是「它们都正常」。
             </p>
           )}
         </section>
@@ -255,10 +258,10 @@ export function SyncHealthWorkspace() {
 
       {/* ---------------- 筛选 ---------------- */}
       <section className="flex flex-wrap items-end gap-3">
-        <label className="flex flex-col gap-1 text-copy-12">
+        <label className="text-copy-12 flex flex-col gap-1">
           <span className="text-muted-foreground">严重度</span>
           <select
-            className="rounded border px-2 py-1 text-copy-12"
+            className="text-copy-12 rounded border px-2 py-1"
             value={filters.severity}
             onChange={(e) => {
               setFilters((current) => ({ ...current, severity: e.target.value }));
@@ -273,10 +276,10 @@ export function SyncHealthWorkspace() {
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-copy-12">
+        <label className="text-copy-12 flex flex-col gap-1">
           <span className="text-muted-foreground">平台</span>
           <select
-            className="rounded border px-2 py-1 text-copy-12"
+            className="text-copy-12 rounded border px-2 py-1"
             value={filters.platformCode}
             onChange={(e) => {
               setFilters((current) => ({ ...current, platformCode: e.target.value }));
@@ -291,10 +294,10 @@ export function SyncHealthWorkspace() {
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-copy-12">
+        <label className="text-copy-12 flex flex-col gap-1">
           <span className="text-muted-foreground">连接 / 店铺 / 平台账号</span>
           <input
-            className="rounded border px-2 py-1 text-copy-12"
+            className="text-copy-12 rounded border px-2 py-1"
             value={filters.keyword}
             onChange={(e) => {
               setFilters((current) => ({ ...current, keyword: e.target.value }));
@@ -313,7 +316,7 @@ export function SyncHealthWorkspace() {
       <section className="space-y-2">
         <h2 className="text-copy-15 font-medium">连接健康卡片</h2>
         {visible.length === 0 ? (
-          <div className="rounded-lg border bg-card p-8 text-center">
+          <div className="bg-card rounded-lg border p-8 text-center">
             <p className="text-copy-13 text-muted-foreground">
               {cards.length === 0
                 ? '这个租户**一条连接都没有**。这不是「一切正常」—— 没有连接就没有同步，没有同步就没有订单。'
@@ -344,7 +347,7 @@ export function SyncHealthWorkspace() {
                   </span>
                 </div>
 
-                <dl className="mt-3 grid gap-2 text-copy-12 sm:grid-cols-2 lg:grid-cols-4">
+                <dl className="text-copy-12 mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
                   <div>
                     <dt className="text-muted-foreground">最近同步（连接级声明值）</dt>
                     <dd>{formatTimestamp(card.lastSyncAt)}</dd>
@@ -361,7 +364,9 @@ export function SyncHealthWorkspace() {
                     <dt className="text-muted-foreground">最近一次运行</dt>
                     <dd>
                       {card.lastRunStatus ?? '还没有任何运行记录'}
-                      {card.lastRunDurationMs !== null ? ` · ${formatDuration(card.lastRunDurationMs)}` : ''}
+                      {card.lastRunDurationMs !== null
+                        ? ` · ${formatDuration(card.lastRunDurationMs)}`
+                        : ''}
                     </dd>
                   </div>
                   <div>
@@ -414,7 +419,7 @@ export function SyncHealthWorkspace() {
         )}
 
         {pageCount > 1 && (
-          <div className="flex items-center gap-2 text-copy-12">
+          <div className="text-copy-12 flex items-center gap-2">
             <Button
               variant="outline"
               size="sm"
@@ -446,7 +451,7 @@ export function SyncHealthWorkspace() {
             <p className="text-copy-12 text-muted-foreground">{capabilities.backlogNote}</p>
           )}
           <div className="overflow-x-auto">
-            <table className="w-full text-copy-12">
+            <table className="text-copy-12 w-full">
               <thead className="text-muted-foreground text-left">
                 <tr>
                   <th className="p-2">队列</th>
@@ -460,10 +465,10 @@ export function SyncHealthWorkspace() {
                 {summary.backlog.map((source) => (
                   <tr key={source.table} className="border-t align-top">
                     <td className="p-2">{source.label}</td>
-                    <td className="p-2 font-mono text-copy-12">{source.table}</td>
-                    <td className="p-2 font-mono text-copy-12">{source.pendingCondition}</td>
+                    <td className="text-copy-12 p-2 font-mono">{source.table}</td>
+                    <td className="text-copy-12 p-2 font-mono">{source.pendingCondition}</td>
                     <td className="p-2 font-medium">{source.pendingCount}</td>
-                    <td className="p-2 text-muted-foreground">{source.semantics}</td>
+                    <td className="text-muted-foreground p-2">{source.semantics}</td>
                   </tr>
                 ))}
               </tbody>
@@ -504,7 +509,8 @@ export function SyncHealthWorkspace() {
             </p>
           ) : (
             <ul className="space-y-2">
-              {sortPendingItems(pending.items).map((item) => {                const href = pendingHref(item);
+              {sortPendingItems(pending.items).map((item) => {
+                const href = pendingHref(item);
                 return (
                   <li key={`${item.kind}-${item.title}`} className="rounded-md border p-3">
                     <div className="flex flex-wrap items-center gap-2">
@@ -531,7 +537,7 @@ export function SyncHealthWorkspace() {
             </ul>
           )}
           {pending.truncated && (
-            <p className="text-copy-12 rounded-md border border-warning/40 bg-warning/5 p-3">
+            <p className="text-copy-12 border-warning/40 bg-warning/5 rounded-md border p-3">
               ⚠️ 连接数超出了单次装载上限，上面的待处理项**不完整** ——
               「没列出来」不等于「没问题」。
             </p>
@@ -544,8 +550,8 @@ export function SyncHealthWorkspace() {
         <section className="space-y-2">
           <h2 className="text-copy-15 font-medium">能力声明</h2>
           <p className="text-copy-12 text-muted-foreground">
-            🔴 红黄绿是**服务端算的**，规则表在这里逐条公布 ——
-            页面上每个颜色都能追到一条「枚举 → 严重度 → 理由 → 事实来源」。
+            🔴 红黄绿是**服务端算的**，规则表在这里逐条公布 —— 页面上每个颜色都能追到一条「枚举 →
+            严重度 → 理由 → 事实来源」。
           </p>
           <p className="text-copy-12 text-muted-foreground">
             判定阈值：{formatThresholds(capabilities.thresholds)}

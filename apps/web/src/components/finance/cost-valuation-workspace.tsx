@@ -234,7 +234,17 @@ export function CostValuationWorkspace() {
     } catch (e) {
       setActionError(e instanceof Error ? e.message : '登记计价方法失败');
     }
-  }, [formScopeType, formScopeRefId, formMethod, formCurrency, formEffectiveFrom, formNote, scopeOptions, load, loadVersions]);
+  }, [
+    formScopeType,
+    formScopeRefId,
+    formMethod,
+    formCurrency,
+    formEffectiveFrom,
+    formNote,
+    scopeOptions,
+    load,
+    loadVersions,
+  ]);
 
   const submitSpecifiedCost = useCallback(async () => {
     if (!skuId) {
@@ -297,7 +307,16 @@ export function CostValuationWorkspace() {
     } catch (e) {
       setActionError(e instanceof Error ? e.message : '试算失败');
     }
-  }, [trialScopeType, trialScopeRefId, trialSkuId, trialSkuCode, trialCurrency, trialQuantity, trialBatchRef, load]);
+  }, [
+    trialScopeType,
+    trialScopeRefId,
+    trialSkuId,
+    trialSkuCode,
+    trialCurrency,
+    trialQuantity,
+    trialBatchRef,
+    load,
+  ]);
 
   if (loading && !caps) {
     return (
@@ -336,8 +355,8 @@ export function CostValuationWorkspace() {
       {/* 边界提示：系统提供选项与试算，不替用户决定政策；重算属 12.4.1.2。 */}
       <Notice tone="info" title="系统只提供选项与试算，不替用户决定计价政策">
         计价方法是租户自己的会计政策，本系统**不预置任何一行配置、也不标任何「推荐方法」**。
-        切换方法会**追加一个新版本**并把旧版本收口留作对比 —— 历史成本不会被追溯改写；
-        切换后需要 <strong>12.4.1.2 成本计算执行</strong> 重算，本模块只做标记，不执行重算。
+        切换方法会**追加一个新版本**并把旧版本收口留作对比 —— 历史成本不会被追溯改写； 切换后需要{' '}
+        <strong>12.4.1.2 成本计算执行</strong> 重算，本模块只做标记，不执行重算。
       </Notice>
 
       {actionError ? (
@@ -370,7 +389,7 @@ export function CostValuationWorkspace() {
                 <span className="text-copy-13 font-medium">{option.label}</span>
                 <Badge tone="neutral">{option.value}</Badge>
               </div>
-              <p className="mt-2 text-copy-12 text-muted-foreground">{option.basis}</p>
+              <p className="text-copy-12 text-muted-foreground mt-2">{option.basis}</p>
             </div>
           ))}
         </div>
@@ -383,7 +402,7 @@ export function CostValuationWorkspace() {
         extra={
           <div className="flex flex-wrap items-center gap-2">
             <select
-              className="border-control-border bg-card h-9 rounded-md border px-2 text-copy-13"
+              className="border-control-border bg-card text-copy-13 h-9 rounded-md border px-2"
               value={scopeType}
               onChange={(e) => setScopeType(e.target.value)}
               aria-label="按范围类型筛选"
@@ -409,7 +428,7 @@ export function CostValuationWorkspace() {
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-copy-13">
+            <table className="text-copy-13 w-full text-left">
               <thead className="text-copy-12 text-muted-foreground">
                 <tr>
                   <th className="p-2">范围</th>
@@ -463,7 +482,7 @@ export function CostValuationWorkspace() {
           <label className="text-copy-12">
             <span className="text-muted-foreground">适用范围</span>
             <select
-              className="border-control-border bg-card mt-1 h-9 w-full rounded-md border px-2 text-copy-13"
+              className="border-control-border bg-card text-copy-13 mt-1 h-9 w-full rounded-md border px-2"
               value={formScopeType}
               onChange={(e) => {
                 setFormScopeType(e.target.value);
@@ -477,7 +496,7 @@ export function CostValuationWorkspace() {
           <label className="text-copy-12">
             <span className="text-muted-foreground">范围</span>
             <select
-              className="border-control-border bg-card mt-1 h-9 w-full rounded-md border px-2 text-copy-13"
+              className="border-control-border bg-card text-copy-13 mt-1 h-9 w-full rounded-md border px-2"
               value={formScopeRefId}
               onChange={(e) => setFormScopeRefId(e.target.value)}
             >
@@ -492,7 +511,7 @@ export function CostValuationWorkspace() {
           <label className="text-copy-12">
             <span className="text-muted-foreground">计价方法</span>
             <select
-              className="border-control-border bg-card mt-1 h-9 w-full rounded-md border px-2 text-copy-13"
+              className="border-control-border bg-card text-copy-13 mt-1 h-9 w-full rounded-md border px-2"
               value={formMethod}
               onChange={(e) => setFormMethod(e.target.value)}
             >
@@ -551,7 +570,7 @@ export function CostValuationWorkspace() {
           <label className="text-copy-12">
             <span className="text-muted-foreground">范围类型</span>
             <select
-              className="border-control-border bg-card mt-1 h-9 rounded-md border px-2 text-copy-13"
+              className="border-control-border bg-card text-copy-13 mt-1 h-9 rounded-md border px-2"
               value={scopeType}
               onChange={(e) => {
                 setScopeType(e.target.value);
@@ -566,7 +585,7 @@ export function CostValuationWorkspace() {
           <label className="text-copy-12">
             <span className="text-muted-foreground">范围</span>
             <select
-              className="border-control-border bg-card mt-1 h-9 rounded-md border px-2 text-copy-13"
+              className="border-control-border bg-card text-copy-13 mt-1 h-9 rounded-md border px-2"
               value={scopeRefId}
               onChange={(e) => setScopeRefId(e.target.value)}
             >
@@ -586,7 +605,7 @@ export function CostValuationWorkspace() {
           <label className="text-copy-12">
             <span className="text-muted-foreground">旧版本</span>
             <select
-              className="border-control-border bg-card mt-1 h-9 rounded-md border px-2 text-copy-13"
+              className="border-control-border bg-card text-copy-13 mt-1 h-9 rounded-md border px-2"
               value={compareFrom}
               onChange={(e) => setCompareFrom(e.target.value)}
             >
@@ -601,7 +620,7 @@ export function CostValuationWorkspace() {
           <label className="text-copy-12">
             <span className="text-muted-foreground">新版本</span>
             <select
-              className="border-control-border bg-card mt-1 h-9 rounded-md border px-2 text-copy-13"
+              className="border-control-border bg-card text-copy-13 mt-1 h-9 rounded-md border px-2"
               value={compareTo}
               onChange={(e) => setCompareTo(e.target.value)}
             >
@@ -624,7 +643,7 @@ export function CostValuationWorkspace() {
               {comparison.recalculationNote}
             </Notice>
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-copy-13">
+              <table className="text-copy-13 w-full text-left">
                 <thead className="text-copy-12 text-muted-foreground">
                   <tr>
                     <th className="p-2">字段</th>
@@ -653,7 +672,7 @@ export function CostValuationWorkspace() {
             </div>
           </div>
         ) : versions.length === 0 && scopeRefId ? (
-          <p className="mt-3 text-copy-12 text-muted-foreground">该范围还没有配置版本。</p>
+          <p className="text-copy-12 text-muted-foreground mt-3">该范围还没有配置版本。</p>
         ) : null}
       </SectionCard>
 
@@ -709,7 +728,7 @@ export function CostValuationWorkspace() {
               还没有维护指定成本单价 —— 指定成本法在未维护单价的 SKU 上算不出结果。
             </p>
           ) : (
-            <table className="w-full text-left text-copy-13">
+            <table className="text-copy-13 w-full text-left">
               <thead className="text-copy-12 text-muted-foreground">
                 <tr>
                   <th className="p-2">SKU</th>
@@ -752,7 +771,7 @@ export function CostValuationWorkspace() {
           <label className="text-copy-12">
             <span className="text-muted-foreground">适用范围</span>
             <select
-              className="border-control-border bg-card mt-1 h-9 w-full rounded-md border px-2 text-copy-13"
+              className="border-control-border bg-card text-copy-13 mt-1 h-9 w-full rounded-md border px-2"
               value={trialScopeType}
               onChange={(e) => {
                 setTrialScopeType(e.target.value);
@@ -766,13 +785,14 @@ export function CostValuationWorkspace() {
           <label className="text-copy-12">
             <span className="text-muted-foreground">范围</span>
             <select
-              className="border-control-border bg-card mt-1 h-9 w-full rounded-md border px-2 text-copy-13"
+              className="border-control-border bg-card text-copy-13 mt-1 h-9 w-full rounded-md border px-2"
               value={trialScopeRefId}
               onChange={(e) => setTrialScopeRefId(e.target.value)}
             >
               <option value="">请选择</option>
-              {(
-                trialScopeType === 'CATEGORY' ? scopes?.categories ?? [] : scopes?.legalEntities ?? []
+              {(trialScopeType === 'CATEGORY'
+                ? (scopes?.categories ?? [])
+                : (scopes?.legalEntities ?? [])
               ).map((s) => (
                 <option key={s.refId} value={s.refId}>
                   {s.name || s.code}
@@ -791,11 +811,19 @@ export function CostValuationWorkspace() {
           </label>
           <label className="text-copy-12">
             <span className="text-muted-foreground">SKU ID</span>
-            <Input className="mt-1" value={trialSkuId} onChange={(e) => setTrialSkuId(e.target.value)} />
+            <Input
+              className="mt-1"
+              value={trialSkuId}
+              onChange={(e) => setTrialSkuId(e.target.value)}
+            />
           </label>
           <label className="text-copy-12">
             <span className="text-muted-foreground">SKU 编码</span>
-            <Input className="mt-1" value={trialSkuCode} onChange={(e) => setTrialSkuCode(e.target.value)} />
+            <Input
+              className="mt-1"
+              value={trialSkuCode}
+              onChange={(e) => setTrialSkuCode(e.target.value)}
+            />
           </label>
           <label className="text-copy-12">
             <span className="text-muted-foreground">币种</span>
@@ -831,11 +859,13 @@ export function CostValuationWorkspace() {
               <StatCard label="参与计算的成本层" value={trial.layerCount} />
               <StatCard
                 label="当前生效方法"
-                value={trial.effectiveMethod ? valuationMethodLabel(trial.effectiveMethod) : '未配置'}
+                value={
+                  trial.effectiveMethod ? valuationMethodLabel(trial.effectiveMethod) : '未配置'
+                }
               />
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-copy-13">
+              <table className="text-copy-13 w-full text-left">
                 <thead className="text-copy-12 text-muted-foreground">
                   <tr>
                     <th className="p-2">计价方法</th>
@@ -856,10 +886,14 @@ export function CostValuationWorkspace() {
                         {formatValuationQuantity(r.coveredQuantity)} /{' '}
                         {formatValuationQuantity(r.shortfallQuantity)}
                       </td>
-                      <td className="p-2">{valuationDifferenceLabel(r.differenceToEffectiveMethod)}</td>
                       <td className="p-2">
-                        {r.comparable ? r.basisNote : (
-                          <span className="inline-flex items-center gap-1 text-warning">
+                        {valuationDifferenceLabel(r.differenceToEffectiveMethod)}
+                      </td>
+                      <td className="p-2">
+                        {r.comparable ? (
+                          r.basisNote
+                        ) : (
+                          <span className="text-warning inline-flex items-center gap-1">
                             <TriangleAlert className="h-3.5 w-3.5" />
                             {r.gapNote}
                           </span>
@@ -876,10 +910,10 @@ export function CostValuationWorkspace() {
         <div className="mt-4">
           <h3 className="text-copy-13 font-medium">历史试算</h3>
           {trials.length === 0 ? (
-            <p className="mt-2 text-copy-13 text-muted-foreground">还没有试算记录。</p>
+            <p className="text-copy-13 text-muted-foreground mt-2">还没有试算记录。</p>
           ) : (
             <div className="mt-2 overflow-x-auto">
-              <table className="w-full text-left text-copy-13">
+              <table className="text-copy-13 w-full text-left">
                 <thead className="text-copy-12 text-muted-foreground">
                   <tr>
                     <th className="p-2">SKU</th>
@@ -912,10 +946,12 @@ export function CostValuationWorkspace() {
           {(caps?.capabilities ?? []).map((c) => (
             <div key={`${c.module}-${c.name}`} className="border-t pt-2">
               <div className="flex items-center gap-2">
-                <Badge tone={c.available ? 'success' : 'danger'}>{c.available ? '已交付' : '未交付'}</Badge>
+                <Badge tone={c.available ? 'success' : 'danger'}>
+                  {c.available ? '已交付' : '未交付'}
+                </Badge>
                 <span className="text-copy-13 font-medium">{c.name}</span>
               </div>
-              <p className="mt-1 text-copy-12 text-muted-foreground">{c.detail}</p>
+              <p className="text-copy-12 text-muted-foreground mt-1">{c.detail}</p>
             </div>
           ))}
           {(caps?.downstreamGaps ?? []).map((g) => (
@@ -926,7 +962,7 @@ export function CostValuationWorkspace() {
                   {g.module} {g.name}
                 </span>
               </div>
-              <p className="mt-1 text-copy-12 text-muted-foreground">{g.detail}</p>
+              <p className="text-copy-12 text-muted-foreground mt-1">{g.detail}</p>
             </div>
           ))}
         </div>

@@ -85,7 +85,8 @@ export function parseFavoriteSet(raw: unknown): PageFavoriteState {
     typeof set.hiddenByPermission === 'number' && set.hiddenByPermission > 0
       ? set.hiddenByPermission
       : 0;
-  const total = typeof set.total === 'number' && set.total >= items.length ? set.total : items.length;
+  const total =
+    typeof set.total === 'number' && set.total >= items.length ? set.total : items.length;
   return { items, hiddenByPermission: hidden, total };
 }
 
@@ -184,8 +185,7 @@ export function filterFavoritePages(
   const needle = keyword.trim().toLowerCase();
   if (!needle) return [...pages];
   return pages.filter(
-    (page) =>
-      page.label.toLowerCase().includes(needle) || page.href.toLowerCase().includes(needle),
+    (page) => page.label.toLowerCase().includes(needle) || page.href.toLowerCase().includes(needle),
   );
 }
 

@@ -277,7 +277,11 @@ describe('缺口清单分得开', () => {
 
 describe('模板表单校验', () => {
   /** 一份已经合法的模板：后续每条用例只改自己关心的那一项。 */
-  const base = (): TemplateInput => ({ ...emptyTemplate(), code: 'OLD-PLUS-30', name: '老品加价 30%' });
+  const base = (): TemplateInput => ({
+    ...emptyTemplate(),
+    code: 'OLD-PLUS-30',
+    name: '老品加价 30%',
+  });
 
   it('编码与名称必填', () => {
     const input = base();
@@ -290,9 +294,7 @@ describe('模板表单校验', () => {
     expect(
       validateTemplate({ ...input, baseMethod: 'FIXED_MARGIN', baseRate: 25 })?.message,
     ).toContain('小数口径');
-    expect(
-      validateTemplate({ ...input, baseMethod: 'FIXED_MARGIN', baseRate: 0.25 }),
-    ).toBeNull();
+    expect(validateTemplate({ ...input, baseMethod: 'FIXED_MARGIN', baseRate: 0.25 })).toBeNull();
   });
 
   it('竞品跟随必须登记竞品基准价', () => {
@@ -319,7 +321,14 @@ describe('模板表单校验', () => {
     const invalid = validateTemplate({
       ...input,
       adjustments: [
-        { type: 'SITE_DIFFERENTIAL', siteCode: '', deltaRate: null, daysCoverThreshold: null, discountRate: null, note: '' },
+        {
+          type: 'SITE_DIFFERENTIAL',
+          siteCode: '',
+          deltaRate: null,
+          daysCoverThreshold: null,
+          discountRate: null,
+          note: '',
+        },
       ],
     });
     expect(invalid?.field).toBe('adjustments');
@@ -345,7 +354,10 @@ describe('模板表单校验', () => {
 
   it('适用对象必须给取值', () => {
     const input = base();
-    const invalid = validateTemplate({ ...input, scopes: [{ type: 'BRAND', ref: '', platformCode: null }] });
+    const invalid = validateTemplate({
+      ...input,
+      scopes: [{ type: 'BRAND', ref: '', platformCode: null }],
+    });
     expect(invalid?.field).toBe('scopes');
   });
 });

@@ -93,9 +93,7 @@ describe('16.2.2.2 认证与资质 · 展示口径', () => {
       missingSkuCount: 2,
       byType: [],
       byCategory: [],
-      missingSkus: [
-        { skuId: 'a', skuCode: 'SKU-A', skuName: '商品 A', missingTypeCodes: ['FCC'] },
-      ],
+      missingSkus: [{ skuId: 'a', skuCode: 'SKU-A', skuName: '商品 A', missingTypeCodes: ['FCC'] }],
     };
     expect(coverage.missingSkus[0]?.missingTypeCodes).toEqual(['FCC']);
     expect(coverage.coveredRequirementCount + coverage.missingRequirementCount).toBe(

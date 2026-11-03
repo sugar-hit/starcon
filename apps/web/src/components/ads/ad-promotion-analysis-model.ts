@@ -285,7 +285,9 @@ export function fetchAdPromotionAnalysisOptions(): Promise<AdAnalysisOptions> {
 }
 
 /** 效果报表：真聚合 / 真分页 / 真筛选 / 真排序。 */
-export function fetchAdPromotionAnalysisReport(query: AdAnalysisQuery = {}): Promise<AdAnalysisPage> {
+export function fetchAdPromotionAnalysisReport(
+  query: AdAnalysisQuery = {},
+): Promise<AdAnalysisPage> {
   return api<AdAnalysisPage>(`channel/ad-promotion-analysis/report${queryString(query)}`);
 }
 
@@ -304,7 +306,12 @@ export function fetchAdPromotionAnalysisRuns(page = 0, size = 20): Promise<AdAna
 }
 
 export function fetchAdPromotionAnalysisCostSnapshots(
-  query: { promotionId?: string | undefined; listingId?: string | undefined; page?: number | undefined; size?: number | undefined } = {},
+  query: {
+    promotionId?: string | undefined;
+    listingId?: string | undefined;
+    page?: number | undefined;
+    size?: number | undefined;
+  } = {},
 ): Promise<AdAnalysisCostSnapshotPage> {
   return api<AdAnalysisCostSnapshotPage>(
     `channel/ad-promotion-analysis/cost-snapshots${queryString(query)}`,
@@ -314,7 +321,11 @@ export function fetchAdPromotionAnalysisCostSnapshots(
 export function saveAdPromotionAnalysisCostSnapshot(
   input: SaveAdAnalysisCostSnapshotInput,
 ): Promise<AdAnalysisCostSnapshotRow> {
-  return api<AdAnalysisCostSnapshotRow>('channel/ad-promotion-analysis/cost-snapshots', 'POST', input);
+  return api<AdAnalysisCostSnapshotRow>(
+    'channel/ad-promotion-analysis/cost-snapshots',
+    'POST',
+    input,
+  );
 }
 
 /** 登记一次导出（留痕：谁、什么时候、什么筛选条件、导出了多少行）。 */
@@ -324,7 +335,10 @@ export function createAdPromotionAnalysisExport(
   return api<AdAnalysisExportRow>('channel/ad-promotion-analysis/exports', 'POST', request);
 }
 
-export function fetchAdPromotionAnalysisExports(page = 0, size = 20): Promise<AdAnalysisExportPage> {
+export function fetchAdPromotionAnalysisExports(
+  page = 0,
+  size = 20,
+): Promise<AdAnalysisExportPage> {
   return api<AdAnalysisExportPage>(
     `channel/ad-promotion-analysis/exports${queryString({ page, size })}`,
   );
@@ -495,7 +509,9 @@ export function analysisRunStatusTone(status: string): string {
 }
 
 /** 跳过明细（jsonb 数组）渲染成人能读的一行行。 */
-export function analysisSkippedEntries(skipped: string): { promotionCode: string; reason: string }[] {
+export function analysisSkippedEntries(
+  skipped: string,
+): { promotionCode: string; reason: string }[] {
   if (!skipped) return [];
   try {
     const parsed: unknown = JSON.parse(skipped);
@@ -568,7 +584,10 @@ export function validateAdAnalysisCostInput(input: AdAnalysisCostInputState): {
 }
 
 /** 报表筛选的日期区间校验。 */
-export function validateAdAnalysisRange(dateFrom: string, dateTo: string): {
+export function validateAdAnalysisRange(
+  dateFrom: string,
+  dateTo: string,
+): {
   ok: boolean;
   errors: string[];
 } {

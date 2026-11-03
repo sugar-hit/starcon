@@ -446,8 +446,18 @@ export function SupplierClaimWorkspace() {
             value={maxAmount}
             onChange={(e) => setMaxAmount(e.target.value)}
           />
-          <Input placeholder="起始日期" type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
-          <Input placeholder="截止日期" type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} />
+          <Input
+            placeholder="起始日期"
+            type="date"
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+          />
+          <Input
+            placeholder="截止日期"
+            type="date"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
+          />
         </div>
 
         {loading ? (
@@ -494,7 +504,8 @@ export function SupplierClaimWorkspace() {
                     {formatAmount(r.claimedAmount, r.claimCurrency)}
                     <span className="text-muted-foreground">
                       {' '}
-                      / 达成 {r.agreedAmount == null ? '—' : formatAmount(r.agreedAmount, r.claimCurrency)}
+                      / 达成{' '}
+                      {r.agreedAmount == null ? '—' : formatAmount(r.agreedAmount, r.claimCurrency)}
                     </span>
                   </td>
                   <td className="py-2 text-xs">
@@ -597,7 +608,9 @@ export function SupplierClaimWorkspace() {
                         <td className="py-1 text-xs">
                           {i.skuName || i.skuCode} · 批次 {i.lotCode || '—'}
                         </td>
-                        <td className="py-1 text-xs">{i.attributedStageLabel || i.attributedStage}</td>
+                        <td className="py-1 text-xs">
+                          {i.attributedStageLabel || i.attributedStage}
+                        </td>
                         <td className="py-1 text-xs">{String(i.claimQty)}</td>
                         <td className="py-1 text-xs">
                           {formatAmount(i.claimAmount, i.claimCurrency)} /{' '}
@@ -673,7 +686,9 @@ export function SupplierClaimWorkspace() {
                 提交索赔
               </Button>
               <Button
-                disabled={busy || Boolean(actionBlockedReason(detail.actions, 'RECORD_NEGOTIATION'))}
+                disabled={
+                  busy || Boolean(actionBlockedReason(detail.actions, 'RECORD_NEGOTIATION'))
+                }
                 onClick={recordNegotiation}
               >
                 记录协商
@@ -689,7 +704,9 @@ export function SupplierClaimWorkspace() {
                 置为已达成
               </Button>
               <Button
-                disabled={busy || Boolean(actionBlockedReason(detail.actions, 'REGISTER_SETTLEMENT'))}
+                disabled={
+                  busy || Boolean(actionBlockedReason(detail.actions, 'REGISTER_SETTLEMENT'))
+                }
                 onClick={registerSettlement}
               >
                 登记赔付

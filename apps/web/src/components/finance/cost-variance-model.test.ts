@@ -160,10 +160,7 @@ describe('驱动因素的排序与主因', () => {
   });
 
   it('主因是 rank 1 的那一类，并写明它的金额', () => {
-    const drivers = [
-      driver('FIRST_MILE', 1, true, 100),
-      driver('SHRINKAGE', 2, false, 20),
-    ];
+    const drivers = [driver('FIRST_MILE', 1, true, 100), driver('SHRINKAGE', 2, false, 20)];
     expect(costVariancePrimaryDriverLabel(drivers)).toBe('头程成本波动（100.0000）');
   });
 

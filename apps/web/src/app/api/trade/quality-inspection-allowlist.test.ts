@@ -25,7 +25,9 @@ import { DELETE, GET, POST, PUT } from './[...path]/route';
 
 // 相对**本文件**定位：vitest 从仓库根或 apps/web 跑时 cwd 都不同，用 cwd 会静默读空。
 const SOURCE = readFileSync(
-  fileURLToPath(new URL('../../../components/purchase/quality-inspection-model.ts', import.meta.url)),
+  fileURLToPath(
+    new URL('../../../components/purchase/quality-inspection-model.ts', import.meta.url),
+  ),
   'utf8',
 );
 
@@ -199,9 +201,10 @@ it('白名单放行的形状与后端契约一一对应（不多放、不少放�
     .filter((p) => p.startsWith('/trade/quality-inspections'))
     .map((p) => p.replace('/trade/', 'trade/'))
     .sort();
-  expect(contractPaths.length, '契约里一条 quality-inspections 路径都没有，判定本身失效了').toBeGreaterThan(
-    0,
-  );
+  expect(
+    contractPaths.length,
+    '契约里一条 quality-inspections 路径都没有，判定本身失效了',
+  ).toBeGreaterThan(0);
 
   // 契约里有的形状，白名单必须放行。
   const allowed = new Set([

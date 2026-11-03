@@ -394,7 +394,10 @@ export function fetchAdTypeCapabilities(): Promise<AdTypeDiffCapabilities> {
 }
 
 /** 走 2.1.2.1 两层解析原始类型的归一口径（无副作用，供建档前自查）。 */
-export function resolveAdType(platformId: string, platformAdType: string): Promise<MappingResolution> {
+export function resolveAdType(
+  platformId: string,
+  platformAdType: string,
+): Promise<MappingResolution> {
   const query = new URLSearchParams({ platformId, platformAdType });
   return api<MappingResolution>(`channel/ad-type-diffs/resolve?${query.toString()}`);
 }
@@ -454,19 +457,23 @@ export function saveFieldSpec(
   profileId: string,
   input: FieldSpecInput,
 ): Promise<AdTypeFieldSpecRow> {
-  return api<AdTypeFieldSpecRow>(`channel/ad-type-diffs/profiles/${profileId}/field-specs`, 'POST', {
-    id: input.id || undefined,
-    fieldKey: input.fieldKey.trim(),
-    fieldLabel: input.fieldLabel.trim(),
-    dataType: input.dataType,
-    unit: input.unit.trim(),
-    enumValues: input.enumValues.trim(),
-    comparable: input.comparable,
-    internalRepresentation: input.internalRepresentation.trim(),
-    requiredOnInput: input.requiredOnInput,
-    position: Number(input.position || 0),
-    note: input.note.trim(),
-  });
+  return api<AdTypeFieldSpecRow>(
+    `channel/ad-type-diffs/profiles/${profileId}/field-specs`,
+    'POST',
+    {
+      id: input.id || undefined,
+      fieldKey: input.fieldKey.trim(),
+      fieldLabel: input.fieldLabel.trim(),
+      dataType: input.dataType,
+      unit: input.unit.trim(),
+      enumValues: input.enumValues.trim(),
+      comparable: input.comparable,
+      internalRepresentation: input.internalRepresentation.trim(),
+      requiredOnInput: input.requiredOnInput,
+      position: Number(input.position || 0),
+      note: input.note.trim(),
+    },
+  );
 }
 
 export function fetchPayloads(params: {
@@ -611,7 +618,10 @@ export function validatePayload(input: PayloadInput): AdValidation {
       errors.push('原始报文不是合法 JSON');
       parsed = undefined;
     }
-    if (parsed !== undefined && (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed))) {
+    if (
+      parsed !== undefined &&
+      (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed))
+    ) {
       errors.push('原始报文必须是 JSON **对象**（按顶层键算差集是保真审计的前提）');
     }
     if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {

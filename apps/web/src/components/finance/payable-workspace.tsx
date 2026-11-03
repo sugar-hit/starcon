@@ -376,7 +376,8 @@ export function PayableWorkspace() {
     }
   }
 
-  const hasFilters = Boolean(status || source || currency || counterpartyRef || keyword) || overdueOnly;
+  const hasFilters =
+    Boolean(status || source || currency || counterpartyRef || keyword) || overdueOnly;
 
   return (
     <div className="space-y-6 p-6">
@@ -385,7 +386,11 @@ export function PayableWorkspace() {
         description="来源 / 应付对象 / 金额与币种 / 到期日 / 已付金额与未付余额"
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            <Button variant="secondary" onClick={() => void runImport('arrivals')} disabled={loading}>
+            <Button
+              variant="secondary"
+              onClick={() => void runImport('arrivals')}
+              disabled={loading}
+            >
               <Download className="mr-2 h-4 w-4" />
               从到货应付确认导入
             </Button>
@@ -397,7 +402,11 @@ export function PayableWorkspace() {
               <Download className="mr-2 h-4 w-4" />
               从头程发运单导入
             </Button>
-            <Button variant="secondary" onClick={() => void runImport('ad-spend')} disabled={loading}>
+            <Button
+              variant="secondary"
+              onClick={() => void runImport('ad-spend')}
+              disabled={loading}
+            >
               <Download className="mr-2 h-4 w-4" />
               从广告花费导入
             </Button>
@@ -665,7 +674,8 @@ export function PayableWorkspace() {
                       </td>
                       <td className="py-2">{formatPayableMoney(row.amount, row.currency)}</td>
                       <td className="py-2">
-                        {formatPayableAmount(row.paidAmount)} / {formatPayableAmount(row.unpaidAmount)}
+                        {formatPayableAmount(row.paidAmount)} /{' '}
+                        {formatPayableAmount(row.unpaidAmount)}
                       </td>
                       <td className="py-2">
                         {row.dueDate}
@@ -716,7 +726,10 @@ export function PayableWorkspace() {
 
           {/* ---------- 应付单详情 ---------- */}
           {detail && (
-            <SectionCard title={`应付单 ${detail.payable.payableNo}`} description="明细行与事件流。">
+            <SectionCard
+              title={`应付单 ${detail.payable.payableNo}`}
+              description="明细行与事件流。"
+            >
               <div className="space-y-4">
                 <table className="text-copy-13 w-full text-left">
                   <thead className="text-muted-foreground">
@@ -948,9 +961,8 @@ export function PayableWorkspace() {
                   <ul className="space-y-1 text-sm">
                     {prepaymentDetail.allocations.map((a) => (
                       <li key={a.id}>
-                        {a.allocatedAt} · {a.targetType} ·{' '}
-                        {a.payableNo ?? a.targetReference ?? '—'} ·{' '}
-                        {formatPayableMoney(a.amount, prepaymentDetail.prepayment.currency)}
+                        {a.allocatedAt} · {a.targetType} · {a.payableNo ?? a.targetReference ?? '—'}{' '}
+                        · {formatPayableMoney(a.amount, prepaymentDetail.prepayment.currency)}
                       </li>
                     ))}
                   </ul>
@@ -975,9 +987,7 @@ export function PayableWorkspace() {
                     <span className="text-muted-foreground">（{cap.module}）</span>
                     <p className="text-muted-foreground mt-1">{cap.detail}</p>
                     {!cap.available && cap.ownerModule && (
-                      <p className="text-muted-foreground text-xs">
-                        归属模块：{cap.ownerModule}
-                      </p>
+                      <p className="text-muted-foreground text-xs">归属模块：{cap.ownerModule}</p>
                     )}
                   </div>
                 ))}
@@ -1023,9 +1033,7 @@ function PolicyRow({
         <Badge tone={payablePolicyStateTone(policy)}>{payablePolicyStateLabel(policy)}</Badge>{' '}
         <span className="font-medium">{policy.sourceLabel}</span>{' '}
         <span className="text-muted-foreground">· {policy.obligationKindLabel}</span>
-        {!policy.producible && (
-          <Badge tone="warning">上游未交付（{policy.ownerModule}）</Badge>
-        )}
+        {!policy.producible && <Badge tone="warning">上游未交付（{policy.ownerModule}）</Badge>}
         <span className="ml-auto flex items-center gap-2">
           <label className="flex items-center gap-1">
             <input

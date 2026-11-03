@@ -29,7 +29,11 @@ export const BASE = 'channel/compliance-precheck';
 /** 两种触发语义。 */
 export const TRIGGER_KINDS = [
   { value: 'DRAFT_SAVE', label: '保存草稿时的即时反馈', hint: '改完内容立刻体检，给即时反馈' },
-  { value: 'PUBLISH_GATE', label: '发布前的强制校验', hint: '发布前再体检一次，供 16.2.1.2 拦截执行消费' },
+  {
+    value: 'PUBLISH_GATE',
+    label: '发布前的强制校验',
+    hint: '发布前再体检一次，供 16.2.1.2 拦截执行消费',
+  },
 ] as const;
 
 export type TriggerKind = (typeof TRIGGER_KINDS)[number]['value'];

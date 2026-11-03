@@ -25,9 +25,7 @@ import { DELETE, GET, POST, PUT } from './[...path]/route';
 
 // 相对**本文件**定位：vitest 从仓库根或 apps/web 跑时 cwd 都不同，用 cwd 会静默读空。
 const SOURCE = readFileSync(
-  fileURLToPath(
-    new URL('../../../components/purchase/defective-goods-model.ts', import.meta.url),
-  ),
+  fileURLToPath(new URL('../../../components/purchase/defective-goods-model.ts', import.meta.url)),
   'utf8',
 );
 

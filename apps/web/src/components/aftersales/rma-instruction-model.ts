@@ -52,7 +52,8 @@ async function call<T>(path: string, init?: RequestInit): Promise<T> {
   return (await response.json()) as T;
 }
 
-export const fetchInstructionCapabilities = () => call<RmaInstructionCapabilities>(`${base}/capabilities`);
+export const fetchInstructionCapabilities = () =>
+  call<RmaInstructionCapabilities>(`${base}/capabilities`);
 
 export const fetchInstructionList = (params: {
   page?: number;
@@ -92,10 +93,16 @@ export const issueInstruction = (id: string, body: unknown) =>
   call<RmaInstructionDetail>(`${base}/${id}/issue`, { method: 'POST', body: JSON.stringify(body) });
 
 export const acknowledgeInstruction = (id: string, body: unknown) =>
-  call<RmaInstructionDetail>(`${base}/${id}/acknowledge`, { method: 'POST', body: JSON.stringify(body) });
+  call<RmaInstructionDetail>(`${base}/${id}/acknowledge`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
 
 export const cancelInstruction = (id: string, body: unknown) =>
-  call<RmaInstructionDetail>(`${base}/${id}/cancel`, { method: 'POST', body: JSON.stringify(body) });
+  call<RmaInstructionDetail>(`${base}/${id}/cancel`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
 
 export const expireInstructions = () =>
   call<import('../../../../../packages/api-contracts/src/index').RmaInstructionExpireResult>(
@@ -107,13 +114,22 @@ export const generateLabel = (id: string, body: unknown) =>
   call<RmaInstructionDetail>(`${base}/${id}/label`, { method: 'POST', body: JSON.stringify(body) });
 
 export const deliverLabel = (id: string, body: unknown) =>
-  call<RmaInstructionDetail>(`${base}/${id}/label/deliver`, { method: 'POST', body: JSON.stringify(body) });
+  call<RmaInstructionDetail>(`${base}/${id}/label/deliver`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
 
 export const voidLabel = (id: string, body: unknown) =>
-  call<RmaInstructionDetail>(`${base}/${id}/label/void`, { method: 'POST', body: JSON.stringify(body) });
+  call<RmaInstructionDetail>(`${base}/${id}/label/void`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
 
 export const appendTracking = (id: string, body: unknown) =>
-  call<RmaInstructionDetail>(`${base}/${id}/tracking`, { method: 'POST', body: JSON.stringify(body) });
+  call<RmaInstructionDetail>(`${base}/${id}/tracking`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
 
 // ================================================================ 展示口径
 
@@ -172,7 +188,9 @@ export function quantity(value: number | string | null | undefined): string {
  * <p>⚠️ 「已签收」用 success 而不是 neutral，但页面上**必须紧挨着**一句
  * 「这不等于我们收到货了」—— 承运商口径的送达与实收登记是两件事。
  */
-export function trackingTone(eventCode: string | null | undefined): 'neutral' | 'info' | 'success' | 'warning' | 'danger' {
+export function trackingTone(
+  eventCode: string | null | undefined,
+): 'neutral' | 'info' | 'success' | 'warning' | 'danger' {
   switch (eventCode) {
     case 'DELIVERED':
       return 'success';
@@ -246,7 +264,8 @@ export function actionButton(action: RmaInstructionAction | null | undefined): {
   disabled: boolean;
   reason: string | null;
 } {
-  if (!action) return { label: '—', variant: 'ghost', disabled: true, reason: '后端未给出动作入口' };
+  if (!action)
+    return { label: '—', variant: 'ghost', disabled: true, reason: '后端未给出动作入口' };
   return {
     label: action.label,
     variant: action.allowed ? 'default' : 'ghost',

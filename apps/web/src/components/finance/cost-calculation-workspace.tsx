@@ -72,7 +72,9 @@ export function CostCalculationWorkspace() {
   const [scopes, setScopes] = useState<FinanceCostValuationScopeOptions | null>(null);
   const [runs, setRuns] = useState<FinanceCostCalculationRunPage | null>(null);
   const [detail, setDetail] = useState<FinanceCostCalculationRunDetail | null>(null);
-  const [comparison, setComparison] = useState<FinanceCostCalculationVarianceComparison | null>(null);
+  const [comparison, setComparison] = useState<FinanceCostCalculationVarianceComparison | null>(
+    null,
+  );
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -265,7 +267,8 @@ export function CostCalculationWorkspace() {
       <Notice tone="info" title="数量账在 warehouse，价值账在 finance">
         出库数量实时读 warehouse 的库存流水（<strong>只读</strong>），
         成本（应结转多少钱）在本服务算并落库。
-        <strong>重算不会改库存</strong> —— 重算改的是「这批货应结转多少成本」，不是「仓库里还剩多少」。
+        <strong>重算不会改库存</strong> ——
+        重算改的是「这批货应结转多少成本」，不是「仓库里还剩多少」。
       </Notice>
 
       {actionError ? (
@@ -298,7 +301,7 @@ export function CostCalculationWorkspace() {
           <label className="text-copy-12">
             <span className="text-muted-foreground">适用范围</span>
             <select
-              className="border-control-border bg-card mt-1 h-9 w-full rounded-md border px-2 text-copy-13"
+              className="border-control-border bg-card text-copy-13 mt-1 h-9 w-full rounded-md border px-2"
               value={formScopeType}
               onChange={(e) => {
                 setFormScopeType(e.target.value);
@@ -312,7 +315,7 @@ export function CostCalculationWorkspace() {
           <label className="text-copy-12">
             <span className="text-muted-foreground">范围</span>
             <select
-              className="border-control-border bg-card mt-1 h-9 w-full rounded-md border px-2 text-copy-13"
+              className="border-control-border bg-card text-copy-13 mt-1 h-9 w-full rounded-md border px-2"
               value={formScopeRefId}
               onChange={(e) => setFormScopeRefId(e.target.value)}
             >
@@ -327,7 +330,7 @@ export function CostCalculationWorkspace() {
           <label className="text-copy-12">
             <span className="text-muted-foreground">计价方法</span>
             <select
-              className="border-control-border bg-card mt-1 h-9 w-full rounded-md border px-2 text-copy-13"
+              className="border-control-border bg-card text-copy-13 mt-1 h-9 w-full rounded-md border px-2"
               value={formMethod}
               onChange={(e) => setFormMethod(e.target.value)}
             >
@@ -393,7 +396,7 @@ export function CostCalculationWorkspace() {
         extra={
           <div className="flex flex-wrap items-center gap-2">
             <select
-              className="border-control-border bg-card h-9 rounded-md border px-2 text-copy-13"
+              className="border-control-border bg-card text-copy-13 h-9 rounded-md border px-2"
               value={methodFilter}
               onChange={(e) => setMethodFilter(e.target.value)}
               aria-label="按计价方法筛选"
@@ -406,7 +409,7 @@ export function CostCalculationWorkspace() {
               ))}
             </select>
             <select
-              className="border-control-border bg-card h-9 rounded-md border px-2 text-copy-13"
+              className="border-control-border bg-card text-copy-13 h-9 rounded-md border px-2"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               aria-label="按状态筛选"
@@ -428,7 +431,7 @@ export function CostCalculationWorkspace() {
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-copy-13">
+            <table className="text-copy-13 w-full text-left">
               <thead className="text-copy-12 text-muted-foreground">
                 <tr>
                   <th className="p-2">批次</th>
@@ -449,7 +452,9 @@ export function CostCalculationWorkspace() {
                         {row.id.slice(0, 8)} · {costCalculationReasonLabel(row.recalculationReason)}
                       </div>
                     </td>
-                    <td className="p-2">{costCalculationPeriodLabel(row.periodFrom, row.periodTo)}</td>
+                    <td className="p-2">
+                      {costCalculationPeriodLabel(row.periodFrom, row.periodTo)}
+                    </td>
                     <td className="p-2">
                       {row.valuationMethodLabel}
                       {row.valuationMethodVersion ? (
@@ -463,12 +468,9 @@ export function CostCalculationWorkspace() {
                       {formatCostCalculationMoney(row.totalCostAmount)} {row.currency}
                     </td>
                     <td className="p-2">
-                      {costCalculationCoverageLabel(
-                        row.totalCoveredQuantity,
-                        row.totalQuantity,
-                      )}
+                      {costCalculationCoverageLabel(row.totalCoveredQuantity, row.totalQuantity)}
                       {row.incompleteEntryCount > 0 ? (
-                        <span className="ml-1 inline-flex items-center gap-1 text-warning">
+                        <span className="text-warning ml-1 inline-flex items-center gap-1">
                           <TriangleAlert className="h-3.5 w-3.5" />
                           {row.incompleteEntryCount} 笔有缺口
                         </span>
@@ -518,12 +520,12 @@ export function CostCalculationWorkspace() {
           <div className="mt-4">
             <h3 className="text-copy-13 font-medium">成本层（{detail.layers.length} 层）</h3>
             {detail.layers.length === 0 ? (
-              <p className="mt-2 text-copy-13 text-muted-foreground">
+              <p className="text-copy-13 text-muted-foreground mt-2">
                 这个批次没有消耗任何成本层 —— 要么期间内没有出库，要么成本层不足。
               </p>
             ) : (
               <div className="mt-2 overflow-x-auto">
-                <table className="w-full text-left text-copy-13">
+                <table className="text-copy-13 w-full text-left">
                   <thead className="text-copy-12 text-muted-foreground">
                     <tr>
                       <th className="p-2">SKU</th>
@@ -541,9 +543,13 @@ export function CostCalculationWorkspace() {
                         <td className="p-2">{layer.skuCode || layer.skuId}</td>
                         <td className="p-2">{layer.lotRef || '—'}</td>
                         <td className="p-2">{layer.receivedDate ?? '—'}</td>
-                        <td className="p-2">{formatCostCalculationQuantity(layer.layerQuantity)}</td>
+                        <td className="p-2">
+                          {formatCostCalculationQuantity(layer.layerQuantity)}
+                        </td>
                         <td className="p-2">{formatCostCalculationMoney(layer.unitCost)}</td>
-                        <td className="p-2">{formatCostCalculationQuantity(layer.consumedQuantity)}</td>
+                        <td className="p-2">
+                          {formatCostCalculationQuantity(layer.consumedQuantity)}
+                        </td>
                         <td className="p-2">{formatCostCalculationMoney(layer.consumedAmount)}</td>
                       </tr>
                     ))}
@@ -558,12 +564,12 @@ export function CostCalculationWorkspace() {
               成本分录（{detail.entries.length} 条 · 有缺口的排在最后）
             </h3>
             {detail.entries.length === 0 ? (
-              <p className="mt-2 text-copy-13 text-muted-foreground">
+              <p className="text-copy-13 text-muted-foreground mt-2">
                 这个期间内没有出库（销售出库 / 发货 / 平台仓转出），所以没有成本分录。
               </p>
             ) : (
               <div className="mt-2 overflow-x-auto">
-                <table className="w-full text-left text-copy-13">
+                <table className="text-copy-13 w-full text-left">
                   <thead className="text-copy-12 text-muted-foreground">
                     <tr>
                       <th className="p-2">出库时间</th>
@@ -579,10 +585,10 @@ export function CostCalculationWorkspace() {
                     {sortCostCalculationEntries(detail.entries).map(
                       (entry: FinanceCostCalculationEntryRow) => (
                         <tr key={entry.id} className="border-t">
+                          <td className="p-2">{entry.occurredAt.slice(0, 19).replace('T', ' ')}</td>
                           <td className="p-2">
-                            {entry.occurredAt.slice(0, 19).replace('T', ' ')}
+                            {costCalculationBusinessTypeLabel(entry.businessType)}
                           </td>
-                          <td className="p-2">{costCalculationBusinessTypeLabel(entry.businessType)}</td>
                           <td className="p-2">{entry.skuCode || entry.skuId}</td>
                           <td className="p-2">
                             {formatCostCalculationQuantity(entry.issueQuantity)} /{' '}
@@ -595,7 +601,7 @@ export function CostCalculationWorkspace() {
                           </td>
                           <td className="p-2">
                             {entry.status === 'INCOMPLETE' ? (
-                              <span className="inline-flex items-center gap-1 text-warning">
+                              <span className="text-warning inline-flex items-center gap-1">
                                 <TriangleAlert className="h-3.5 w-3.5" />
                                 {costCalculationEntryStatusLabel(entry.status)}
                                 {entry.gapNote ? `：${entry.gapNote}` : ''}
@@ -626,7 +632,7 @@ export function CostCalculationWorkspace() {
           <label className="text-copy-12">
             <span className="text-muted-foreground">旧批次</span>
             <select
-              className="border-control-border bg-card mt-1 h-9 rounded-md border px-2 text-copy-13"
+              className="border-control-border bg-card text-copy-13 mt-1 h-9 rounded-md border px-2"
               value={compareFrom}
               onChange={(e) => setCompareFrom(e.target.value)}
             >
@@ -642,7 +648,7 @@ export function CostCalculationWorkspace() {
           <label className="text-copy-12">
             <span className="text-muted-foreground">新批次</span>
             <select
-              className="border-control-border bg-card mt-1 h-9 rounded-md border px-2 text-copy-13"
+              className="border-control-border bg-card text-copy-13 mt-1 h-9 rounded-md border px-2"
               value={compareTo}
               onChange={(e) => setCompareTo(e.target.value)}
             >
@@ -674,11 +680,14 @@ export function CostCalculationWorkspace() {
                 label="新批次结转金额"
                 value={formatCostCalculationMoney(comparison.toTotalCostAmount)}
               />
-              <StatCard label="差额" value={costCalculationDifferenceLabel(comparison.totalCostAmountDifference)} />
+              <StatCard
+                label="差额"
+                value={costCalculationDifferenceLabel(comparison.totalCostAmountDifference)}
+              />
               <StatCard label="对比 SKU 数" value={comparison.comparedSkuCount} />
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-copy-13">
+              <table className="text-copy-13 w-full text-left">
                 <thead className="text-copy-12 text-muted-foreground">
                   <tr>
                     <th className="p-2">SKU</th>
@@ -717,7 +726,7 @@ export function CostCalculationWorkspace() {
             </div>
           </div>
         ) : runItems.length === 0 ? (
-          <p className="mt-3 text-copy-12 text-muted-foreground">还没有批次可比。</p>
+          <p className="text-copy-12 text-muted-foreground mt-3">还没有批次可比。</p>
         ) : null}
       </SectionCard>
 
@@ -727,10 +736,12 @@ export function CostCalculationWorkspace() {
           {(caps?.capabilities ?? []).map((c) => (
             <div key={`${c.module}-${c.name}`} className="border-t pt-2">
               <div className="flex items-center gap-2">
-                <Badge tone={c.available ? 'success' : 'danger'}>{c.available ? '已交付' : '未交付'}</Badge>
+                <Badge tone={c.available ? 'success' : 'danger'}>
+                  {c.available ? '已交付' : '未交付'}
+                </Badge>
                 <span className="text-copy-13 font-medium">{c.name}</span>
               </div>
-              <p className="mt-1 text-copy-12 text-muted-foreground">{c.detail}</p>
+              <p className="text-copy-12 text-muted-foreground mt-1">{c.detail}</p>
             </div>
           ))}
           {(caps?.downstreamGaps ?? []).map((g) => (
@@ -741,7 +752,7 @@ export function CostCalculationWorkspace() {
                   {g.module} {g.name}
                 </span>
               </div>
-              <p className="mt-1 text-copy-12 text-muted-foreground">{g.detail}</p>
+              <p className="text-copy-12 text-muted-foreground mt-1">{g.detail}</p>
             </div>
           ))}
         </div>

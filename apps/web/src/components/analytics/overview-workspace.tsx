@@ -146,7 +146,12 @@ export function AnalyticsOverviewWorkspace() {
           <span>
             {scopeLabel(scopeType)} · {rangeText(from, to)}
           </span>
-          <Button variant="outline" size="sm" disabled={loading || busy} onClick={() => void load()}>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={loading || busy}
+            onClick={() => void load()}
+          >
             <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
             刷新
           </Button>
@@ -154,7 +159,10 @@ export function AnalyticsOverviewWorkspace() {
       </div>
 
       {/* ── 时间范围与维度选择 ───────────────────────────────────────── */}
-      <SectionCard title="时间范围与维度" description="时间范围决定分桶与对比窗口；维度决定汇总口径。">
+      <SectionCard
+        title="时间范围与维度"
+        description="时间范围决定分桶与对比窗口；维度决定汇总口径。"
+      >
         <div className="flex flex-wrap items-end gap-4">
           <label className="text-copy-13 text-muted-foreground flex flex-col gap-1">
             起始日期
@@ -193,7 +201,8 @@ export function AnalyticsOverviewWorkspace() {
         </div>
         {overview && overview.timezones.length > 1 && (
           <p className="text-copy-13 text-muted-foreground mt-3">
-            本窗口的数据跨越 {overview.timezones.join('、')} 多个分桶时区，跨时区汇总的时间口径以各行自己的时区为准。
+            本窗口的数据跨越 {overview.timezones.join('、')}{' '}
+            多个分桶时区，跨时区汇总的时间口径以各行自己的时区为准。
           </p>
         )}
       </SectionCard>
@@ -217,7 +226,10 @@ export function AnalyticsOverviewWorkspace() {
       {/* ── 加载态 ───────────────────────────────────────────────────── */}
       {state === 'loading' && (
         <SectionCard>
-          <EmptyState title="正在读取经营总览…" description="报表数据来自投影读模型，可能需要一点时间。" />
+          <EmptyState
+            title="正在读取经营总览…"
+            description="报表数据来自投影读模型，可能需要一点时间。"
+          />
         </SectionCard>
       )}
 
@@ -263,7 +275,10 @@ export function AnalyticsOverviewWorkspace() {
 
       {/* ── 趋势图 ───────────────────────────────────────────────────── */}
       {state === 'ready' && series.length > 0 && (
-        <SectionCard title="趋势" description="只画有事实的那几天；没有数据的一天不是 0，是没有点。">
+        <SectionCard
+          title="趋势"
+          description="只画有事实的那几天；没有数据的一天不是 0，是没有点。"
+        >
           <div className="space-y-4">
             {series.map((line) => (
               <TrendLineView
@@ -306,7 +321,10 @@ export function AnalyticsOverviewWorkspace() {
               </thead>
               <tbody>
                 {drilldown.items.map((row) => (
-                  <tr key={`${row.sourceKind}|${row.referenceId}|${row.currency}`} className="border-border border-t">
+                  <tr
+                    key={`${row.sourceKind}|${row.referenceId}|${row.currency}`}
+                    className="border-border border-t"
+                  >
                     <td className="py-2 pr-3">
                       <div className="text-foreground">{row.referenceLabel || row.referenceId}</div>
                       <div className="text-copy-13 text-muted-foreground">{row.referenceId}</div>
@@ -314,7 +332,9 @@ export function AnalyticsOverviewWorkspace() {
                     <td className="text-copy-13 text-muted-foreground py-2 pr-3">
                       {drilldownSourceLabel(row.sourceKind)}
                     </td>
-                    <td className="text-copy-13 text-muted-foreground py-2 pr-3">{row.bucketDate}</td>
+                    <td className="text-copy-13 text-muted-foreground py-2 pr-3">
+                      {row.bucketDate}
+                    </td>
                     <td className="py-2 tabular-nums">{drilldownRowText(row)}</td>
                   </tr>
                 ))}
@@ -346,9 +366,16 @@ function MetricCardView({
 
   // 🔴 不可比时 delta 不传（StatCard 只在 delta 是 number 时才渲染变化徽标），
   //    而是比较文本单独写出来 —— 「不可比」不是 0%。
-  const delta = previous.comparable && previous.changeRate !== null ? previous.changeRate : undefined;
+  const delta =
+    previous.comparable && previous.changeRate !== null ? previous.changeRate : undefined;
   const deltaDirection =
-    direction === 'up' ? 'up' : direction === 'down' ? 'down' : direction === 'flat' ? 'flat' : 'flat';
+    direction === 'up'
+      ? 'up'
+      : direction === 'down'
+        ? 'down'
+        : direction === 'flat'
+          ? 'flat'
+          : 'flat';
 
   return (
     <div className="border-border bg-card rounded-lg border p-4">
@@ -370,7 +397,7 @@ function MetricCardView({
           <div className="text-h-24 text-muted-foreground tracking-tight">—</div>
         ) : (
           rows.map((row) => (
-            <div key={row} className="text-h-24 text-foreground tracking-tight tabular-nums">
+            <div key={row} className="text-h-24 text-foreground tabular-nums tracking-tight">
               {row}
             </div>
           ))
@@ -383,7 +410,7 @@ function MetricCardView({
       )}
 
       {rows.length > 0 && (
-        <div className="mt-2 flex flex-wrap items-center gap-2 text-copy-13">
+        <div className="text-copy-13 mt-2 flex flex-wrap items-center gap-2">
           {/* 🔴 涨跌**不判好坏**：涨是好事还是坏事取决于指标（退货率涨是坏事），
               页面不替用户决定，只把方向与数字如实显示。 */}
           <Badge tone="neutral">{comparisonText(previous)}</Badge>
@@ -425,13 +452,21 @@ function TrendLineView({
     y: height - padding - (point.value / max) * (height - padding * 2),
     point,
   }));
-  const path = coords.map((c, i) => `${i === 0 ? 'M' : 'L'}${c.x.toFixed(2)},${c.y.toFixed(2)}`).join(' ');
+  const path = coords
+    .map((c, i) => `${i === 0 ? 'M' : 'L'}${c.x.toFixed(2)},${c.y.toFixed(2)}`)
+    .join(' ');
 
   return (
     <div>
       <div className="text-copy-13 text-foreground">{title}</div>
       <svg viewBox={`0 0 ${width} ${height}`} className="h-32 w-full" role="img" aria-label={title}>
-        <path d={path} fill="none" stroke="currentColor" strokeWidth={1.5} className="text-foreground" />
+        <path
+          d={path}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.5}
+          className="text-foreground"
+        />
         {coords.map((c) => (
           <circle key={c.point.date} cx={c.x} cy={c.y} r={2.5} className="fill-foreground" />
         ))}

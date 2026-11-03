@@ -180,14 +180,15 @@ export function BoardWorkspace() {
       if (visibility) query.set('visibility', visibility);
       query.set('page', '0');
       query.set('size', '20');
-      const [caps, metricDefs, dimensionDefs, templateList, boardPage, myBoards] = await Promise.all([
-        api<BoardCapabilities>('reporting/board/capabilities'),
-        api<BoardMetricView[]>('reporting/board/metrics'),
-        api<BoardDimensionView[]>('reporting/board/dimensions'),
-        api<BoardTemplateView[]>('reporting/board/board-templates'),
-        api<BoardPage>(`reporting/board/boards?${query.toString()}`),
-        api<BoardWorkbenchResponse>('reporting/board/board'),
-      ]);
+      const [caps, metricDefs, dimensionDefs, templateList, boardPage, myBoards] =
+        await Promise.all([
+          api<BoardCapabilities>('reporting/board/capabilities'),
+          api<BoardMetricView[]>('reporting/board/metrics'),
+          api<BoardDimensionView[]>('reporting/board/dimensions'),
+          api<BoardTemplateView[]>('reporting/board/board-templates'),
+          api<BoardPage>(`reporting/board/boards?${query.toString()}`),
+          api<BoardWorkbenchResponse>('reporting/board/board'),
+        ]);
       setCapabilities(caps);
       setMetrics(metricDefs);
       setDimensions(dimensionDefs);
@@ -216,9 +217,7 @@ export function BoardWorkspace() {
       setBoard(loaded);
       setLayoutDraft(sortByLayout(loaded.components));
       setDefaults(await api<BoardDefaultsView>(`reporting/board/boards/${boardId}/defaults`));
-      setDefaultFilters(
-        defaultsToDraft(loaded.defaultFilters),
-      );
+      setDefaultFilters(defaultsToDraft(loaded.defaultFilters));
       setDefaultWindowFrom(loaded.defaultWindowFrom ?? '');
       setDefaultWindowTo(loaded.defaultWindowTo ?? '');
     } catch (e) {
@@ -325,7 +324,11 @@ export function BoardWorkspace() {
     setShareError('');
     try {
       await api<BoardShareView>(`reporting/board/boards/${board.boardId}/shares`, 'POST', {
-        ...toShareSaveRequest({ roleId: shareRoleId, permissionCode: sharePermissionCode, scope: shareScope }),
+        ...toShareSaveRequest({
+          roleId: shareRoleId,
+          permissionCode: sharePermissionCode,
+          scope: shareScope,
+        }),
       });
       setShareRoleId('');
       setSharePermissionCode('');
@@ -520,7 +523,9 @@ export function BoardWorkspace() {
                 </button>
               ))}
             </div>
-            <p className="text-copy-13 text-muted-foreground mt-2">{workbenchDataUpdatedText(workbench)}</p>
+            <p className="text-copy-13 text-muted-foreground mt-2">
+              {workbenchDataUpdatedText(workbench)}
+            </p>
           </>
         )}
       </SectionCard>
@@ -581,7 +586,11 @@ export function BoardWorkspace() {
                       <Badge tone="neutral">{visibilityLabel(row.visibility)}</Badge>
                     </td>
                     <td className="py-2">
-                      <Button size="sm" variant="outline" onClick={() => void openBoard(row.boardId)}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => void openBoard(row.boardId)}
+                      >
                         打开
                       </Button>
                     </td>
@@ -617,9 +626,7 @@ export function BoardWorkspace() {
                 </Button>
               )}
               {dirty && (
-                <span className="text-copy-13 text-muted-foreground">
-                  布局改了还没保存。
-                </span>
+                <span className="text-copy-13 text-muted-foreground">布局改了还没保存。</span>
               )}
             </div>
             {actionError && <p className="text-copy-13 text-destructive mt-2">{actionError}</p>}
@@ -654,7 +661,9 @@ export function BoardWorkspace() {
                       onDrop={(event) => {
                         event.preventDefault();
                         if (!dragId || !board.ownedByMe) return;
-                        setLayoutDraft((current) => swapLayouts(current, dragId, component.componentId));
+                        setLayoutDraft((current) =>
+                          swapLayouts(current, dragId, component.componentId),
+                        );
                         setDragId(null);
                       }}
                       className="border-border bg-background rounded-lg border p-3"
@@ -690,7 +699,7 @@ export function BoardWorkspace() {
                       </div>
 
                       {data && data.points.length > 0 && (
-                        <table className="mt-2 w-full text-left text-copy-13">
+                        <table className="text-copy-13 mt-2 w-full text-left">
                           <tbody>
                             {rows.map((row) => (
                               <tr key={row.dimensionValue}>
@@ -711,12 +720,12 @@ export function BoardWorkspace() {
                         </table>
                       )}
                       {data && data.points.length === 0 && (
-                        <p className="text-muted-foreground mt-2 text-copy-13">
+                        <p className="text-muted-foreground text-copy-13 mt-2">
                           {data.emptyNote || '这个窗口里没有数据（不是 0）。'}
                         </p>
                       )}
                       {!data && (
-                        <p className="text-muted-foreground mt-2 text-copy-13">
+                        <p className="text-muted-foreground text-copy-13 mt-2">
                           这个组件这次没有取到数据。
                         </p>
                       )}
@@ -726,28 +735,36 @@ export function BoardWorkspace() {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => patchLayout(component.componentId, moveLeft(component.layout))}
+                            onClick={() =>
+                              patchLayout(component.componentId, moveLeft(component.layout))
+                            }
                           >
                             ←
                           </Button>
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => patchLayout(component.componentId, moveRight(component.layout))}
+                            onClick={() =>
+                              patchLayout(component.componentId, moveRight(component.layout))
+                            }
                           >
                             →
                           </Button>
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => patchLayout(component.componentId, moveUp(component.layout))}
+                            onClick={() =>
+                              patchLayout(component.componentId, moveUp(component.layout))
+                            }
                           >
                             ↑
                           </Button>
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => patchLayout(component.componentId, moveDown(component.layout))}
+                            onClick={() =>
+                              patchLayout(component.componentId, moveDown(component.layout))
+                            }
                           >
                             ↓
                           </Button>
@@ -778,10 +795,7 @@ export function BoardWorkspace() {
 
           {/* 加组件 */}
           {board.ownedByMe && (
-            <SectionCard
-              title="加组件"
-              description={metricRegistryNote()}
-            >
+            <SectionCard title="加组件" description={metricRegistryNote()}>
               {!componentDraft ? (
                 <Button onClick={() => setComponentDraft({ ...EMPTY_COMPONENT_DRAFT })}>
                   <LayoutGrid className="mr-1.5 h-4 w-4" />
@@ -858,7 +872,10 @@ export function BoardWorkspace() {
 
                   <div className="flex flex-wrap gap-3">
                     {(['x', 'y', 'w', 'h'] as const).map((key) => (
-                      <label key={key} className="text-copy-13 text-muted-foreground flex flex-col gap-1">
+                      <label
+                        key={key}
+                        className="text-copy-13 text-muted-foreground flex flex-col gap-1"
+                      >
                         {key}
                         <input
                           type="number"
@@ -885,7 +902,9 @@ export function BoardWorkspace() {
                   )}
 
                   <div className="space-y-2">
-                    <div className="text-copy-13 text-muted-foreground">组件筛选（值只作为参数传给服务端）</div>
+                    <div className="text-copy-13 text-muted-foreground">
+                      组件筛选（值只作为参数传给服务端）
+                    </div>
                     {componentDraft.filter.map((filter, index) => (
                       <div key={index} className="flex flex-wrap items-center gap-2">
                         <select
@@ -975,7 +994,9 @@ export function BoardWorkspace() {
                     </Button>
                   </div>
 
-                  {componentError && <p className="text-copy-13 text-destructive">{componentError}</p>}
+                  {componentError && (
+                    <p className="text-copy-13 text-destructive">{componentError}</p>
+                  )}
                   <div className="flex gap-2">
                     <Button onClick={() => void addComponent()}>保存组件</Button>
                     <Button variant="outline" onClick={() => setComponentDraft(null)}>
@@ -1002,7 +1023,11 @@ export function BoardWorkspace() {
                     <span>{shareTargetLabel(share)}</span>
                     <Badge tone="neutral">{shareScopeLabel(share.scope)}</Badge>
                     {board.ownedByMe && (
-                      <Button size="sm" variant="outline" onClick={() => void revokeShare(share.shareId)}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => void revokeShare(share.shareId)}
+                      >
                         撤销
                       </Button>
                     )}
@@ -1167,9 +1192,7 @@ export function BoardWorkspace() {
             )}
             {defaultsError && <p className="text-copy-13 text-destructive mt-2">{defaultsError}</p>}
             {defaults && !defaults.ownedByMe && (
-              <p className="text-muted-foreground text-copy-13 mt-2">
-                默认值由看板的创建者维护。
-              </p>
+              <p className="text-muted-foreground text-copy-13 mt-2">默认值由看板的创建者维护。</p>
             )}
           </SectionCard>
         </>
@@ -1213,10 +1236,12 @@ export function BoardWorkspace() {
               <li key={template.templateId} className="text-copy-13 flex items-center gap-2">
                 <span className="font-medium">{template.displayName}</span>
                 <span className="text-muted-foreground">{template.templateCode}</span>
-                <span className="text-muted-foreground">
-                  {template.components.length} 个组件
-                </span>
-                <Button size="sm" variant="outline" onClick={() => void instantiateTemplate(template.templateId)}>
+                <span className="text-muted-foreground">{template.components.length} 个组件</span>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => void instantiateTemplate(template.templateId)}
+                >
                   用它建看板
                 </Button>
               </li>

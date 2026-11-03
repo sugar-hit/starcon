@@ -478,7 +478,11 @@ export function toOrderOverdue(row: TimelinessOverdueRow, now: number): MyTodo {
     href: `/orders/fulfillment/timeliness?factNo=${encodeURIComponent(row.factNo)}`,
     actionLabel: '去时效处理页',
     detail: `${row.carrierName || row.carrierCode || '未标注承运商'} · 超期 ${formatDwell(row.overdueSeconds ?? null)}`,
-    scopeLabel: row.shopRef ? `店铺 ${row.shopRef}` : row.warehouseRef ? `仓库 ${row.warehouseRef}` : '未标注范围',
+    scopeLabel: row.shopRef
+      ? `店铺 ${row.shopRef}`
+      : row.warehouseRef
+        ? `仓库 ${row.warehouseRef}`
+        : '未标注范围',
   };
 }
 
@@ -538,10 +542,7 @@ export function toSyncFailure(row: SyncFailureView, now: number): MyTodo {
 }
 
 /** 待核对账差异 → 待办卡片。 */
-export function toReconciliationDiff(
-  row: FinanceSupplierReconciliationRow,
-  now: number,
-): MyTodo {
+export function toReconciliationDiff(row: FinanceSupplierReconciliationRow, now: number): MyTodo {
   return {
     key: `RECONCILIATION_DIFF:${row.id}`,
     type: 'RECONCILIATION_DIFF',
@@ -646,11 +647,7 @@ export function mergeTodos(
   const todos: MyTodo[] = [];
   const unreadable: { type: TodoType; reason: string }[] = [];
 
-  const push = <T>(
-    type: TodoType,
-    result: SourceResult<T>,
-    map: (row: T) => MyTodo | null,
-  ) => {
+  const push = <T>(type: TodoType, result: SourceResult<T>, map: (row: T) => MyTodo | null) => {
     if (result.error) {
       unreadable.push({ type, reason: result.error });
       return;

@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import type { HitCondition, ReviewDecision, RuleHit } from '../../../../../packages/api-contracts/src/index';
+import type {
+  HitCondition,
+  ReviewDecision,
+  RuleHit,
+} from '../../../../../packages/api-contracts/src/index';
 import {
   ADDRESS_ANOMALY_LABELS,
   anomalyText,
@@ -206,16 +210,27 @@ describe('9.2.1.2 审单规则 —— 结论展示', () => {
 
 describe('9.2.1.2 审单规则 —— 生效状态把状态与生效期分开说', () => {
   it('草稿与停用都不参与判定', () => {
-    expect(effectiveText({ status: 'DRAFT', effectiveFrom: 'a', effectiveTo: '', effectiveNow: false }))
-      .toContain('不参与判定');
     expect(
-      effectiveText({ status: 'DISABLED', effectiveFrom: 'a', effectiveTo: '', effectiveNow: false }),
+      effectiveText({ status: 'DRAFT', effectiveFrom: 'a', effectiveTo: '', effectiveNow: false }),
+    ).toContain('不参与判定');
+    expect(
+      effectiveText({
+        status: 'DISABLED',
+        effectiveFrom: 'a',
+        effectiveTo: '',
+        effectiveNow: false,
+      }),
     ).toContain('不参与判定');
   });
 
   it('ACTIVE 但不在生效期内要说清，否则会以为它已经在管事了', () => {
     expect(
-      effectiveText({ status: 'ACTIVE', effectiveFrom: '2026-03-10', effectiveTo: '', effectiveNow: false }),
+      effectiveText({
+        status: 'ACTIVE',
+        effectiveFrom: '2026-03-10',
+        effectiveTo: '',
+        effectiveNow: false,
+      }),
     ).toContain('不在生效期内');
     expect(
       effectiveText({
@@ -226,7 +241,12 @@ describe('9.2.1.2 审单规则 —— 生效状态把状态与生效期分开说
       }),
     ).toBe('生效中，至 2026-03-10');
     expect(
-      effectiveText({ status: 'ACTIVE', effectiveFrom: '2026-03-01', effectiveTo: '', effectiveNow: true }),
+      effectiveText({
+        status: 'ACTIVE',
+        effectiveFrom: '2026-03-01',
+        effectiveTo: '',
+        effectiveNow: true,
+      }),
     ).toBe('生效中，长期有效');
   });
 });

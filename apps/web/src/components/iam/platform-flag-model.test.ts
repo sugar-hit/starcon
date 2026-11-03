@@ -234,19 +234,19 @@ describe('announcementWindowState', () => {
   const now = new Date('2026-10-23T00:00:00Z');
 
   it('窗口内是生效中', () => {
-    expect(
-      announcementWindowState('2026-10-01T00:00:00Z', '2026-11-01T00:00:00Z', now),
-    ).toBe('生效中');
+    expect(announcementWindowState('2026-10-01T00:00:00Z', '2026-11-01T00:00:00Z', now)).toBe(
+      '生效中',
+    );
   });
 
   it('还没到开始时刻是未生效，过了结束时刻是已过期', () => {
     // 这两件事的处置不同：前者等，后者要改窗口。
-    expect(
-      announcementWindowState('2026-11-01T00:00:00Z', '2026-12-01T00:00:00Z', now),
-    ).toBe('未生效');
-    expect(
-      announcementWindowState('2026-09-01T00:00:00Z', '2026-10-01T00:00:00Z', now),
-    ).toBe('已过期');
+    expect(announcementWindowState('2026-11-01T00:00:00Z', '2026-12-01T00:00:00Z', now)).toBe(
+      '未生效',
+    );
+    expect(announcementWindowState('2026-09-01T00:00:00Z', '2026-10-01T00:00:00Z', now)).toBe(
+      '已过期',
+    );
   });
 
   it('没配窗口就是未配置', () => {
@@ -295,9 +295,7 @@ describe('validateSettingInput', () => {
   });
 
   it('功能开关不接受限流与公告字段', () => {
-    expect(validateSettingInput('MODULE', draft({ rateLimitPerMinute: '10' }))).toContain(
-      '不接受',
-    );
+    expect(validateSettingInput('MODULE', draft({ rateLimitPerMinute: '10' }))).toContain('不接受');
   });
 });
 

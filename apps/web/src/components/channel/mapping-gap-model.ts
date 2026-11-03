@@ -462,7 +462,8 @@ export function validateMapForm(form: MapForm): string | null {
   } else if (form.componentQuantity.trim()) {
     return '组件数量只对一对多（套装）有意义';
   }
-  if (!form.changeReason.trim()) return '变更原因必填：没有原因的版本历史无法回溯「当时为什么这么建」';
+  if (!form.changeReason.trim())
+    return '变更原因必填：没有原因的版本历史无法回溯「当时为什么这么建」';
   return null;
 }
 
@@ -471,8 +472,7 @@ export function buildMapInput(form: MapForm): MappingGapMapInput {
   return {
     internalSkuId: form.internalSkuId.trim(),
     relationType: form.relationType,
-    componentQuantity:
-      form.relationType === 'ONE_TO_MANY' ? Number(form.componentQuantity) : null,
+    componentQuantity: form.relationType === 'ONE_TO_MANY' ? Number(form.componentQuantity) : null,
     changeReason: form.changeReason.trim(),
     effectiveFrom: null,
   };

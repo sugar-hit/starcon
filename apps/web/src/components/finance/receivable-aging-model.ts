@@ -88,21 +88,14 @@ export function updateReceivableAgingBuckets(buckets: FinanceAgingBucketInput[])
 }
 
 /** 账龄分布报表：按店铺 / 客户 / 币种三个维度下钻，争议中金额单列。 */
-export function fetchReceivableAgingDistribution(
-  dimension: string,
-  params: AgingParams = {},
-) {
+export function fetchReceivableAgingDistribution(dimension: string, params: AgingParams = {}) {
   return api<FinanceReceivableAgingDistribution>(
     `${base}/distribution${query({ dimension, ...params })}`,
   );
 }
 
 /** 逾期清单：真分页 + 真筛选 + 按币种汇总（覆盖整个筛选结果集）。 */
-export function fetchReceivableAgingOverdue(
-  params: AgingParams = {},
-  page = 0,
-  size = 50,
-) {
+export function fetchReceivableAgingOverdue(params: AgingParams = {}, page = 0, size = 50) {
   return api<FinanceReceivableAgingOverduePage>(
     `${base}/overdue${query({ ...params, page, size })}`,
   );

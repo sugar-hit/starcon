@@ -312,7 +312,11 @@ export function upstreamModules(capabilities: AttainmentCapabilities | null): st
 export type PageState = 'loading' | 'error' | 'empty' | 'ready';
 
 /** 三态判定（**加载态 / 错误态 / 空态**）。 */
-export function pageState(board: AttainmentBoard | null, error: string, loading: boolean): PageState {
+export function pageState(
+  board: AttainmentBoard | null,
+  error: string,
+  loading: boolean,
+): PageState {
   if (loading) return 'loading';
   if (error) return 'error';
   if (!board || board.total === 0) return 'empty';

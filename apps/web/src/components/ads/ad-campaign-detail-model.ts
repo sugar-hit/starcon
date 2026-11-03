@@ -387,7 +387,9 @@ export function fetchAdCampaignGroups(
   id: string,
   query: { keyword?: string; status?: string; page?: number; size?: number } = {},
 ): Promise<AdCampaignPage<AdCampaignGroupRow>> {
-  return api<AdCampaignPage<AdCampaignGroupRow>>(`${BASE}/campaigns/${id}/groups${queryString(query)}`);
+  return api<AdCampaignPage<AdCampaignGroupRow>>(
+    `${BASE}/campaigns/${id}/groups${queryString(query)}`,
+  );
 }
 
 export function fetchAdCampaignProducts(
@@ -529,7 +531,11 @@ export function timestampText(value: string | null): string {
  * 🔴 `available=false` 时**必须**说清「拿不到」以及「当前展示的是什么」——
  * 把它渲染成「暂无修改记录」就是在说「平台侧没改过」，那是假的。
  */
-export function changeHistoryText(available: boolean, note: string, localAuditNote: string): string {
+export function changeHistoryText(
+  available: boolean,
+  note: string,
+  localAuditNote: string,
+): string {
   if (available) return note;
   return `${note}\n\n当前展示：${localAuditNote}`;
 }
@@ -547,7 +553,9 @@ export function copyResultText(result: AdCampaignCopyResult): string {
   if (result.pendingPlatformWriteback) {
     parts.push('平台侧还没有这份结构（回写队列未交付），目标活动已标「待回写平台」且状态为暂停。');
   }
-  parts.push(`关键词没有复制（${result.keywordCount} 条）：平台侧还没建这个活动，关键词 id 无从分配。`);
+  parts.push(
+    `关键词没有复制（${result.keywordCount} 条）：平台侧还没建这个活动，关键词 id 无从分配。`,
+  );
   return parts.join(' ');
 }
 
@@ -582,7 +590,10 @@ export const emptyAdCopyStructureInput: AdCopyStructureInput = {
  * 🔴 `TARGET_LISTING` 必须给出目标 ASIN（listing id）；`KEEP_PRODUCTS` 不接受目标 ASIN ——
  * 两者语义相反（沿用 vs 改投），混着填会让界面上说的和做的不一致。
  */
-export function validateCopyStructure(input: AdCopyStructureInput): { ok: boolean; errors: string[] } {
+export function validateCopyStructure(input: AdCopyStructureInput): {
+  ok: boolean;
+  errors: string[];
+} {
   const errors: string[] = [];
   if (!input.targetShopCode.trim()) errors.push('目标店铺编码必填');
   if (!['KEEP_PRODUCTS', 'TARGET_LISTING'].includes(input.productMode)) {

@@ -101,10 +101,7 @@ it('写动作真的转发到 8083（不是只判了正则没转发）', async ()
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
   vi.stubGlobal('fetch', fetcher);
 
-  for (const path of [
-    'channel/ad-groups',
-    `channel/ad-groups/${ID}/products`,
-  ]) {
+  for (const path of ['channel/ad-groups', `channel/ad-groups/${ID}/products`]) {
     const response = await callProxy(path, {
       method: path === 'channel/ad-groups' ? 'POST' : 'PUT',
       headers: {

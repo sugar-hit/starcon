@@ -136,7 +136,10 @@ it('写动作的 POST / PUT 形状被放行，且真的转发到 8087', async ()
     });
     expect(response.status, `POST ${path} 未被放行`).toBe(200);
   }
-  for (const path of [`finance/account-subjects/${ID}`, `finance/account-subjects/mappings/${ID}`]) {
+  for (const path of [
+    `finance/account-subjects/${ID}`,
+    `finance/account-subjects/mappings/${ID}`,
+  ]) {
     const response = await PUT(request(path, 'PUT'), {
       params: Promise.resolve({ path: path.split('/') }),
     });

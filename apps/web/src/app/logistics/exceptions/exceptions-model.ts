@@ -86,12 +86,7 @@ export const ACTION_TYPES: readonly ActionType[] = [
 ];
 
 export type DispositionStatus =
-  | 'PENDING'
-  | 'IN_PROGRESS'
-  | 'SUBMITTED'
-  | 'CONFIRMED'
-  | 'FAILED'
-  | 'CANCELLED';
+  'PENDING' | 'IN_PROGRESS' | 'SUBMITTED' | 'CONFIRMED' | 'FAILED' | 'CANCELLED';
 
 export const DISPOSITION_STATUSES: readonly DispositionStatus[] = [
   'PENDING',
@@ -434,9 +429,7 @@ export interface DispositionQuery {
   size?: number | undefined;
 }
 
-export function fetchDispositions(
-  query: DispositionQuery = {},
-): Promise<ExceptionDispositionPage> {
+export function fetchDispositions(query: DispositionQuery = {}): Promise<ExceptionDispositionPage> {
   const params = new URLSearchParams();
   if (query.actionType) params.set('actionType', query.actionType);
   if (query.status) params.set('status', query.status);
@@ -708,9 +701,7 @@ export function quantityText(qty: number | null | undefined): string {
  */
 export function claimTotalsText(totals: CurrencyTotal[] | null | undefined): string {
   if (!totals || totals.length === 0) return '暂无登记金额';
-  return totals
-    .map((t) => `${moneyText(t.amount, t.currency)}（${t.claimCount} 张单）`)
-    .join('；');
+  return totals.map((t) => `${moneyText(t.amount, t.currency)}（${t.claimCount} 张单）`).join('；');
 }
 
 // ================================================================ 表单
@@ -846,7 +837,9 @@ export function validateClaimForm(form: ClaimForm): string | null {
   return null;
 }
 
-export function buildClaimPayload(form: ClaimForm): { payload: CreateClaimPayload } | { error: string } {
+export function buildClaimPayload(
+  form: ClaimForm,
+): { payload: CreateClaimPayload } | { error: string } {
   const error = validateClaimForm(form);
   if (error) return { error };
   const payload: CreateClaimPayload = { claimType: form.claimType };

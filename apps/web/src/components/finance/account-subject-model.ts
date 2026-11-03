@@ -127,9 +127,7 @@ export function fetchAccountSubject(id: string) {
  * <p>⚠️ 编码在本租户内唯一 ⇒ 命中时至多一条；没命中时后端如实返回 `found=false`。
  */
 export function fetchAccountSubjectByCode(subjectCode: string) {
-  return api<FinanceAccountSubjectByCodeResult>(
-    `${base}/by-code${query({ subjectCode })}`,
-  );
+  return api<FinanceAccountSubjectByCodeResult>(`${base}/by-code${query({ subjectCode })}`);
 }
 
 /** 新增科目。 */
@@ -198,7 +196,11 @@ export function updateAccountSubjectMapping(
   id: string,
   input: FinanceAccountSubjectMappingUpdateInput,
 ) {
-  return api<FinanceAccountSubjectMappingRow>(`${base}/mappings/${encodeURIComponent(id)}`, 'PUT', input);
+  return api<FinanceAccountSubjectMappingRow>(
+    `${base}/mappings/${encodeURIComponent(id)}`,
+    'PUT',
+    input,
+  );
 }
 
 /** 启用映射规则（借贷齐备才让启用）。 */

@@ -179,97 +179,73 @@ export function MyTodoWorkspace() {
         await Promise.all([
           // 09 订单：超期未发货
           read<TimelinessOverdueRow>('ORDER_OVERDUE', () =>
-            loadAll<TimelinessOverdueRow>(
-              async (pageNo) => {
-                const result = await api<TimelinessOverduePage>(
-                  `trade/fulfillment/timeliness/overdue?page=${pageNo}&size=${PAGE_SIZE}`,
-                );
-                return { items: result.items, total: result.total };
-              },
-              MAX_PAGES,
-            ),
+            loadAll<TimelinessOverdueRow>(async (pageNo) => {
+              const result = await api<TimelinessOverduePage>(
+                `trade/fulfillment/timeliness/overdue?page=${pageNo}&size=${PAGE_SIZE}`,
+              );
+              return { items: result.items, total: result.total };
+            }, MAX_PAGES),
           ),
           // 09 订单：待审订单
           read<PendingReviewRow>('ORDER_PENDING_REVIEW', () =>
-            loadAll<PendingReviewRow>(
-              async (pageNo) => {
-                const result = await api<PendingReviewPage>(
-                  `trade/order-pending-review/queue?page=${pageNo}&size=${PAGE_SIZE}`,
-                );
-                return { items: result.items, total: result.total };
-              },
-              MAX_PAGES,
-            ),
+            loadAll<PendingReviewRow>(async (pageNo) => {
+              const result = await api<PendingReviewPage>(
+                `trade/order-pending-review/queue?page=${pageNo}&size=${PAGE_SIZE}`,
+              );
+              return { items: result.items, total: result.total };
+            }, MAX_PAGES),
           ),
           // 07 库存：库存缺口
           read<StockoutAlertRow>('STOCK_SHORTAGE', () =>
-            loadAll<StockoutAlertRow>(
-              async (pageNo) => {
-                const result = await api<StockoutAlertPage>(
-                  `warehouse/inventory/stockout-alerts/stockouts?page=${pageNo}&size=${PAGE_SIZE}`,
-                );
-                return { items: result.rows, total: result.total };
-              },
-              MAX_PAGES,
-            ),
+            loadAll<StockoutAlertRow>(async (pageNo) => {
+              const result = await api<StockoutAlertPage>(
+                `warehouse/inventory/stockout-alerts/stockouts?page=${pageNo}&size=${PAGE_SIZE}`,
+              );
+              return { items: result.rows, total: result.total };
+            }, MAX_PAGES),
           ),
           // 02 渠道：待处理同步失败
           read<SyncFailureView>('SYNC_FAILED', () =>
-            loadAll<SyncFailureView>(
-              async () => {
-                const result = await api<SyncFailureView[]>('channel/sync-failures?limit=200');
-                return { items: result, total: result.length };
-              },
-              1,
-            ),
+            loadAll<SyncFailureView>(async () => {
+              const result = await api<SyncFailureView[]>('channel/sync-failures?limit=200');
+              return { items: result, total: result.length };
+            }, 1),
           ),
           // 12 财务：待核对账差异
           read<FinanceSupplierReconciliationRow>('RECONCILIATION_DIFF', () =>
-            loadAll<FinanceSupplierReconciliationRow>(
-              async (pageNo) => {
-                const result = await api<FinanceSupplierReconciliationPage>(
-                  `finance/supplier-reconciliation?page=${pageNo}&size=${PAGE_SIZE}`,
-                );
-                return { items: result.rows, total: result.total };
-              },
-              MAX_PAGES,
-            ),
+            loadAll<FinanceSupplierReconciliationRow>(async (pageNo) => {
+              const result = await api<FinanceSupplierReconciliationPage>(
+                `finance/supplier-reconciliation?page=${pageNo}&size=${PAGE_SIZE}`,
+              );
+              return { items: result.rows, total: result.total };
+            }, MAX_PAGES),
           ),
           // 15 客户：待回复站内信
           read<CrmMessageRow>('MESSAGE_UNREAD', () =>
-            loadAll<CrmMessageRow>(
-              async (pageNo) => {
-                const result = await api<CrmMessagePage>(
-                  `crm/message-inbox/messages?readStatus=UNREAD&page=${pageNo}&size=${PAGE_SIZE}`,
-                );
-                return { items: result.items, total: result.total };
-              },
-              MAX_PAGES,
-            ),
+            loadAll<CrmMessageRow>(async (pageNo) => {
+              const result = await api<CrmMessagePage>(
+                `crm/message-inbox/messages?readStatus=UNREAD&page=${pageNo}&size=${PAGE_SIZE}`,
+              );
+              return { items: result.items, total: result.total };
+            }, MAX_PAGES),
           ),
           // 17 审批：待审批单据
           read<ApprovalTodoItem>('APPROVAL_PENDING', () =>
-            loadAll<ApprovalTodoItem>(
-              async (pageNo) => {
-                const result = await api<ApprovalTodoPage>(
-                  `identity/approval-todos?page=${pageNo}&size=${PAGE_SIZE}`,
-                );
-                return { items: result.items, total: result.total };
-              },
-              MAX_PAGES,
-            ),
+            loadAll<ApprovalTodoItem>(async (pageNo) => {
+              const result = await api<ApprovalTodoPage>(
+                `identity/approval-todos?page=${pageNo}&size=${PAGE_SIZE}`,
+              );
+              return { items: result.items, total: result.total };
+            }, MAX_PAGES),
           ),
           // 07 库存：库存低于安全线
           read<SafetyStockAlertRow>('SAFETY_STOCK_BELOW', () =>
-            loadAll<SafetyStockAlertRow>(
-              async (pageNo) => {
-                const result = await api<SafetyStockAlertPage>(
-                  `warehouse/inventory/safety-stock/alerts?page=${pageNo}&size=${PAGE_SIZE}`,
-                );
-                return { items: result.alerts, total: result.total };
-              },
-              MAX_PAGES,
-            ),
+            loadAll<SafetyStockAlertRow>(async (pageNo) => {
+              const result = await api<SafetyStockAlertPage>(
+                `warehouse/inventory/safety-stock/alerts?page=${pageNo}&size=${PAGE_SIZE}`,
+              );
+              return { items: result.alerts, total: result.total };
+            }, MAX_PAGES),
           ),
         ]);
 
@@ -344,7 +320,10 @@ export function MyTodoWorkspace() {
   );
 
   const visible = useMemo(() => filterTodos(todos, filters), [todos, filters]);
-  const summary = useMemo(() => summarizeTodos(todos, unreadable.length), [todos, unreadable.length]);
+  const summary = useMemo(
+    () => summarizeTodos(todos, unreadable.length),
+    [todos, unreadable.length],
+  );
   const pageCount = Math.max(1, Math.ceil(visible.length / PAGE_SIZE));
   const current = Math.min(page, pageCount - 1);
   const pageRows = visible.slice(current * PAGE_SIZE, current * PAGE_SIZE + PAGE_SIZE);
@@ -363,9 +342,9 @@ export function MyTodoWorkspace() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-copy-13 text-muted-foreground">
-          我的待办是卷 01 的<b>只读聚合层</b>：它把 09 订单、07 库存、02 渠道、12 财务、
-          15 客户、17 审批六处的待办投影并成<b>一条按紧急度排序</b>的队列。
-          本页<b>不产生任何业务写入</b> —— 每张卡片只给一条出口：
+          我的待办是卷 01 的<b>只读聚合层</b>：它把 09 订单、07 库存、02 渠道、12 财务、 15 客户、17
+          审批六处的待办投影并成<b>一条按紧急度排序</b>的队列。 本页<b>不产生任何业务写入</b> ——
+          每张卡片只给一条出口：
           <b>跳到归属系统的处理页并带上定位参数</b>，处置动作一律回到归属系统完成。
         </p>
         <Button variant="ghost" size="sm" onClick={() => void load()} disabled={busy}>
@@ -389,7 +368,7 @@ export function MyTodoWorkspace() {
         <p
           key={notice}
           role="status"
-          className="border-warning/40 bg-warning/5 rounded-md border p-3 text-copy-12"
+          className="border-warning/40 bg-warning/5 text-copy-12 rounded-md border p-3"
         >
           {notice}
         </p>
@@ -412,7 +391,7 @@ export function MyTodoWorkspace() {
                   {TODO_TYPE_LABELS[code]} · 归属 {TODO_TYPE_OWNER[code]} · 上游共{' '}
                   {permitted ? `${sourceTotals[code] ?? 0} 条` : '未读取（无权限）'}
                 </span>
-                <span className="text-muted-foreground ml-2 font-mono text-copy-12">
+                <span className="text-muted-foreground text-copy-12 ml-2 font-mono">
                   {TODO_TYPE_SOURCE[code]}
                 </span>
                 {permitted && avail && (
@@ -433,8 +412,8 @@ export function MyTodoWorkspace() {
           <b>不信任任何客户端租户头</b>）。法人/店铺/仓库/部门的数据范围
           <b>由归属服务按该会话在服务端判定</b>（每个服务的 AccessService 先解析可信租户、
           再开事务绑定 RLS 租户上下文），本页<b>不把范围当成可信输入往下传</b> ——
-          它只读各服务**已经按范围过滤好**的投影。
-          数据截至 {dataAsOf ? dataAsOf.replace('T', ' ').slice(0, 19) : '—'}。
+          它只读各服务**已经按范围过滤好**的投影。 数据截至{' '}
+          {dataAsOf ? dataAsOf.replace('T', ' ').slice(0, 19) : '—'}。
         </p>
       </section>
 
@@ -442,7 +421,7 @@ export function MyTodoWorkspace() {
       <section className="space-y-2">
         <h2 className="text-copy-16 font-semibold">待办概览</h2>
         <div className="flex flex-wrap gap-2">
-          <span className="rounded-md border px-3 py-2 text-copy-12">
+          <span className="text-copy-12 rounded-md border px-3 py-2">
             待办总数 <b className="ml-1">{summary.total}</b> 条
             {unreadBadge(summary) && (
               <Badge tone="info" className="ml-2">
@@ -450,7 +429,7 @@ export function MyTodoWorkspace() {
               </Badge>
             )}
           </span>
-          <span className="rounded-md border px-3 py-2 text-copy-12">
+          <span className="text-copy-12 rounded-md border px-3 py-2">
             最久停留{' '}
             <b className="ml-1">
               {summary.longestDwellSeconds === null
@@ -458,18 +437,18 @@ export function MyTodoWorkspace() {
                 : formatDwell(summary.longestDwellSeconds)}
             </b>
           </span>
-          <span className="rounded-md border px-3 py-2 text-copy-12">
+          <span className="text-copy-12 rounded-md border px-3 py-2">
             严重 <b className="ml-1">{summary.bySeverity.CRITICAL ?? 0}</b> · 高{' '}
             <b className="ml-1">{summary.bySeverity.HIGH ?? 0}</b> · 中{' '}
             <b className="ml-1">{summary.bySeverity.MEDIUM ?? 0}</b> · 低{' '}
             <b className="ml-1">{summary.bySeverity.LOW ?? 0}</b>
           </span>
-          <span className="border-warning/40 bg-warning/5 rounded-md border px-3 py-2 text-copy-12">
+          <span className="border-warning/40 bg-warning/5 text-copy-12 rounded-md border px-3 py-2">
             判不了严重度 <b className="ml-1">{summary.unknownSeverityCount}</b> 条
             <span className="text-muted-foreground ml-2">（上游没给判定依据，不等于低优先级）</span>
           </span>
           {unreadable.length > 0 && (
-            <span className="border-destructive/30 bg-destructive/5 rounded-md border px-3 py-2 text-copy-12">
+            <span className="border-destructive/30 bg-destructive/5 text-copy-12 rounded-md border px-3 py-2">
               读不到来源 <b className="ml-1">{unreadable.length}</b> 个
               <span className="text-muted-foreground ml-2">
                 （这几类的待办本次**判不了**，不等于「没有待办」）
@@ -477,7 +456,7 @@ export function MyTodoWorkspace() {
             </span>
           )}
           {notPermittedCount > 0 && (
-            <span className="rounded-md border px-3 py-2 text-copy-12">
+            <span className="text-copy-12 rounded-md border px-3 py-2">
               无权限来源 <b className="ml-1">{notPermittedCount}</b> 个
               <span className="text-muted-foreground ml-2">
                 （这几类待办对你的角色不开放，不计入总数）
@@ -499,7 +478,7 @@ export function MyTodoWorkspace() {
                 setType((currentType) => (currentType === code ? '' : code));
                 setPage(0);
               }}
-              className={`rounded-md border px-3 py-2 text-left text-copy-12 ${
+              className={`text-copy-12 rounded-md border px-3 py-2 text-left ${
                 type === code ? 'border-primary bg-primary/5' : ''
               }`}
             >
@@ -512,10 +491,10 @@ export function MyTodoWorkspace() {
 
       {/* ---------------- 筛选 ---------------- */}
       <section className="flex flex-wrap items-end gap-3">
-        <label className="flex flex-col gap-1 text-copy-12">
+        <label className="text-copy-12 flex flex-col gap-1">
           <span className="text-muted-foreground">严重度</span>
           <select
-            className="border rounded px-2 py-1 text-copy-12"
+            className="text-copy-12 rounded border px-2 py-1"
             value={severity}
             onChange={(e) => {
               setSeverity(e.target.value);
@@ -530,10 +509,10 @@ export function MyTodoWorkspace() {
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-copy-12">
+        <label className="text-copy-12 flex flex-col gap-1">
           <span className="text-muted-foreground">停留时长下限（小时）</span>
           <input
-            className="border rounded px-2 py-1 text-copy-12"
+            className="text-copy-12 rounded border px-2 py-1"
             value={minDwellHours}
             inputMode="numeric"
             onChange={(e) => {
@@ -543,10 +522,10 @@ export function MyTodoWorkspace() {
             placeholder="不限"
           />
         </label>
-        <label className="flex flex-col gap-1 text-copy-12">
+        <label className="text-copy-12 flex flex-col gap-1">
           <span className="text-muted-foreground">单据引用 / 说明</span>
           <input
-            className="border rounded px-2 py-1 text-copy-12"
+            className="text-copy-12 rounded border px-2 py-1"
             value={keyword}
             onChange={(e) => {
               setKeyword(e.target.value);
@@ -599,8 +578,10 @@ export function MyTodoWorkspace() {
                     <Badge tone={severityTone(todo.severity)}>
                       {SEVERITY_LABELS[todo.severity]}
                     </Badge>
-                    <span className="font-mono text-copy-13">{todo.reference}</span>
-                    <span className="text-copy-12 text-muted-foreground">{todo.referenceLabel}</span>
+                    <span className="text-copy-13 font-mono">{todo.reference}</span>
+                    <span className="text-copy-12 text-muted-foreground">
+                      {todo.referenceLabel}
+                    </span>
                   </div>
                   <div className="text-copy-12 text-muted-foreground mt-1">{todo.detail}</div>
                   <div className="text-copy-12 text-muted-foreground mt-1">

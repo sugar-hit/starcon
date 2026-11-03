@@ -167,11 +167,7 @@ export function moveWorkbenchCard(order: readonly string[], key: string, offset:
  *
  * <p>语义与「把 from 拖到 to 身上」一致 —— from 落到 to 的位置，to 及其后面的卡依次后移。
  */
-export function reorderWorkbenchCard(
-  order: readonly string[],
-  from: string,
-  to: string,
-): string[] {
+export function reorderWorkbenchCard(order: readonly string[], from: string, to: string): string[] {
   const result = [...order];
   const fromIndex = result.indexOf(from);
   const toIndex = result.indexOf(to);
@@ -211,7 +207,9 @@ export function visibleWorkbenchCardsInTab(
 export function describeWorkbenchLayout(state: WorkbenchLayoutState): string[] {
   const visible = visibleWorkbenchCards(state);
   const lines: string[] = [];
-  lines.push(`默认落地分区：${WORKBENCH_TABS.find((t) => t.id === state.defaultTab)?.label ?? '概览'}`);
+  lines.push(
+    `默认落地分区：${WORKBENCH_TABS.find((t) => t.id === state.defaultTab)?.label ?? '概览'}`,
+  );
   lines.push(
     visible.length === 0
       ? '显示的卡片：（全部隐藏）'
@@ -246,9 +244,7 @@ export function fetchWorkbenchLayout(): Promise<UserPreferenceView> {
 }
 
 /** 保存（upsert）我的工作台布局。 */
-export function saveWorkbenchLayout(
-  payload: Record<string, unknown>,
-): Promise<UserPreferenceView> {
+export function saveWorkbenchLayout(payload: Record<string, unknown>): Promise<UserPreferenceView> {
   return api<UserPreferenceView>(path(), 'PUT', { preference: payload });
 }
 

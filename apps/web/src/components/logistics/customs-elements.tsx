@@ -2,15 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, RefreshCw, Search } from 'lucide-react';
-import {
-  Button,
-  EmptyState,
-  Input,
-  Notice,
-  PageHeader,
-  SectionCard,
-  StatCard,
-} from '@starcon/ui';
+import { Button, EmptyState, Input, Notice, PageHeader, SectionCard, StatCard } from '@starcon/ui';
 import type {
   ElementSetCapabilities,
   ElementSetDetail,
@@ -59,9 +51,7 @@ const TONE_CLASS: Record<ElementSetTone, string> = {
 };
 
 function Badge(props: { tone: ElementSetTone; children: React.ReactNode }) {
-  return (
-    <span className={`text-xs font-medium ${TONE_CLASS[props.tone]}`}>{props.children}</span>
-  );
+  return <span className={`text-xs font-medium ${TONE_CLASS[props.tone]}`}>{props.children}</span>;
 }
 
 function SelectField(props: {
@@ -195,7 +185,10 @@ export function CustomsElementsWorkspace() {
   const destinationOptions = useMemo(
     () => [
       { value: '', label: '全部目的地' },
-      ...(options?.destinations ?? []).map((d) => ({ value: d.code, label: `${d.code}（${d.label}）` })),
+      ...(options?.destinations ?? []).map((d) => ({
+        value: d.code,
+        label: `${d.code}（${d.label}）`,
+      })),
     ],
     [options],
   );
@@ -209,7 +202,11 @@ export function CustomsElementsWorkspace() {
   );
 
   const sortOptions = useMemo(
-    () => (options?.sorts ?? [{ key: 'UPDATED_AT_DESC', label: '最近更新' }]).map((s) => ({ value: s.key, label: s.label })),
+    () =>
+      (options?.sorts ?? [{ key: 'UPDATED_AT_DESC', label: '最近更新' }]).map((s) => ({
+        value: s.key,
+        label: s.label,
+      })),
     [options],
   );
 
@@ -222,7 +219,10 @@ export function CustomsElementsWorkspace() {
     setPreviewError('');
     try {
       setUpstream(
-        await fetchUpstreamPreview({ skuId: previewSku.trim(), destination: previewDestination.trim() }),
+        await fetchUpstreamPreview({
+          skuId: previewSku.trim(),
+          destination: previewDestination.trim(),
+        }),
       );
     } catch (error) {
       setUpstream(null);
@@ -336,8 +336,9 @@ export function CustomsElementsWorkspace() {
               <div>{salesTitleForCompare(upstream.salesTitle)}</div>
               <div className="text-muted-foreground text-xs">
                 上游归类口径：税号 {upstream.hsCode || '未维护'} · 产地{' '}
-                {upstream.originCountryCode || '未维护'} · 法定单位 {upstream.statutoryUnitCode || '未维护'} ·
-                基础申报品名 {upstream.declaredName || '未维护'}（来源 {upstream.declaredNameSource || '—'}）
+                {upstream.originCountryCode || '未维护'} · 法定单位{' '}
+                {upstream.statutoryUnitCode || '未维护'} · 基础申报品名{' '}
+                {upstream.declaredName || '未维护'}（来源 {upstream.declaredNameSource || '—'}）
               </div>
             </div>
           ) : null}
@@ -433,8 +434,8 @@ export function CustomsElementsWorkspace() {
       <SectionCard title="申报要素集清单">
         {loadError ? (
           <Notice tone="danger" title="清单加载失败">
-              {loadError}
-            </Notice>
+            {loadError}
+          </Notice>
         ) : loading ? (
           <p className="text-muted-foreground text-sm">加载中…</p>
         ) : !page || page.items.length === 0 ? (
@@ -462,7 +463,7 @@ export function CustomsElementsWorkspace() {
                 {page.items.map((row: ElementSetRow) => (
                   <tr
                     key={row.id}
-                    className={`border-t cursor-pointer ${selectedId === row.id ? 'bg-muted/50' : ''}`}
+                    className={`cursor-pointer border-t ${selectedId === row.id ? 'bg-muted/50' : ''}`}
                     onClick={() => setSelectedId(row.id)}
                   >
                     <td className="py-2">{destinationVersionLabel(row)}</td>
@@ -532,9 +533,7 @@ export function CustomsElementsWorkspace() {
             </div>
 
             <div className="flex flex-col gap-2">
-              <div className="text-sm font-medium">
-                缺失项提示 · {missingHeadline(detail)}
-              </div>
+              <div className="text-sm font-medium">缺失项提示 · {missingHeadline(detail)}</div>
               {detail.missing.length === 0 ? (
                 <Notice tone="success" title="齐备">
                   九件本体与必填补充申报要素均已填写，可以发布。
@@ -593,7 +592,8 @@ export function CustomsElementsWorkspace() {
                 </Button>
               ) : null}
               <span className="text-muted-foreground self-center text-xs">
-                当前状态 {statusLabel(detail.row.status)} · 可执行动作 {detail.actions.join(' / ') || '无'}
+                当前状态 {statusLabel(detail.row.status)} · 可执行动作{' '}
+                {detail.actions.join(' / ') || '无'}
               </span>
             </div>
 

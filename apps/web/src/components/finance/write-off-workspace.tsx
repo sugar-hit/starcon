@@ -301,7 +301,9 @@ export function WriteOffWorkspace() {
     setNotice('');
     try {
       await releaseWriteOffAdvance(row.id);
-      setNotice(`已释放 ${row.receiptNo} 上的预收挂账 ${formatWriteOffMoney(row.amount, row.currency)}`);
+      setNotice(
+        `已释放 ${row.receiptNo} 上的预收挂账 ${formatWriteOffMoney(row.amount, row.currency)}`,
+      );
       await load();
     } catch (e) {
       setActionError(e instanceof Error ? e.message : '释放预收挂账失败');
@@ -470,7 +472,9 @@ export function WriteOffWorkspace() {
                           <span className="text-muted-foreground">—</span>
                         )}
                       </td>
-                      <td className="py-2 font-medium">{formatWriteOffAmount(r.availableAmount)}</td>
+                      <td className="py-2 font-medium">
+                        {formatWriteOffAmount(r.availableAmount)}
+                      </td>
                       <td className="py-2">{formatOccurredAt(r.receivedAt)}</td>
                     </tr>
                   ))}
@@ -839,7 +843,7 @@ export function WriteOffWorkspace() {
                 </tbody>
               </table>
 
-              <h3 className="mt-4 mb-2 text-sm font-medium">事件流</h3>
+              <h3 className="mb-2 mt-4 text-sm font-medium">事件流</h3>
               <ul className="space-y-1 text-sm">
                 {detail.events.map((e) => (
                   <li key={e.id} className="text-muted-foreground">

@@ -1,14 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  Badge,
-  Button,
-  EmptyState,
-  PageHeader,
-  SectionCard,
-  StatCard,
-} from '@starcon/ui';
+import { Badge, Button, EmptyState, PageHeader, SectionCard, StatCard } from '@starcon/ui';
 import {
   CircleHelp,
   ClipboardCheck,
@@ -153,7 +146,10 @@ export function CompliancePrecheckWorkspace() {
   const unknown = useMemo(() => unknownDimensions(report), [report]);
   const problems = useMemo(() => violations(report), [report]);
   const notMeasurable = useMemo(() => unknownFindings(report), [report]);
-  const allUnknown = Boolean(report) && report!.dimensions.length > 0 && unknown.length === report!.dimensions.length;
+  const allUnknown =
+    Boolean(report) &&
+    report!.dimensions.length > 0 &&
+    unknown.length === report!.dimensions.length;
   const selectedDraft = useMemo(
     () => drafts.find((draft) => draft.draftId === selectedDraftId) ?? null,
     [drafts, selectedDraftId],
@@ -162,7 +158,7 @@ export function CompliancePrecheckWorkspace() {
   // 🔴 三态：加载中 / 加载失败 / 加载成功但**没有可体检的草稿**。
   if (loading) {
     return (
-      <div className="flex items-center justify-center gap-2 py-16 text-muted-foreground">
+      <div className="text-muted-foreground flex items-center justify-center gap-2 py-16">
         <Loader2 className="size-4 animate-spin" />
         <span className="text-label-13">正在加载合规预检…</span>
       </div>
@@ -173,7 +169,7 @@ export function CompliancePrecheckWorkspace() {
     return (
       <SectionCard title="合规预检">
         <EmptyState
-          icon={<TriangleAlert className="size-8 text-destructive" />}
+          icon={<TriangleAlert className="text-destructive size-8" />}
           title="合规预检加载失败"
           description={error}
           action={
@@ -191,7 +187,7 @@ export function CompliancePrecheckWorkspace() {
     return (
       <SectionCard title="合规预检">
         <EmptyState
-          icon={<TriangleAlert className="size-8 text-destructive" />}
+          icon={<TriangleAlert className="text-destructive size-8" />}
           title="合规预检加载失败"
           description="没有拿到能力声明，请重试。"
           action={
@@ -256,7 +252,7 @@ export function CompliancePrecheckWorkspace() {
 
           {drafts.length === 0 ? (
             <EmptyState
-              icon={<ClipboardCheck className="size-8 text-muted-foreground" />}
+              icon={<ClipboardCheck className="text-muted-foreground size-8" />}
               title={noDraft.title}
               description={noDraft.description}
             />
@@ -303,7 +299,9 @@ export function CompliancePrecheckWorkspace() {
                   {triggerText(trigger)}
                 </Button>
                 <span className="text-copy-12 text-muted-foreground">
-                  {selectedDraft ? `已选：${selectedDraft.title || '（未命名草稿）'}` : '请先选一份草稿'}
+                  {selectedDraft
+                    ? `已选：${selectedDraft.title || '（未命名草稿）'}`
+                    : '请先选一份草稿'}
                 </span>
               </div>
 
@@ -314,7 +312,9 @@ export function CompliancePrecheckWorkspace() {
                     size="sm"
                     disabled={draftPage === 0 || busy}
                     onClick={() =>
-                      void loadDrafts(draftPage - 1).then(() => setDraftPage((p) => Math.max(0, p - 1)))
+                      void loadDrafts(draftPage - 1).then(() =>
+                        setDraftPage((p) => Math.max(0, p - 1)),
+                      )
                     }
                   >
                     上一页
@@ -382,8 +382,8 @@ export function CompliancePrecheckWorkspace() {
               <div className="border-warning/40 bg-warning/5 text-warning flex items-start gap-2 rounded-lg border px-4 py-3">
                 <CircleHelp className="mt-0.5 size-4 shrink-0" />
                 <p className="text-label-13">
-                  有 {report.header.unknownDimensionCount} 个维度<b>量不到</b>（得分是「未知」，不是 0 分，
-                  也不计入总分分母）。每个维度的归属模块见下面的得分卡。
+                  有 {report.header.unknownDimensionCount} 个维度<b>量不到</b>（得分是「未知」，不是
+                  0 分， 也不计入总分分母）。每个维度的归属模块见下面的得分卡。
                 </p>
               </div>
             )}
@@ -391,7 +391,7 @@ export function CompliancePrecheckWorkspace() {
             {/* 🔴 三态之一：所有维度都量不到 ⇒ 说清「得分是未知而不是 0 分」 */}
             {allUnknown && (
               <EmptyState
-                icon={<CircleHelp className="size-8 text-warning" />}
+                icon={<CircleHelp className="text-warning size-8" />}
                 title={emptyState('ALL_UNKNOWN').title}
                 description={emptyState('ALL_UNKNOWN').description}
               />
@@ -425,7 +425,7 @@ export function CompliancePrecheckWorkspace() {
         >
           {report.findings.length === 0 ? (
             <EmptyState
-              icon={<ClipboardCheck className="size-8 text-muted-foreground" />}
+              icon={<ClipboardCheck className="text-muted-foreground size-8" />}
               title={emptyState('NO_FINDING').title}
               description={emptyState('NO_FINDING').description}
             />
@@ -477,14 +477,13 @@ export function CompliancePrecheckWorkspace() {
         description="每一次体检都留一份报告 —— 那是「当时凭什么这么判」的凭据，事后改不了。"
         extra={
           <Badge tone="neutral">
-            <History className="mr-1 size-3" />
-            共 {historyTotal} 份
+            <History className="mr-1 size-3" />共 {historyTotal} 份
           </Badge>
         }
       >
         {history.length === 0 ? (
           <EmptyState
-            icon={<History className="size-8 text-muted-foreground" />}
+            icon={<History className="text-muted-foreground size-8" />}
             title="还没有体检记录"
             description="选一份内容草稿跑一次体检，这里就会出现那一次的报告。"
           />
@@ -526,7 +525,9 @@ export function CompliancePrecheckWorkspace() {
                 size="sm"
                 disabled={historyPage === 0 || busy}
                 onClick={() =>
-                  void loadHistory(historyPage - 1).then(() => setHistoryPage((p) => Math.max(0, p - 1)))
+                  void loadHistory(historyPage - 1).then(() =>
+                    setHistoryPage((p) => Math.max(0, p - 1)),
+                  )
                 }
               >
                 上一页
@@ -550,7 +551,10 @@ export function CompliancePrecheckWorkspace() {
       </SectionCard>
 
       {/* ---- 能力声明：哪些维度量得到、量不到归谁 ---- */}
-      <SectionCard title="能力声明" description="逐维度报出「量得到 / 量不到」，量不到的归哪个模块。">
+      <SectionCard
+        title="能力声明"
+        description="逐维度报出「量得到 / 量不到」，量不到的归哪个模块。"
+      >
         <div className="space-y-3">
           {caps.dimensions.map((dimension) => (
             <div key={dimension.code} className="border-border rounded-lg border px-4 py-3">
@@ -599,7 +603,9 @@ function DimensionCard({ dimension }: { dimension: CompliancePrecheckDimensionSc
       </div>
       {unknown ? (
         <div className="text-copy-12 text-muted-foreground mt-2 space-y-1">
-          <p>这一维度<b>量不到</b>，不计入总分分母（未知不是 0 分）。</p>
+          <p>
+            这一维度<b>量不到</b>，不计入总分分母（未知不是 0 分）。
+          </p>
           {dimension.ownerModule && <p>归属模块：{dimension.ownerModule}</p>}
           {dimension.unavailableReason && <p>{dimension.unavailableReason}</p>}
         </div>

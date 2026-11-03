@@ -94,9 +94,9 @@ describe('validateRuleForm · 重量段是半开区间 [下限, 上限)', () => 
   });
 
   it('下限为负要报', () => {
-    expect(validateRuleForm(ruleForm({ weightMinKg: -1 })).some((p) => p.includes('不能为负'))).toBe(
-      true,
-    );
+    expect(
+      validateRuleForm(ruleForm({ weightMinKg: -1 })).some((p) => p.includes('不能为负')),
+    ).toBe(true);
   });
 });
 
@@ -157,9 +157,9 @@ describe('validateSizeForm · 尺寸三维要么都给要么都不给', () => {
   });
 
   it('三维齐备或只给重量都合法', () => {
-    expect(validateSizeForm(sizeForm({ maxLengthCm: 60, maxWidthCm: 40, maxHeightCm: 30 }))).toEqual(
-      [],
-    );
+    expect(
+      validateSizeForm(sizeForm({ maxLengthCm: 60, maxWidthCm: 40, maxHeightCm: 30 })),
+    ).toEqual([]);
     expect(validateSizeForm(sizeForm({ maxWeightKg: 30 }))).toEqual([]);
   });
 
@@ -171,12 +171,12 @@ describe('validateSizeForm · 尺寸三维要么都给要么都不给', () => {
     expect(validateSizeForm(sizeForm({ maxWeightKg: 0 })).some((p) => p.includes('大于 0'))).toBe(
       true,
     );
-    expect(validateSizeForm(sizeForm({ countryCode: 'DEU' })).some((p) => p.includes('两位字母'))).toBe(
-      true,
-    );
-    expect(validateSizeForm(sizeForm({ countryCode: '' })).some((p) => p.includes('两位字母'))).toBe(
-      false,
-    );
+    expect(
+      validateSizeForm(sizeForm({ countryCode: 'DEU' })).some((p) => p.includes('两位字母')),
+    ).toBe(true);
+    expect(
+      validateSizeForm(sizeForm({ countryCode: '' })).some((p) => p.includes('两位字母')),
+    ).toBe(false);
   });
 });
 
@@ -191,10 +191,14 @@ describe('validateMarkingForm · 要求贴标识就必须点名贴什么', () =>
 
   it('点名了就合法；BLOCK / MANUAL_REVIEW / ALLOWED 不要求点名', () => {
     expect(
-      validateMarkingForm(markingForm({ requirementMode: 'LABEL_REQUIRED', markingCode: 'UN38.3' })),
+      validateMarkingForm(
+        markingForm({ requirementMode: 'LABEL_REQUIRED', markingCode: 'UN38.3' }),
+      ),
     ).toEqual([]);
     for (const mode of ['BLOCK', 'MANUAL_REVIEW', 'ALLOWED']) {
-      expect(validateMarkingForm(markingForm({ requirementMode: mode, markingCode: '' }))).toEqual([]);
+      expect(validateMarkingForm(markingForm({ requirementMode: mode, markingCode: '' }))).toEqual(
+        [],
+      );
     }
   });
 });
@@ -206,7 +210,7 @@ describe('展示文案', () => {
   });
 
   it('bandText 去掉 NUMERIC(19,6) 的尾零：界面上不该出现 0.500000', () => {
-    expect(bandText(0.500000, 30.000000)).toBe('0.5 ~ 30 kg（不含上限）');
+    expect(bandText(0.5, 30.0)).toBe('0.5 ~ 30 kg（不含上限）');
   });
 
   it('transitDaysText：同一天数不重复写两遍', () => {

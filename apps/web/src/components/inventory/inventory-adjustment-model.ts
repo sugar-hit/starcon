@@ -130,9 +130,11 @@ export function postAdjustment(id: string, note?: string): Promise<InventoryAdju
 }
 
 /** 6.4.2.2 不良品处置单候选（跨服务只读；上游不可达时后端返 503 并说明原因）。 */
-export function fetchDefectiveSources(
-  params: { keyword?: string; page?: number; size?: number },
-): Promise<InventoryAdjustmentDefectiveSourcePage> {
+export function fetchDefectiveSources(params: {
+  keyword?: string;
+  page?: number;
+  size?: number;
+}): Promise<InventoryAdjustmentDefectiveSourcePage> {
   return api<InventoryAdjustmentDefectiveSourcePage>(
     `warehouse/inventory/adjustment-sources/defective-dispositions${query(params)}`,
   );
@@ -301,7 +303,7 @@ export function lineProblem(
     return '「盘盈」的调整数量必须是正数：方向写反的调整单在审批时是看不出来的';
   if (reasonCode === 'SHORTAGE' && parsed > 0)
     return '「盘亏」的调整数量必须是负数：方向写反的调整单在审批时是看不出来的';
-  const decimals = text.includes('.') ? text.split('.')[1]?.length ?? 0 : 0;
+  const decimals = text.includes('.') ? (text.split('.')[1]?.length ?? 0) : 0;
   if (decimals > 4)
     return '调整数量最多 4 位小数（库存精度是 numeric(19,4)）：系统不会替你四舍五入';
   if (expectedVersion === null)
@@ -327,7 +329,8 @@ export function createProblem(
 
 /** 批准必须写理由（与后端同一条纪律：只留一个「已批」状态，事后没人说得清批的是哪条判断）。 */
 export function approveProblem(note: string): string | null {
-  if (note.trim() === '') return '批准必须写理由：只留一个「已批」状态，事后没人说得清批的是哪条判断';
+  if (note.trim() === '')
+    return '批准必须写理由：只留一个「已批」状态，事后没人说得清批的是哪条判断';
   if (note.trim().length > 500) return '审批意见超过 500 字';
   return null;
 }
@@ -344,7 +347,8 @@ export function errorText(error: unknown): string {
   if (error instanceof ApiError) {
     if (error.status === 403) return '当前角色没有此操作权限（需要 warehouse.inventory.update）';
     if (error.status === 404) return '找不到该对象（可能不属于当前租户）';
-    if (error.status === 409) return error.message || '状态冲突：这一步现在还不能做（可能库存已经变动）';
+    if (error.status === 409)
+      return error.message || '状态冲突：这一步现在还不能做（可能库存已经变动）';
     if (error.status === 422) return error.message || '这个条件当前不可用';
     // 503 一律说清「不可用」：上游不可达时后端会带原因（如「读取 6.4.2.2 不良品处置单失败：…」），
     // 直接把那句话原文抛给用户会**看不出这是不可用**，
@@ -366,6 +370,7 @@ export function orderSummary(order: InventoryAdjustmentOrder): string {
 
 /** 附件摘要（凭证清单里的一行）。 */
 export function attachmentSummary(attachment: InventoryAdjustmentAttachment): string {
-  const size = attachment.sizeBytes === null ? '' : ` · ${Math.round(attachment.sizeBytes / 1024)} KB`;
+  const size =
+    attachment.sizeBytes === null ? '' : ` · ${Math.round(attachment.sizeBytes / 1024)} KB`;
   return `${attachment.fileName}（${attachment.mediaType || '未知类型'}）${size}`;
 }

@@ -131,24 +131,24 @@ export function VatIossWorkspace() {
     void refresh();
   }, [refresh]);
 
-  const run = useCallback(async (work: () => Promise<string>) => {
-    setBusy(true);
-    setError(null);
-    setNotice(null);
-    try {
-      setNotice(await work());
-      await refresh();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : '操作失败');
-    } finally {
-      setBusy(false);
-    }
-  }, [refresh]);
-
-  const scopes = useMemo(
-    () => splitByScope(statistics?.rows ?? []),
-    [statistics?.rows],
+  const run = useCallback(
+    async (work: () => Promise<string>) => {
+      setBusy(true);
+      setError(null);
+      setNotice(null);
+      try {
+        setNotice(await work());
+        await refresh();
+      } catch (e) {
+        setError(e instanceof Error ? e.message : '操作失败');
+      } finally {
+        setBusy(false);
+      }
+    },
+    [refresh],
   );
+
+  const scopes = useMemo(() => splitByScope(statistics?.rows ?? []), [statistics?.rows]);
   const currencyTotals = useMemo(
     () => groupTotalsByCurrency(statistics?.rows ?? []),
     [statistics?.rows],
@@ -170,12 +170,12 @@ export function VatIossWorkspace() {
         description="IOSS 订单识别、代收代缴统计与申报状态。IOSS 订单与一般 VAT 订单分开统计。"
         actions={
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => void refresh()}
-              disabled={loading || busy}
-            >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+            <Button variant="outline" onClick={() => void refresh()} disabled={loading || busy}>
+              {loading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4" />
+              )}
               刷新
             </Button>
             <Button
@@ -262,7 +262,8 @@ export function VatIossWorkspace() {
           <div className="flex flex-wrap gap-2">
             {currencyTotals.map((total) => (
               <Badge key={total.currency} tone="info">
-                {total.currency} · {total.orderCount} 单 · 税额 {formatAmount(total.taxAmount, total.currency)}
+                {total.currency} · {total.orderCount} 单 · 税额{' '}
+                {formatAmount(total.taxAmount, total.currency)}
               </Badge>
             ))}
           </div>
@@ -273,14 +274,16 @@ export function VatIossWorkspace() {
         ) : (statistics?.rows.length ?? 0) === 0 ? (
           <EmptyState
             title="还没有统计数据"
-            description={emptyStateText(emptyStateKind({
-              everSynced: false,
-              filtered: false,
-              hasScopeFilter: false,
-            }))}
+            description={emptyStateText(
+              emptyStateKind({
+                everSynced: false,
+                filtered: false,
+                hasScopeFilter: false,
+              }),
+            )}
           />
         ) : (
-          <table className="w-full text-left text-copy-13">
+          <table className="text-copy-13 w-full text-left">
             <thead>
               <tr className="text-muted-foreground border-b">
                 <th className="px-3 py-2">统计分档</th>
@@ -305,7 +308,7 @@ export function VatIossWorkspace() {
                     >
                       {scopeLabel(row.filingScope)}
                     </Badge>
-                    <div className="text-muted-foreground mt-1 text-copy-12">
+                    <div className="text-muted-foreground text-copy-12 mt-1">
                       {scopeDescription(row.filingScope)}
                     </div>
                   </td>
@@ -325,9 +328,12 @@ export function VatIossWorkspace() {
         description="适用店铺与商品是登记的「范围」。应税消费品（酒 / 烟 / 能源）即使在覆盖范围内也不适用 IOSS。"
       >
         {registrations.length === 0 ? (
-          <EmptyState title="还没有 IOSS 登记" description="没有生效的 IOSS 登记，所有订单都会判成「一般 VAT」。" />
+          <EmptyState
+            title="还没有 IOSS 登记"
+            description="没有生效的 IOSS 登记，所有订单都会判成「一般 VAT」。"
+          />
         ) : (
-          <table className="w-full text-left text-copy-13">
+          <table className="text-copy-13 w-full text-left">
             <thead>
               <tr className="text-muted-foreground border-b">
                 <th className="px-3 py-2">登记号</th>
@@ -364,7 +370,10 @@ export function VatIossWorkspace() {
                     {row.goodsScopes.length === 0
                       ? '—'
                       : row.goodsScopes
-                          .map((g) => `${g.skuCode}${g.exciseGoods ? '（应税消费品，不适用 IOSS）' : ''}`)
+                          .map(
+                            (g) =>
+                              `${g.skuCode}${g.exciseGoods ? '（应税消费品，不适用 IOSS）' : ''}`,
+                          )
                           .join('、')}
                   </td>
                   <td className="px-3 py-2">
@@ -450,14 +459,11 @@ export function VatIossWorkspace() {
         </div>
       </SectionCard>
 
-      <SectionCard
-        title="申报周期配置"
-        description="辖区码来自 16.3.1.1 的辖区码表（只读）。"
-      >
+      <SectionCard title="申报周期配置" description="辖区码来自 16.3.1.1 的辖区码表（只读）。">
         {cycles.length === 0 ? (
           <EmptyState title="还没有申报周期配置" description="先登记一条申报周期，才能开申报期。" />
         ) : (
-          <table className="w-full text-left text-copy-13">
+          <table className="text-copy-13 w-full text-left">
             <thead>
               <tr className="text-muted-foreground border-b">
                 <th className="px-3 py-2">辖区</th>
@@ -563,7 +569,7 @@ export function VatIossWorkspace() {
         {periods.length === 0 ? (
           <EmptyState title="还没有申报期" description="开一期申报，才能出这一期的底稿统计。" />
         ) : (
-          <table className="w-full text-left text-copy-13">
+          <table className="text-copy-13 w-full text-left">
             <thead>
               <tr className="text-muted-foreground border-b">
                 <th className="px-3 py-2">辖区</th>
@@ -708,7 +714,7 @@ export function VatIossWorkspace() {
         ) : (orders?.items.length ?? 0) === 0 ? (
           <EmptyState title="没有订单" description={emptyStateText(orderEmptyKind)} />
         ) : (
-          <table className="w-full text-left text-copy-13">
+          <table className="text-copy-13 w-full text-left">
             <thead>
               <tr className="text-muted-foreground border-b">
                 <th className="px-3 py-2">订单号</th>
@@ -744,7 +750,9 @@ export function VatIossWorkspace() {
                   </td>
                   <td className="px-3 py-2">
                     {reasonLabel(row.reasonCode)}
-                    <div className="text-muted-foreground mt-1 text-copy-12">{row.reasonDetail}</div>
+                    <div className="text-muted-foreground text-copy-12 mt-1">
+                      {row.reasonDetail}
+                    </div>
                   </td>
                   <td className="px-3 py-2">{taxRateDisplay(row.taxRate, row.taxRateSource)}</td>
                   <td className="px-3 py-2">{formatAmount(row.taxAmount, row.currency)}</td>

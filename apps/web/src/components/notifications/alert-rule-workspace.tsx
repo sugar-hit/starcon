@@ -257,8 +257,8 @@ export function AlertRuleWorkspace() {
           key={item.kind}
           className={
             item.kind === 'error'
-              ? 'text-destructive bg-destructive-soft rounded-md px-3 py-2 text-copy-13'
-              : 'text-success bg-success-soft rounded-md px-3 py-2 text-copy-13'
+              ? 'text-destructive bg-destructive-soft text-copy-13 rounded-md px-3 py-2'
+              : 'text-success bg-success-soft text-copy-13 rounded-md px-3 py-2'
           }
         >
           {item.text}
@@ -266,7 +266,9 @@ export function AlertRuleWorkspace() {
       ))}
 
       {loading && !list ? (
-        <div className="text-muted-foreground px-1 py-10 text-center text-copy-13">正在读取规则…</div>
+        <div className="text-muted-foreground text-copy-13 px-1 py-10 text-center">
+          正在读取规则…
+        </div>
       ) : null}
 
       {!loading && !list ? (
@@ -287,7 +289,7 @@ export function AlertRuleWorkspace() {
           {/* ------------------------------------------------ 能力与边界 */}
           <section className="space-y-2">
             <h2 className="text-copy-14 text-foreground font-medium">能力与边界</h2>
-            <div className="text-muted-foreground space-y-1 text-copy-13">
+            <div className="text-muted-foreground text-copy-13 space-y-1">
               <div>
                 共 {summary.total} 条生效规则（预置 {summary.presetCount} 条 · 自定义{' '}
                 {summary.customCount} 条），其中 {summary.customizedCount} 条被本租户改过、
@@ -322,7 +324,9 @@ export function AlertRuleWorkspace() {
                 {presets.map((rule) => (
                   <li key={rule.ruleCode} className="space-y-2 px-4 py-3">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-copy-14 text-foreground font-medium">{rule.displayName}</span>
+                      <span className="text-copy-14 text-foreground font-medium">
+                        {rule.displayName}
+                      </span>
                       {rule.customized ? <Badge tone="warning">已被本租户改过</Badge> : null}
                       {!rule.enabled ? <Badge tone="neutral">已关闭</Badge> : null}
                       {metricAvailable(vocabulary, rule.metricCode) ? null : (
@@ -338,7 +342,9 @@ export function AlertRuleWorkspace() {
                       <div>
                         时间窗按 <b>{rule.timezone}</b> 计算（
                         {TIMEZONE_SOURCE_LABELS[rule.timezoneSource] ?? rule.timezoneSource}）
-                        {rule.upstreamModule ? ` · 上游：${rule.upstreamSystem} ${rule.upstreamModule}` : ''}
+                        {rule.upstreamModule
+                          ? ` · 上游：${rule.upstreamSystem} ${rule.upstreamModule}`
+                          : ''}
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -399,10 +405,12 @@ export function AlertRuleWorkspace() {
                 title="本租户还没有自定义规则"
                 description="预置规则覆盖的是「跨境常用」的几条线。要盯自己的对象，自己建一条。"
                 action={
-                  <Button onClick={() => {
-                    setCreating(emptyDraft());
-                    setEditing(null);
-                  }}>
+                  <Button
+                    onClick={() => {
+                      setCreating(emptyDraft());
+                      setEditing(null);
+                    }}
+                  >
                     <Plus className="mr-1.5 h-4 w-4" />
                     新建规则
                   </Button>
@@ -413,7 +421,9 @@ export function AlertRuleWorkspace() {
                 {customs.map((rule) => (
                   <li key={rule.ruleCode} className="space-y-2 px-4 py-3">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-copy-14 text-foreground font-medium">{rule.displayName}</span>
+                      <span className="text-copy-14 text-foreground font-medium">
+                        {rule.displayName}
+                      </span>
                       <Badge tone="primary">自定义</Badge>
                       {!rule.enabled ? <Badge tone="neutral">已关闭</Badge> : null}
                     </div>
@@ -514,7 +524,8 @@ export function AlertRuleWorkspace() {
                       </div>
                       <div className="text-muted-foreground">
                         {OBJECT_TYPE_LABELS[hit.objectType] ?? hit.objectType}
-                        {hit.objectRef ? ` ${hit.objectRef}` : ''} · 观测值 {hit.observedValue ?? '—'}
+                        {hit.objectRef ? ` ${hit.objectRef}` : ''} · 观测值{' '}
+                        {hit.observedValue ?? '—'}
                         {hit.baseValue ? ` · 基期 ${hit.baseValue}` : ''} · 阈值 {hit.threshold}
                       </div>
                       {hit.reason ? (
@@ -593,7 +604,7 @@ function RuleForm({
         <label className="space-y-1">
           <span className="text-copy-13 text-muted-foreground">对象类型</span>
           <select
-            className="border-input bg-background h-9 w-full rounded-md border px-3 text-copy-13"
+            className="border-input bg-background text-copy-13 h-9 w-full rounded-md border px-3"
             value={draft.objectType}
             onChange={(event) => set({ objectType: event.target.value })}
           >
@@ -608,7 +619,7 @@ function RuleForm({
         <label className="space-y-1">
           <span className="text-copy-13 text-muted-foreground">度量</span>
           <select
-            className="border-input bg-background h-9 w-full rounded-md border px-3 text-copy-13"
+            className="border-input bg-background text-copy-13 h-9 w-full rounded-md border px-3"
             value={draft.metricCode}
             onChange={(event) => set({ metricCode: event.target.value })}
           >
@@ -622,9 +633,7 @@ function RuleForm({
           </select>
         </label>
         <label className="space-y-1">
-          <span className="text-copy-13 text-muted-foreground">
-            阈值（十进制文本，不带正负号）
-          </span>
+          <span className="text-copy-13 text-muted-foreground">阈值（十进制文本，不带正负号）</span>
           <Input
             value={draft.threshold}
             onChange={(event) => set({ threshold: event.target.value })}
@@ -638,7 +647,7 @@ function RuleForm({
         <label className="space-y-1">
           <span className="text-copy-13 text-muted-foreground">时间窗</span>
           <select
-            className="border-input bg-background h-9 w-full rounded-md border px-3 text-copy-13"
+            className="border-input bg-background text-copy-13 h-9 w-full rounded-md border px-3"
             value={draft.timeWindow}
             onChange={(event) => set({ timeWindow: event.target.value })}
           >
@@ -652,7 +661,7 @@ function RuleForm({
         <label className="space-y-1">
           <span className="text-copy-13 text-muted-foreground">比较方向</span>
           <select
-            className="border-input bg-background h-9 w-full rounded-md border px-3 text-copy-13"
+            className="border-input bg-background text-copy-13 h-9 w-full rounded-md border px-3"
             value={draft.comparison}
             onChange={(event) => set({ comparison: event.target.value })}
           >
@@ -666,7 +675,7 @@ function RuleForm({
         <label className="space-y-1">
           <span className="text-copy-13 text-muted-foreground">比较基准</span>
           <select
-            className="border-input bg-background h-9 w-full rounded-md border px-3 text-copy-13"
+            className="border-input bg-background text-copy-13 h-9 w-full rounded-md border px-3"
             value={draft.changeBasis}
             onChange={(event) => set({ changeBasis: event.target.value })}
           >
@@ -680,7 +689,7 @@ function RuleForm({
         <label className="space-y-1">
           <span className="text-copy-13 text-muted-foreground">对象范围</span>
           <select
-            className="border-input bg-background h-9 w-full rounded-md border px-3 text-copy-13"
+            className="border-input bg-background text-copy-13 h-9 w-full rounded-md border px-3"
             value={draft.objectScope}
             onChange={(event) => set({ objectScope: event.target.value })}
           >

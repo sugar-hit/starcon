@@ -161,9 +161,9 @@ describe('1.4.1.1 顺序归一化', () => {
   it('永远与注册表等长（完整排列）', () => {
     expect(normalizeWorkbenchOrder([])).toHaveLength(WORKBENCH_CARDS.length);
     expect(normalizeWorkbenchOrder(['a', 'b'])).toHaveLength(WORKBENCH_CARDS.length);
-    expect(
-      normalizeWorkbenchOrder(WORKBENCH_CARDS.map((card) => card.key)),
-    ).toHaveLength(WORKBENCH_CARDS.length);
+    expect(normalizeWorkbenchOrder(WORKBENCH_CARDS.map((card) => card.key))).toHaveLength(
+      WORKBENCH_CARDS.length,
+    );
   });
 
   it('幂等：归一化两次结果相同', () => {

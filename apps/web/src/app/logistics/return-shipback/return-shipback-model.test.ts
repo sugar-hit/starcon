@@ -78,7 +78,9 @@ function candidate(overrides: Partial<ShipbackCandidateRow> = {}): ShipbackCandi
   };
 }
 
-function allocation(overrides: Partial<ReturnShipbackAllocationRow> = {}): ReturnShipbackAllocationRow {
+function allocation(
+  overrides: Partial<ReturnShipbackAllocationRow> = {},
+): ReturnShipbackAllocationRow {
   return {
     id: 'alloc-1',
     consignmentId: 'sbk-1',
@@ -166,7 +168,9 @@ describe('10.7.1.2 合单（凑单）是真的', () => {
       originWarehouseRef: 'WH-DE-1',
       domesticWarehouseRef: 'WH-CN-1',
     };
-    expect(validateConsignmentForm(form, [emptySelectedCandidate(candidate())])).toContain('起运国家');
+    expect(validateConsignmentForm(form, [emptySelectedCandidate(candidate())])).toContain(
+      '起运国家',
+    );
 
     const badCurrency = {
       ...form,
@@ -302,9 +306,7 @@ describe('10.7.1.2 入库 / 报废分录', () => {
       id: 'line-1',
       qty: 10,
     } as unknown as ReturnShipbackLineRow;
-    const entries = [
-      { lineId: 'line-1', qty: 4 } as unknown as ReturnShipbackEntryRow,
-    ];
+    const entries = [{ lineId: 'line-1', qty: 4 } as unknown as ReturnShipbackEntryRow];
     expect(remainingEntryQty(line, entries)).toBe(6);
   });
 });

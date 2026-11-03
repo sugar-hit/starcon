@@ -198,8 +198,7 @@ export function AftersalesIntakeWorkspace() {
         intakeSource: form.intakeSource,
         intakeChannel: form.intakeChannel,
         intakeReference: form.intakeReference.trim() || null,
-        platformMustRefund:
-          form.intakeSource === 'PLATFORM_MESSAGE' && form.platformMustRefund,
+        platformMustRefund: form.intakeSource === 'PLATFORM_MESSAGE' && form.platformMustRefund,
         buyerRequest: form.buyerRequest.trim() || null,
         handlingPlan: form.handlingPlan,
         ownerRef: form.ownerRef.trim() || null,
@@ -327,11 +326,14 @@ export function AftersalesIntakeWorkspace() {
 
       {caps && (
         <SectionCard title="受理能力与政策来源" description={caps.policySource}>
-          <ul className="text-muted-foreground flex list-disc flex-col gap-1 pl-5 text-copy-13">
+          <ul className="text-muted-foreground text-copy-13 flex list-disc flex-col gap-1 pl-5">
             <li>
               售后期限参数 <code className="text-foreground">{caps.returnWindowParameter}</code>
-              ：当前生效 <strong className="text-foreground">{caps.effectiveReturnWindowDays ?? '—'}</strong> 天
-              （档位 {caps.policyScopeType ?? '—'}）
+              ：当前生效{' '}
+              <strong className="text-foreground">
+                {caps.effectiveReturnWindowDays ?? '—'}
+              </strong>{' '}
+              天 （档位 {caps.policyScopeType ?? '—'}）
             </li>
             <li>
               必退情形参数 <code className="text-foreground">{caps.mustRefundParameter}</code>
@@ -343,10 +345,12 @@ export function AftersalesIntakeWorkspace() {
               </strong>
             </li>
           </ul>
-          <p className="text-muted-foreground mt-3 text-copy-13">{caps.mustRefundEnforcementNote}</p>
-          <p className="text-muted-foreground mt-1 text-copy-13">{caps.replyDeadlineNote}</p>
-          <p className="text-muted-foreground mt-1 text-copy-13">{caps.ownerSourceNote}</p>
-          <p className="text-muted-foreground mt-1 text-copy-13">{caps.platformMessageNote}</p>
+          <p className="text-muted-foreground text-copy-13 mt-3">
+            {caps.mustRefundEnforcementNote}
+          </p>
+          <p className="text-muted-foreground text-copy-13 mt-1">{caps.replyDeadlineNote}</p>
+          <p className="text-muted-foreground text-copy-13 mt-1">{caps.ownerSourceNote}</p>
+          <p className="text-muted-foreground text-copy-13 mt-1">{caps.platformMessageNote}</p>
         </SectionCard>
       )}
 
@@ -378,7 +382,7 @@ export function AftersalesIntakeWorkspace() {
               </strong>
               （{ownerModeText(submitted.ownerAssignment.mode)}）。
             </p>
-            <p className="text-muted-foreground mt-1 text-copy-13">{submitted.policyNote}</p>
+            <p className="text-muted-foreground text-copy-13 mt-1">{submitted.policyNote}</p>
           </div>
         )}
 
@@ -394,7 +398,7 @@ export function AftersalesIntakeWorkspace() {
           <label className="flex flex-col gap-1">
             <span className="text-copy-13">售后类型</span>
             <select
-              className="border-input bg-background rounded-md border px-3 py-2 text-copy-13"
+              className="border-input bg-background text-copy-13 rounded-md border px-3 py-2"
               value={form.caseType}
               onChange={(e) => setForm({ ...form, caseType: e.target.value })}
             >
@@ -408,7 +412,7 @@ export function AftersalesIntakeWorkspace() {
           <label className="flex flex-col gap-1">
             <span className="text-copy-13">原因分类（强制选择，不允许自由文本）</span>
             <select
-              className="border-input bg-background rounded-md border px-3 py-2 text-copy-13"
+              className="border-input bg-background text-copy-13 rounded-md border px-3 py-2"
               value={form.reasonCode}
               onChange={(e) => setForm({ ...form, reasonCode: e.target.value })}
             >
@@ -446,7 +450,7 @@ export function AftersalesIntakeWorkspace() {
           <label className="flex flex-col gap-1">
             <span className="text-copy-13">受理来源</span>
             <select
-              className="border-input bg-background rounded-md border px-3 py-2 text-copy-13"
+              className="border-input bg-background text-copy-13 rounded-md border px-3 py-2"
               value={form.intakeSource}
               onChange={(e) => setForm({ ...form, intakeSource: e.target.value })}
             >
@@ -465,7 +469,7 @@ export function AftersalesIntakeWorkspace() {
           <label className="flex flex-col gap-1">
             <span className="text-copy-13">处理方案</span>
             <select
-              className="border-input bg-background rounded-md border px-3 py-2 text-copy-13"
+              className="border-input bg-background text-copy-13 rounded-md border px-3 py-2"
               value={form.handlingPlan}
               onChange={(e) => setForm({ ...form, handlingPlan: e.target.value })}
             >
@@ -575,14 +579,16 @@ export function AftersalesIntakeWorkspace() {
             </Button>
           )}
         </div>
-        <p className="text-muted-foreground mt-2 text-copy-13">
+        <p className="text-muted-foreground text-copy-13 mt-2">
           同一平台档同一时刻只能有一档生效，且档内容写定后不可改 —— 想改时限只能收口旧档再开新档。
         </p>
       </SectionCard>
 
       <SectionCard
         title="责任人名册"
-        description={caps?.ownerSourceNote ?? '租户可维护的名册；自动派单按「在办单数 ÷ 权重」最少者优先。'}
+        description={
+          caps?.ownerSourceNote ?? '租户可维护的名册；自动派单按「在办单数 ÷ 权重」最少者优先。'
+        }
       >
         {ownerError && (
           <div className="border-destructive-soft bg-destructive-soft text-destructive mb-3 flex items-center gap-2 rounded-lg border px-4 py-3">
@@ -613,11 +619,11 @@ export function AftersalesIntakeWorkspace() {
         </div>
 
         {roster.length === 0 ? (
-          <p className="text-muted-foreground mt-4 text-copy-13">
+          <p className="text-muted-foreground text-copy-13 mt-4">
             名册为空 —— 受理时责任人会是「待认领」，不会被静默指派给某个不存在的人。
           </p>
         ) : (
-          <table className="mt-4 w-full text-copy-13">
+          <table className="text-copy-13 mt-4 w-full">
             <thead>
               <tr className="text-muted-foreground border-b text-left">
                 <th className="py-2">责任人</th>
@@ -632,7 +638,7 @@ export function AftersalesIntakeWorkspace() {
                 <tr key={row.id} className="border-border border-b">
                   <td className="py-2">
                     <span className="text-foreground">{row.ownerDisplayName || row.ownerRef}</span>
-                    <span className="text-muted-foreground ml-1 text-copy-13">{row.ownerRef}</span>
+                    <span className="text-muted-foreground text-copy-13 ml-1">{row.ownerRef}</span>
                   </td>
                   <td className="py-2">{row.ownerSource}</td>
                   <td className="py-2">{row.weight}</td>
@@ -654,7 +660,7 @@ export function AftersalesIntakeWorkspace() {
           <label className="flex flex-col gap-1">
             <span className="text-copy-13">受理结论</span>
             <select
-              className="border-input bg-background rounded-md border px-3 py-2 text-copy-13"
+              className="border-input bg-background text-copy-13 rounded-md border px-3 py-2"
               value={params.eligibility}
               onChange={(e) => setParams({ ...params, eligibility: e.target.value, page: 0 })}
             >
@@ -665,23 +671,19 @@ export function AftersalesIntakeWorkspace() {
               <option value="REJECTED_OUT_OF_WINDOW">超窗不受理</option>
             </select>
           </label>
-          <label className="flex items-center gap-2 text-copy-13">
+          <label className="text-copy-13 flex items-center gap-2">
             <input
               type="checkbox"
               checked={params.mustRefundOnly}
-              onChange={(e) =>
-                setParams({ ...params, mustRefundOnly: e.target.checked, page: 0 })
-              }
+              onChange={(e) => setParams({ ...params, mustRefundOnly: e.target.checked, page: 0 })}
             />
             只看必退
           </label>
-          <label className="flex items-center gap-2 text-copy-13">
+          <label className="text-copy-13 flex items-center gap-2">
             <input
               type="checkbox"
               checked={params.currentOnly}
-              onChange={(e) =>
-                setParams({ ...params, currentOnly: e.target.checked, page: 0 })
-              }
+              onChange={(e) => setParams({ ...params, currentOnly: e.target.checked, page: 0 })}
             />
             只看生效中的判定
           </label>
@@ -692,7 +694,7 @@ export function AftersalesIntakeWorkspace() {
             className="w-56"
           />
           <select
-            className="border-input bg-background rounded-md border px-3 py-2 text-copy-13"
+            className="border-input bg-background text-copy-13 rounded-md border px-3 py-2"
             value={params.sort}
             onChange={(e) => setParams({ ...params, sort: e.target.value, page: 0 })}
           >
@@ -710,7 +712,7 @@ export function AftersalesIntakeWorkspace() {
 
       <SectionCard title="受理判定凭据" description={page?.sortSemantics ?? ''}>
         {loading && !page ? (
-          <div className="text-muted-foreground p-6 text-center text-copy-13">加载中…</div>
+          <div className="text-muted-foreground text-copy-13 p-6 text-center">加载中…</div>
         ) : (page?.items.length ?? 0) === 0 ? (
           <EmptyState
             title="还没有受理判定凭据"
@@ -777,7 +779,9 @@ function VerdictRow({
         <Link className="text-foreground underline" href={`/aftersales/cases/${row.caseId}`}>
           {row.caseNo}
         </Link>
-        <span className={`badge ${mustRefundBadgeClass(row.mustRefund, replyOverdue)}`}>{must.badge}</span>
+        <span className={`badge ${mustRefundBadgeClass(row.mustRefund, replyOverdue)}`}>
+          {must.badge}
+        </span>
         <span className={`badge ${eligibilityBadgeClass(row.eligibility)}`}>{elig.label}</span>
         <span className="text-muted-foreground text-copy-13">
           {mustRefundBasisText(row.mustRefundBasis, row.mustRefundSituation)}
@@ -787,11 +791,12 @@ function VerdictRow({
         </Button>
       </div>
 
-      <dl className="text-muted-foreground mt-2 grid gap-x-6 gap-y-1 text-copy-13 sm:grid-cols-2 lg:grid-cols-3">
+      <dl className="text-muted-foreground text-copy-13 mt-2 grid gap-x-6 gap-y-1 sm:grid-cols-2 lg:grid-cols-3">
         <div>
           <dt className="inline">售后期：</dt>
           <dd className="text-foreground inline">
-            {windowMarginText(row.inReturnWindow, row.windowMarginHours)}（{row.policyReturnWindowDays} 天，
+            {windowMarginText(row.inReturnWindow, row.windowMarginHours)}（
+            {row.policyReturnWindowDays} 天，
             {orderAnchorText(row.orderAnchorKind)}）
           </dd>
         </div>
@@ -799,7 +804,9 @@ function VerdictRow({
           <dt className="inline">回复时限：</dt>
           <dd className="text-foreground inline">
             {formatTime(row.replyDueAt)}
-            {replyOverdue ? `（已超时 ${humanizeHours((replyDue.getTime() - Date.now()) / -3600000)}）` : ''}
+            {replyOverdue
+              ? `（已超时 ${humanizeHours((replyDue.getTime() - Date.now()) / -3600000)}）`
+              : ''}
             {' · '}
             {replyDueBasisText(row.replyDueBasis, row.replySlaHours)}
           </dd>
@@ -831,7 +838,7 @@ function VerdictRow({
       </dl>
 
       {row.policyMustRefundReasons.length > 0 && (
-        <p className="text-muted-foreground mt-2 text-copy-13">
+        <p className="text-muted-foreground text-copy-13 mt-2">
           冻结的必退词表（{row.policyMustRefundReasons.join('、')}）
         </p>
       )}

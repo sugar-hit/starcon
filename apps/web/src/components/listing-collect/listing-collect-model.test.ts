@@ -187,7 +187,9 @@ describe('deduplicatedNote —— 去重要看得见', () => {
 
 describe('capturedAtLabel —— 抓取时刻', () => {
   it('格式化成可读时间', () => {
-    expect(capturedAtLabel('2026-10-20T04:05:06Z')).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
+    expect(capturedAtLabel('2026-10-20T04:05:06Z')).toMatch(
+      /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/,
+    );
   });
 
   it('空值与非法值都如实显示', () => {

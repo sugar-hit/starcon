@@ -180,7 +180,10 @@ export function oldGoodsTone(status?: string | null): Tone {
 }
 
 export function oldGoodsLabel(row: ExchangeOrderRow): string {
-  return row.oldGoodsReturnStatusLabel || (row.oldGoodsReturnStatus === 'WAIVED' ? '已结清（免回）' : '等买家寄回');
+  return (
+    row.oldGoodsReturnStatusLabel ||
+    (row.oldGoodsReturnStatus === 'WAIVED' ? '已结清（免回）' : '等买家寄回')
+  );
 }
 
 /** 新单单据状态语气：草稿 = 还没进审单队列，是要人推的一步。 */
@@ -346,7 +349,9 @@ export function emptyHint(capabilities: ExchangeOrderCapabilities | null): strin
 }
 
 /** 下拉项的可用性提示：原单没有收货地址快照时建单必然被拒，提前说清而不是让人填完再收 422。 */
-export function authorizationBlocker(option?: ExchangeOrderAuthorizationOption | null): string | null {
+export function authorizationBlocker(
+  option?: ExchangeOrderAuthorizationOption | null,
+): string | null {
   if (!option) return null;
   if (!option.hasShippingSnapshot) {
     return '原订单没有收货地址快照，无法建立换货新单：换货新单的收货地址只能照抄原单。';

@@ -269,12 +269,7 @@ describe('选项集合', () => {
   });
 
   it('优先级四档', () => {
-    expect(TICKET_PRIORITY_OPTIONS.map((o) => o.code)).toEqual([
-      'LOW',
-      'NORMAL',
-      'HIGH',
-      'URGENT',
-    ]);
+    expect(TICKET_PRIORITY_OPTIONS.map((o) => o.code)).toEqual(['LOW', 'NORMAL', 'HIGH', 'URGENT']);
   });
 
   it('关闭原因六种，且「已解决」与「已升级转单」是算办完的那两个', () => {
