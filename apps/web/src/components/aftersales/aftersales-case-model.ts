@@ -330,7 +330,9 @@ export function dimensionByField(
   field: string,
 ): { label: string; ownerModule: string; reason: string } | undefined {
   const found = caps?.unavailableDimensions?.find((d) => d.field === field);
-  return found ? { label: found.label, ownerModule: found.ownerModule, reason: found.reason } : undefined;
+  return found
+    ? { label: found.label, ownerModule: found.ownerModule, reason: found.reason }
+    : undefined;
 }
 
 /** 表格列定义。店铺列也在列里（显示「—」），缺席比「假装支持」更容易被误读。 */

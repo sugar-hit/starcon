@@ -137,12 +137,9 @@ it('写动作的 POST / PUT 形状被放行，且真的转发到 8087', async ()
   });
   expect(rule.status, 'PUT rules/{id} 未被放行').toBe(200);
 
-  const revert = await POST(
-    request(`finance/cost-allocations/batches/${ID}/revert`, 'POST'),
-    {
-      params: Promise.resolve({ path: `finance/cost-allocations/batches/${ID}/revert`.split('/') }),
-    },
-  );
+  const revert = await POST(request(`finance/cost-allocations/batches/${ID}/revert`, 'POST'), {
+    params: Promise.resolve({ path: `finance/cost-allocations/batches/${ID}/revert`.split('/') }),
+  });
   expect(revert.status, 'POST batches/{id}/revert 未被放行').toBe(200);
 });
 

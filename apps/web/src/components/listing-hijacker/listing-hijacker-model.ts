@@ -374,10 +374,7 @@ export function watchStatusLabel(status: string): string {
  *
  * <p>没有值显示「—」—— **不是 0**。跟卖价缺失与跟卖价为 0 是两件事。
  */
-export function formatAmount(
-  value: number | null | undefined,
-  currency?: string | null,
-): string {
+export function formatAmount(value: number | null | undefined, currency?: string | null): string {
   if (value === null || value === undefined || Number.isNaN(value)) return '—';
   const body = value.toLocaleString('zh-CN', {
     minimumFractionDigits: 2,
@@ -448,11 +445,7 @@ export function gapText(ratio: number | null | undefined): string {
 }
 
 /** 真分页的页码摘要（total 来自服务端 count，不是前端算的）。 */
-export function pageSummary(page: {
-  page: number;
-  size: number;
-  total: number;
-}): string {
+export function pageSummary(page: { page: number; size: number; total: number }): string {
   const from = page.total === 0 ? 0 : page.page * page.size + 1;
   const to = Math.min(page.total, (page.page + 1) * page.size);
   return `第 ${from}-${to} 条 / 共 ${page.total} 条`;
@@ -477,9 +470,7 @@ export function emptyRecordsMessage(watchCount: number, total: number): string {
 /**
  * 🔴 对比视图空态文案：优先用服务端写明的 emptyReason。
  */
-export function emptyComparisonMessage(
-  comparison: ListingHijackerComparisonPage | null,
-): string {
+export function emptyComparisonMessage(comparison: ListingHijackerComparisonPage | null): string {
   if (!comparison) return '';
   return comparison.emptyReason || '这个监控对象在所选区间内没有跟卖数据。';
 }

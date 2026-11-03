@@ -70,7 +70,9 @@ export interface WaybillCarrierParams {
  * 「不能赋给 Record<string, string|number>」。
  */
 function query(params: object): string {
-  const parts = Object.entries(params as Record<string, string | number | boolean | undefined | null>)
+  const parts = Object.entries(
+    params as Record<string, string | number | boolean | undefined | null>,
+  )
     .filter(([, v]) => v !== undefined && v !== null && `${v}` !== '')
     .map(([k, v]) => `${k}=${encodeURIComponent(String(v))}`);
   return parts.length ? `?${parts.join('&')}` : '';

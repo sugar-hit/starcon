@@ -370,7 +370,9 @@ export async function fetchOpportunities(params: {
   if (params.to) query.set('to', params.to);
   query.set('page', String(params.page ?? 0));
   query.set('size', String(params.size ?? 20));
-  return api<ListingChangeOpportunityPage>(`channel/listing-changes/opportunities?${query.toString()}`);
+  return api<ListingChangeOpportunityPage>(
+    `channel/listing-changes/opportunities?${query.toString()}`,
+  );
 }
 
 export async function fetchCrawls(params: {
@@ -446,11 +448,9 @@ export async function fetchComparison(params: {
 }
 
 export async function acknowledgeOpportunity(opportunityId: string, note?: string): Promise<void> {
-  await api(
-    `channel/listing-changes/opportunities/${opportunityId}/acknowledge`,
-    'PUT',
-    { note: note ?? '' },
-  );
+  await api(`channel/listing-changes/opportunities/${opportunityId}/acknowledge`, 'PUT', {
+    note: note ?? '',
+  });
 }
 
 // ================================================================ 纯函数（可单测）
@@ -550,7 +550,8 @@ export function rankBasisLabel(basis: string): string {
 export function directionLabel(changeType: string, direction: string): string {
   if (changeType === 'LISTING_STATUS') return '状态迁移';
   if (changeType === 'PRICE') return direction === 'INCREASED' ? '涨价' : '降价';
-  if (changeType === 'RANK') return direction === 'INCREASED' ? '名次下滑（竞品变差）' : '名次上升（竞品变好）';
+  if (changeType === 'RANK')
+    return direction === 'INCREASED' ? '名次下滑（竞品变差）' : '名次上升（竞品变好）';
   if (changeType === 'REVIEW_COUNT') return direction === 'INCREASED' ? '评论数增加' : '评论数减少';
   return direction;
 }
@@ -595,10 +596,7 @@ export function formatSignedRate(value: number | null | undefined): string {
  *
  * <p>没有值显示「—」—— **不是 0**。平台没报价格与平台报了个 0 价是两件事。
  */
-export function formatAmount(
-  value: number | null | undefined,
-  currency?: string | null,
-): string {
+export function formatAmount(value: number | null | undefined, currency?: string | null): string {
   if (value === null || value === undefined || Number.isNaN(value)) return '—';
   const body = value.toLocaleString('zh-CN', {
     minimumFractionDigits: 2,
@@ -622,11 +620,7 @@ export function formatTime(value: string | null | undefined): string {
 }
 
 /** 真分页的页码摘要（total 来自服务端 count，不是前端算的）。 */
-export function pageSummary(page: {
-  page: number;
-  size: number;
-  total: number;
-}): string {
+export function pageSummary(page: { page: number; size: number; total: number }): string {
   const from = page.total === 0 ? 0 : page.page * page.size + 1;
   const to = Math.min(page.total, (page.page + 1) * page.size);
   return `第 ${from}-${to} 条 / 共 ${page.total} 条`;

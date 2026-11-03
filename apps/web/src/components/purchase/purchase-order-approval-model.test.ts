@@ -92,9 +92,9 @@ describe('规则命中的展示', () => {
 
 describe('能不能操作', () => {
   it('能批时说「可以审批」', () => {
-    expect(
-      actionHint({ caseStatus: 'PENDING', canApprove: true, blockedReason: '' }),
-    ).toBe('可以审批');
+    expect(actionHint({ caseStatus: 'PENDING', canApprove: true, blockedReason: '' })).toBe(
+      '可以审批',
+    );
   });
 
   it('不能批时把原因原样透出', () => {

@@ -199,7 +199,12 @@ describe('14.1.3.2 投放定位 前端模型', () => {
       bucketDate: '2026-10-01',
       currency: 'USD',
     };
-    const ok = validateAdTargetingMetric({ ...base, impressions: '100', clicks: '10', conversions: '1' });
+    const ok = validateAdTargetingMetric({
+      ...base,
+      impressions: '100',
+      clicks: '10',
+      conversions: '1',
+    });
     expect(ok.ok).toBe(true);
 
     const bad = validateAdTargetingMetric({ ...base, impressions: '10', clicks: '20' });

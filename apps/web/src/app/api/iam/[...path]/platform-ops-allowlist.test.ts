@@ -123,7 +123,9 @@ it('写动作也放行（确认告警、闭环告警、改阈值）', async () =
   vi.stubGlobal('fetch', fetcher);
   const acknowledged = await POST(
     request(`identity/platform-ops/alerts/${ID}/acknowledge`, 'POST'),
-    { params: Promise.resolve({ path: segments(`identity/platform-ops/alerts/${ID}/acknowledge`) }) },
+    {
+      params: Promise.resolve({ path: segments(`identity/platform-ops/alerts/${ID}/acknowledge`) }),
+    },
   );
   expect(acknowledged.status).toBe(200);
   const resolved = await POST(request(`identity/platform-ops/alerts/${ID}/resolve`, 'POST'), {

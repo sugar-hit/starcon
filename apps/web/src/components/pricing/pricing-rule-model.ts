@@ -528,7 +528,9 @@ export function requiresConfirmationText(suggestion: PricingRuleSuggestionView |
 }
 
 /** 状态的色调。 */
-export function statusTone(status: SuggestionStatus | null | undefined): 'success' | 'warning' | 'danger' | 'neutral' {
+export function statusTone(
+  status: SuggestionStatus | null | undefined,
+): 'success' | 'warning' | 'danger' | 'neutral' {
   switch (status) {
     case 'READY':
       return 'success';
@@ -690,7 +692,10 @@ export function validateRule(input: PricingRuleInput): ValidationError | null {
   }
   for (const scope of input.scopes) {
     if (!scope.ref.trim()) {
-      return { field: 'scopes', message: '作用范围必须给取值（分类码 / 品牌码 / 站点码 / SKU 编码）' };
+      return {
+        field: 'scopes',
+        message: '作用范围必须给取值（分类码 / 品牌码 / 站点码 / SKU 编码）',
+      };
     }
   }
   return null;
@@ -702,15 +707,16 @@ export function validateRule(input: PricingRuleInput): ValidationError | null {
  * <p>🔴 当前价来自 5.5.2.1 的价格观测台账（按「平台 + 站点 + SKU」登记），
  * 所以目标店铺与目标平台必填 —— 没有它们就取不到价，也就没有建议价。
  */
-export function validateEvaluate(
-  request: PricingRuleEvaluateRequest,
-): ValidationError | null {
+export function validateEvaluate(request: PricingRuleEvaluateRequest): ValidationError | null {
   if (request.skuIds.length === 0) return { field: 'skuIds', message: '至少给一个 SKU' };
   if (!request.siteCode?.trim()) {
     return { field: 'siteCode', message: '必须给目标店铺（当前价按「平台 + 站点 + SKU」登记）' };
   }
   if (!request.platformCode?.trim()) {
-    return { field: 'platformCode', message: '必须给目标平台（当前价按「平台 + 站点 + SKU」登记）' };
+    return {
+      field: 'platformCode',
+      message: '必须给目标平台（当前价按「平台 + 站点 + SKU」登记）',
+    };
   }
   if (!/^[A-Za-z]{3}$/.test(request.currency)) {
     return { field: 'currency', message: '币种必须是三位大写字母' };
@@ -959,5 +965,9 @@ export function decidePricingRuleSuggestion(
   id: string,
   request: PricingRuleDecideRequest,
 ): Promise<PricingRuleSuggestionView> {
-  return api<PricingRuleSuggestionView>(`catalog/pricing-rules/suggestions/${id}/decide`, 'POST', request);
+  return api<PricingRuleSuggestionView>(
+    `catalog/pricing-rules/suggestions/${id}/decide`,
+    'POST',
+    request,
+  );
 }

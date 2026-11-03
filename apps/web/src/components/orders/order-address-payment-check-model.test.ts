@@ -230,12 +230,7 @@ describe('码表与词表', () => {
   });
 
   it('支付状态、禁运强度、规则严重度各有词表', () => {
-    expect(PAYMENT_STATUSES.map((s) => s.value)).toEqual([
-      'PAID',
-      'UNPAID',
-      'PARTIAL',
-      'COD',
-    ]);
+    expect(PAYMENT_STATUSES.map((s) => s.value)).toEqual(['PAID', 'UNPAID', 'PARTIAL', 'COD']);
     expect(EMBARGO_LEVELS.map((s) => s.value)).toEqual(['BLOCK', 'REVIEW']);
     expect(RULE_SEVERITIES.map((s) => s.value)).toEqual(['OK', 'WARN', 'BLOCK']);
     expect(DELIVERY_STATUSES.map((s) => s.value)).toEqual([

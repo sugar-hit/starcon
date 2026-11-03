@@ -123,7 +123,11 @@ export function countText(value: number | null): string {
  * <p>⚠️ 单位来自**口径定义**（{@code TargetCaliberView.unit} / {@code TargetView.unit}），
  * 不来自取值本身 —— 猜单位就会把「百分比」当成「金额」渲染。
  */
-export function targetValueText(unit: string, value: number | null, currency: string | null): string {
+export function targetValueText(
+  unit: string,
+  value: number | null,
+  currency: string | null,
+): string {
   switch (unit) {
     case 'CURRENCY':
       return amountText(value, currency);
@@ -444,7 +448,11 @@ export type PageState = 'loading' | 'error' | 'empty' | 'ready';
  * <p>⚠️ **空态与错误态必须分开**：读不到（上游挂了 / 没权限）是 error，
  * 读到了但一条都没有才是 empty —— 两者混在一起会让人以为「这个模块没做」。
  */
-export function pageState(list: TargetListResponse | null, error: string, loading: boolean): PageState {
+export function pageState(
+  list: TargetListResponse | null,
+  error: string,
+  loading: boolean,
+): PageState {
   if (loading) return 'loading';
   if (error) return 'error';
   if (!list) return 'loading';
@@ -466,7 +474,10 @@ export function emptyText(list: TargetListResponse | null): string {
 export function currencyTotalsText(totals: TargetCurrencyTotal[]): string {
   if (totals.length === 0) return '—';
   return totals
-    .map((total) => `${total.currency} ${formatNumber(total.total, MONEY_DECIMALS)}（${total.count} 条）`)
+    .map(
+      (total) =>
+        `${total.currency} ${formatNumber(total.total, MONEY_DECIMALS)}（${total.count} 条）`,
+    )
     .join('　');
 }
 

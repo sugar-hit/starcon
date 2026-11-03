@@ -162,10 +162,8 @@ export function AdFlashSaleWorkspace() {
         currency: current.sale.currency,
         startAt: flashLocalDateTimeInput(current.sale.startAt),
         endAt: flashLocalDateTimeInput(current.sale.endAt),
-        totalStock:
-          current.sale.totalStock === null ? '0' : String(current.sale.totalStock),
-        perUserLimit:
-          current.sale.perUserLimit === null ? '' : String(current.sale.perUserLimit),
+        totalStock: current.sale.totalStock === null ? '0' : String(current.sale.totalStock),
+        perUserLimit: current.sale.perUserLimit === null ? '' : String(current.sale.perUserLimit),
         channelType: current.sale.channelType,
         placement: current.sale.placement,
         note: current.sale.note,
@@ -192,8 +190,7 @@ export function AdFlashSaleWorkspace() {
         shopCode: input.shopCode.trim(),
         listingId: input.listingId.trim(),
         flashPrice: Number(input.flashPrice),
-        originalPrice:
-          input.originalPrice.trim() === '' ? undefined : Number(input.originalPrice),
+        originalPrice: input.originalPrice.trim() === '' ? undefined : Number(input.originalPrice),
         currency: input.currency.trim(),
         startAt: input.startAt === '' ? null : new Date(input.startAt).toISOString(),
         endAt: input.endAt === '' ? null : new Date(input.endAt).toISOString(),
@@ -450,10 +447,14 @@ export function AdFlashSaleWorkspace() {
                     {flashCountText(s.redeemedQuantity)}
                   </td>
                   <td className="py-1 text-xs">
-                    {s.perUserLimit === null ? '不限领' : `${flashCountText(s.perUserLimit)} 件 / 人`}
+                    {s.perUserLimit === null
+                      ? '不限领'
+                      : `${flashCountText(s.perUserLimit)} 件 / 人`}
                   </td>
                   <td className="py-1 text-xs">{s.channelType}</td>
-                  <td className={`py-1 ${flashStatusTone(s.status)}`}>{flashStatusLabel(s.status)}</td>
+                  <td className={`py-1 ${flashStatusTone(s.status)}`}>
+                    {flashStatusLabel(s.status)}
+                  </td>
                   <td className="py-1">
                     <div className="flex gap-1">
                       <button
@@ -568,7 +569,7 @@ export function AdFlashSaleWorkspace() {
             </button>
           </div>
 
-          <h3 className="font-medium text-sm">领取与核销记录</h3>
+          <h3 className="text-sm font-medium">领取与核销记录</h3>
           {detail.recentClaims.length === 0 ? (
             <p className="text-muted-foreground text-sm">还没有领取记录。</p>
           ) : (
@@ -590,7 +591,9 @@ export function AdFlashSaleWorkspace() {
                     <td className="py-1 text-xs">{c.recipientKey}</td>
                     <td className="py-1 text-xs">{flashCountText(c.quantity)}</td>
                     <td className="py-1 text-xs">{c.orderRef || '—'}</td>
-                    <td className="py-1 text-xs">{flashMoney(c.redeemedAmount, detail.sale.currency)}</td>
+                    <td className="py-1 text-xs">
+                      {flashMoney(c.redeemedAmount, detail.sale.currency)}
+                    </td>
                     <td className="py-1 text-xs">{flashSubsidyText(c.subsidyCost)}</td>
                     <td className="py-1 text-xs">{flashClaimStatusLabel(c.status)}</td>
                     <td className="py-1 text-xs">{flashTimestampText(c.claimedAt)}</td>
@@ -616,9 +619,7 @@ export function AdFlashSaleWorkspace() {
               <input
                 className="rounded border px-2 py-1"
                 value={claimInput.recipientKey}
-                onChange={(e) =>
-                  setClaimInput({ ...claimInput, recipientKey: e.target.value })
-                }
+                onChange={(e) => setClaimInput({ ...claimInput, recipientKey: e.target.value })}
               />
             </Field>
             <Field label="领取件数">

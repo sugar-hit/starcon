@@ -55,7 +55,9 @@ function card(overrides: Partial<SyncHealthConnectionCard> = {}): SyncHealthConn
     syncPaused: false,
     severity: GREEN,
     reasons: [],
-    shops: [{ shopId: '22222222-2222-2222-2222-222222222222', shopCode: 'AMZ-01', shopName: '北美店' }],
+    shops: [
+      { shopId: '22222222-2222-2222-2222-222222222222', shopCode: 'AMZ-01', shopName: '北美店' },
+    ],
     shopCount: 1,
     lastSyncAt: null,
     lastSyncAtSource: 'RUN_FINISHED',
@@ -111,14 +113,16 @@ describe('1.5.1.1 筛选', () => {
       platformCode: 'SHOPIFY',
       displayName: '欧洲店',
       authorizedAccount: 'acct-2',
-      shops: [{ shopId: '33333333-3333-3333-3333-333333333333', shopCode: 'SHOP-02', shopName: '欧洲店' }],
+      shops: [
+        { shopId: '33333333-3333-3333-3333-333333333333', shopCode: 'SHOP-02', shopName: '欧洲店' },
+      ],
     }),
   ];
 
   it('按严重度筛', () => {
-    expect(filterCards(cards, { ...EMPTY_FILTERS, severity: RED }).map((c) => c.connectionId)).toEqual([
-      'a',
-    ]);
+    expect(
+      filterCards(cards, { ...EMPTY_FILTERS, severity: RED }).map((c) => c.connectionId),
+    ).toEqual(['a']);
   });
 
   it('按平台筛', () => {

@@ -171,7 +171,7 @@ export function ListingPerformanceWorkspace() {
       />
 
       {error && (
-        <div className="border-destructive/40 bg-destructive/5 text-destructive flex items-center gap-2 rounded-lg border px-4 py-3 text-label-13">
+        <div className="border-destructive/40 bg-destructive/5 text-destructive text-label-13 flex items-center gap-2 rounded-lg border px-4 py-3">
           <TriangleAlert className="size-4 shrink-0" />
           <span className="flex-1">{error}</span>
           <Button size="sm" variant="secondary" onClick={() => void load()}>
@@ -182,7 +182,7 @@ export function ListingPerformanceWorkspace() {
       )}
 
       {/* ---- 🔴 数据来源标注（蓝图加粗句：展示时需标注来源） ---- */}
-      <div className="border-info/40 bg-info/5 text-foreground flex items-start gap-3 rounded-lg border px-4 py-3 text-label-13">
+      <div className="border-info/40 bg-info/5 text-foreground text-label-13 flex items-start gap-3 rounded-lg border px-4 py-3">
         <Badge tone="info" className="mt-0.5 shrink-0">
           {PLATFORM_SOURCE_BADGE}
         </Badge>
@@ -215,7 +215,7 @@ export function ListingPerformanceWorkspace() {
       )}
 
       {loading && !page ? (
-        <div className="text-muted-foreground flex items-center gap-2 px-1 py-8 text-label-13">
+        <div className="text-muted-foreground text-label-13 flex items-center gap-2 px-1 py-8">
           <Loader2 className="size-4 animate-spin" />
           正在加载平台表现数据…
         </div>
@@ -292,14 +292,14 @@ export function ListingPerformanceWorkspace() {
 
             {!page || page.items.length === 0 ? (
               <EmptyState
-                icon={<PackageSearch className="size-8 text-muted-foreground" />}
+                icon={<PackageSearch className="text-muted-foreground size-8" />}
                 title="没有平台表现数据"
                 description={emptySnapshotsMessage(page?.syncCount ?? 0)}
               />
             ) : (
               <>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-label-13">
+                  <table className="text-label-13 w-full text-left">
                     <thead className="text-muted-foreground border-border border-b">
                       <tr>
                         <th className="px-4 py-2 font-medium">商品</th>
@@ -406,19 +406,19 @@ export function ListingPerformanceWorkspace() {
             }
           >
             {detailLoading ? (
-              <div className="text-muted-foreground flex items-center gap-2 px-1 py-8 text-label-13">
+              <div className="text-muted-foreground text-label-13 flex items-center gap-2 px-1 py-8">
                 <Loader2 className="size-4 animate-spin" />
                 正在加载表现明细…
               </div>
             ) : !detail ? (
               <EmptyState
-                icon={<BarChart3 className="size-8 text-muted-foreground" />}
+                icon={<BarChart3 className="text-muted-foreground size-8" />}
                 title="还没有选中商品"
                 description="在上方的表现快照列表里点一行，这里会显示该商品的表现指标与时间范围对比。"
               />
             ) : !detail.hasData ? (
               <EmptyState
-                icon={<PackageSearch className="size-8 text-muted-foreground" />}
+                icon={<PackageSearch className="text-muted-foreground size-8" />}
                 title="这个区间没有平台表现数据"
                 description={emptyDetailMessage(detail)}
               />
@@ -447,14 +447,14 @@ export function ListingPerformanceWorkspace() {
                           m.unit,
                           detail.current.currency,
                         )}
-                        {...(rate === null
-                          ? {}
-                          : { delta: rate * 100 })}
+                        {...(rate === null ? {} : { delta: rate * 100 })}
                         deltaDirection={
                           rate === null ? 'flat' : rate > 0 ? 'up' : rate < 0 ? 'down' : 'flat'
                         }
                         polarity={
-                          m.value === 'returnsCount' || m.value === 'returnAmount' || m.value === 'returnRate'
+                          m.value === 'returnsCount' ||
+                          m.value === 'returnAmount' ||
+                          m.value === 'returnRate'
                             ? 'negative'
                             : m.value === 'rating'
                               ? 'neutral'
@@ -467,7 +467,7 @@ export function ListingPerformanceWorkspace() {
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-label-13">
+                  <table className="text-label-13 w-full text-left">
                     <thead className="text-muted-foreground border-border border-b">
                       <tr>
                         <th className="px-4 py-2 font-medium">指标</th>
@@ -487,18 +487,10 @@ export function ListingPerformanceWorkspace() {
                             </Badge>
                           </td>
                           <td className="px-4 py-2">
-                            {formatMetric(
-                              entry.current,
-                              entry.unit,
-                              detail.current.currency,
-                            )}
+                            {formatMetric(entry.current, entry.unit, detail.current.currency)}
                           </td>
                           <td className="text-muted-foreground px-4 py-2">
-                            {formatMetric(
-                              entry.previous,
-                              entry.unit,
-                              detail.current.currency,
-                            )}
+                            {formatMetric(entry.previous, entry.unit, detail.current.currency)}
                           </td>
                           <td className="px-4 py-2">
                             {formatMetric(entry.change, entry.unit, detail.current.currency)}
@@ -521,7 +513,7 @@ export function ListingPerformanceWorkspace() {
               <div className="flex flex-wrap items-center gap-2">
                 <select
                   aria-label="趋势粒度"
-                  className="border-border bg-background h-8 rounded-md border px-2 text-label-13"
+                  className="border-border bg-background text-label-13 h-8 rounded-md border px-2"
                   value={granularity}
                   onChange={(e) => {
                     setGranularity(e.target.value);
@@ -534,7 +526,7 @@ export function ListingPerformanceWorkspace() {
                 </select>
                 <select
                   aria-label="趋势指标"
-                  className="border-border bg-background h-8 rounded-md border px-2 text-label-13"
+                  className="border-border bg-background text-label-13 h-8 rounded-md border px-2"
                   value={trendMetric}
                   onChange={(e) => setTrendMetric(e.target.value)}
                 >
@@ -549,13 +541,13 @@ export function ListingPerformanceWorkspace() {
           >
             {!trend ? (
               <EmptyState
-                icon={<BarChart3 className="size-8 text-muted-foreground" />}
+                icon={<BarChart3 className="text-muted-foreground size-8" />}
                 title="还没有选中商品"
                 description="选中一个商品后，这里显示它的平台表现趋势。"
               />
             ) : trend.points.length === 0 ? (
               <EmptyState
-                icon={<BarChart3 className="size-8 text-muted-foreground" />}
+                icon={<BarChart3 className="text-muted-foreground size-8" />}
                 title="这个区间没有平台表现数据"
                 description={`${periodLabel(trend.from, trend.to)} 区间内平台没有回报表现数据 —— 这里不画假曲线。`}
               />
@@ -566,7 +558,10 @@ export function ListingPerformanceWorkspace() {
                     <LineChart data={chartData}>
                       <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
                       <XAxis dataKey="bucket" fontSize={12} />
-                      <YAxis fontSize={12} tickFormatter={(v: number) => `${(v * 100).toFixed(1)}%`} />
+                      <YAxis
+                        fontSize={12}
+                        tickFormatter={(v: number) => `${(v * 100).toFixed(1)}%`}
+                      />
                       <Tooltip
                         formatter={(value: number | string) => [
                           typeof value === 'number' ? formatMetric(value, 'RATE') : String(value),
@@ -598,11 +593,16 @@ export function ListingPerformanceWorkspace() {
                         ]}
                       />
                       <Legend />
-                      <Bar dataKey="value" name={metricLabel(trendMetric)} fill="#6366f1" radius={[4, 4, 0, 0]} />
+                      <Bar
+                        dataKey="value"
+                        name={metricLabel(trendMetric)}
+                        fill="#6366f1"
+                        radius={[4, 4, 0, 0]}
+                      />
                     </BarChart>
                   )}
                 </ResponsiveContainer>
-                <p className="text-muted-foreground mt-2 text-label-12">
+                <p className="text-muted-foreground text-label-12 mt-2">
                   🔴 {PLATFORM_SOURCE_BADGE}：{trend.sourceNote}
                 </p>
               </>

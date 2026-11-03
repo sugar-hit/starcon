@@ -192,9 +192,7 @@ export function CarrierWorkspace() {
                   id="kw"
                   value={filters.keyword}
                   placeholder="主体编码 / 名称"
-                  onChange={(e) =>
-                    setFilters({ ...filters, keyword: e.target.value, page: 0 })
-                  }
+                  onChange={(e) => setFilters({ ...filters, keyword: e.target.value, page: 0 })}
                 />
               </FormField>
               <FormField id="cat" label="承运商类别">
@@ -212,9 +210,7 @@ export function CarrierWorkspace() {
                   id="tier"
                   value={filters.serviceTier}
                   placeholder="全部"
-                  onChange={(e) =>
-                    setFilters({ ...filters, serviceTier: e.target.value, page: 0 })
-                  }
+                  onChange={(e) => setFilters({ ...filters, serviceTier: e.target.value, page: 0 })}
                 />
               </FormField>
               <FormField id="avail" label="可用性">
@@ -232,9 +228,7 @@ export function CarrierWorkspace() {
                   id="country"
                   value={filters.countryCode}
                   placeholder="如 DE"
-                  onChange={(e) =>
-                    setFilters({ ...filters, countryCode: e.target.value, page: 0 })
-                  }
+                  onChange={(e) => setFilters({ ...filters, countryCode: e.target.value, page: 0 })}
                 />
               </FormField>
               <FormField id="biz" label="业务类型">
@@ -478,13 +472,16 @@ function CarrierForm({
         <Input
           id="f-country"
           value={form.coverageCountries.join(', ')}
-          onChange={(e) =>
-            onChange({ ...form, coverageCountries: parseList(e.target.value) })
-          }
+          onChange={(e) => onChange({ ...form, coverageCountries: parseList(e.target.value) })}
         />
       </FormField>
 
-      <FormField id="f-biz" label="支持业务类型" hint="逗号分隔，如 OWN_FULFILLMENT, FBA_INBOUND" required>
+      <FormField
+        id="f-biz"
+        label="支持业务类型"
+        hint="逗号分隔，如 OWN_FULFILLMENT, FBA_INBOUND"
+        required
+      >
         <Input
           id="f-biz"
           value={form.businessTypes.join(', ')}
@@ -509,7 +506,8 @@ function CarrierForm({
         </Button>
       </div>
       <p className="text-muted-foreground text-xs">
-        主体名称、编码、接口类型、账号、服务能力在本页不可编辑 —— 那是往来单位档案的主权，要回 /partners 改。
+        主体名称、编码、接口类型、账号、服务能力在本页不可编辑 —— 那是往来单位档案的主权，要回
+        /partners 改。
       </p>
     </div>
   );

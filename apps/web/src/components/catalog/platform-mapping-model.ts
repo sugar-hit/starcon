@@ -440,7 +440,8 @@ export function toAttributeInput(draft: AttributeRuleDraft): PlatformAttributeMa
   return {
     platformAttributeCode: normalizePlatformAttributeCode(draft.platformAttributeCode),
     platformAttributeName: normalizePlatformAttributeName(draft.platformAttributeName),
-    internalAttributeId: draft.internalAttributeId.trim().length === 0 ? null : draft.internalAttributeId.trim(),
+    internalAttributeId:
+      draft.internalAttributeId.trim().length === 0 ? null : draft.internalAttributeId.trim(),
     requirement: draft.requirement.trim(),
     platformDataType: draft.platformDataType.trim(),
     multiple: draft.multiple,
@@ -599,7 +600,9 @@ export function resolveTarget(internalCategoryId: string, platformCode: string, 
     platformCode: normalizePlatform(platformCode),
     siteCode: normalizeSite(siteCode),
   });
-  return api<PlatformCategoryResolveResult>(`catalog/category-mappings/resolve?${params.toString()}`);
+  return api<PlatformCategoryResolveResult>(
+    `catalog/category-mappings/resolve?${params.toString()}`,
+  );
 }
 
 export type {

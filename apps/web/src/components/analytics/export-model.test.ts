@@ -178,16 +178,17 @@ describe('投递状态', () => {
   });
 
   it('失败必须把原因摆出来', () => {
-    const failed = delivery({ status: 'FAILED', lastError: '未配置邮件通道（REPORTING_SMTP_HOST 为空）' });
+    const failed = delivery({
+      status: 'FAILED',
+      lastError: '未配置邮件通道（REPORTING_SMTP_HOST 为空）',
+    });
     expect(deliveryNote(failed)).toContain('REPORTING_SMTP_HOST');
   });
 
   it('成功与待投递的说明各说各的', () => {
     expect(deliveryNote(delivery())).toContain('等待外部调度');
     expect(
-      deliveryNote(
-        delivery({ status: 'DELIVERED', note: '传输层回报已成功送达。' }),
-      ),
+      deliveryNote(delivery({ status: 'DELIVERED', note: '传输层回报已成功送达。' })),
     ).toContain('已成功送达');
   });
 

@@ -127,12 +127,7 @@ describe('10.1.1.1 凭据只存引用', () => {
   });
 
   it('四种引用前缀都放行', () => {
-    for (const ref of [
-      'secret://x',
-      'kv://x',
-      'vault://x',
-      'external-secrets://x',
-    ]) {
+    for (const ref of ['secret://x', 'kv://x', 'vault://x', 'external-secrets://x']) {
       expect(validateCredential(ref, 'a****b')).toEqual([]);
     }
   });
@@ -165,9 +160,9 @@ describe('10.1.1.1 物流侧档案校验', () => {
   });
 
   it('国家代码必须是两位字母', () => {
-    expect(
-      validateCarrierForm(input({ coverageCountries: ['DEU'] })).join('；'),
-    ).toContain('两位字母');
+    expect(validateCarrierForm(input({ coverageCountries: ['DEU'] })).join('；')).toContain(
+      '两位字母',
+    );
   });
 });
 

@@ -25,7 +25,9 @@ import { DELETE, GET, POST } from './[...path]/route';
 
 // 相对**本文件**定位：vitest 从仓库根或 apps/web 跑时 cwd 都不同，用 cwd 会静默读空。
 const SOURCE = readFileSync(
-  fileURLToPath(new URL('../../../components/orders/fulfillment-request-model.ts', import.meta.url)),
+  fileURLToPath(
+    new URL('../../../components/orders/fulfillment-request-model.ts', import.meta.url),
+  ),
   'utf8',
 );
 
@@ -212,8 +214,8 @@ it('DELETE 打过来会被转发 —— 白名单只看 path，所以拦截点�
   });
   expect(
     fetcher,
-    '白名单是 path 白名单：这条断言锁住「不靠白名单挡 DELETE」这个事实，'
-      + '免得有人以为改一行正则就能删掉凭据',
+    '白名单是 path 白名单：这条断言锁住「不靠白名单挡 DELETE」这个事实，' +
+      '免得有人以为改一行正则就能删掉凭据',
   ).toHaveBeenCalled();
 });
 

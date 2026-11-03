@@ -90,8 +90,11 @@ describe('刊登闸门摘要', () => {
   });
 
   it('在授权范围内 ⇒ 明确说允许刊登', () => {
-    expect(gateSummary(gate({ allowed: true, blocking: false, severity: 'NONE', conclusion: 'IN_SCOPE' })))
-      .toContain('允许刊登');
+    expect(
+      gateSummary(
+        gate({ allowed: true, blocking: false, severity: 'NONE', conclusion: 'IN_SCOPE' }),
+      ),
+    ).toContain('允许刊登');
   });
 
   it('🔴 判不了 ⇒ 说「判不了」并说明不放行（不是「不合规」）', () => {

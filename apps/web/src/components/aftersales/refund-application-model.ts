@@ -147,7 +147,9 @@ export function stateTone(status: string): 'neutral' | 'info' | 'success' | 'war
  * <p>⚠️ {@code UNKNOWN} 用 **warning** 而不是 **danger**：外部超时的结果未知，
  * **不是失败**。标成红色会让运营把它当成「退失败了」去点重试 —— 而重试一次退款的代价是真金白银。
  */
-export function executionTone(state: string | null | undefined): 'neutral' | 'info' | 'success' | 'warning' | 'danger' {
+export function executionTone(
+  state: string | null | undefined,
+): 'neutral' | 'info' | 'success' | 'warning' | 'danger' {
   switch (state) {
     case 'SUCCEEDED':
       return 'success';
@@ -168,7 +170,10 @@ export function executionTone(state: string | null | undefined): 'neutral' | 'in
 /** 金额。⚠️ 一律按字符串传入服务端是 BigDecimal 口径，这里只负责显示。 */
 export function amount(value: number | string | null | undefined): string {
   if (value === null || value === undefined || value === '') return '—';
-  return Number(value).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return Number(value).toLocaleString('zh-CN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 }
 
 /**
@@ -188,7 +193,9 @@ export function availableText(balance: RefundBalance): {
 }
 
 /** 五个占用桶逐行 —— 蓝图加粗句「已退 + 在途」在页面上的落点。 */
-export function balanceRows(balance: RefundBalance): { label: string; value: string; hint?: string }[] {
+export function balanceRows(
+  balance: RefundBalance,
+): { label: string; value: string; hint?: string }[] {
   return [
     { label: '可退基数（售后单申请金额）', value: amount(balance.baseAmount) },
     { label: '已退（成功执行记录）', value: `−${amount(balance.settledAmount)}` },
@@ -210,7 +217,10 @@ export function balanceRows(balance: RefundBalance): { label: string; value: str
  * <p>⚠️ **没有配置时必须显示成「未配置 · 按最严格档执行」**，不能显示阈值 0 ——
  * 后者会被读成「0 元以下不用第二个人签」，而真相是「任何金额都要两个人」。
  */
-export function policyText(policy: RefundPolicyView): { label: string; tone: 'neutral' | 'warning' } {
+export function policyText(policy: RefundPolicyView): {
+  label: string;
+  tone: 'neutral' | 'warning';
+} {
   if (policy.policySource === 'DEFAULT_NO_POLICY') {
     return { label: '未配置 · 任何金额都要两人签字（fail-closed）', tone: 'warning' };
   }
@@ -261,7 +271,9 @@ export function reasonText(reason: string): string {
  * 必须原样把后端给的 {@code executionStateNote} 显示出来，而不是自己重写一句
  * 「渠道处理中」—— 后者会被读成「再等等就好」，而真相是「必须先查证再决定」。
  */
-export function executionText(detail: Pick<RefundDetail, 'executionState' | 'executionStateNote'>): string {
+export function executionText(
+  detail: Pick<RefundDetail, 'executionState' | 'executionStateNote'>,
+): string {
   return detail.executionStateNote;
 }
 
@@ -286,12 +298,17 @@ export function unavailableText(module: {
 }
 
 /** 动作按钮：不可用时把理由原样带出来（按钮变灰而不给理由会让人以为系统坏了）。 */
-export function actionButton(action: {
-  label: string;
-  allowed: boolean;
-  blockingReason: string | null;
-  unavailableReason: string | null;
-} | null | undefined): { label: string; disabled: boolean; reason: string | null } {
+export function actionButton(
+  action:
+    | {
+        label: string;
+        allowed: boolean;
+        blockingReason: string | null;
+        unavailableReason: string | null;
+      }
+    | null
+    | undefined,
+): { label: string; disabled: boolean; reason: string | null } {
   if (!action) return { label: '—', disabled: true, reason: '后端未给出动作入口' };
   return {
     label: action.label,
@@ -301,7 +318,9 @@ export function actionButton(action: {
 }
 
 /** 「刻意不做的事」清单：页面照着显示，而不是让用户自己猜为什么找不到按钮。 */
-export function boundaryRows(capabilities: RefundCapabilities): { scope: string; owner: string; reason: string }[] {
+export function boundaryRows(
+  capabilities: RefundCapabilities,
+): { scope: string; owner: string; reason: string }[] {
   return capabilities.boundaries.map((b) => ({
     scope: b.boundary,
     owner: b.ownerModule,

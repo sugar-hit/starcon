@@ -386,10 +386,7 @@ export type PageState = 'loading' | 'error' | 'empty' | 'ready';
  * <p>🔴 **「读不到」与「没有数据」是两种状态** —— 上游不可达是 error，
  * 上游可达但这个窗口没有事实是 empty。混成一个空态会让用户以为「这段时间没投放」。
  */
-export function pageState(
-  response: AffiliateMarketingResponse | null,
-  error: string,
-): PageState {
+export function pageState(response: AffiliateMarketingResponse | null, error: string): PageState {
   if (error) return 'error';
   if (!response) return 'loading';
   if (response.status === 'EMPTY') return 'empty';

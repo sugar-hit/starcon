@@ -77,14 +77,16 @@ describe('11.1.2.2 环节分布', () => {
 
   it('全零与缺失都显示破折号而不是空白', () => {
     // 空白会被读成「没有数据」而不是「真的是 0」。
-    expect(dominantStageText({
-      production: 0,
-      transport: 0,
-      warehouse: 0,
-      description: 0,
-      buyerFactor: 0,
-      undetermined: 0,
-    })).toBe('—');
+    expect(
+      dominantStageText({
+        production: 0,
+        transport: 0,
+        warehouse: 0,
+        description: 0,
+        buyerFactor: 0,
+        undetermined: 0,
+      }),
+    ).toBe('—');
     expect(dominantStageText(undefined)).toBe('—');
   });
 

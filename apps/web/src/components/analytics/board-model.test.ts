@@ -65,9 +65,7 @@ function value(overrides: Partial<BoardComponentValue> = {}): BoardComponentValu
   };
 }
 
-function component(
-  overrides: Partial<BoardComponentView> = {},
-): BoardComponentView {
+function component(overrides: Partial<BoardComponentView> = {}): BoardComponentView {
   return {
     componentId: 'c1',
     boardId: 'b1',
@@ -108,16 +106,20 @@ describe('13.6.1.2 看板搭建 · 前端模型', () => {
   // ================================================================ 不可比 ≠ 0
 
   it('算不出来的取值显示「—」而不是 0', () => {
-    expect(componentValueText(value({ value: null, availability: 'NOT_COMPARABLE' }), 'CURRENCY')).toBe(
+    expect(
+      componentValueText(value({ value: null, availability: 'NOT_COMPARABLE' }), 'CURRENCY'),
+    ).toBe('—');
+    expect(componentValueText(value({ value: null, availability: 'NO_DATA' }), 'PERCENT')).toBe(
       '—',
     );
-    expect(componentValueText(value({ value: null, availability: 'NO_DATA' }), 'PERCENT')).toBe('—');
   });
 
   it('可用的取值带单位与币种', () => {
     expect(componentValueText(value({ value: 1234.5 }), 'CURRENCY')).toBe('1,234.50 USD');
     expect(componentValueText(value({ value: 60, currency: '' }), 'PERCENT')).toBe('60.00%');
-    expect(componentValueText(value({ value: 12.345678, currency: '' }), 'QUANTITY')).toBe('12.346');
+    expect(componentValueText(value({ value: 12.345678, currency: '' }), 'QUANTITY')).toBe(
+      '12.346',
+    );
     expect(componentValueText(value({ value: 7, currency: '' }), 'COUNT')).toBe('7');
   });
 
@@ -309,10 +311,7 @@ describe('13.6.1.2 看板搭建 · 前端模型', () => {
   it('指标找不到时退回指标码，不编一个名字', () => {
     expect(metricLabel(undefined, 'SALES_AMOUNT')).toBe('SALES_AMOUNT');
     expect(
-      metricLabel(
-        { metricCode: 'SALES_AMOUNT', displayName: '销售额' } as never,
-        'SALES_AMOUNT',
-      ),
+      metricLabel({ metricCode: 'SALES_AMOUNT', displayName: '销售额' } as never, 'SALES_AMOUNT'),
     ).toBe('销售额');
   });
 
@@ -324,9 +323,7 @@ describe('13.6.1.2 看板搭建 · 前端模型', () => {
       displayName: ' 看板一 ',
       description: ' 说明 ',
       visibility: 'TEAM',
-      defaultFilters: [
-        { dimensionCode: 'SHOP', operator: 'EQ', valueText: 'x', valueText2: '' },
-      ],
+      defaultFilters: [{ dimensionCode: 'SHOP', operator: 'EQ', valueText: 'x', valueText2: '' }],
       defaultWindowFrom: '',
       defaultWindowTo: '',
     });

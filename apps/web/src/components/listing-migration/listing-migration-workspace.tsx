@@ -270,8 +270,8 @@ export function ListingMigrationWorkspace() {
 
       {lastResult && (
         <div className="border-brand/40 bg-brand-soft/40 rounded-lg border px-4 py-3">
-          <p className="text-foreground flex items-start gap-2 text-label-13">
-            <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-brand" />
+          <p className="text-foreground text-label-13 flex items-start gap-2">
+            <CheckCircle2 className="text-brand mt-0.5 size-4 shrink-0" />
             <span>{lastResult}</span>
           </p>
         </div>
@@ -280,18 +280,18 @@ export function ListingMigrationWorkspace() {
       {/* ---- 三条硬保证（后端给原文，前端原样展示） ---- */}
       {caps && (
         <div className="border-brand/40 bg-brand-soft/40 rounded-lg border px-4 py-3">
-          <p className="text-foreground mb-1 text-label-13 font-medium">批量搬迁的三条硬保证</p>
-          <ul className="text-muted-foreground space-y-1 text-label-12">
+          <p className="text-foreground text-label-13 mb-1 font-medium">批量搬迁的三条硬保证</p>
+          <ul className="text-muted-foreground text-label-12 space-y-1">
             <li className="flex items-start gap-2">
-              <ShieldCheck className="mt-0.5 size-3.5 shrink-0 text-brand" />
+              <ShieldCheck className="text-brand mt-0.5 size-3.5 shrink-0" />
               <span>{caps.titleDifferentiationNote}</span>
             </li>
             <li className="flex items-start gap-2">
-              <ShieldCheck className="mt-0.5 size-3.5 shrink-0 text-brand" />
+              <ShieldCheck className="text-brand mt-0.5 size-3.5 shrink-0" />
               <span>{caps.riskNote}</span>
             </li>
             <li className="flex items-start gap-2">
-              <ShieldCheck className="mt-0.5 size-3.5 shrink-0 text-brand" />
+              <ShieldCheck className="text-brand mt-0.5 size-3.5 shrink-0" />
               <span>{caps.idempotencyNote}</span>
             </li>
           </ul>
@@ -307,7 +307,7 @@ export function ListingMigrationWorkspace() {
               key={d.dimension}
               className="border-warning/40 bg-warning/5 rounded-lg border px-4 py-3"
             >
-              <p className="text-warning mb-1 text-label-13 font-medium">{d.description}：未接入</p>
+              <p className="text-warning text-label-13 mb-1 font-medium">{d.description}：未接入</p>
               <p className="text-muted-foreground text-label-12">
                 归 {d.ownerModule} —— {d.impact}
               </p>
@@ -328,7 +328,7 @@ export function ListingMigrationWorkspace() {
         <div className="space-y-5 px-4 py-4">
           {/* 源店铺 */}
           <div>
-            <p className="text-foreground mb-2 text-label-13 font-medium">① 源店铺</p>
+            <p className="text-foreground text-label-13 mb-2 font-medium">① 源店铺</p>
             <select
               className={SELECT_CLASS}
               value={draft.sourceShopId}
@@ -346,7 +346,7 @@ export function ListingMigrationWorkspace() {
 
           {/* 类目 */}
           <div>
-            <p className="text-foreground mb-2 text-label-13 font-medium">② 类目筛选</p>
+            <p className="text-foreground text-label-13 mb-2 font-medium">② 类目筛选</p>
             {categories.length === 0 ? (
               <p className="text-muted-foreground text-label-12">
                 选了源店铺之后，这里会列出它名下**真实存在**的类目。
@@ -363,8 +363,8 @@ export function ListingMigrationWorkspace() {
                         onClick={() => toggleCategory(key)}
                         className={
                           active
-                            ? 'border-brand bg-brand-soft/60 text-foreground rounded-md border px-2.5 py-1 text-label-12'
-                            : 'border-border text-muted-foreground hover:text-foreground rounded-md border px-2.5 py-1 text-label-12'
+                            ? 'border-brand bg-brand-soft/60 text-foreground text-label-12 rounded-md border px-2.5 py-1'
+                            : 'border-border text-muted-foreground hover:text-foreground text-label-12 rounded-md border px-2.5 py-1'
                         }
                       >
                         {categoryOptionLabel(c)}（{c.listingCount}）
@@ -379,7 +379,7 @@ export function ListingMigrationWorkspace() {
           {/* 数值区间 */}
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <p className="text-foreground mb-2 text-label-13 font-medium">③ 价格区间</p>
+              <p className="text-foreground text-label-13 mb-2 font-medium">③ 价格区间</p>
               <div className="flex items-center gap-2">
                 <Input
                   className="max-w-[10rem]"
@@ -395,12 +395,13 @@ export function ListingMigrationWorkspace() {
                   onChange={(e) => patch({ priceMax: e.target.value })}
                 />
               </div>
-              <p className="text-muted-foreground mt-1 text-label-12">
-                来源：平台侧在售价快照（回写登记簿）。未登记为可回写目标的 listing 价格是**未知**，不是 0。
+              <p className="text-muted-foreground text-label-12 mt-1">
+                来源：平台侧在售价快照（回写登记簿）。未登记为可回写目标的 listing
+                价格是**未知**，不是 0。
               </p>
             </div>
             <div>
-              <p className="text-foreground mb-2 text-label-13 font-medium">④ 销量区间</p>
+              <p className="text-foreground text-label-13 mb-2 font-medium">④ 销量区间</p>
               <div className="flex items-center gap-2">
                 <Input
                   className="max-w-[10rem]"
@@ -416,7 +417,7 @@ export function ListingMigrationWorkspace() {
                   onChange={(e) => patch({ salesMax: e.target.value })}
                 />
               </div>
-              <p className="text-warning mt-1 text-label-12">
+              <p className="text-warning text-label-12 mt-1">
                 ⚠️ 销量维度**未接入**（归 4.5.1.1 平台商品监控）：所有候选的销量都是未知（不是 0），
                 命中数按下面的未知值策略如实报。
               </p>
@@ -426,7 +427,7 @@ export function ListingMigrationWorkspace() {
           {/* 未知值策略 + 排序 */}
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <p className="text-foreground mb-2 text-label-13 font-medium">⑤ 未知值策略</p>
+              <p className="text-foreground text-label-13 mb-2 font-medium">⑤ 未知值策略</p>
               <select
                 className={SELECT_CLASS}
                 value={draft.unknownPolicy}
@@ -443,7 +444,7 @@ export function ListingMigrationWorkspace() {
               </select>
             </div>
             <div>
-              <p className="text-foreground mb-2 text-label-13 font-medium">⑥ 排序</p>
+              <p className="text-foreground text-label-13 mb-2 font-medium">⑥ 排序</p>
               <div className="flex gap-2">
                 <select
                   className={SELECT_CLASS}
@@ -472,7 +473,7 @@ export function ListingMigrationWorkspace() {
 
           {/* 目标店铺 */}
           <div>
-            <p className="text-foreground mb-2 text-label-13 font-medium">⑦ 目标店铺集合</p>
+            <p className="text-foreground text-label-13 mb-2 font-medium">⑦ 目标店铺集合</p>
             {targetShops.length === 0 ? (
               <p className="text-muted-foreground text-label-12">
                 没有别的可迁入店铺。批量搬迁要求目标店铺与源店铺**不同**。
@@ -488,8 +489,8 @@ export function ListingMigrationWorkspace() {
                         onClick={() => toggleTarget(s.id)}
                         className={
                           active
-                            ? 'border-brand bg-brand-soft/60 text-foreground rounded-md border px-2.5 py-1 text-label-12'
-                            : 'border-border text-muted-foreground hover:text-foreground rounded-md border px-2.5 py-1 text-label-12'
+                            ? 'border-brand bg-brand-soft/60 text-foreground text-label-12 rounded-md border px-2.5 py-1'
+                            : 'border-border text-muted-foreground hover:text-foreground text-label-12 rounded-md border px-2.5 py-1'
                         }
                       >
                         {s.code} · {s.name}
@@ -503,12 +504,14 @@ export function ListingMigrationWorkspace() {
 
           {/* 重复度控制参数 */}
           <div>
-            <p className="text-foreground mb-2 text-label-13 font-medium">⑧ 重复度控制参数</p>
+            <p className="text-foreground text-label-13 mb-2 font-medium">⑧ 重复度控制参数</p>
             <div className="grid gap-3 sm:grid-cols-3">
               <select
                 className={SELECT_CLASS}
                 value={draft.maxRiskLevel}
-                onChange={(e) => patch({ maxRiskLevel: e.target.value as MigrationDraft['maxRiskLevel'] })}
+                onChange={(e) =>
+                  patch({ maxRiskLevel: e.target.value as MigrationDraft['maxRiskLevel'] })
+                }
                 disabled={busy}
               >
                 {MAX_RISK_OPTIONS.map((o) => (
@@ -520,7 +523,9 @@ export function ListingMigrationWorkspace() {
               <select
                 className={SELECT_CLASS}
                 value={draft.onUnknown}
-                onChange={(e) => patch({ onUnknown: e.target.value as MigrationDraft['onUnknown'] })}
+                onChange={(e) =>
+                  patch({ onUnknown: e.target.value as MigrationDraft['onUnknown'] })
+                }
                 disabled={busy}
               >
                 {UNKNOWN_RISK_OPTIONS.map((o) => (
@@ -535,7 +540,7 @@ export function ListingMigrationWorkspace() {
                 onChange={(e) => patch({ titleTemplate: e.target.value })}
               />
             </div>
-            <p className="text-muted-foreground mt-1 text-label-12">
+            <p className="text-muted-foreground text-label-12 mt-1">
               标题模板可用占位符：{'{title}'} {'{storeName}'} {'{shopCode}'} {'{marketplaceCode}'}{' '}
               {'{categoryLeaf}'}。不填时用默认规则（店铺标识 → 站点标识 → 同名消歧）。
             </p>
@@ -568,7 +573,7 @@ export function ListingMigrationWorkspace() {
           {preview?.explanation && (
             <div className="border-border bg-muted/30 rounded-lg border px-3 py-2">
               <p className="text-foreground text-label-13">{preview.explanation.note}</p>
-              <ul className="text-muted-foreground mt-2 space-y-1 text-label-12">
+              <ul className="text-muted-foreground text-label-12 mt-2 space-y-1">
                 {preview.explanation.dimensions.map((d) => (
                   <li key={d.dimension}>
                     <span className="text-foreground">{d.dimension}</span>：{d.note}
@@ -597,15 +602,20 @@ export function ListingMigrationWorkspace() {
                 <li key={c.sourceListingId} className="border-border rounded-lg border px-3 py-2">
                   <p className="text-foreground text-label-13">
                     {c.sourceTitle}
-                    <span className="text-muted-foreground">（{c.sourceCategoryPath || '未归类目'}）</span>
+                    <span className="text-muted-foreground">
+                      （{c.sourceCategoryPath || '未归类目'}）
+                    </span>
                   </p>
-                  <p className="text-muted-foreground mt-1 text-label-12">{c.priceNote}</p>
+                  <p className="text-muted-foreground text-label-12 mt-1">{c.priceNote}</p>
                   {c.targets.map((t) => (
-                    <div key={t.targetShopId} className="mt-2 border-border/70 rounded-md border px-2.5 py-1.5">
+                    <div
+                      key={t.targetShopId}
+                      className="border-border/70 mt-2 rounded-md border px-2.5 py-1.5"
+                    >
                       <p className="text-foreground text-label-12">
                         → {t.targetShopCode}（{t.targetShopName} / {t.targetMarketplaceCode}）
                       </p>
-                      <p className="text-muted-foreground mt-1 flex flex-wrap items-center gap-2 text-label-12">
+                      <p className="text-muted-foreground text-label-12 mt-1 flex flex-wrap items-center gap-2">
                         <Badge tone={riskLevelTone(t.duplicateLevel)}>
                           重复度 {riskScoreLabel(t.duplicateScore, t.duplicateLevel)}
                         </Badge>
@@ -613,18 +623,21 @@ export function ListingMigrationWorkspace() {
                         {t.alreadyClaimed ? <Badge tone="warning">已被 4.4.2.1 认领</Badge> : null}
                       </p>
                       {t.plannedTargetTitle ? (
-                        <p className="text-foreground mt-1 text-label-12">
-                          搬迁后标题：<span className="text-foreground">{t.plannedTargetTitle}</span>
+                        <p className="text-foreground text-label-12 mt-1">
+                          搬迁后标题：
+                          <span className="text-foreground">{t.plannedTargetTitle}</span>
                           <span className="text-muted-foreground">
                             （规则：{t.plannedRules.map(ruleLabel).join(' → ') || '—'}）
                           </span>
                         </p>
                       ) : (
-                        <p className="text-warning mt-1 text-label-12">
+                        <p className="text-warning text-label-12 mt-1">
                           这个组合做不出差异化标题，搬迁会被拒绝。
                         </p>
                       )}
-                      <p className="text-muted-foreground mt-1 text-label-12">{t.duplicateReason}</p>
+                      <p className="text-muted-foreground text-label-12 mt-1">
+                        {t.duplicateReason}
+                      </p>
                     </div>
                   ))}
                 </li>
@@ -663,13 +676,15 @@ export function ListingMigrationWorkspace() {
             <ul className="space-y-3">
               {items.map((item) => (
                 <li key={item.itemId} className="border-border rounded-lg border px-3 py-2">
-                  <p className="text-foreground flex flex-wrap items-center gap-2 text-label-13">
+                  <p className="text-foreground text-label-13 flex flex-wrap items-center gap-2">
                     <Badge tone={itemStateTone(item.state)}>{itemStateLabel(item.state)}</Badge>
                     <span>{item.sourceTitle}</span>
                     <ArrowRight className="text-muted-foreground size-3.5" />
-                    <span className="text-foreground">{item.differentiatedTitle || '（未搬迁）'}</span>
+                    <span className="text-foreground">
+                      {item.differentiatedTitle || '（未搬迁）'}
+                    </span>
                   </p>
-                  <p className="text-muted-foreground mt-1 flex flex-wrap items-center gap-2 text-label-12">
+                  <p className="text-muted-foreground text-label-12 mt-1 flex flex-wrap items-center gap-2">
                     <Badge tone={riskLevelTone(item.duplicateLevel)}>
                       重复度 {riskScoreLabel(item.duplicateScore, item.duplicateLevel)}
                     </Badge>
@@ -681,13 +696,13 @@ export function ListingMigrationWorkspace() {
                     ) : null}
                   </p>
                   {item.skipReason ? (
-                    <p className="text-warning mt-1 text-label-12">{item.skipReason}</p>
+                    <p className="text-warning text-label-12 mt-1">{item.skipReason}</p>
                   ) : null}
                   {item.failureReason ? (
-                    <p className="text-destructive mt-1 text-label-12">{item.failureReason}</p>
+                    <p className="text-destructive text-label-12 mt-1">{item.failureReason}</p>
                   ) : null}
                   {item.duplicateBasis ? (
-                    <p className="text-muted-foreground mt-1 text-label-12">
+                    <p className="text-muted-foreground text-label-12 mt-1">
                       标题 {similarityLabel(item.duplicateBasis.titleSimilarity)} · 类目{' '}
                       {similarityLabel(item.duplicateBasis.categorySimilarity)} · 属性{' '}
                       {similarityLabel(item.duplicateBasis.attributeSimilarity)} ——{' '}
@@ -697,10 +712,15 @@ export function ListingMigrationWorkspace() {
                   {item.diffs.length > 0 ? (
                     <ul className="border-border/70 mt-2 space-y-1 rounded-md border px-2.5 py-1.5">
                       {item.diffs.map((d) => (
-                        <li key={`${d.field}-${d.ruleId}-${d.targetValue}`} className="text-label-12">
+                        <li
+                          key={`${d.field}-${d.ruleId}-${d.targetValue}`}
+                          className="text-label-12"
+                        >
                           <span className="text-foreground">{d.field}</span>
                           <span className="text-muted-foreground"> · {ruleLabel(d.ruleId)}：</span>
-                          <span className="text-muted-foreground line-through">{d.sourceValue}</span>
+                          <span className="text-muted-foreground line-through">
+                            {d.sourceValue}
+                          </span>
                           <ArrowRight className="text-muted-foreground mx-1 inline size-3" />
                           <span className="text-foreground">{d.targetValue}</span>
                           {d.ruleParams.reason ? (
@@ -729,18 +749,20 @@ export function ListingMigrationWorkspace() {
             <ul className="space-y-2">
               {risks.map((r) => (
                 <li key={r.assessmentId} className="border-border rounded-lg border px-3 py-2">
-                  <p className="text-foreground flex flex-wrap items-center gap-2 text-label-13">
+                  <p className="text-foreground text-label-13 flex flex-wrap items-center gap-2">
                     <Badge tone={riskLevelTone(r.level)}>
                       重复度 {riskScoreLabel(r.score, r.level)}
                     </Badge>
                     <span>{r.sourceTitle}</span>
                     <span className="text-muted-foreground">→ {r.targetShopCode}</span>
                   </p>
-                  <p className="text-muted-foreground mt-1 text-label-12">
+                  <p className="text-muted-foreground text-label-12 mt-1">
                     最像的既有商品：{r.comparableTitle || '（无可比商品）'}
                     {r.comparableCount > 0 ? `（参与比对 ${r.comparableCount} 条）` : ''}
                   </p>
-                  {r.basis ? <p className="text-muted-foreground text-label-12">{r.basis.explanation}</p> : null}
+                  {r.basis ? (
+                    <p className="text-muted-foreground text-label-12">{r.basis.explanation}</p>
+                  ) : null}
                 </li>
               ))}
             </ul>
@@ -760,13 +782,13 @@ export function ListingMigrationWorkspace() {
             <ul className="space-y-2">
               {migrated.map((m) => (
                 <li key={m.itemId} className="border-border rounded-lg border px-3 py-2">
-                  <p className="text-foreground flex flex-wrap items-center gap-2 text-label-13">
+                  <p className="text-foreground text-label-13 flex flex-wrap items-center gap-2">
                     <span>{m.sourceTitle}</span>
                     <ArrowRight className="text-muted-foreground size-3.5" />
                     <span>{m.differentiatedTitle}</span>
                     <span className="text-muted-foreground">→ {m.targetShopCode}</span>
                   </p>
-                  <p className="text-muted-foreground mt-1 text-label-12">
+                  <p className="text-muted-foreground text-label-12 mt-1">
                     重复度 {riskScoreLabel(m.duplicateScore, m.duplicateLevel)}
                   </p>
                 </li>

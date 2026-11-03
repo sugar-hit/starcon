@@ -585,7 +585,10 @@ export function signoffEventKindLabel(code: string): string {
  */
 export function formatMoment(value: string | null | undefined): string {
   if (!value) return '—';
-  return value.replace('T', ' ').replace(/\.\d+/, '').replace(/([+-]\d{2}:\d{2}|Z)$/, ' $1');
+  return value
+    .replace('T', ' ')
+    .replace(/\.\d+/, '')
+    .replace(/([+-]\d{2}:\d{2}|Z)$/, ' $1');
 }
 
 /** 小时展示：保留后端给的精度（numeric(19,6)），不做单位换算。 */
@@ -673,10 +676,7 @@ export function validateSlaRuleInput(input: PickupSignoffSlaRuleInput): string[]
 }
 
 /** 人工确认前的校验。凭据号**必填**（没有凭据号的确认无法用于事后追责）。 */
-export function validateAttestInput(input: {
-  kind: string;
-  evidenceRef: string;
-}): string[] {
+export function validateAttestInput(input: { kind: string; evidenceRef: string }): string[] {
   const problems: string[] = [];
   if (input.kind !== 'PICKUP' && input.kind !== 'DELIVERY')
     problems.push('确认类型只能是 PICKUP（揽收）或 DELIVERY（签收）');

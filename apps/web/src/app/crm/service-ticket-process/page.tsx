@@ -27,8 +27,8 @@ export default function CrmServiceTicketProcessPage() {
       <header className="space-y-1">
         <h1 className="text-copy-20 font-semibold">工单处理</h1>
         <p className="text-muted-foreground text-copy-13">
-          处理客服工单：回复、备注、状态流转、关联订单与售后单、解决确认、满意度回收、
-          SLA 暂停与恢复。<strong>工单关闭不等于问题解决</strong> ——
+          处理客服工单：回复、备注、状态流转、关联订单与售后单、解决确认、满意度回收、 SLA
+          暂停与恢复。<strong>工单关闭不等于问题解决</strong> ——
           关闭只是「不再跟了」，实际结果（退款到账、换货发出）要另做一次「解决确认」才计为解决，
           所以页面把这两个结论分开摆着。SLA 按营业时间计时，暂停区间不计入消耗。
         </p>

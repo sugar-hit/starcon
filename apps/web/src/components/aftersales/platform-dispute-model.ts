@@ -88,27 +88,28 @@ export const fetchPlatformDisputeCapabilities = () =>
 // 纠纷单
 // ==========================================================================
 
-export const fetchPlatformDisputes = (params: {
-  page?: number;
-  size?: number;
-  status?: string;
-  disputeType?: string;
-  platformCode?: string;
-  currency?: string;
-  ourPosition?: string;
-  liabilityStage?: string;
-  settlementStatus?: string;
-  overdueOnly?: boolean;
-  minAmount?: number;
-  maxAmount?: number;
-  from?: string;
-  to?: string;
-  keyword?: string;
-  sort?: string;
-} = {}) => call<PlatformDisputePage>(`${base}${query(params)}`);
+export const fetchPlatformDisputes = (
+  params: {
+    page?: number;
+    size?: number;
+    status?: string;
+    disputeType?: string;
+    platformCode?: string;
+    currency?: string;
+    ourPosition?: string;
+    liabilityStage?: string;
+    settlementStatus?: string;
+    overdueOnly?: boolean;
+    minAmount?: number;
+    maxAmount?: number;
+    from?: string;
+    to?: string;
+    keyword?: string;
+    sort?: string;
+  } = {},
+) => call<PlatformDisputePage>(`${base}${query(params)}`);
 
-export const fetchPlatformDispute = (id: string) =>
-  call<PlatformDisputeDetail>(`${base}/${id}`);
+export const fetchPlatformDispute = (id: string) => call<PlatformDisputeDetail>(`${base}/${id}`);
 
 /** 登记平台纠纷。⚠️ 平台名要显式给：平台主数据在 channel 独立库，这里落的是快照。 */
 export const createPlatformDispute = (body: PlatformDisputeCreate) =>
@@ -129,11 +130,7 @@ export const addPlatformEvidenceItem = (id: string, body: PlatformEvidenceItemCr
  *
  * ⚠️ 确认缺失**必须**写清缺什么（后端表级 CHECK 钉死，前端也不给绕过的地方）。
  */
-export const markPlatformEvidence = (
-  id: string,
-  itemId: string,
-  body: PlatformEvidenceMark,
-) =>
+export const markPlatformEvidence = (id: string, itemId: string, body: PlatformEvidenceMark) =>
   call<PlatformDisputeDetail>(`${base}/${id}/evidence-items/${itemId}`, {
     method: 'PUT',
     body: JSON.stringify(body),
@@ -152,10 +149,7 @@ export const startPlatformEvidence = (id: string, expectedVersion: number) =>
 // 立场与结果
 // ==========================================================================
 
-export const updatePlatformDisputePosition = (
-  id: string,
-  body: PlatformDisputePositionUpdate,
-) =>
+export const updatePlatformDisputePosition = (id: string, body: PlatformDisputePositionUpdate) =>
   call<PlatformDisputeDetail>(`${base}/${id}/position`, {
     method: 'POST',
     body: JSON.stringify(body),
@@ -178,7 +172,10 @@ export const submitPlatformEvidence = (id: string, body: PlatformDisputeSubmitEv
  * ⚠️ 结果码**不接受**「超期自动判负」：那是系统判的，不接受人工声明。
  */
 export const resolvePlatformDispute = (id: string, body: PlatformDisputeResolve) =>
-  call<PlatformDisputeDetail>(`${base}/${id}/resolve`, { method: 'POST', body: JSON.stringify(body) });
+  call<PlatformDisputeDetail>(`${base}/${id}/resolve`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
 
 export const withdrawPlatformDispute = (id: string, body: PlatformDisputeWithdraw) =>
   call<PlatformDisputeDetail>(`${base}/${id}/withdraw`, {

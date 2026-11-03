@@ -51,7 +51,13 @@ function caps(overrides: Partial<ListingTemplateCapabilities> = {}): ListingTemp
       },
     ],
     fields: ['TITLE', 'BULLETS', 'IMAGES', 'CATEGORY_PATH', 'PLATFORM_CATEGORY_ID'],
-    sourceKinds: ['LISTING_FIELD', 'PRODUCT_ATTRIBUTE', 'CONTENT_TEMPLATE', 'IMAGE_GROUP', 'LITERAL'],
+    sourceKinds: [
+      'LISTING_FIELD',
+      'PRODUCT_ATTRIBUTE',
+      'CONTENT_TEMPLATE',
+      'IMAGE_GROUP',
+      'LITERAL',
+    ],
     evaluationStatuses: ['RESOLVED', 'EMPTY', 'SOURCE_MISSING', 'UNKNOWN_SOURCE', 'LIMIT_EXCEEDED'],
     scopes: ['CATEGORY', 'SHOP'],
     rulesOnly: true,
@@ -118,7 +124,14 @@ describe('模板定义：规则不是值', () => {
     draft.platformId = 'platform-1';
     draft.categoryPath = 'Electronics > Audio';
     draft.fields = [
-      { field: 'TITLE', sourceKind: 'LITERAL', sourceRef: '', valueExpression: '', required: false, slotNo: 0 },
+      {
+        field: 'TITLE',
+        sourceKind: 'LITERAL',
+        sourceRef: '',
+        valueExpression: '',
+        required: false,
+        slotNo: 0,
+      },
     ];
     expect(buildTemplateRequest(draft), 'LITERAL 没有常量').toBeNull();
 
@@ -172,8 +185,12 @@ describe('模板定义：规则不是值', () => {
 
 describe('套用请求', () => {
   it('模板与目标都选了才能套用', () => {
-    expect(buildApplyRequest({ templateId: '', listingId: 'l-1', idempotencyKey: '', note: '' })).toBeNull();
-    expect(buildApplyRequest({ templateId: 't-1', listingId: '', idempotencyKey: '', note: '' })).toBeNull();
+    expect(
+      buildApplyRequest({ templateId: '', listingId: 'l-1', idempotencyKey: '', note: '' }),
+    ).toBeNull();
+    expect(
+      buildApplyRequest({ templateId: 't-1', listingId: '', idempotencyKey: '', note: '' }),
+    ).toBeNull();
     const payload = buildApplyRequest({
       templateId: 't-1',
       listingId: 'l-1',
@@ -225,7 +242,11 @@ describe('必填违规的措辞', () => {
     };
   }
 
-  const result = (violations: number, unknown: number, missing: number): ListingTemplateApplyResult =>
+  const result = (
+    violations: number,
+    unknown: number,
+    missing: number,
+  ): ListingTemplateApplyResult =>
     ({
       applyId: 'a-1',
       templateId: 't-1',

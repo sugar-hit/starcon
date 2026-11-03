@@ -141,7 +141,9 @@ export function AnalyticsLifecycleSegmentationWorkspace() {
         `reporting/lifecycle-segmentation/refresh?${params}`,
         'POST',
       );
-      setRefreshNote(results.map((result) => `${refreshStatusLabel(result.status)}：${result.note}`).join(' / '));
+      setRefreshNote(
+        results.map((result) => `${refreshStatusLabel(result.status)}：${result.note}`).join(' / '),
+      );
       // 刷完立刻重读 —— 投影变了，页面上的数必须跟着变。
       await load();
     } catch (e) {
@@ -407,7 +409,8 @@ export function AnalyticsLifecycleSegmentationWorkspace() {
             )}
             <div className="text-copy-13 text-muted-foreground mt-3 flex items-center gap-2">
               <span>
-                第 {data.page + 1} / {Math.max(Math.ceil(data.total / data.size), 1)} 页（{data.total} 条）
+                第 {data.page + 1} / {Math.max(Math.ceil(data.total / data.size), 1)} 页（
+                {data.total} 条）
               </span>
               <Button
                 variant="outline"
@@ -446,22 +449,31 @@ export function AnalyticsLifecycleSegmentationWorkspace() {
             ) : (
               <div className="space-y-3">
                 {rules.map((rule) => (
-                  <div key={`${rule.ruleCode}-${rule.version}`} className="border-border rounded-lg border px-4 py-3">
+                  <div
+                    key={`${rule.ruleCode}-${rule.version}`}
+                    className="border-border rounded-lg border px-4 py-3"
+                  >
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-copy-14 text-foreground font-medium">{rule.ruleName}</span>
+                      <span className="text-copy-14 text-foreground font-medium">
+                        {rule.ruleName}
+                      </span>
                       <Badge tone={rule.enabled ? 'success' : 'neutral'}>
                         {rule.enabled ? '生效中' : '已停用'}
                       </Badge>
                       <Badge tone="info">v{rule.version}</Badge>
                       <Badge tone="neutral">{rule.dimensionType}</Badge>
                     </div>
-                    <p className="text-copy-13 text-muted-foreground mt-1">{ruleThresholdText(rule)}</p>
                     <p className="text-copy-13 text-muted-foreground mt-1">
-                      口径引用：{rule.quantityMetricCode} / {rule.amountMetricCode} /{' '}
-                      {rule.grossProfitMetricCode}（**引用 13.2.2.2 与 13.3.1.1 的口径表，本模块不重复登记**）
+                      {ruleThresholdText(rule)}
                     </p>
                     <p className="text-copy-13 text-muted-foreground mt-1">
-                      生效区间：{rule.effectiveFrom} ~ {rule.effectiveTo ?? '（一直生效）'} · 变更人：
+                      口径引用：{rule.quantityMetricCode} / {rule.amountMetricCode} /{' '}
+                      {rule.grossProfitMetricCode}（**引用 13.2.2.2 与 13.3.1.1
+                      的口径表，本模块不重复登记**）
+                    </p>
+                    <p className="text-copy-13 text-muted-foreground mt-1">
+                      生效区间：{rule.effectiveFrom} ~ {rule.effectiveTo ?? '（一直生效）'} ·
+                      变更人：
                       {rule.createdBy || '—'}
                     </p>
                     {rule.note && (
@@ -557,7 +569,9 @@ function SummaryRow({ summary }: { summary: LifecycleSegmentSummary }) {
           <div className="space-y-1">
             {summary.amounts.map((amount) => (
               <div key={amount.currency}>
-                <span className="text-foreground">{amountText(amount.salesAmount, amount.currency)}</span>
+                <span className="text-foreground">
+                  {amountText(amount.salesAmount, amount.currency)}
+                </span>
                 <span className="text-muted-foreground">
                   {' '}
                   · 毛利 {amountText(amount.grossProfitAmount, amount.currency)}
@@ -600,9 +614,7 @@ function RowView({ row }: { row: LifecycleSegmentationRow }) {
         )}
       </td>
       <td className="py-2 pr-3">
-        <Badge tone={segmentTone(row.lifecycleSegment)}>
-          {segmentLabel(row.lifecycleSegment)}
-        </Badge>
+        <Badge tone={segmentTone(row.lifecycleSegment)}>{segmentLabel(row.lifecycleSegment)}</Badge>
         {row.segmentAvailability !== 'AVAILABLE' && (
           <div className="mt-1">
             <Badge tone={availabilityTone(row.segmentAvailability)}>
@@ -619,10 +631,7 @@ function RowView({ row }: { row: LifecycleSegmentationRow }) {
         {row.amounts.length > 0 && (
           <div className="text-copy-13 text-muted-foreground">
             {row.amounts
-              .map(
-                (amount) =>
-                  `${currencyLabel(amount.currency)} ${abcLabel(amount.abcByAmount)}`,
-              )
+              .map((amount) => `${currencyLabel(amount.currency)} ${abcLabel(amount.abcByAmount)}`)
               .join(' · ')}
           </div>
         )}

@@ -145,7 +145,12 @@ export function ReturnsWorkspace() {
 
   // 追加成本弹窗
   const [costTarget, setCostTarget] = useState<ReturnDispositionOrderRow | null>(null);
-  const [costForm, setCostForm] = useState({ costType: 'RETURN_FREIGHT', amount: '', vendorRef: '', note: '' });
+  const [costForm, setCostForm] = useState({
+    costType: 'RETURN_FREIGHT',
+    amount: '',
+    vendorRef: '',
+    note: '',
+  });
   const [costError, setCostError] = useState('');
 
   // 处置单详情
@@ -436,7 +441,12 @@ export function ReturnsWorkspace() {
 
       <div className="mt-4 grid gap-4 sm:grid-cols-3">
         {distribution.map((d) => (
-          <StatCard key={d.method} label={d.label} value={String(d.count)} comparisonLabel="按未被取代的决策统计" />
+          <StatCard
+            key={d.method}
+            label={d.label}
+            value={String(d.count)}
+            comparisonLabel="按未被取代的决策统计"
+          />
         ))}
       </div>
 
@@ -531,7 +541,9 @@ export function ReturnsWorkspace() {
                       </td>
                       <td className="py-2">{quantityText(row.receivedQty)}</td>
                       <td className="py-2">
-                        <Badge tone={row.dispositionState === 'PENDING_DECISION' ? 'warning' : 'neutral'}>
+                        <Badge
+                          tone={row.dispositionState === 'PENDING_DECISION' ? 'warning' : 'neutral'}
+                        >
                           {dispositionStateLabel(row.dispositionState)}
                         </Badge>
                       </td>
@@ -627,12 +639,10 @@ export function ReturnsWorkspace() {
                         </Badge>
                       </td>
                       <td className="py-2">{quantityText(d.decidedQty)}</td>
-                      <td className="py-2 max-w-xs">{d.decisionBasis}</td>
+                      <td className="max-w-xs py-2">{d.decisionBasis}</td>
                       <td className="py-2">
                         {d.qualityVerdictLabel ?? '—'}
-                        {d.resaleRestricted ? (
-                          <Badge tone="danger">命中再销售限制</Badge>
-                        ) : null}
+                        {d.resaleRestricted ? <Badge tone="danger">命中再销售限制</Badge> : null}
                       </td>
                       <td className="py-2">{d.statusLabel}</td>
                       <td className="py-2">
@@ -719,11 +729,17 @@ export function ReturnsWorkspace() {
                       </td>
                       <td className="py-2">{moneyText(o.salvageAmount, o.salvageCurrency)}</td>
                       <td className="py-2">
-                        <Badge tone={o.status === 'ISSUED' ? 'success' : 'neutral'}>{o.statusLabel}</Badge>
+                        <Badge tone={o.status === 'ISSUED' ? 'success' : 'neutral'}>
+                          {o.statusLabel}
+                        </Badge>
                       </td>
                       <td className="py-2">
                         <div className="flex gap-2">
-                          <Button size="sm" variant="outline" onClick={() => void openOrderDetail(o)}>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => void openOrderDetail(o)}
+                          >
                             详情
                           </Button>
                           <Button
@@ -799,7 +815,7 @@ export function ReturnsWorkspace() {
                         <div className="font-mono text-xs">{r.subjectRef}</div>
                       </td>
                       <td className="py-2">{restrictionBasisLabel(r.restrictionBasis)}</td>
-                      <td className="py-2 max-w-xs">{r.reason}</td>
+                      <td className="max-w-xs py-2">{r.reason}</td>
                       <td className="py-2">
                         <Badge tone={r.status === 'ACTIVE' ? 'danger' : 'neutral'}>
                           {r.status === 'ACTIVE' ? '生效中' : '已撤销'}
@@ -926,7 +942,9 @@ export function ReturnsWorkspace() {
                   id="disposition-method"
                   className="rounded border px-2 py-1"
                   value={decisionForm.dispositionMethod}
-                  onChange={(e) => setDecisionForm({ ...decisionForm, dispositionMethod: e.target.value })}
+                  onChange={(e) =>
+                    setDecisionForm({ ...decisionForm, dispositionMethod: e.target.value })
+                  }
                 >
                   {/* 🔴 第一项是空值占位：页面从不预选任何去向，更不会默认「转销售」。 */}
                   <option value="">—— 请显式选择处置方式 ——</option>
@@ -975,7 +993,9 @@ export function ReturnsWorkspace() {
                   rows={3}
                   placeholder="凭什么这么判：质检结论、品牌方要求、平台政策……"
                   value={decisionForm.decisionBasis}
-                  onChange={(e) => setDecisionForm({ ...decisionForm, decisionBasis: e.target.value })}
+                  onChange={(e) =>
+                    setDecisionForm({ ...decisionForm, decisionBasis: e.target.value })
+                  }
                 />
               </div>
             </div>
@@ -1015,7 +1035,9 @@ export function ReturnsWorkspace() {
                   <Input
                     id="receipt-id"
                     value={registerForm.receiptId}
-                    onChange={(e) => setRegisterForm({ ...registerForm, receiptId: e.target.value })}
+                    onChange={(e) =>
+                      setRegisterForm({ ...registerForm, receiptId: e.target.value })
+                    }
                   />
                 </div>
                 <div className="space-y-2">
@@ -1025,7 +1047,9 @@ export function ReturnsWorkspace() {
                   <Input
                     id="receipt-line-id"
                     value={registerForm.receiptLineId}
-                    onChange={(e) => setRegisterForm({ ...registerForm, receiptLineId: e.target.value })}
+                    onChange={(e) =>
+                      setRegisterForm({ ...registerForm, receiptLineId: e.target.value })
+                    }
                   />
                 </div>
                 <div className="space-y-2">
@@ -1036,7 +1060,9 @@ export function ReturnsWorkspace() {
                     id="warehouse-type"
                     className="rounded border px-2 py-1"
                     value={registerForm.warehouseType}
-                    onChange={(e) => setRegisterForm({ ...registerForm, warehouseType: e.target.value })}
+                    onChange={(e) =>
+                      setRegisterForm({ ...registerForm, warehouseType: e.target.value })
+                    }
                   >
                     <option value="LOCAL">本地仓</option>
                     <option value="OVERSEAS">海外仓</option>
@@ -1050,7 +1076,9 @@ export function ReturnsWorkspace() {
                   <Input
                     id="warehouse-ref"
                     value={registerForm.warehouseRef}
-                    onChange={(e) => setRegisterForm({ ...registerForm, warehouseRef: e.target.value })}
+                    onChange={(e) =>
+                      setRegisterForm({ ...registerForm, warehouseRef: e.target.value })
+                    }
                   />
                 </div>
                 <div className="space-y-2">
@@ -1063,7 +1091,9 @@ export function ReturnsWorkspace() {
                     min="0"
                     step="1"
                     value={registerForm.receivedQty}
-                    onChange={(e) => setRegisterForm({ ...registerForm, receivedQty: e.target.value })}
+                    onChange={(e) =>
+                      setRegisterForm({ ...registerForm, receivedQty: e.target.value })
+                    }
                   />
                 </div>
                 <div className="space-y-2">
@@ -1075,7 +1105,9 @@ export function ReturnsWorkspace() {
                     maxLength={2}
                     placeholder="DE"
                     value={registerForm.warehouseCountry}
-                    onChange={(e) => setRegisterForm({ ...registerForm, warehouseCountry: e.target.value })}
+                    onChange={(e) =>
+                      setRegisterForm({ ...registerForm, warehouseCountry: e.target.value })
+                    }
                   />
                 </div>
                 <div className="space-y-2">
@@ -1085,7 +1117,9 @@ export function ReturnsWorkspace() {
                   <Input
                     id="brand-code"
                     value={registerForm.brandCode}
-                    onChange={(e) => setRegisterForm({ ...registerForm, brandCode: e.target.value })}
+                    onChange={(e) =>
+                      setRegisterForm({ ...registerForm, brandCode: e.target.value })
+                    }
                   />
                 </div>
                 <div className="space-y-2">
@@ -1095,7 +1129,9 @@ export function ReturnsWorkspace() {
                   <Input
                     id="platform-code"
                     value={registerForm.platformCode}
-                    onChange={(e) => setRegisterForm({ ...registerForm, platformCode: e.target.value })}
+                    onChange={(e) =>
+                      setRegisterForm({ ...registerForm, platformCode: e.target.value })
+                    }
                   />
                 </div>
               </div>
@@ -1149,7 +1185,9 @@ export function ReturnsWorkspace() {
                     id="salvage-currency"
                     maxLength={3}
                     value={issueForm.salvageCurrency}
-                    onChange={(e) => setIssueForm({ ...issueForm, salvageCurrency: e.target.value })}
+                    onChange={(e) =>
+                      setIssueForm({ ...issueForm, salvageCurrency: e.target.value })
+                    }
                   />
                 </div>
                 <div className="space-y-2">
@@ -1203,13 +1241,18 @@ export function ReturnsWorkspace() {
                             setIssueCosts(next);
                           }}
                         >
-                          {(['RETURN_FREIGHT', 'DESTROY_FEE', 'PLATFORM_HANDLING_FEE', 'OTHER'] as const).map(
-                            (t) => (
-                              <option key={t} value={t}>
-                                {costTypeLabel(t)}
-                              </option>
-                            ),
-                          )}
+                          {(
+                            [
+                              'RETURN_FREIGHT',
+                              'DESTROY_FEE',
+                              'PLATFORM_HANDLING_FEE',
+                              'OTHER',
+                            ] as const
+                          ).map((t) => (
+                            <option key={t} value={t}>
+                              {costTypeLabel(t)}
+                            </option>
+                          ))}
                         </select>
                         <Input
                           className="w-28"
@@ -1255,7 +1298,8 @@ export function ReturnsWorkspace() {
             <ModalHeader>
               <ModalTitle>追加处置成本</ModalTitle>
               <ModalDescription>
-                {costTarget.dispositionNo} · 成本币种 {costTarget.costCurrency}（必须与处置单逐字相同）
+                {costTarget.dispositionNo} · 成本币种 {costTarget.costCurrency}
+                （必须与处置单逐字相同）
               </ModalDescription>
             </ModalHeader>
             <div className="space-y-3">
@@ -1274,7 +1318,9 @@ export function ReturnsWorkspace() {
                   value={costForm.costType}
                   onChange={(e) => setCostForm({ ...costForm, costType: e.target.value })}
                 >
-                  {(['RETURN_FREIGHT', 'DESTROY_FEE', 'PLATFORM_HANDLING_FEE', 'OTHER'] as const).map((t) => (
+                  {(
+                    ['RETURN_FREIGHT', 'DESTROY_FEE', 'PLATFORM_HANDLING_FEE', 'OTHER'] as const
+                  ).map((t) => (
                     <option key={t} value={t}>
                       {costTypeLabel(t)}
                     </option>
@@ -1417,7 +1463,9 @@ export function ReturnsWorkspace() {
           <ModalContent className="max-w-xl">
             <ModalHeader>
               <ModalTitle>登记再销售限制</ModalTitle>
-              <ModalDescription>品牌方要求 / 平台政策：命中该对象的批次不能判成转销售。</ModalDescription>
+              <ModalDescription>
+                品牌方要求 / 平台政策：命中该对象的批次不能判成转销售。
+              </ModalDescription>
             </ModalHeader>
             <div className="space-y-3">
               {restrictionError ? (
@@ -1433,7 +1481,9 @@ export function ReturnsWorkspace() {
                   id="restriction-subject-type"
                   className="rounded border px-2 py-1"
                   value={restrictionForm.subjectType}
-                  onChange={(e) => setRestrictionForm({ ...restrictionForm, subjectType: e.target.value })}
+                  onChange={(e) =>
+                    setRestrictionForm({ ...restrictionForm, subjectType: e.target.value })
+                  }
                 >
                   <option value="BRAND">品牌方要求</option>
                   <option value="PLATFORM">平台政策</option>
@@ -1448,7 +1498,9 @@ export function ReturnsWorkspace() {
                   id="restriction-subject-ref"
                   placeholder="品牌编码 / 平台编码 / SKU 编码"
                   value={restrictionForm.subjectRef}
-                  onChange={(e) => setRestrictionForm({ ...restrictionForm, subjectRef: e.target.value })}
+                  onChange={(e) =>
+                    setRestrictionForm({ ...restrictionForm, subjectRef: e.target.value })
+                  }
                 />
               </div>
               <div className="space-y-2">
@@ -1478,7 +1530,9 @@ export function ReturnsWorkspace() {
                   className="w-full rounded border px-2 py-1 text-sm"
                   rows={3}
                   value={restrictionForm.reason}
-                  onChange={(e) => setRestrictionForm({ ...restrictionForm, reason: e.target.value })}
+                  onChange={(e) =>
+                    setRestrictionForm({ ...restrictionForm, reason: e.target.value })
+                  }
                 />
               </div>
             </div>

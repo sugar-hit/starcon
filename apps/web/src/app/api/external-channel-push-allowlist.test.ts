@@ -65,7 +65,10 @@ async function call(path: string): Promise<number> {
 
 /** 把模板字面量展开成一条**具体路径**（id 位展开成真 UUID 形状，query 截掉）。 */
 function expandTemplate(raw: string): string {
-  return raw.replace(/\$\{[^}]*\}/g, UUID_PLACEHOLDER).replace(/\?.*$/, '').trim();
+  return raw
+    .replace(/\$\{[^}]*\}/g, UUID_PLACEHOLDER)
+    .replace(/\?.*$/, '')
+    .trim();
 }
 
 /**

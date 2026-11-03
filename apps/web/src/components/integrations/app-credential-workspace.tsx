@@ -124,7 +124,11 @@ export function AppCredentialWorkspace() {
   const [ipForm, setIpForm] = useState({ cidr: '', note: '' });
 
   const [quotaOpen, setQuotaOpen] = useState(false);
-  const [quotaForm, setQuotaForm] = useState({ windowType: 'MINUTE', limitCount: '', enabled: true });
+  const [quotaForm, setQuotaForm] = useState({
+    windowType: 'MINUTE',
+    limitCount: '',
+    enabled: true,
+  });
 
   const [verifyOpen, setVerifyOpen] = useState(false);
   const [verifyForm, setVerifyForm] = useState({
@@ -306,7 +310,11 @@ export function AppCredentialWorkspace() {
         description="管理第三方接入的应用：注册、API Key/Secret 生成与轮换、授权范围、IP 白名单、调用配额。明文只展示一次，泄露可一键吊销。"
         actions={
           <Button onClick={() => void load()} disabled={loading}>
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
             刷新
           </Button>
         }
@@ -327,7 +335,11 @@ export function AppCredentialWorkspace() {
 
       {overview && (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard label="应用总数" value={overview.totalApps} icon={<KeyRound className="h-4 w-4" />} />
+          <StatCard
+            label="应用总数"
+            value={overview.totalApps}
+            icon={<KeyRound className="h-4 w-4" />}
+          />
           <StatCard label="正常应用" value={overview.activeApps} />
           <StatCard label="生效中的凭证" value={overview.activeCredentials} />
           <StatCard label="已吊销应用" value={overview.revokedApps} />
@@ -433,9 +445,9 @@ export function AppCredentialWorkspace() {
                   {app.statusLabel}
                 </Badge>
                 <span className="text-muted-foreground text-copy-12">{app.appTypeLabel}</span>
-                <span className="text-muted-foreground ml-auto text-copy-12">
-                  凭证 {app.activeCredentialCount} · 授权 {app.scopeCount} · 白名单 {app.ipAllowlistCount} ·
-                  配额 {app.quotaCount}
+                <span className="text-muted-foreground text-copy-12 ml-auto">
+                  凭证 {app.activeCredentialCount} · 授权 {app.scopeCount} · 白名单{' '}
+                  {app.ipAllowlistCount} · 配额 {app.quotaCount}
                 </span>
               </button>
             ))}
@@ -497,7 +509,8 @@ export function AppCredentialWorkspace() {
             <div className="text-muted-foreground grid gap-1 text-sm">
               <span>说明：{detail.app.description || '（未填写）'}</span>
               <span>
-                联系人：{detail.app.contactName || '（未填写）'} · {detail.app.contactEmail || '（未填写）'}
+                联系人：{detail.app.contactName || '（未填写）'} ·{' '}
+                {detail.app.contactEmail || '（未填写）'}
               </span>
               <span>创建于 {detail.app.createdAt}</span>
               {detail.app.revokedAt && (
@@ -512,7 +525,11 @@ export function AppCredentialWorkspace() {
             title="凭证"
             description="只显示摘要前缀与末四位。明文只在生成 / 轮换那一次返回，之后永远取不回。"
             extra={
-              <Button variant="outline" onClick={() => void openDetail(detail.app.id)} disabled={busy}>
+              <Button
+                variant="outline"
+                onClick={() => void openDetail(detail.app.id)}
+                disabled={busy}
+              >
                 刷新
               </Button>
             }
@@ -535,7 +552,7 @@ export function AppCredentialWorkspace() {
                     <Badge className={toneClasses[c.status === 'ACTIVE' ? 'ok' : 'muted']}>
                       {c.statusLabel}
                     </Badge>
-                    <span className="text-muted-foreground font-mono text-copy-12">
+                    <span className="text-muted-foreground text-copy-12 font-mono">
                       {c.apiKeyPrefix}… / …{c.secretHint}
                     </span>
                     <span className="text-muted-foreground text-copy-12">签发于 {c.issuedAt}</span>
@@ -597,12 +614,16 @@ export function AppCredentialWorkspace() {
                       <Badge className={toneClasses[s.actionCode === 'WRITE' ? 'warn' : 'ok']}>
                         {s.actionCodeLabel}
                       </Badge>
-                      <span className="text-muted-foreground text-copy-12">授权于 {s.grantedAt}</span>
+                      <span className="text-muted-foreground text-copy-12">
+                        授权于 {s.grantedAt}
+                      </span>
                       <Button
                         variant="outline"
                         className="ml-auto"
                         disabled={busy}
-                        onClick={() => void run(() => revokeScope(detail.app.id, s.id), '授权已撤销。')}
+                        onClick={() =>
+                          void run(() => revokeScope(detail.app.id, s.id), '授权已撤销。')
+                        }
                       >
                         撤销
                       </Button>
@@ -641,7 +662,10 @@ export function AppCredentialWorkspace() {
                         className="ml-auto"
                         disabled={busy}
                         onClick={() =>
-                          void run(() => removeIpAllowlist(detail.app.id, e.id), '白名单条目已删除。')
+                          void run(
+                            () => removeIpAllowlist(detail.app.id, e.id),
+                            '白名单条目已删除。',
+                          )
                         }
                       >
                         删除
@@ -688,7 +712,10 @@ export function AppCredentialWorkspace() {
             </div>
           </SectionCard>
 
-          <SectionCard title="审计留痕" description="只追加，不可改不可删。读取凭证档案这件事本身也会留痕。">
+          <SectionCard
+            title="审计留痕"
+            description="只追加，不可改不可删。读取凭证档案这件事本身也会留痕。"
+          >
             {audit && audit.items.length > 0 ? (
               <div className="space-y-1">
                 {audit.items.map((e) => (
@@ -725,7 +752,10 @@ export function AppCredentialWorkspace() {
               </div>
             ))}
             {capabilities.downstreamGaps.map((g) => (
-              <div key={g.module} className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm">
+              <div
+                key={g.module}
+                className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm"
+              >
                 <Badge className={toneClasses.muted}>{g.module}</Badge>
                 <span>{g.name}</span>
                 <span>{g.detail}</span>
@@ -804,11 +834,15 @@ export function AppCredentialWorkspace() {
             <div className="space-y-3 text-sm">
               <div>
                 <div className="text-muted-foreground text-copy-12">API Key</div>
-                <code className="bg-muted block break-all rounded p-2 font-mono">{issued.apiKey}</code>
+                <code className="bg-muted block break-all rounded p-2 font-mono">
+                  {issued.apiKey}
+                </code>
               </div>
               <div>
                 <div className="text-muted-foreground text-copy-12">Secret</div>
-                <code className="bg-muted block break-all rounded p-2 font-mono">{issued.secret}</code>
+                <code className="bg-muted block break-all rounded p-2 font-mono">
+                  {issued.secret}
+                </code>
               </div>
               <div className="text-muted-foreground text-copy-12">
                 掩码预览：{maskSecret(issued.apiKey)} / {maskSecret(issued.secret)}
@@ -1024,9 +1058,18 @@ export function AppCredentialWorkspace() {
             <div className="space-y-2 text-sm">
               <div className="font-medium">{verifyConclusion(verifyResult)}</div>
               <div className="text-muted-foreground">
-                凭证：{verifyResult.credentialMatched ? '匹配' : `不匹配（${verifyResult.credentialStatus}）`} ·
-                授权范围：{verifyResult.scopeChecked ? (verifyResult.scopeGranted ? '允许' : '不允许') : '未判定'} ·
-                IP 白名单：{verifyResult.ipChecked ? (verifyResult.ipAllowed ? '允许' : '不允许') : '未判定'} ·
+                凭证：
+                {verifyResult.credentialMatched
+                  ? '匹配'
+                  : `不匹配（${verifyResult.credentialStatus}）`}{' '}
+                · 授权范围：
+                {verifyResult.scopeChecked
+                  ? verifyResult.scopeGranted
+                    ? '允许'
+                    : '不允许'
+                  : '未判定'}{' '}
+                · IP 白名单：
+                {verifyResult.ipChecked ? (verifyResult.ipAllowed ? '允许' : '不允许') : '未判定'} ·
                 配额：{verifyResult.quotaExceeded ? '已超限' : '未超限'}
               </div>
               {verifyResult.note && (
@@ -1067,11 +1110,12 @@ export function AppCredentialWorkspace() {
               disabled={busy}
               onClick={() => {
                 if (!detail) return;
-                void run(() => revokeApp(detail.app.id, revokeReason), '应用已吊销，全部凭证同时失效。').then(
-                  (ok) => {
-                    if (ok) setRevokeOpen(false);
-                  },
-                );
+                void run(
+                  () => revokeApp(detail.app.id, revokeReason),
+                  '应用已吊销，全部凭证同时失效。',
+                ).then((ok) => {
+                  if (ok) setRevokeOpen(false);
+                });
               }}
             >
               确认吊销

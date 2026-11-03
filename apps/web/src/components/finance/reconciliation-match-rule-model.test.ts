@@ -31,11 +31,7 @@ import {
 describe('12.3.2.3 自动匹配规则前端模型', () => {
   describe('🔴 硬约束：匹配键里没有金额', () => {
     it('候选档位只有订单号 / 日期 / 类型三档', () => {
-      expect(MATCH_RULE_KEY_OPTIONS.map((o) => o.value)).toEqual([
-        'REFERENCE',
-        'DATE',
-        'TYPE',
-      ]);
+      expect(MATCH_RULE_KEY_OPTIONS.map((o) => o.value)).toEqual(['REFERENCE', 'DATE', 'TYPE']);
       expect(MATCH_RULE_KEY_OPTIONS.map((o) => o.value)).not.toContain('AMOUNT');
     });
 
@@ -198,15 +194,15 @@ describe('12.3.2.3 自动匹配规则前端模型', () => {
     });
 
     it('适用范围：空 = 全部', () => {
-      expect(
-        matchRuleScopeLabel({ currency: null, accountId: null, shopId: null }),
-      ).toContain('全部币种');
-      expect(
-        matchRuleScopeLabel({ currency: null, accountId: null, shopId: null }),
-      ).toContain('全部账户');
-      expect(
-        matchRuleScopeLabel({ currency: 'USD', accountId: 'a', shopId: 'b' }),
-      ).toContain('币种 USD');
+      expect(matchRuleScopeLabel({ currency: null, accountId: null, shopId: null })).toContain(
+        '全部币种',
+      );
+      expect(matchRuleScopeLabel({ currency: null, accountId: null, shopId: null })).toContain(
+        '全部账户',
+      );
+      expect(matchRuleScopeLabel({ currency: 'USD', accountId: 'a', shopId: 'b' })).toContain(
+        '币种 USD',
+      );
     });
 
     it('已启用的规则不能再「启用」；不合规的规则给出原因', () => {

@@ -24,10 +24,7 @@ import { api } from '../inventory/api';
 export type SourceAlternativeReason = 'STOCKOUT' | 'QUALITY';
 
 /** 判定类型（证据强度从高到低）。 */
-export type SourceAlternativeMatchType =
-  | 'SKU_LINK'
-  | 'PURCHASE_HISTORY'
-  | 'TITLE_SPEC_MATCH';
+export type SourceAlternativeMatchType = 'SKU_LINK' | 'PURCHASE_HISTORY' | 'TITLE_SPEC_MATCH';
 
 /** 批次状态。 */
 export type SourceAlternativeRunStatus = 'OPEN' | 'REQUESTED' | 'CLOSED';
@@ -322,10 +319,7 @@ export function confidenceTone(
 }
 
 /** 判定类型的本地兜底文案（后端给的中文优先）。 */
-export function matchTypeLabel(
-  matchType: string,
-  fallback?: string | null,
-): string {
+export function matchTypeLabel(matchType: string, fallback?: string | null): string {
   if (fallback) return fallback;
   switch (matchType) {
     case 'SKU_LINK':
@@ -448,10 +442,7 @@ export function validatePolicyForm(form: SourceAlternativePolicyForm): string[] 
     errors.push('四个维度的权重都必须是不小于 0、不大于 1 的数字');
     return errors;
   }
-  const total = parsed.reduce<number>(
-    (sum, w) => sum + Math.round((w as number) * 1_000_000),
-    0,
-  );
+  const total = parsed.reduce<number>((sum, w) => sum + Math.round((w as number) * 1_000_000), 0);
   if (total !== 1_000_000) {
     errors.push(`四个维度的权重之和必须精确等于 1，当前是 ${(total / 1_000_000).toFixed(6)}`);
   }
@@ -591,9 +582,7 @@ export function createSourceAlternativeRun(
 export function previewSourceAlternativeCandidates(
   skuId: string,
 ): Promise<SourceAlternativeCandidate[]> {
-  return api<SourceAlternativeCandidate[]>(
-    `trade/source-alternatives/skus/${skuId}/candidates`,
-  );
+  return api<SourceAlternativeCandidate[]>(`trade/source-alternatives/skus/${skuId}/candidates`);
 }
 
 /** 人工判定（写动作）。 */

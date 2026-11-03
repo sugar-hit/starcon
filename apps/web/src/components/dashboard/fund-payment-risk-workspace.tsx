@@ -77,9 +77,10 @@ export function FundPaymentRiskWorkspace() {
   const [error, setError] = useState('');
   const [ready, setReady] = useState(false);
 
-  const [availability, setAvailability] = useState<Record<RiskSourceKey, SourceAvailability> | null>(
-    null,
-  );
+  const [availability, setAvailability] = useState<Record<
+    RiskSourceKey,
+    SourceAvailability
+  > | null>(null);
   /** 逐来源的读不到原因（无权限也归到这里，措辞不同）。 */
   const [sourceErrors, setSourceErrors] = useState<Record<string, string>>({});
 
@@ -87,7 +88,15 @@ export function FundPaymentRiskWorkspace() {
   const [agingMeta, setAgingMeta] = useState<FinanceReceivableAgingDistribution | null>(null);
   const [overdue, setOverdue] = useState<OverdueView>(buildOverdueView(null));
   const [pendingSettlement, setPendingSettlement] = useState<
-    { currency: string; settlementAmount: number; receivedAmount: number; unsettledAmount: number; pendingCount: number; partialCount: number; count: number }[]
+    {
+      currency: string;
+      settlementAmount: number;
+      receivedAmount: number;
+      unsettledAmount: number;
+      pendingCount: number;
+      partialCount: number;
+      count: number;
+    }[]
   >([]);
   const [payables, setPayables] = useState<UpcomingPayableView>(buildUpcomingPayables(null));
   const [inTransitMoney, setInTransitMoney] = useState<InTransitMoneyCurrency[]>([]);
@@ -115,8 +124,7 @@ export function FundPaymentRiskWorkspace() {
         errors[key] = '无权限 · 对你不开放';
       };
       const failed = (key: RiskSourceKey, failure: unknown) => {
-        errors[key] =
-          failure instanceof ApiError ? failure.message : '服务暂时读不到';
+        errors[key] = failure instanceof ApiError ? failure.message : '服务暂时读不到';
       };
 
       // 2. 账龄分布
@@ -296,8 +304,8 @@ export function FundPaymentRiskWorkspace() {
         <div className="space-y-1">
           <h1 className="text-copy-16 font-medium">资金与回款风险</h1>
           <p className="text-copy-12 text-muted-foreground">
-            应收账龄、平台待结算金额、逾期应收、即将到期的供应商应付、在途资金占用。
-            本页只读：确认 / 催收 / 调整 / 核销都回 12 财务去做。
+            应收账龄、平台待结算金额、逾期应收、即将到期的供应商应付、在途资金占用。 本页只读：确认
+            / 催收 / 调整 / 核销都回 12 财务去做。
           </p>
           {agingMeta && (
             <p className="text-copy-12 text-muted-foreground">
@@ -347,7 +355,9 @@ export function FundPaymentRiskWorkspace() {
                 <span className="ml-2">
                   {spec.label} · {spec.owner}（{spec.ownerModule}） ·{' '}
                   <span className="font-mono">{spec.endpoint}</span>
-                  {scope ? ` · 数据范围：${scope === 'ALL' ? '租户内全部' : scope === 'DEPARTMENT' ? '本部门' : '仅本人'}` : ''}
+                  {scope
+                    ? ` · 数据范围：${scope === 'ALL' ? '租户内全部' : scope === 'DEPARTMENT' ? '本部门' : '仅本人'}`
+                    : ''}
                 </span>
                 {reason ? (
                   <span className="ml-1">
@@ -371,11 +381,7 @@ export function FundPaymentRiskWorkspace() {
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard label="币种数" value={summaries.length} unit="个" />
           <StatCard label="逾期应收张数" value={overdue.total} unit="笔" />
-          <StatCard
-            label="已逾期供应商应付"
-            value={payables.overdueCount}
-            unit="笔"
-          />
+          <StatCard label="已逾期供应商应付" value={payables.overdueCount} unit="笔" />
           <StatCard
             label="即将到期供应商应付"
             value={payables.dueSoonCount}
@@ -390,7 +396,7 @@ export function FundPaymentRiskWorkspace() {
           />
         ) : (
           <div className="bg-card overflow-x-auto rounded-lg border">
-            <table className="w-full text-left text-copy-12">
+            <table className="text-copy-12 w-full text-left">
               <thead className="text-muted-foreground border-b">
                 <tr>
                   <th className="px-3 py-2 font-medium">币种</th>
@@ -447,10 +453,10 @@ export function FundPaymentRiskWorkspace() {
             return (
               <div key={currency.currency} className="bg-card rounded-lg border p-3">
                 <div className="flex flex-wrap items-baseline gap-2">
-                  <span className="font-mono text-copy-13">{currency.currency}</span>
+                  <span className="text-copy-13 font-mono">{currency.currency}</span>
                   <span className="text-copy-12 text-muted-foreground">
-                    未核销 {formatMoney(currency.openAmount)} · {currency.count} 笔 ·
-                    逾期 {formatMoney(currency.overdueAmount)}
+                    未核销 {formatMoney(currency.openAmount)} · {currency.count} 笔 · 逾期{' '}
+                    {formatMoney(currency.overdueAmount)}
                   </span>
                   {currency.disputeAmount > 0 && (
                     <Badge tone="warning">争议中 {formatMoney(currency.disputeAmount)}</Badge>
@@ -511,7 +517,7 @@ export function FundPaymentRiskWorkspace() {
           />
         ) : (
           <div className="bg-card overflow-x-auto rounded-lg border">
-            <table className="w-full text-left text-copy-12">
+            <table className="text-copy-12 w-full text-left">
               <thead className="text-muted-foreground border-b">
                 <tr>
                   <th className="px-3 py-2 font-medium">单号</th>
@@ -542,7 +548,9 @@ export function FundPaymentRiskWorkspace() {
                     </td>
                     <td className="px-3 py-2">{row.bucketLabel}</td>
                     <td className="px-3 py-2 text-right font-mono">{row.overdueDays}</td>
-                    <td className="px-3 py-2 text-right font-mono">{formatMoney(row.openAmount)}</td>
+                    <td className="px-3 py-2 text-right font-mono">
+                      {formatMoney(row.openAmount)}
+                    </td>
                     <td className="px-3 py-2">
                       {row.disputeFlag ? <Badge tone="danger">争议中</Badge> : '—'}
                     </td>
@@ -566,9 +574,7 @@ export function FundPaymentRiskWorkspace() {
         )}
         {selectedOverdue && (
           <div className="bg-card rounded-lg border p-3">
-            <h3 className="text-copy-13 font-medium">
-              明细 · {selectedOverdue.receivableNo}
-            </h3>
+            <h3 className="text-copy-13 font-medium">明细 · {selectedOverdue.receivableNo}</h3>
             <ul className="text-copy-12 mt-1 space-y-1">
               {describeOverdue(selectedOverdue).map((line) => (
                 <li key={line}>{line}</li>
@@ -604,7 +610,7 @@ export function FundPaymentRiskWorkspace() {
           />
         ) : (
           <div className="bg-card overflow-x-auto rounded-lg border">
-            <table className="w-full text-left text-copy-12">
+            <table className="text-copy-12 w-full text-left">
               <thead className="text-muted-foreground border-b">
                 <tr>
                   <th className="px-3 py-2 font-medium">币种</th>
@@ -651,10 +657,10 @@ export function FundPaymentRiskWorkspace() {
           </Link>
         </div>
         <div className="flex flex-wrap items-end gap-3">
-          <label className="flex flex-col gap-1 text-copy-12">
+          <label className="text-copy-12 flex flex-col gap-1">
             <span className="text-muted-foreground">到期窗口</span>
             <select
-              className="border rounded px-2 py-1 text-copy-12"
+              className="text-copy-12 rounded border px-2 py-1"
               value={horizonDays}
               onChange={(e) => setHorizonDays(Number(e.target.value))}
             >
@@ -665,10 +671,10 @@ export function FundPaymentRiskWorkspace() {
               ))}
             </select>
           </label>
-          <label className="flex flex-col gap-1 text-copy-12">
+          <label className="text-copy-12 flex flex-col gap-1">
             <span className="text-muted-foreground">应付对象</span>
             <select
-              className="border rounded px-2 py-1 text-copy-12"
+              className="text-copy-12 rounded border px-2 py-1"
               value={counterpartyType}
               onChange={(e) => setCounterpartyType(e.target.value)}
             >
@@ -692,7 +698,7 @@ export function FundPaymentRiskWorkspace() {
           />
         ) : (
           <div className="bg-card overflow-x-auto rounded-lg border">
-            <table className="w-full text-left text-copy-12">
+            <table className="text-copy-12 w-full text-left">
               <thead className="text-muted-foreground border-b">
                 <tr>
                   <th className="px-3 py-2 font-medium">单号</th>
@@ -775,7 +781,7 @@ export function FundPaymentRiskWorkspace() {
           />
         ) : (
           <div className="bg-card overflow-x-auto rounded-lg border">
-            <table className="w-full text-left text-copy-12">
+            <table className="text-copy-12 w-full text-left">
               <thead className="text-muted-foreground border-b">
                 <tr>
                   <th className="px-3 py-2 font-medium">币种</th>
@@ -807,8 +813,8 @@ export function FundPaymentRiskWorkspace() {
         )}
         {basis && (
           <p className="text-copy-12 text-muted-foreground">
-            口径定义：订单口径 = {basis.orderBasis}；已结算口径 = {basis.settledBasis}；
-            在途未结算 = {basis.inTransitBasis}；{basis.basisDifference}。币种政策：{basis.currencyPolicy}。
+            口径定义：订单口径 = {basis.orderBasis}；已结算口径 = {basis.settledBasis}； 在途未结算
+            = {basis.inTransitBasis}；{basis.basisDifference}。币种政策：{basis.currencyPolicy}。
           </p>
         )}
         <div className="bg-card rounded-lg border p-3">

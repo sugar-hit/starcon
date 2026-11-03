@@ -272,7 +272,9 @@ export async function fetchKeywords(params: {
   if (params.status) query.set('status', params.status);
   query.set('page', String(params.page ?? 0));
   query.set('size', String(params.size ?? 20));
-  return api<ListingKeywordRankingKeywordPage>(`channel/listing-keyword-rankings?${query.toString()}`);
+  return api<ListingKeywordRankingKeywordPage>(
+    `channel/listing-keyword-rankings?${query.toString()}`,
+  );
 }
 
 export async function fetchDetail(keywordId: string): Promise<ListingKeywordRankingDetail> {
@@ -302,7 +304,9 @@ export async function fetchTrend(
   if (params.to) query.set('to', params.to);
   if (params.granularity) query.set('granularity', params.granularity);
   const suffix = query.toString() ? `?${query.toString()}` : '';
-  return api<ListingKeywordRankingTrend>(`channel/listing-keyword-rankings/${keywordId}/trend${suffix}`);
+  return api<ListingKeywordRankingTrend>(
+    `channel/listing-keyword-rankings/${keywordId}/trend${suffix}`,
+  );
 }
 
 export async function fetchAlerts(params: {
@@ -320,7 +324,9 @@ export async function fetchAlerts(params: {
   if (params.acknowledged) query.set('acknowledged', params.acknowledged);
   query.set('page', String(params.page ?? 0));
   query.set('size', String(params.size ?? 20));
-  return api<ListingKeywordRankingAlertPage>(`channel/listing-keyword-rankings/alerts?${query.toString()}`);
+  return api<ListingKeywordRankingAlertPage>(
+    `channel/listing-keyword-rankings/alerts?${query.toString()}`,
+  );
 }
 
 export async function fetchReport(params: {
@@ -366,7 +372,9 @@ export const ALERT_TYPE_OPTIONS = [
   },
 ] as const;
 
-const ALERT_TYPE_LABELS = new Map<string, string>(ALERT_TYPE_OPTIONS.map((o) => [o.value, o.label]));
+const ALERT_TYPE_LABELS = new Map<string, string>(
+  ALERT_TYPE_OPTIONS.map((o) => [o.value, o.label]),
+);
 
 export function alertTypeLabel(alertType: string): string {
   return ALERT_TYPE_LABELS.get(alertType) ?? alertType;
@@ -404,7 +412,9 @@ export function formatAverageRank(value: number | null | undefined): string {
  * <p>`unknown` = 变化量是 null（没有上一次抓取，或上一次没报这个维度）——
  * 「不知道」和「持平」是两件事，页面必须分开显示。
  */
-export function rankChangeDirection(change: number | null | undefined): 'up' | 'down' | 'flat' | 'unknown' {
+export function rankChangeDirection(
+  change: number | null | undefined,
+): 'up' | 'down' | 'flat' | 'unknown' {
   if (change === null || change === undefined || Number.isNaN(change)) return 'unknown';
   if (change > 0) return 'down';
   if (change < 0) return 'up';

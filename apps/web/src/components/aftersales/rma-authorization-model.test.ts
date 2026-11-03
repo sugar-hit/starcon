@@ -119,7 +119,9 @@ describe('寄回时限读数', () => {
 
 /** RmaActionEntry 的每个字段都是必带（可为 null）—— 手写全字段而不是 `as never`，
  *  这样字段一改，测试就会在这里报出来而不是静默继续。 */
-function entry(over: Partial<import('../../../../../packages/api-contracts/src/index').RmaActionEntry> = {}) {
+function entry(
+  over: Partial<import('../../../../../packages/api-contracts/src/index').RmaActionEntry> = {},
+) {
   return {
     code: 'DECIDE',
     label: '审批',

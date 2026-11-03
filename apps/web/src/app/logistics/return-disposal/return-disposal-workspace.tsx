@@ -579,7 +579,9 @@ export function ReturnDisposalWorkspace() {
                         <div>{row.skuCode}</div>
                         <div className="text-muted-foreground text-xs">{row.skuName}</div>
                       </td>
-                      <td className="py-2">{row.disposalMethodLabel || methodLabel(row.disposalMethod)}</td>
+                      <td className="py-2">
+                        {row.disposalMethodLabel || methodLabel(row.disposalMethod)}
+                      </td>
                       <td className="py-2">
                         <Badge tone={row.status === 'DISPOSED' ? 'success' : 'neutral'}>
                           {row.statusLabel || statusLabel(row.status)}
@@ -646,7 +648,9 @@ export function ReturnDisposalWorkspace() {
                     <tr key={row.id} className="border-b last:border-0">
                       <td className="py-2">
                         <div>{row.subjectTypeLabel || subjectTypeLabel(row.subjectType)}</div>
-                        <div className="text-muted-foreground font-mono text-xs">{row.subjectRef}</div>
+                        <div className="text-muted-foreground font-mono text-xs">
+                          {row.subjectRef}
+                        </div>
                       </td>
                       <td className="py-2 text-xs">
                         {row.requiredPhoto ? '照片 ' : ''}
@@ -670,10 +674,7 @@ export function ReturnDisposalWorkspace() {
 
         {/* ---------------- 留痕 ---------------- */}
         <TabsContent value="events">
-          <SectionCard
-            title="留痕"
-            description="销毁留痕是追加式的：改与删都被数据库拒。"
-          >
+          <SectionCard title="留痕" description="销毁留痕是追加式的：改与删都被数据库拒。">
             {loading ? (
               <p className="text-muted-foreground text-sm">正在加载留痕…</p>
             ) : (events?.rows.length ?? 0) === 0 ? (
@@ -742,7 +743,9 @@ export function ReturnDisposalWorkspace() {
                 setEvidenceOpen(true);
                 setEvidenceError('');
               }}
-              disabled={busy || detail.order.status === 'DISPOSED' || detail.order.status === 'CANCELLED'}
+              disabled={
+                busy || detail.order.status === 'DISPOSED' || detail.order.status === 'CANCELLED'
+              }
             >
               登记凭证
             </Button>
@@ -762,7 +765,10 @@ export function ReturnDisposalWorkspace() {
               size="sm"
               variant="outline"
               onClick={() => {
-                setClaimForm({ ...emptyClaimBasisForm(), claimedCurrency: detail.order.costCurrency });
+                setClaimForm({
+                  ...emptyClaimBasisForm(),
+                  claimedCurrency: detail.order.costCurrency,
+                });
                 setClaimOpen(true);
                 setClaimError('');
               }}
@@ -920,7 +926,7 @@ export function ReturnDisposalWorkspace() {
             <h3 className="mb-2 text-sm font-medium">留痕</h3>
             <ul className="space-y-1 text-xs">
               {detail.events.map((row) => (
-                <li key={row.id} className="border-b last:border-0 py-1">
+                <li key={row.id} className="border-b py-1 last:border-0">
                   <span className="mr-2 font-medium">{row.eventTypeLabel}</span>
                   <span className="text-muted-foreground mr-2">{row.occurredAt}</span>
                   {row.detail}
@@ -943,7 +949,8 @@ export function ReturnDisposalWorkspace() {
           <ModalHeader>
             <ModalTitle>建销毁单</ModalTitle>
             <ModalDescription>
-              销毁方式是<strong>枚举事实</strong>（压碎 / 焚烧 / 专业销毁），它同时决定要留哪几样凭证。
+              销毁方式是<strong>枚举事实</strong>（压碎 / 焚烧 /
+              专业销毁），它同时决定要留哪几样凭证。
             </ModalDescription>
           </ModalHeader>
 
@@ -959,9 +966,7 @@ export function ReturnDisposalWorkspace() {
               <Input
                 className="mt-1"
                 value={orderForm.dispositionOrderId}
-                onChange={(e) =>
-                  setOrderForm({ ...orderForm, dispositionOrderId: e.target.value })
-                }
+                onChange={(e) => setOrderForm({ ...orderForm, dispositionOrderId: e.target.value })}
                 placeholder="处置单 id（从待销毁清单选）"
               />
             </label>
@@ -1157,7 +1162,8 @@ export function ReturnDisposalWorkspace() {
           <ModalHeader>
             <ModalTitle>记一笔销毁费用</ModalTitle>
             <ModalDescription>
-              费用币种必须与销毁单一致：混币种的「合计」是没有意义的数字。合计是查询时现算的 SUM，不落表。
+              费用币种必须与销毁单一致：混币种的「合计」是没有意义的数字。合计是查询时现算的
+              SUM，不落表。
             </ModalDescription>
           </ModalHeader>
 
@@ -1227,7 +1233,8 @@ export function ReturnDisposalWorkspace() {
           <ModalHeader>
             <ModalTitle>生成索赔依据</ModalTitle>
             <ModalDescription>
-              数量与重量取自销毁单（不能另填一个口径）；下游 11.2.3.3 在 trade，本模块只产出依据事实。
+              数量与重量取自销毁单（不能另填一个口径）；下游 11.2.3.3 在
+              trade，本模块只产出依据事实。
             </ModalDescription>
           </ModalHeader>
 
@@ -1254,9 +1261,7 @@ export function ReturnDisposalWorkspace() {
               <Input
                 className="mt-1"
                 value={claimForm.counterpartyCode}
-                onChange={(e) =>
-                  setClaimForm({ ...claimForm, counterpartyCode: e.target.value })
-                }
+                onChange={(e) => setClaimForm({ ...claimForm, counterpartyCode: e.target.value })}
               />
             </label>
             <label className="text-sm">
@@ -1367,7 +1372,8 @@ export function ReturnDisposalWorkspace() {
           <ModalHeader>
             <ModalTitle>登记凭证要求</ModalTitle>
             <ModalDescription>
-              凭证要求<strong>只能加严</strong>不能放松：品牌化客户的「销毁并回传证明」合约义务是下限。
+              凭证要求<strong>只能加严</strong>
+              不能放松：品牌化客户的「销毁并回传证明」合约义务是下限。
             </ModalDescription>
           </ModalHeader>
 
@@ -1406,9 +1412,7 @@ export function ReturnDisposalWorkspace() {
               <input
                 type="checkbox"
                 checked={policyForm.requiredPhoto}
-                onChange={(e) =>
-                  setPolicyForm({ ...policyForm, requiredPhoto: e.target.checked })
-                }
+                onChange={(e) => setPolicyForm({ ...policyForm, requiredPhoto: e.target.checked })}
               />
               需要销毁照片
             </label>
@@ -1416,9 +1420,7 @@ export function ReturnDisposalWorkspace() {
               <input
                 type="checkbox"
                 checked={policyForm.requiredWeight}
-                onChange={(e) =>
-                  setPolicyForm({ ...policyForm, requiredWeight: e.target.checked })
-                }
+                onChange={(e) => setPolicyForm({ ...policyForm, requiredWeight: e.target.checked })}
               />
               需要重量记录
             </label>

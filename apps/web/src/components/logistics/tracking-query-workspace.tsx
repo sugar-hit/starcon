@@ -290,9 +290,7 @@ export function TrackingQueryWorkspace() {
                   id="tkCarrier"
                   value={filters.carrierCode}
                   placeholder="SF / FEDEX"
-                  onChange={(e) =>
-                    setFilters({ ...filters, carrierCode: e.target.value, page: 0 })
-                  }
+                  onChange={(e) => setFilters({ ...filters, carrierCode: e.target.value, page: 0 })}
                 />
               </FormField>
               <FormField id="tkCountry" label="目的国">
@@ -394,9 +392,7 @@ export function TrackingQueryWorkspace() {
                             <Badge tone={row.exceptionFlag ? 'danger' : 'neutral'}>
                               {row.latestNodeLabel || nodeTypeLabel(row.latestNode)}
                             </Badge>
-                            <div className="text-muted-foreground text-xs">
-                              {latestText(row)}
-                            </div>
+                            <div className="text-muted-foreground text-xs">{latestText(row)}</div>
                           </td>
                           <td className="p-2">
                             <Badge tone={etaStatusTone(row.etaStatus)}>
@@ -405,9 +401,7 @@ export function TrackingQueryWorkspace() {
                           </td>
                           <td className="p-2">
                             {row.exceptionFlag ? (
-                              <span className="text-destructive text-xs">
-                                {exceptionText(row)}
-                              </span>
+                              <span className="text-destructive text-xs">{exceptionText(row)}</span>
                             ) : (
                               <span className="text-muted-foreground text-xs">无</span>
                             )}
@@ -543,7 +537,8 @@ export function TrackingQueryWorkspace() {
                   onChange={(e) =>
                     setPullForm({
                       ...pullForm,
-                      triggerSource: e.target.value.toUpperCase() as TrackingPullTaskInput['triggerSource'],
+                      triggerSource:
+                        e.target.value.toUpperCase() as TrackingPullTaskInput['triggerSource'],
                     })
                   }
                 />
@@ -585,17 +580,13 @@ export function TrackingQueryWorkspace() {
                       <span className="text-muted-foreground text-xs">
                         {formatMoment(row.createdAt)}
                       </span>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => void openPullTask(row.id)}
-                      >
+                      <Button size="sm" variant="ghost" onClick={() => void openPullTask(row.id)}>
                         逐票结果
                       </Button>
                     </div>
                     <div className="text-muted-foreground mt-1 text-xs">
-                      取回 {row.insertedEventCount} 条 · 重复 {row.duplicateCount} 条 · 承运商回复无轨迹{' '}
-                      {row.noEventCount} 票 · 失败 {row.failedCount} 票
+                      取回 {row.insertedEventCount} 条 · 重复 {row.duplicateCount} 条 ·
+                      承运商回复无轨迹 {row.noEventCount} 票 · 失败 {row.failedCount} 票
                     </div>
                     {row.failureReason ? (
                       <div className="text-destructive mt-1 text-xs">{row.failureReason}</div>
@@ -664,7 +655,9 @@ export function TrackingQueryWorkspace() {
                           </td>
                           <td className="p-2">{item.insertedEventCount}</td>
                           <td className="p-2">{item.duplicateEventCount}</td>
-                          <td className="text-muted-foreground p-2 text-xs">{item.detail || '—'}</td>
+                          <td className="text-muted-foreground p-2 text-xs">
+                            {item.detail || '—'}
+                          </td>
                         </tr>
                       ))}
                     </tbody>

@@ -39,7 +39,9 @@ import {
  *    也不许把 0 显示成 `-0`。
  */
 
-const capability = (over: Partial<FinanceSoftwareCapabilities> = {}): FinanceSoftwareCapabilities => ({
+const capability = (
+  over: Partial<FinanceSoftwareCapabilities> = {},
+): FinanceSoftwareCapabilities => ({
   capabilities: [
     {
       moduleId: '18.2.1.1',

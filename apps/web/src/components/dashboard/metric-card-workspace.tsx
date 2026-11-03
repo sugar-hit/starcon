@@ -82,7 +82,13 @@ export function MetricCardWorkspace() {
       // 1. 先向身份服务确认身份与权限（租户**不**来自客户端头）。
       const access = await api<Access>('auth/session');
       setScopeMode(
-        SCOPE_MODE_LABELS[scopeModeOf(access?.grants ?? null, 'reporting.overview.read', Boolean(access?.departmentId))],
+        SCOPE_MODE_LABELS[
+          scopeModeOf(
+            access?.grants ?? null,
+            'reporting.overview.read',
+            Boolean(access?.departmentId),
+          )
+        ],
       );
 
       // 2. 能力声明与卡片数据（两个接口并行读；能力声明读不到不该让卡片也读不到）。
@@ -133,7 +139,10 @@ export function MetricCardWorkspace() {
   if (!ready) {
     return (
       <SectionCard>
-        <EmptyState title="正在读取核心指标卡…" description="指标来自 reporting 服务的投影读模型。" />
+        <EmptyState
+          title="正在读取核心指标卡…"
+          description="指标来自 reporting 服务的投影读模型。"
+        />
       </SectionCard>
     );
   }
@@ -151,8 +160,13 @@ export function MetricCardWorkspace() {
             <p className="text-copy-12 text-muted-foreground">
               窗口 {cards.from} ~ {cards.to}（{windowLabel(cards.windowPreset)}） · 时区{' '}
               {cards.timezone}
-              {cards.timezoneSource === 'FALLBACK_UTC' ? '（本租户还没有投影数据，暂按 UTC）' : ''} ·
-              数据截至 {cards.dataUpdatedAt ? cards.dataUpdatedAt.replace('T', ' ').slice(0, 19) : '尚未投影任何数据'}{' '}
+              {cards.timezoneSource === 'FALLBACK_UTC'
+                ? '（本租户还没有投影数据，暂按 UTC）'
+                : ''}{' '}
+              · 数据截至{' '}
+              {cards.dataUpdatedAt
+                ? cards.dataUpdatedAt.replace('T', ' ').slice(0, 19)
+                : '尚未投影任何数据'}{' '}
               · 数据范围：{scopeMode}
             </p>
           )}
@@ -192,7 +206,11 @@ export function MetricCardWorkspace() {
                 className="border-border rounded-md border px-2 py-1"
               />
             </label>
-            <Button variant="outline" onClick={() => void load()} disabled={loading || !from || !to}>
+            <Button
+              variant="outline"
+              onClick={() => void load()}
+              disabled={loading || !from || !to}
+            >
               应用区间
             </Button>
           </div>
@@ -262,10 +280,7 @@ export function MetricCardWorkspace() {
         >
           <ul className="space-y-2">
             {capabilities.metrics.map((metric) => (
-              <li
-                key={metric.key}
-                className="text-copy-12 border-border rounded-md border p-2"
-              >
+              <li key={metric.key} className="text-copy-12 border-border rounded-md border p-2">
                 <Badge tone={metric.available ? 'success' : 'warning'}>
                   {metric.available ? '已接通' : '未接通'}
                 </Badge>
@@ -362,10 +377,11 @@ export function MetricCardWorkspace() {
                     <td className="text-copy-13 text-muted-foreground py-2 pr-3">
                       {sourceKindLabel(row.sourceKind)}
                     </td>
-                    <td className="text-copy-13 text-muted-foreground py-2 pr-3">{row.bucketDate}</td>
+                    <td className="text-copy-13 text-muted-foreground py-2 pr-3">
+                      {row.bucketDate}
+                    </td>
                     <td className="py-2 tabular-nums">
-                      {row.value === null ? '—' : formatValue(row.value, 'CURRENCY')}{' '}
-                      {row.currency}
+                      {row.value === null ? '—' : formatValue(row.value, 'CURRENCY')} {row.currency}
                       {row.quantity !== null && row.quantity !== 0
                         ? ` · ${formatValue(row.quantity, 'QUANTITY')}`
                         : ''}
@@ -382,13 +398,7 @@ export function MetricCardWorkspace() {
 }
 
 /** 一张卡。 */
-function MetricCardView({
-  card,
-  onDrilldown,
-}: {
-  card: MetricCardEntry;
-  onDrilldown: () => void;
-}) {
+function MetricCardView({ card, onDrilldown }: { card: MetricCardEntry; onDrilldown: () => void }) {
   const unavailable = isUnavailable(card);
   const rows = currencyRows(card);
   const tooltip = caliberTooltip(card);
@@ -397,7 +407,7 @@ function MetricCardView({
   return (
     <div
       className={`rounded-lg border p-4 ${
-        unavailable ? 'border-dashed bg-muted/30' : 'border-border bg-card'
+        unavailable ? 'bg-muted/30 border-dashed' : 'border-border bg-card'
       }`}
       title={tooltip || undefined}
     >
@@ -434,7 +444,9 @@ function MetricCardView({
             )}
             <span>环比 {comparisonLine(card.previousPeriod)}</span>
           </div>
-          <div className="text-copy-12 text-muted-foreground">同比 {comparisonLine(card.yearOverYear)}</div>
+          <div className="text-copy-12 text-muted-foreground">
+            同比 {comparisonLine(card.yearOverYear)}
+          </div>
           {rows.length > 1 && (
             <ul className="text-copy-12 text-muted-foreground space-y-0.5">
               {rows.map((row) => (

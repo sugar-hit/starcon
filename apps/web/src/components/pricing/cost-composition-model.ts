@@ -413,7 +413,9 @@ export function sourceLabel(source: string | null | undefined): string {
 }
 
 /** 来源类型的色：派生 / 参数 / 手工 / 参考。 */
-export function sourceTone(kind: string | null | undefined): 'success' | 'warning' | 'info' | 'neutral' {
+export function sourceTone(
+  kind: string | null | undefined,
+): 'success' | 'warning' | 'info' | 'neutral' {
   switch (kind) {
     case 'DERIVED':
       return 'success';
@@ -581,9 +583,7 @@ export function fetchCostDetail(
   if (windowFrom) query.set('windowFrom', windowFrom);
   if (windowTo) query.set('windowTo', windowTo);
   const suffix = query.toString();
-  return api<CostDetail>(
-    `catalog/sku-cost-compositions/${skuId}${suffix ? `?${suffix}` : ''}`,
-  );
+  return api<CostDetail>(`catalog/sku-cost-compositions/${skuId}${suffix ? `?${suffix}` : ''}`);
 }
 
 export function fetchCostRevisions(skuId: string, currency: string | null): Promise<RevisionRow[]> {

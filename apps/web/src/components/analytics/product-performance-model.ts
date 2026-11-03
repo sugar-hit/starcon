@@ -450,10 +450,7 @@ export type PageState = 'loading' | 'error' | 'empty' | 'ready';
  * <p>🔴 **空 ≠ 错误**：上游读不到（error）与「读到了但这个窗口没有事实」（empty）
  * 是两件事 —— 前者要修，后者不用修。
  */
-export function pageState(
-  response: ProductPerformanceResponse | null,
-  error: string,
-): PageState {
+export function pageState(response: ProductPerformanceResponse | null, error: string): PageState {
   if (error) return 'error';
   if (!response) return 'loading';
   if (!response.sections || response.sections.length === 0) return 'empty';
@@ -525,7 +522,9 @@ export function upstreamModules(capabilities: ProductPerformanceCapabilities | n
 }
 
 /** 判定规则与口径说明。 */
-export function ruleNotes(capabilities: ProductPerformanceCapabilities | null): PerformanceRuleNote[] {
+export function ruleNotes(
+  capabilities: ProductPerformanceCapabilities | null,
+): PerformanceRuleNote[] {
   return capabilities?.rules ?? [];
 }
 

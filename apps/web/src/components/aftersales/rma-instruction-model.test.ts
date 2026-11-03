@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import type { RmaInstructionAction, RmaInstructionEvent, RmaTrackingEvent } from '../../../../../packages/api-contracts/src/index';
+import type {
+  RmaInstructionAction,
+  RmaInstructionEvent,
+  RmaTrackingEvent,
+} from '../../../../../packages/api-contracts/src/index';
 import {
   actionButton,
   addressText,
@@ -91,16 +95,16 @@ describe('轨迹语气', () => {
       eventLocation: '洛杉矶',
     } as RmaTrackingEvent;
     expect(trackingEventText(event)).toBe('FedEx T-1 · 运输中 @ 洛杉矶');
-    expect(
-      trackingEventText({ ...event, eventLocation: null } as RmaTrackingEvent),
-    ).toBe('FedEx T-1 · 运输中');
+    expect(trackingEventText({ ...event, eventLocation: null } as RmaTrackingEvent)).toBe(
+      'FedEx T-1 · 运输中',
+    );
   });
 });
 
 describe('数量', () => {
   it('去掉无意义尾零但保留最多六位小数', () => {
     expect(quantity(3)).toBe('3');
-    expect(quantity(3.000000)).toBe('3');
+    expect(quantity(3.0)).toBe('3');
     expect(quantity(1.5)).toBe('1.5');
     expect(quantity(null)).toBe('—');
     expect(quantity('abc')).toBe('abc');

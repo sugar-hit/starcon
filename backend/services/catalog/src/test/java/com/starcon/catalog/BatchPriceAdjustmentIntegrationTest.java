@@ -15,6 +15,7 @@ import com.starcon.catalog.BatchPriceAdjustmentModels.ItemStatus;
 import com.starcon.catalog.BatchPriceAdjustmentModels.ShopRef;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -617,7 +618,11 @@ class BatchPriceAdjustmentIntegrationTest extends BatchPriceAdjustmentFixture {
   void 调价单创建时刻写回零漂移() {
     String category = unique("CAT");
     UUID skuId = pricedSku(actor, "TS", category, "BrandT");
-    var observedAt = OffsetDateTime.now().minusHours(3);
+    // PostgreSQL 的 timestamptz 精度只到微秒，JVM 的 Instant.now() 可能带纳秒。
+    // 不截断的话，写进库被四舍五入到微秒、读回来必然差几百纳秒
+    // （CI 实测 expected 722795824ns vs actual 722796µs）。
+    // 截断到微秒 == 数据库的实际存储精度，写回读回才会逐字相等。
+    var observedAt = OffsetDateTime.now().minusHours(3).truncatedTo(ChronoUnit.MICROS);
     priceObservation(actor, skuId, "AMAZON", "US", "USD", "100", null, observedAt);
 
     var preview = preview(actor, fixedAmount(category, "BrandT", "5"));

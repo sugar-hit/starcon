@@ -14,12 +14,12 @@
 
 ## 第 0 步：前置依赖
 
-| 依赖 | 版本 | 检查命令 |
-| --- | --- | --- |
-| Node | **≥ 22.12**（仓库 `.nvmrc` = 22） | `node -v` |
-| pnpm | **9.0.0**（仓库 `packageManager` 锁定） | `pnpm -v` |
-| Java | **25**（后端是 Spring Boot + jOOQ） | `java -version` |
-| Docker | 能跑 Testcontainers | `docker info` |
+| 依赖   | 版本                                    | 检查命令        |
+| ------ | --------------------------------------- | --------------- |
+| Node   | **≥ 22.12**（仓库 `.nvmrc` = 22）       | `node -v`       |
+| pnpm   | **9.0.0**（仓库 `packageManager` 锁定） | `pnpm -v`       |
+| Java   | **25**（后端是 Spring Boot + jOOQ）     | `java -version` |
+| Docker | 能跑 Testcontainers                     | `docker info`   |
 
 ```bash
 node -v && pnpm -v && java -version 2>&1 | head -1 && docker info --format '{{.ServerVersion}}'
@@ -211,11 +211,11 @@ mcp_invoke(
 )
 ```
 
-| 参数 | 值 | 为什么 |
-| --- | --- | --- |
-| `schedule` | `*/5 8-20 * * *` | 每 5 分钟轮询；`8-20` 让夜间**结构上**不触发（静默窗口第一道闸） |
-| `session.mode` | `new` | 每轮是全新会话，不继承上次上下文（与 A 组一致） |
-| `project` | `/Users/tommy/Project/starcon` | **必须是 Mac B 上的绝对路径** |
+| 参数           | 值                             | 为什么                                                           |
+| -------------- | ------------------------------ | ---------------------------------------------------------------- |
+| `schedule`     | `*/5 8-20 * * *`               | 每 5 分钟轮询；`8-20` 让夜间**结构上**不触发（静默窗口第一道闸） |
+| `session.mode` | `new`                          | 每轮是全新会话，不继承上次上下文（与 A 组一致）                  |
+| `project`      | `/Users/tommy/Project/starcon` | **必须是 Mac B 上的绝对路径**                                    |
 
 > ⚠️ **`*/5` 与 `0` 的错峰**：Mac A 在整点签发票据，B 在整点后最多 5 分钟领走。
 > 平均延迟 2.5 分钟，相对 A 的 60 分钟批次节奏约 4% 损耗 —— 可以接受。
@@ -225,10 +225,11 @@ mcp_invoke(
 
 ### 7.3 Mac B 的 cron 任务书正文
 
-```markdown
+````markdown
 你负责 `/Users/tommy/Project/starcon` 的**跨机执行**。你是 Mac B（执行机）。
 
 每次运行先完整阅读：
+
 1. 仓库根 `AGENTS.md`
 2. `tools/module-progress/PIPELINE.md`（单机协议：硬性要求、验证层级、任务书模板）
 3. `tools/module-progress/PIPELINE-MULTI.md`（双机协议：你的角色与边界）
@@ -243,6 +244,7 @@ mcp_invoke(
 **你只做四件事**：领票 → 干活 → 交付 → 心跳。
 
 **你绝不做**：
+
 - 不跑 `lane.mjs plan`（不排车道、不分配 Flyway 版本号）
 - 不跑 `lane.mjs merge-ready`、不 merge、不 push 集成分支
 - 不跑 L2 全量验证（那是 Mac A 在集成头上跑的唯一一次）
@@ -267,10 +269,12 @@ mcp_invoke(
      --format '{{.Names}}\t{{.Label "org.testcontainers.sessionId"}}' \
      | awk -F'\t' '$2 != ""' | wc -l
    ```
+````
 
-   - 在途车道数 >= `RUNNING_QUOTA` → 零领票
-   - load 1min > `LOAD_MAX` → 零领票（**看趋势**：1min > 5min 说明正在爬升）
-   - PG 容器数 >= 6 → 零领票（降噪闸，**排除常驻的 starcon-mig-v2**）
+- 在途车道数 >= `RUNNING_QUOTA` → 零领票
+- load 1min > `LOAD_MAX` → 零领票（**看趋势**：1min > 5min 说明正在爬升）
+- PG 容器数 >= 6 → 零领票（降噪闸，**排除常驻的 starcon-mig-v2**）
+
 3. **模型额度可读**：读不到就写「未知」，不要假装有。
 
 命中闸门时**只做只读检查 + 简短汇报**，不要领票、不要建 worktree、不要起容器。
@@ -310,6 +314,7 @@ node tools/module-progress/remote-worker.mjs read  --lane <模块ID>
 （`agent_name: "worker"`, `run_in_background: true`）。
 
 **任务书里必须补充给 worker 的三条**：
+
 1. 所有命令都在 `claim` 返回的 worktree 目录里执行，**不要动主工作区**
 2. **不要 push，不要跑 `lane.mjs land`**（并入由 Mac A 负责）——
    交付走下面的 `finish`
@@ -328,6 +333,7 @@ node tools/module-progress/remote-worker.mjs finish --lane <模块ID> --report <
 ## 第 4 步：汇报
 
 简短汇报（12 行以内）：
+
 - 容量闸判定：在途数 / 配额、load 三点值及趋势、PG 容器数 → GO / STOP（命中哪条）
 - 领到几条票、分别是什么模块
 - 每条票的状态：跑完 / BLOCKED / RESOURCE_BLOCKED / 失败
@@ -337,7 +343,8 @@ node tools/module-progress/remote-worker.mjs finish --lane <模块ID> --report <
 
 **只汇报有变化的结果。** 没有票且一切正常 → 简短结束。
 不要谎报「已交付」—— 交付以 `finish` 成功返回为准。
-```
+
+````
 
 ---
 
@@ -369,7 +376,7 @@ node -e "
 const {execSync}=require('child_process');
 " ; node tools/module-progress/lane.mjs plan --dry-run --lanes 1 | head -20
 # ⚠️ **只加 --dry-run**。没有 --dry-run 的 plan 会真的建分支和 worktree。
-```
+````
 
 > ⚠️ **第 6 条的 `--dry-run` 一定要加**。`lane.mjs plan` 有副作用：
 > 不加 `--dry-run` 会建分支、建 worktree、装依赖、**占掉一个 Flyway 版本号**。
@@ -416,6 +423,7 @@ node tools/module-progress/remote-lane.mjs harvest
 **你是 Mac A（调度机）—— 唯一写集成头、唯一分配 Flyway 版本号、唯一改台账的机器。**
 
 每次运行先完整阅读：
+
 1. 仓库根 `AGENTS.md`
 2. `tools/module-progress/PIPELINE_CRON_PROMPT.md`
 3. `tools/module-progress/PIPELINE.md`
@@ -430,11 +438,11 @@ node tools/module-progress/remote-lane.mjs harvest
 优先修复失败和完成在途任务，再派发新任务。
 **本轮 plan 出的车道按序号奇偶分配执行机：奇数本机执行，偶数签发票据交给 Mac B。**
 签发票据时：
-  node tools/module-progress/remote-lane.mjs issue --lane <模块ID> --brief <任务书文件>
+node tools/module-progress/remote-lane.mjs issue --lane <模块ID> --brief <任务书文件>
 **不要给 Mac B 的车道派本机 task**（那会双写）。
 
 回收阶段先收割远端车道：
-  node tools/module-progress/remote-lane.mjs harvest
+node tools/module-progress/remote-lane.mjs harvest
 ```
 
 > **Mac A 只用 `remote-lane.mjs`**（签发 / 收割 / 收编）。
@@ -444,24 +452,24 @@ node tools/module-progress/remote-lane.mjs harvest
 
 ## 附录 A：Mac B 上**不需要**的东西
 
-| 不需要 | 原因 |
-| --- | --- |
-| `lane.mjs init` 之外的编排器配置 | B 不排车道、不合并 |
-| Flyway 版本号分配权 | 只能 Mac A 分配，否则撞号 |
-| 调度闸的持有权 | 闸只防 A 自己的并发；B 用它防**自己**的 tick 重叠 |
-| 台账的写权限 | 台账是版本化文件，只能一个写者 |
-| L2 全量验证 | 在 Mac A 的集成头上跑唯一一次 |
-| `lock.mjs` 开发锁 | 那是老调度器的遗留机制 |
+| 不需要                           | 原因                                              |
+| -------------------------------- | ------------------------------------------------- |
+| `lane.mjs init` 之外的编排器配置 | B 不排车道、不合并                                |
+| Flyway 版本号分配权              | 只能 Mac A 分配，否则撞号                         |
+| 调度闸的持有权                   | 闸只防 A 自己的并发；B 用它防**自己**的 tick 重叠 |
+| 台账的写权限                     | 台账是版本化文件，只能一个写者                    |
+| L2 全量验证                      | 在 Mac A 的集成头上跑唯一一次                     |
+| `lock.mjs` 开发锁                | 那是老调度器的遗留机制                            |
 
 ## 附录 B：故障速查
 
-| 现象 | 原因 | 处置 |
-| --- | --- | --- |
-| `poll` 报 `fetch upstream 失败` | 远端名不是 `upstream`，或没凭据 | `git remote -v`；改名或设 `LANE_REMOTE` |
-| `poll` 永远返回空 | Mac A 还没签发票据（正常） | 等 A 的 P2 阶段；或查 A 的 `remote-lane.mjs status` |
-| `claim` 报「worktree 已存在」 | 上次没收干净 | `git worktree list` 看残留，手动 `git worktree remove --force` |
-| `claim` 报「与远端分叉」 | 本机有分叉提交 | 人工核对；**不要强推** |
-| `finish` 报「有未预期的改动」 | worker 留了未提交改动 | 让 worker 先 commit；票据文件会被自动删 |
-| A 侧 `harvest` 一直跳过某条车道 | 票据还在（worker 没交付）或心跳超 90 分钟 | `remote-lane.mjs status` 看 `ticketAlive` 与 `heartbeat` |
-| 页面 404 且 typecheck/lint/vitest 全绿 | **`api-proxy.ts` 白名单被取错一侧** | 协议第 9 条：必须求并，跑真 proxy 断言 HTTP 状态码 |
-| 合并时 Flyway 报「Found more than one migration with version N」 | 版本号撞了 | **不该发生**（I2 保证）。若发生说明有第二个分配者，立刻查是不是有人手工 `plan` 过 |
+| 现象                                                             | 原因                                      | 处置                                                                              |
+| ---------------------------------------------------------------- | ----------------------------------------- | --------------------------------------------------------------------------------- |
+| `poll` 报 `fetch upstream 失败`                                  | 远端名不是 `upstream`，或没凭据           | `git remote -v`；改名或设 `LANE_REMOTE`                                           |
+| `poll` 永远返回空                                                | Mac A 还没签发票据（正常）                | 等 A 的 P2 阶段；或查 A 的 `remote-lane.mjs status`                               |
+| `claim` 报「worktree 已存在」                                    | 上次没收干净                              | `git worktree list` 看残留，手动 `git worktree remove --force`                    |
+| `claim` 报「与远端分叉」                                         | 本机有分叉提交                            | 人工核对；**不要强推**                                                            |
+| `finish` 报「有未预期的改动」                                    | worker 留了未提交改动                     | 让 worker 先 commit；票据文件会被自动删                                           |
+| A 侧 `harvest` 一直跳过某条车道                                  | 票据还在（worker 没交付）或心跳超 90 分钟 | `remote-lane.mjs status` 看 `ticketAlive` 与 `heartbeat`                          |
+| 页面 404 且 typecheck/lint/vitest 全绿                           | **`api-proxy.ts` 白名单被取错一侧**       | 协议第 9 条：必须求并，跑真 proxy 断言 HTTP 状态码                                |
+| 合并时 Flyway 报「Found more than one migration with version N」 | 版本号撞了                                | **不该发生**（I2 保证）。若发生说明有第二个分配者，立刻查是不是有人手工 `plan` 过 |

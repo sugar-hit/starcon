@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import type { FreightEstimateInput, FreightEstimateLine, FreightEstimateResult } from './freight-calculator-model';
+import type {
+  FreightEstimateInput,
+  FreightEstimateLine,
+  FreightEstimateResult,
+} from './freight-calculator-model';
 import {
   bandRangeText,
   basisLabel,
@@ -139,7 +143,11 @@ describe('10.1.2.1 运费试算：请求体组装', () => {
 
   it('国家与币种统一大写，品类编码按多种分隔符拆开', () => {
     const request = toEstimateRequest(
-      input({ destCountry: 'de', declaredCurrency: 'usd', categoryCodes: 'home_goods, 3c；BATTERY' }),
+      input({
+        destCountry: 'de',
+        declaredCurrency: 'usd',
+        categoryCodes: 'home_goods, 3c；BATTERY',
+      }),
     );
     expect(request.destCountry).toBe('DE');
     expect(request.declaredCurrency).toBe('USD');
@@ -177,9 +185,7 @@ describe('10.1.2.1 运费试算：金额与口径展示', () => {
   });
 
   it('体积重要一并显示（要能看出这一票是按体积重算的）', () => {
-    expect(chargeableText(line({ chargeableQty: 2, volumetricQty: 2 }))).toBe(
-      '2 kg（体积重 2kg）',
-    );
+    expect(chargeableText(line({ chargeableQty: 2, volumetricQty: 2 }))).toBe('2 kg（体积重 2kg）');
     expect(chargeableText(line({ basis: 'PIECE', chargeableQty: 3, volumetricQty: null }))).toBe(
       '3 件',
     );
@@ -264,13 +270,34 @@ describe('10.1.2.1 运费试算：费率卡摘要', () => {
 
   it('档位区间的闭开写法与 DB 语义一致（下界恒闭）', () => {
     expect(
-      bandRangeText({ bandNo: 1, fromQty: 0, toQty: 1, toQtyInclusive: false, rateAmount: 10, note: '' }),
+      bandRangeText({
+        bandNo: 1,
+        fromQty: 0,
+        toQty: 1,
+        toQtyInclusive: false,
+        rateAmount: 10,
+        note: '',
+      }),
     ).toBe('[0, 1)');
     expect(
-      bandRangeText({ bandNo: 1, fromQty: 0, toQty: 1, toQtyInclusive: true, rateAmount: 10, note: '' }),
+      bandRangeText({
+        bandNo: 1,
+        fromQty: 0,
+        toQty: 1,
+        toQtyInclusive: true,
+        rateAmount: 10,
+        note: '',
+      }),
     ).toBe('[0, 1]');
     expect(
-      bandRangeText({ bandNo: 3, fromQty: 5, toQty: null, toQtyInclusive: false, rateAmount: 20, note: '' }),
+      bandRangeText({
+        bandNo: 3,
+        fromQty: 5,
+        toQty: null,
+        toQtyInclusive: false,
+        rateAmount: 20,
+        note: '',
+      }),
     ).toBe('[5, ∞)');
   });
 });

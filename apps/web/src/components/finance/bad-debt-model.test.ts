@@ -163,7 +163,10 @@ describe('不可执行的动作要说清楚为什么', () => {
   it('不可执行时给出服务端给的原因', () => {
     expect(
       badDebtActionBlockedReason(
-        action({ allowed: false, blockedReason: '还没有依据材料：核销是终审动作，必须有完整依据链' }),
+        action({
+          allowed: false,
+          blockedReason: '还没有依据材料：核销是终审动作，必须有完整依据链',
+        }),
       ),
     ).toContain('依据材料');
   });

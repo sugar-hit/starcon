@@ -512,7 +512,10 @@ class ApprovalRecordIntegrationTest extends IdentityIntegrationTestBase {
     // 必须在租户事务内写：approval_instance 是 FORCE RLS，事务外 WITH CHECK 直接拒绝。
     var ownerTenant = tenantOf(owner);
     var resubmitted = UUID.randomUUID();
-    var submittedAt = OffsetDateTime.now(PLUS_8).minusMinutes(30);
+    // 🔴 截断到微秒：timestamptz 只存微秒，纳秒尾巴写进去就没了。
+    // 这条断言要抓的是 +08:00 写回的零漂移，不是纳秒精度。
+    var submittedAt =
+        OffsetDateTime.now(PLUS_8).minusMinutes(30).truncatedTo(java.time.temporal.ChronoUnit.MICROS);
     inTenant(
         ownerTenant,
         () -> {

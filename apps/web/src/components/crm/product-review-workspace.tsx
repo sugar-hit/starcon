@@ -101,15 +101,15 @@ export function ProductReviewWorkspace() {
     () =>
       Boolean(
         shopId ||
-          rating ||
-          hasImage ||
-          hasVideo ||
-          unreplied ||
-          variantRef ||
-          salesOrderNo ||
-          keyword ||
-          reviewedFrom ||
-          reviewedTo,
+        rating ||
+        hasImage ||
+        hasVideo ||
+        unreplied ||
+        variantRef ||
+        salesOrderNo ||
+        keyword ||
+        reviewedFrom ||
+        reviewedTo,
       ),
     [
       shopId,
@@ -306,22 +306,22 @@ export function ProductReviewWorkspace() {
   return (
     <div className="space-y-4">
       {error && (
-        <div className="border-destructive/40 bg-destructive/10 text-destructive rounded-md px-3 py-2 text-copy-13">
+        <div className="border-destructive/40 bg-destructive/10 text-destructive text-copy-13 rounded-md px-3 py-2">
           {error}
         </div>
       )}
       {actionError && (
-        <div className="border-destructive/40 bg-destructive/10 text-destructive rounded-md px-3 py-2 text-copy-13">
+        <div className="border-destructive/40 bg-destructive/10 text-destructive text-copy-13 rounded-md px-3 py-2">
           {actionError}
         </div>
       )}
       {notice && (
-        <div className="border-border bg-muted/40 rounded-md px-3 py-2 text-copy-13">{notice}</div>
+        <div className="border-border bg-muted/40 text-copy-13 rounded-md px-3 py-2">{notice}</div>
       )}
 
       {/* ---------------------------------------------------------- 能力边界 */}
       <SectionCard title="能力边界">
-        <ul className="space-y-2 text-copy-13">
+        <ul className="text-copy-13 space-y-2">
           {(capabilities?.dimensions ?? []).map((dimension) => (
             <li key={dimension.dimension} className="flex flex-wrap items-start gap-2">
               <Badge tone={dimension.available ? 'success' : 'warning'}>
@@ -337,7 +337,7 @@ export function ProductReviewWorkspace() {
           ))}
         </ul>
         {capabilities?.highlight && (
-          <p className="text-muted-foreground mt-3 text-copy-12">{capabilities.highlight}</p>
+          <p className="text-muted-foreground text-copy-12 mt-3">{capabilities.highlight}</p>
         )}
       </SectionCard>
 
@@ -346,7 +346,7 @@ export function ProductReviewWorkspace() {
         {!stats ? (
           <p className="text-muted-foreground text-copy-13">暂无统计数据。</p>
         ) : (
-          <div className="space-y-4 text-copy-13">
+          <div className="text-copy-13 space-y-4">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-muted-foreground">作用域</span>
               <select
@@ -362,14 +362,15 @@ export function ProductReviewWorkspace() {
               <span className="text-muted-foreground">
                 {stats.scopeFrom} 起 · 共 <strong>{stats.totalReviews}</strong> 条 · 平均分{' '}
                 <strong>{stats.averageRating ?? '—'}</strong> · 未回复{' '}
-                <strong>{stats.unrepliedCount}</strong> · 含图 <strong>{stats.withImageCount}</strong>{' '}
-                · 含视频 <strong>{stats.withVideoCount}</strong>
+                <strong>{stats.unrepliedCount}</strong> · 含图{' '}
+                <strong>{stats.withImageCount}</strong> · 含视频{' '}
+                <strong>{stats.withVideoCount}</strong>
               </span>
             </div>
 
             <div>
               <h3 className="font-medium">星级分布</h3>
-              <ul className="mt-1 flex flex-wrap gap-3 text-copy-12">
+              <ul className="text-copy-12 mt-1 flex flex-wrap gap-3">
                 {stats.ratingDistribution.map((bucket) => (
                   <li key={bucket.rating}>
                     {ratingLabel(bucket.rating)}：<strong>{bucket.count}</strong> 条
@@ -380,7 +381,7 @@ export function ProductReviewWorkspace() {
 
             <div>
               <h3 className="font-medium">趋势（按平台评价时刻分桶）</h3>
-              <ul className="mt-1 space-y-1 text-copy-12">
+              <ul className="text-copy-12 mt-1 space-y-1">
                 {stats.trend.map((bucket) => (
                   <li key={bucket.bucketStart}>
                     {bucket.bucketStart} → {bucket.bucketEnd}：<strong>{bucket.count}</strong> 条 ·
@@ -396,20 +397,23 @@ export function ProductReviewWorkspace() {
                 在下滑的维度
               </h3>
               {stats.declining.length === 0 ? (
-                <p className="text-muted-foreground mt-1 text-copy-12">
+                <p className="text-muted-foreground text-copy-12 mt-1">
                   当前作用域内没有出现下滑的维度（店铺 / 商品 / 变体）。
                 </p>
               ) : (
-                <ul className="mt-1 space-y-1 text-copy-12">
+                <ul className="text-copy-12 mt-1 space-y-1">
                   {stats.declining.map((decline) => (
-                    <li key={`${decline.dimension}-${decline.key}`} className="flex flex-wrap gap-2">
+                    <li
+                      key={`${decline.dimension}-${decline.key}`}
+                      className="flex flex-wrap gap-2"
+                    >
                       <Badge tone={decline.continuous ? 'danger' : 'neutral'}>
                         {continuousLabel(decline.continuous)}
                       </Badge>
                       <span>{declineLabel(decline)}</span>
                       <span className="text-muted-foreground">
-                        近窗 {decline.recentAverage ?? '—'} · 中窗 {decline.previousAverage ?? '—'} ·
-                        远窗 {decline.olderAverage ?? '—'} · 差值 {decline.delta ?? '—'} · 共{' '}
+                        近窗 {decline.recentAverage ?? '—'} · 中窗 {decline.previousAverage ?? '—'}{' '}
+                        · 远窗 {decline.olderAverage ?? '—'} · 差值 {decline.delta ?? '—'} · 共{' '}
                         {decline.count} 条
                       </span>
                     </li>
@@ -487,7 +491,7 @@ export function ProductReviewWorkspace() {
           </Field>
           <Field label="其它筛选">
             <div className="flex flex-wrap gap-3 pt-1">
-              <label className="flex items-center gap-1 text-copy-12">
+              <label className="text-copy-12 flex items-center gap-1">
                 <input
                   type="checkbox"
                   checked={hasImage}
@@ -495,7 +499,7 @@ export function ProductReviewWorkspace() {
                 />
                 含图
               </label>
-              <label className="flex items-center gap-1 text-copy-12">
+              <label className="text-copy-12 flex items-center gap-1">
                 <input
                   type="checkbox"
                   checked={hasVideo}
@@ -503,7 +507,7 @@ export function ProductReviewWorkspace() {
                 />
                 含视频
               </label>
-              <label className="flex items-center gap-1 text-copy-12">
+              <label className="text-copy-12 flex items-center gap-1">
                 <input
                   type="checkbox"
                   checked={unreplied}
@@ -540,14 +544,17 @@ export function ProductReviewWorkspace() {
           />
         ) : (
           <>
-            <p className="text-muted-foreground mb-2 text-copy-12">
-              共 <strong>{page.totalElements}</strong> 条 · 第 {page.page + 1} / {page.totalPages} 页
+            <p className="text-muted-foreground text-copy-12 mb-2">
+              共 <strong>{page.totalElements}</strong> 条 · 第 {page.page + 1} / {page.totalPages}{' '}
+              页
             </p>
-            <ul className="space-y-2 text-copy-13">
+            <ul className="text-copy-13 space-y-2">
               {page.items.map((row) => (
                 <li key={row.id} className="border-border rounded-md px-3 py-2">
                   <div className="flex flex-wrap items-center gap-2">
-                    <Badge tone={row.rating >= 4 ? 'success' : row.rating >= 3 ? 'neutral' : 'danger'}>
+                    <Badge
+                      tone={row.rating >= 4 ? 'success' : row.rating >= 3 ? 'neutral' : 'danger'}
+                    >
                       <Star className="mr-1 h-3 w-3" />
                       {ratingLabel(row.rating)}
                     </Badge>
@@ -556,7 +563,7 @@ export function ProductReviewWorkspace() {
                     </Badge>
                     <button
                       type="button"
-                      className="hover:underline font-medium"
+                      className="font-medium hover:underline"
                       onClick={() => void openDetail(row.id)}
                     >
                       {row.reviewNo}
@@ -565,15 +572,15 @@ export function ProductReviewWorkspace() {
                       {row.shopName} · {row.platformCode} · 变体 {row.variantRef}
                     </span>
                     <span className="text-muted-foreground">
-                      平台时刻 {row.platformReviewedAt} ·{' '}
-                      {row.hasImage ? '含图' : '无图'} · {row.hasVideo ? '含视频' : '无视频'}
+                      平台时刻 {row.platformReviewedAt} · {row.hasImage ? '含图' : '无图'} ·{' '}
+                      {row.hasVideo ? '含视频' : '无视频'}
                     </span>
                     {row.salesOrderNo && (
                       <span className="text-muted-foreground">订单 {row.salesOrderNo}</span>
                     )}
                   </div>
                   {row.content && (
-                    <p className="text-muted-foreground mt-1 line-clamp-2 text-copy-12">
+                    <p className="text-muted-foreground text-copy-12 mt-1 line-clamp-2">
                       {row.content}
                     </p>
                   )}
@@ -605,7 +612,7 @@ export function ProductReviewWorkspace() {
       {/* ---------------------------------------------------------- 详情 */}
       {detail && (
         <SectionCard title={`评价详情 · ${detail.review.reviewNo}`}>
-          <div className="space-y-3 text-copy-13">
+          <div className="text-copy-13 space-y-3">
             <p>
               {detail.review.shopName} · {detail.review.platformCode} ·{' '}
               {ratingLabel(detail.review.rating)} · {replyStateLabel(detail.review.replied)} ·{' '}
@@ -632,16 +639,16 @@ export function ProductReviewWorkspace() {
               <h3 className="font-medium">关联订单上下文</h3>
               {detail.orderContext.available ? (
                 detail.orderContext.reason ? (
-                  <p className="text-muted-foreground mt-1 text-copy-12">
+                  <p className="text-muted-foreground text-copy-12 mt-1">
                     {detail.orderContext.reason}
                   </p>
                 ) : null
               ) : (
-                <p className="text-destructive mt-1 text-copy-12">
+                <p className="text-destructive text-copy-12 mt-1">
                   订单上下文不可用：{detail.orderContext.reason}
                 </p>
               )}
-              <p className="text-muted-foreground mt-1 text-copy-12">
+              <p className="text-muted-foreground text-copy-12 mt-1">
                 订单号 {detail.orderContext.salesOrderNo || '—'} · 单号{' '}
                 {detail.orderContext.orderNo || '—'} · 订单状态{' '}
                 {detail.orderContext.orderStatus || '—'} · 签收时刻{' '}

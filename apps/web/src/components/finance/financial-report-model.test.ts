@@ -144,9 +144,7 @@ describe('12.5.2.2 财务报表 · 前端模型', () => {
     expect(
       toApiPath('/finance/financial-reports/drill?reportType=BALANCE_SHEET&lineCode=1001'),
     ).toBe('finance/financial-reports/drill?reportType=BALANCE_SHEET&lineCode=1001');
-    expect(toApiPath('finance/financial-reports/drill')).toBe(
-      'finance/financial-reports/drill',
-    );
+    expect(toApiPath('finance/financial-reports/drill')).toBe('finance/financial-reports/drill');
   });
 
   it('借贷方向与科目类别各有可读名；没登记的科目要说「未在科目表登记」', () => {

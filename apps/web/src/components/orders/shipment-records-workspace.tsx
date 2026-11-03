@@ -300,10 +300,7 @@ export function ShipmentRecordsWorkspace() {
   }, [load]);
 
   const records: ShipmentRecordRow[] = page?.items ?? [];
-  const tiles = useMemo(
-    () => (page ? summaryTiles(page.summary) : []),
-    [page],
-  );
+  const tiles = useMemo(() => (page ? summaryTiles(page.summary) : []), [page]);
 
   async function run(action: () => Promise<string>) {
     setBusy(true);
@@ -366,8 +363,8 @@ export function ShipmentRecordsWorkspace() {
                 <span
                   className={
                     dimension.available
-                      ? 'mt-0.5 inline-flex shrink-0 rounded px-1.5 py-0.5 text-xs bg-emerald-100 text-emerald-800'
-                      : 'mt-0.5 inline-flex shrink-0 rounded px-1.5 py-0.5 text-xs bg-amber-100 text-amber-800'
+                      ? 'mt-0.5 inline-flex shrink-0 rounded bg-emerald-100 px-1.5 py-0.5 text-xs text-emerald-800'
+                      : 'mt-0.5 inline-flex shrink-0 rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800'
                   }
                 >
                   {dimension.available ? '可用' : '未交付'}
@@ -386,7 +383,7 @@ export function ShipmentRecordsWorkspace() {
               </li>
             ))}
           </ul>
-          <p className="mt-3 text-xs text-muted-foreground">{capabilities.downstreamNote}</p>
+          <p className="text-muted-foreground mt-3 text-xs">{capabilities.downstreamNote}</p>
         </SectionCard>
       ) : null}
 
@@ -394,10 +391,10 @@ export function ShipmentRecordsWorkspace() {
         title="从 8.3.4.1 同步已确认交接的交接单"
         extra={<PackageCheck className="h-4 w-4" />}
       >
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           已发货的唯一来源是 warehouse 服务 8.3.4.1 已确认交接（status=HANDED_OVER）的交接单
-          （跨库视图与跨服务 SQL 都被禁止）。发货时刻取上游 handover_at 快照，
-          界面上<strong>不允许</strong>手填 —— 迟发率不能靠改时间凑。
+          （跨库视图与跨服务 SQL 都被禁止）。发货时刻取上游 handover_at 快照， 界面上
+          <strong>不允许</strong>手填 —— 迟发率不能靠改时间凑。
         </p>
         <div className="mt-3">
           <Button
@@ -419,21 +416,18 @@ export function ShipmentRecordsWorkspace() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard label="迟发率" value={percentText(performance.lateRate)} />
             <StatCard label="准时率" value={percentText(performance.onTimeRate)} />
-            <StatCard
-              label="有效追踪率"
-              value={percentText(performance.validTrackingRate)}
-            />
+            <StatCard label="有效追踪率" value={percentText(performance.validTrackingRate)} />
             <StatCard label="未登记时限（UNSET）" value={performance.unsetSlaRecords} />
           </div>
-          <ul className="mt-3 space-y-1 text-xs text-muted-foreground">
+          <ul className="text-muted-foreground mt-3 space-y-1 text-xs">
             <li>迟发率口径：{performance.lateRateBasis}</li>
             <li>有效追踪率口径：{performance.validTrackingRateBasis}</li>
             {performance.boundaryNotes.map((note) => (
               <li key={note}>· {note}</li>
             ))}
             <li className={TONE_CLASS[trackingRateSeverity(performance.validTrackingRate)]}>
-              有效追踪率当前为 {percentText(performance.validTrackingRate)}
-              （{performance.trackableRecords} 可追踪 / {performance.untrackableRecords} 不可追踪）
+              有效追踪率当前为 {percentText(performance.validTrackingRate)}（
+              {performance.trackableRecords} 可追踪 / {performance.untrackableRecords} 不可追踪）
             </li>
           </ul>
         </SectionCard>
@@ -444,7 +438,7 @@ export function ShipmentRecordsWorkspace() {
           {tiles.map((tile) => (
             <div key={tile.label} title={tile.hint}>
               <StatCard label={tile.label} value={tile.value} />
-              <p className="mt-1 text-xs text-muted-foreground">{tile.hint}</p>
+              <p className="text-muted-foreground mt-1 text-xs">{tile.hint}</p>
             </div>
           ))}
         </div>
@@ -513,9 +507,7 @@ export function ShipmentRecordsWorkspace() {
                     <td className="py-2">
                       <Badge
                         severity={
-                          group.groupKey === 'UNSET' || group.groupKey === ''
-                            ? 'muted'
-                            : 'normal'
+                          group.groupKey === 'UNSET' || group.groupKey === '' ? 'muted' : 'normal'
                         }
                       >
                         {group.groupLabel}
@@ -535,7 +527,7 @@ export function ShipmentRecordsWorkspace() {
               </tbody>
             </table>
           ) : (
-            <p className="mt-4 text-sm text-muted-foreground">当前筛选下没有分组。</p>
+            <p className="text-muted-foreground mt-4 text-sm">当前筛选下没有分组。</p>
           )
         ) : null}
       </SectionCard>
@@ -548,7 +540,10 @@ export function ShipmentRecordsWorkspace() {
           prefs={prefs}
         />
         <div className="flex flex-wrap items-end gap-3">
-          <FormField id="shipment-records-keyword" label="关键字（记录号 / 运单号 / 订单号 / 交接单号）">
+          <FormField
+            id="shipment-records-keyword"
+            label="关键字（记录号 / 运单号 / 订单号 / 交接单号）"
+          >
             <Input
               value={keyword}
               placeholder="留空为全部"
@@ -561,7 +556,7 @@ export function ShipmentRecordsWorkspace() {
         </div>
 
         {loading ? (
-          <p className="mt-4 text-sm text-muted-foreground">加载中…</p>
+          <p className="text-muted-foreground mt-4 text-sm">加载中…</p>
         ) : records.length === 0 ? (
           <EmptyState
             title="没有匹配的发货记录"
@@ -592,7 +587,7 @@ export function ShipmentRecordsWorkspace() {
                       {columnVisible('recordNo') && (
                         <td className="py-2">
                           <div>{row.recordNo}</div>
-                          <div className="text-xs text-muted-foreground">
+                          <div className="text-muted-foreground text-xs">
                             {row.salesOrderNo || '（无订单快照）'}
                           </div>
                         </td>
@@ -600,9 +595,7 @@ export function ShipmentRecordsWorkspace() {
                       {columnVisible('carrier') && (
                         <td className="py-2">{row.carrierName || row.carrierCode}</td>
                       )}
-                      {columnVisible('waybill') && (
-                        <td className="py-2">{row.masterWaybillNo}</td>
-                      )}
+                      {columnVisible('waybill') && <td className="py-2">{row.masterWaybillNo}</td>}
                       {columnVisible('shippedAt') && (
                         <td className="py-2">{moment(row.shippedAt)}</td>
                       )}
@@ -642,7 +635,10 @@ export function ShipmentRecordsWorkspace() {
               </tbody>
             </table>
             <div className="mt-3 flex items-center gap-2 text-sm">
-              <Button disabled={pageIndex <= 0} onClick={() => setPageIndex((p) => Math.max(0, p - 1))}>
+              <Button
+                disabled={pageIndex <= 0}
+                onClick={() => setPageIndex((p) => Math.max(0, p - 1))}
+              >
                 上一页
               </Button>
               <span>
@@ -664,12 +660,15 @@ export function ShipmentRecordsWorkspace() {
         <SectionCard title={`记录明细 · ${detail.record.recordNo}`}>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard label="包裹" value={detail.record.parcelCount} />
-            <StatCard label="承运商" value={detail.record.carrierName || detail.record.carrierCode} />
+            <StatCard
+              label="承运商"
+              value={detail.record.carrierName || detail.record.carrierCode}
+            />
             <StatCard label="运单号" value={detail.record.masterWaybillNo} />
             <StatCard label="发货时间" value={moment(detail.record.shippedAt)} />
           </div>
 
-          <ul className="mt-3 space-y-1 text-xs text-muted-foreground">
+          <ul className="text-muted-foreground mt-3 space-y-1 text-xs">
             {detail.boundaryNotes.map((note) => (
               <li key={note}>· {note}</li>
             ))}
@@ -721,7 +720,9 @@ export function ShipmentRecordsWorkspace() {
                 {detail.tracking.map((observation: ShipmentTrackingObservationRow) => (
                   <tr key={observation.id} className="border-b">
                     <td className="py-2">{moment(observation.observedAt)}</td>
-                    <td className="py-2">{observation.parcelId ? `#${observation.parcelNo}` : '整票'}</td>
+                    <td className="py-2">
+                      {observation.parcelId ? `#${observation.parcelNo}` : '整票'}
+                    </td>
                     <td className="py-2">{trackingStatusLabel(observation.status)}</td>
                     <td className="py-2">{observation.source}</td>
                     <td className="py-2">{observation.observationRef || observation.detail}</td>
@@ -730,7 +731,7 @@ export function ShipmentRecordsWorkspace() {
               </tbody>
             </table>
           ) : (
-            <p className="mt-2 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mt-2 text-sm">
               尚未登记任何轨迹观测（10.3 未交付）——「未登记」不等于「轨迹正常」。
             </p>
           )}
@@ -746,7 +747,7 @@ export function ShipmentRecordsWorkspace() {
               ))}
             </ul>
           ) : (
-            <p className="mt-2 text-sm text-muted-foreground">尚未登记（无可读上游）。</p>
+            <p className="text-muted-foreground mt-2 text-sm">尚未登记（无可读上游）。</p>
           )}
 
           <h4 className="mt-4 text-sm font-medium">平台回传</h4>
@@ -762,7 +763,7 @@ export function ShipmentRecordsWorkspace() {
               ))}
             </ul>
           ) : (
-            <p className="mt-2 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mt-2 text-sm">
               尚未登记（9.4.2.1 / 2.5.1.1 未交付）——这是「漏了」，与「决定不回传」不同。
             </p>
           )}
@@ -778,14 +779,14 @@ export function ShipmentRecordsWorkspace() {
           </ul>
 
           {callbackGapNote(detail.record.platformCallbackStatus, undefined) ? (
-            <p className="mt-3 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mt-3 text-sm">
               {callbackGapNote(detail.record.platformCallbackStatus, undefined)}
             </p>
           ) : null}
 
           <h4 className="mt-4 text-sm font-medium">登记</h4>
           {isTerminal(detail.record.status) ? (
-            <p className="mt-2 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mt-2 text-sm">
               该记录已处于终态（{shipmentRecordStatusLabel(detail.record.status)}），
               不再接受状态登记 —— 它已是发生过的发货事实。
             </p>
@@ -917,7 +918,9 @@ export function ShipmentRecordsWorkspace() {
                 <Input value={callbackNote} onChange={(e) => setCallbackNote(e.target.value)} />
               </FormField>
               <Button
-                disabled={busy || !statusDraft || callbackNote.trim().length < 4 || !selectedRecordId()}
+                disabled={
+                  busy || !statusDraft || callbackNote.trim().length < 4 || !selectedRecordId()
+                }
                 onClick={() =>
                   void run(async () => {
                     const result = await changeShipmentRecordStatus(selectedRecordId() as string, {

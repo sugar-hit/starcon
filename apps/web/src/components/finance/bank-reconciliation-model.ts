@@ -121,12 +121,16 @@ export function runBankReconMatch(id: string) {
 
 /** 银行流水行（真分页）。 */
 export function fetchBankReconStatementLines(id: string, page = 0, size = 20) {
-  return api<FinanceBankReconStatementLinePage>(`${base}/sessions/${id}/statement-lines${query({ page, size })}`);
+  return api<FinanceBankReconStatementLinePage>(
+    `${base}/sessions/${id}/statement-lines${query({ page, size })}`,
+  );
 }
 
 /** 系统记录快照（真分页）。 */
 export function fetchBankReconSystemLines(id: string, page = 0, size = 20) {
-  return api<FinanceBankReconSystemLinePage>(`${base}/sessions/${id}/system-lines${query({ page, size })}`);
+  return api<FinanceBankReconSystemLinePage>(
+    `${base}/sessions/${id}/system-lines${query({ page, size })}`,
+  );
 }
 
 /** 匹配结果（真分页）。 */
@@ -178,8 +182,15 @@ export function excludeBankReconUnmatched(
 }
 
 /** 认领 / 说明记录（真分页；append-only 举证）。 */
-export function fetchBankReconClaims(id: string, unmatchedId?: string | undefined, page = 0, size = 20) {
-  return api<FinanceBankReconClaimPage>(`${base}/sessions/${id}/claims${query({ unmatchedId, page, size })}`);
+export function fetchBankReconClaims(
+  id: string,
+  unmatchedId?: string | undefined,
+  page = 0,
+  size = 20,
+) {
+  return api<FinanceBankReconClaimPage>(
+    `${base}/sessions/${id}/claims${query({ unmatchedId, page, size })}`,
+  );
 }
 
 /** 生成对账报告并确认对账（确认是**终态**）。 */
@@ -215,7 +226,10 @@ export function updateBankReconRule(id: string, input: FinanceBankReconRuleInput
 // ================================================================ 展示口径
 
 /** 取服务端下发的可读名；没有就兜底成原值（不自己编）。 */
-function serverLabel(code: string | null | undefined, fallback?: string | null | undefined): string {
+function serverLabel(
+  code: string | null | undefined,
+  fallback?: string | null | undefined,
+): string {
   if (fallback && fallback.trim() !== '') return fallback;
   return code ?? '';
 }
@@ -325,7 +339,11 @@ export function bankReconAdjustmentRows(
   report: FinanceBankReconReportRow,
 ): BankReconAdjustmentRow[] {
   const rows: BankReconAdjustmentRow[] = [
-    { label: '银行对账单期末余额', amount: formatBankReconMoney(report.statementClosingBalance, report.currency), sign: '' },
+    {
+      label: '银行对账单期末余额',
+      amount: formatBankReconMoney(report.statementClosingBalance, report.currency),
+      sign: '',
+    },
     {
       label: '加：银行已收、我方账上没有',
       amount: formatBankReconMoney(report.unmatchedBankInAmount, report.currency),

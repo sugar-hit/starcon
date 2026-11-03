@@ -86,7 +86,9 @@ describe('concludeBlockedReason：判定按钮的禁用理由必填', () => {
   });
 
   it('已撤销同样禁用', () => {
-    expect(concludeBlockedReason({ ...base, head: { inspectionStatus: 'CANCELLED' } })).toContain('撤销');
+    expect(concludeBlockedReason({ ...base, head: { inspectionStatus: 'CANCELLED' } })).toContain(
+      '撤销',
+    );
   });
 
   it('三个结论全被禁时要说清原因，而不是让质检员猜', () => {

@@ -190,7 +190,15 @@ export function ReconciliationTaskWorkspace() {
         setDetailLoading(false);
       }
     },
-    [shapeFilter, bookSourceFilter, matchPage, differenceTypeFilter, currencyFilter, sideFilter, differencePage],
+    [
+      shapeFilter,
+      bookSourceFilter,
+      matchPage,
+      differenceTypeFilter,
+      currencyFilter,
+      sideFilter,
+      differencePage,
+    ],
   );
 
   useEffect(() => {
@@ -281,11 +289,7 @@ export function ReconciliationTaskWorkspace() {
         ? await updateReconciliationTask(editingId, input)
         : await createReconciliationTask(input);
       setSelected(saved);
-      setNotice(
-        editingId
-          ? `已更新对账范围 ${saved.taskNo}`
-          : `已建立对账任务 ${saved.taskNo}`,
-      );
+      setNotice(editingId ? `已更新对账范围 ${saved.taskNo}` : `已建立对账任务 ${saved.taskNo}`);
       resetDraft();
       await loadTasks();
       await loadDetail(saved.id);
@@ -311,7 +315,10 @@ export function ReconciliationTaskWorkspace() {
 
   const accounts = options?.accounts ?? [];
   const draftReady =
-    draftAccountId !== '' && draftPeriodStart !== '' && draftPeriodEnd !== '' && draftSources.length > 0;
+    draftAccountId !== '' &&
+    draftPeriodStart !== '' &&
+    draftPeriodEnd !== '' &&
+    draftSources.length > 0;
   const matchBlockReason = selected ? reconciliationMatchBlockReason(selected) : '';
   const frozenHint = selected ? reconciliationScopeFrozenHint(selected) : '';
 
@@ -452,7 +459,7 @@ export function ReconciliationTaskWorkspace() {
                 ))}
               </datalist>
               <div className="overflow-x-auto">
-                <table className="w-full text-copy-13">
+                <table className="text-copy-13 w-full">
                   <thead>
                     <tr className="text-muted-foreground border-b text-left">
                       <th className="py-2 pr-3">任务号</th>
@@ -477,9 +484,7 @@ export function ReconciliationTaskWorkspace() {
                           {t.accountNo}
                           <span className="text-muted-foreground ml-1">{t.accountName}</span>
                         </td>
-                        <td className="py-2 pr-3">
-                          {t.shopId ? t.shopName : '全部授权店铺'}
-                        </td>
+                        <td className="py-2 pr-3">{t.shopId ? t.shopName : '全部授权店铺'}</td>
                         <td className="py-2 pr-3">
                           {t.periodStart} → {t.periodEnd}
                         </td>
@@ -538,7 +543,7 @@ export function ReconciliationTaskWorkspace() {
               可选账户（来自 12.7.1.1 的真实账户档案）：
               {accounts.length === 0 ? '本租户还没有启用中的资金账户。' : ''}
             </p>
-            <ul className="text-muted-foreground space-y-1 text-copy-12">
+            <ul className="text-muted-foreground text-copy-12 space-y-1">
               {accounts.map((a) => (
                 <li key={a.id}>
                   {a.accountNo} · {a.accountName} · {a.currency} · {a.legalEntityName}
@@ -574,7 +579,7 @@ export function ReconciliationTaskWorkspace() {
                 </span>
               </p>
               {BOOK_SOURCES.map((source) => (
-                <label key={source} className="flex items-center gap-2 text-copy-13">
+                <label key={source} className="text-copy-13 flex items-center gap-2">
                   <input
                     type="checkbox"
                     checked={draftSources.includes(source)}
@@ -591,7 +596,11 @@ export function ReconciliationTaskWorkspace() {
                 不同来源之间不互配：每个来源各自与平台账单比，选得越多差异清单越长。
               </p>
             </div>
-            <FormField id="rt-new-window" label="日期窗口（天）" hint="1 ~ 31；放到几百天等于用「金额相同」冒充匹配">
+            <FormField
+              id="rt-new-window"
+              label="日期窗口（天）"
+              hint="1 ~ 31；放到几百天等于用「金额相同」冒充匹配"
+            >
               <Input
                 type="number"
                 min={1}
@@ -600,7 +609,11 @@ export function ReconciliationTaskWorkspace() {
                 onChange={(e) => setDraftWindowDays(e.target.value)}
               />
             </FormField>
-            <FormField id="rt-new-tolerance" label="金额容差" hint="默认 0；容差只放宽成组时的金额相等判定">
+            <FormField
+              id="rt-new-tolerance"
+              label="金额容差"
+              hint="默认 0；容差只放宽成组时的金额相等判定"
+            >
               <Input
                 type="number"
                 min={0}
@@ -622,9 +635,7 @@ export function ReconciliationTaskWorkspace() {
                 </Button>
               ) : null}
             </div>
-            <p className="text-muted-foreground text-copy-12">
-              {options?.note ?? ''}
-            </p>
+            <p className="text-muted-foreground text-copy-12">{options?.note ?? ''}</p>
           </div>
         </SectionCard>
       </div>
@@ -661,9 +672,9 @@ export function ReconciliationTaskWorkspace() {
               <StatCard label="匹配行" value={String(selected.matchedLineCount)} />
               <StatCard label="差异" value={String(selected.differenceCount)} />
             </div>
-            <p className="text-muted-foreground mt-3 text-copy-12">
-              状态：{reconciliationStatusLabel(selected.status)}；日期窗口 {selected.dateWindowDays} 天；
-              金额容差 {selected.amountTolerance}；我方账来源：
+            <p className="text-muted-foreground text-copy-12 mt-3">
+              状态：{reconciliationStatusLabel(selected.status)}；日期窗口 {selected.dateWindowDays}{' '}
+              天； 金额容差 {selected.amountTolerance}；我方账来源：
               {selected.bookSources.map(reconciliationBookSourceLabel).join(' + ') || '—'}
             </p>
             {matchBlockReason ? (
@@ -705,7 +716,7 @@ export function ReconciliationTaskWorkspace() {
                         )}
                       </span>
                     </div>
-                    <p className="text-muted-foreground mt-1 text-copy-12">
+                    <p className="text-muted-foreground text-copy-12 mt-1">
                       匹配组 {c.matchedGroupCount} 个 · 差异 {c.differenceCount} 条
                       {c.note ? ` · ${c.note}` : ''}
                     </p>
@@ -765,7 +776,7 @@ export function ReconciliationTaskWorkspace() {
               ))}
             </div>
             {detailLoading ? (
-              <p className="text-muted-foreground mt-3 text-copy-13">加载中…</p>
+              <p className="text-muted-foreground text-copy-13 mt-3">加载中…</p>
             ) : !matches || matches.items.length === 0 ? (
               <EmptyState
                 title="没有匹配结果"
@@ -780,8 +791,8 @@ export function ReconciliationTaskWorkspace() {
                         {reconciliationShapeLabel(m.shape)}
                       </Badge>
                       <span className="text-copy-13">
-                        {reconciliationExternalKindLabel(m.externalKind)}{' '}
-                        {m.externalNo} {formatReconciliationMoney(m.externalAmount, m.currency)}
+                        {reconciliationExternalKindLabel(m.externalKind)} {m.externalNo}{' '}
+                        {formatReconciliationMoney(m.externalAmount, m.currency)}
                       </span>
                       <span className="text-copy-13">
                         ⇄ {reconciliationBookSourceLabel(m.bookSource)} {m.bookNo}{' '}
@@ -789,10 +800,10 @@ export function ReconciliationTaskWorkspace() {
                       </span>
                       <Badge tone="info">{reconciliationDirectionLabel(m.direction)}</Badge>
                     </div>
-                    <p className="text-muted-foreground mt-1 text-copy-12">
+                    <p className="text-muted-foreground text-copy-12 mt-1">
                       {reconciliationMatchHint(m)}
                     </p>
-                    <p className="text-muted-foreground mt-1 text-copy-12">
+                    <p className="text-muted-foreground text-copy-12 mt-1">
                       平台单号 {m.externalReference || '—'} / 我方单号 {m.bookReference || '—'} ·{' '}
                       {m.externalOccurredOn ?? '—'} ⇄ {m.bookOccurredOn ?? '—'} · 组内平台{' '}
                       {formatReconciliationMoney(m.groupExternalAmount, m.currency)} / 组内我方{' '}
@@ -883,7 +894,7 @@ export function ReconciliationTaskWorkspace() {
               ))}
             </div>
             {detailLoading ? (
-              <p className="text-muted-foreground mt-3 text-copy-13">加载中…</p>
+              <p className="text-muted-foreground text-copy-13 mt-3">加载中…</p>
             ) : !differences || differences.items.length === 0 ? (
               <EmptyState
                 title="没有差异"
@@ -891,7 +902,7 @@ export function ReconciliationTaskWorkspace() {
               />
             ) : (
               <div className="mt-3 overflow-x-auto">
-                <table className="w-full text-copy-13">
+                <table className="text-copy-13 w-full">
                   <thead>
                     <tr className="text-muted-foreground border-b text-left">
                       <th className="py-2 pr-3">类型</th>
@@ -931,7 +942,7 @@ export function ReconciliationTaskWorkspace() {
                         </td>
                         <td className="py-2 pr-3">
                           {d.reason || '—'}
-                          <span className="text-muted-foreground mt-1 block text-copy-12">
+                          <span className="text-muted-foreground text-copy-12 mt-1 block">
                             {reconciliationDifferenceActionHint(d)}
                           </span>
                         </td>

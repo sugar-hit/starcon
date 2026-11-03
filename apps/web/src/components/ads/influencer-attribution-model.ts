@@ -462,10 +462,7 @@ export function fetchAttributionReport(
  *
  * <p>0 会被读成「这个达人一单没带过货 / 不用付佣金」，而真相是「你还没录」。
  */
-export function attributionMoney(
-  value: AttributionMoney | undefined,
-  currency?: string,
-): string {
+export function attributionMoney(value: AttributionMoney | undefined, currency?: string): string {
   if (value === null || value === undefined) return '未录入';
   const fixed = value.toFixed(2);
   return currency ? `${fixed} ${currency}` : fixed;

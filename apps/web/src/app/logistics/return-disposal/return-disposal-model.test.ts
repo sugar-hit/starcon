@@ -139,9 +139,9 @@ describe('10.7.1.3 销毁方式是枚举事实', () => {
     expect(buildDisposalOrderPayload({ ...base, disposalQty: 'abc' })).toEqual({
       error: '销毁数量必须大于 0',
     });
-    expect(
-      buildDisposalOrderPayload({ ...base, disposalQty: '5', costCurrency: 'usd' }),
-    ).toEqual({ error: '费用币种必须是三个大写字母（例如 USD）' });
+    expect(buildDisposalOrderPayload({ ...base, disposalQty: '5', costCurrency: 'usd' })).toEqual({
+      error: '费用币种必须是三个大写字母（例如 USD）',
+    });
   });
 
   it('方式决定基线凭证要求：压碎不要重量、焚烧要处置证明、专业销毁要重量', () => {

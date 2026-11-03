@@ -222,9 +222,7 @@ describe('展示辅助', () => {
 
   it('命中总数跨域累加', () => {
     const merged = mergeServiceResults([
-      outcome('catalog', [
-        group('PRODUCT', [hit({ id: '1' }), hit({ id: '2' })], 'ALL', '商品'),
-      ]),
+      outcome('catalog', [group('PRODUCT', [hit({ id: '1' }), hit({ id: '2' })], 'ALL', '商品')]),
       outcome('trade', [group('ORDER', [hit({ domain: 'ORDER', id: '3' })], 'ALL', '订单')]),
     ]);
     expect(countHits(merged.groups)).toBe(3);

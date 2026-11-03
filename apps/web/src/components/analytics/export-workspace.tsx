@@ -30,7 +30,10 @@ import type {
   ExportSubscriptionJobPage,
   ExportSubscriptionSourcesResponse,
 } from './export-model';
-import type { CustomReportPage, CustomReportSummary } from '../../../../../packages/api-contracts/src/index';
+import type {
+  CustomReportPage,
+  CustomReportSummary,
+} from '../../../../../packages/api-contracts/src/index';
 
 /**
  * 13.6.2.1「导出与订阅」工作区。
@@ -216,11 +219,7 @@ export function ExportWorkspace() {
     async (jobId: string) => {
       setJobError('');
       try {
-        await api<void>(
-          `reporting/custom-report/export/jobs/${jobId}/cancel`,
-          'POST',
-          {},
-        );
+        await api<void>(`reporting/custom-report/export/jobs/${jobId}/cancel`, 'POST', {});
         await loadJobs();
       } catch (e) {
         setJobError(e instanceof Error ? e.message : '作废导出失败，请重试');
@@ -390,7 +389,10 @@ export function ExportWorkspace() {
                 ))}
               </select>
             </label>
-            <Button disabled={!reportId || submitting || selectedFields.length === 0} onClick={() => void submit()}>
+            <Button
+              disabled={!reportId || submitting || selectedFields.length === 0}
+              onClick={() => void submit()}
+            >
               <FileSpreadsheet className="mr-1.5 h-3.5 w-3.5" />
               {submitting ? '提交中…' : '发起导出'}
             </Button>
@@ -508,7 +510,9 @@ export function ExportWorkspace() {
           </div>
         )}
 
-        {listState === 'loading' && <div className="text-copy-13 text-muted-foreground">读取中…</div>}
+        {listState === 'loading' && (
+          <div className="text-copy-13 text-muted-foreground">读取中…</div>
+        )}
 
         {listState === 'empty' && (
           <EmptyState
@@ -552,12 +556,10 @@ export function ExportWorkspace() {
                         下载
                       </a>
                     )}
-                    {(job.status === 'PENDING' || job.status === 'RUNNING' || job.status === 'SUCCEEDED') && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => void cancelJob(job.jobId)}
-                      >
+                    {(job.status === 'PENDING' ||
+                      job.status === 'RUNNING' ||
+                      job.status === 'SUCCEEDED') && (
+                      <Button variant="outline" size="sm" onClick={() => void cancelJob(job.jobId)}>
                         作废
                       </Button>
                     )}
@@ -613,7 +615,12 @@ export function ExportWorkspace() {
               <option value="CANCELLED">已取消</option>
             </select>
           </label>
-          <Button variant="outline" size="sm" disabled={dispatching} onClick={() => void runDispatch()}>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={dispatching}
+            onClick={() => void runDispatch()}
+          >
             <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
             {dispatching ? '投递中…' : '跑一轮投递'}
           </Button>
@@ -621,7 +628,9 @@ export function ExportWorkspace() {
             刷新
           </Button>
           {dispatch && (
-            <span className="text-copy-13 text-muted-foreground">{dispatchResultText(dispatch)}</span>
+            <span className="text-copy-13 text-muted-foreground">
+              {dispatchResultText(dispatch)}
+            </span>
           )}
         </div>
 
@@ -632,9 +641,7 @@ export function ExportWorkspace() {
           </div>
         )}
 
-        {dispatch && (
-          <div className="text-copy-13 text-muted-foreground mb-3">{dispatch.note}</div>
-        )}
+        {dispatch && <div className="text-copy-13 text-muted-foreground mb-3">{dispatch.note}</div>}
 
         {!ledger || ledger.rows.length === 0 ? (
           <EmptyState
@@ -661,7 +668,11 @@ export function ExportWorkspace() {
                     <div className="text-destructive text-label-12">失败原因：{row.lastError}</div>
                   )}
                 </div>
-                <Button variant="outline" size="sm" onClick={() => void openDelivery(row.deliveryId)}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => void openDelivery(row.deliveryId)}
+                >
                   详情
                 </Button>
               </div>
@@ -700,9 +711,12 @@ export function ExportWorkspace() {
               通道 {deliveryDetail.channel} → {deliveryDetail.target}
             </div>
             <div className="text-muted-foreground text-label-12">
-              状态 {deliveryStatusLabel(deliveryDetail.status)} · 尝试 {deliveryDetail.attemptCount} 次
+              状态 {deliveryStatusLabel(deliveryDetail.status)} · 尝试 {deliveryDetail.attemptCount}{' '}
+              次
             </div>
-            <div className="text-muted-foreground text-label-12">{deliveryNote(deliveryDetail)}</div>
+            <div className="text-muted-foreground text-label-12">
+              {deliveryNote(deliveryDetail)}
+            </div>
           </div>
         )}
       </SectionCard>

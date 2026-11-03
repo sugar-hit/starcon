@@ -291,7 +291,5 @@ export function ratingDistributionText(
   buckets: { rating: number; count: number }[] | undefined,
 ): string {
   if (!buckets || buckets.length === 0) return '暂无回收';
-  return buckets
-    .map((bucket) => `${bucket.rating}★×${bucket.count}`)
-    .join(' · ');
+  return buckets.map((bucket) => `${bucket.rating}★×${bucket.count}`).join(' · ');
 }

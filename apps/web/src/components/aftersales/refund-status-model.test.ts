@@ -53,7 +53,9 @@ describe('refundListQuery 筛选与分页', () => {
   });
 
   it('空串与纯空白视为未设置，不会把 ?executionState= 发给后端', () => {
-    expect(refundListQuery({ executionState: '', platformSyncState: '   ', currency: '' })).toBe('');
+    expect(refundListQuery({ executionState: '', platformSyncState: '   ', currency: '' })).toBe(
+      '',
+    );
   });
 
   it('值两侧空白先 trim 再进 query', () => {
@@ -77,8 +79,8 @@ describe('refundListQuery 筛选与分页', () => {
       size: 20,
     });
     expect(q).toBe(
-      '?executionState=UNKNOWN&currency=USD&minAmount=10&maxAmount=90'
-      + '&onlyNeedsAttention=true&sort=ATTENTION_FIRST&page=2&size=20',
+      '?executionState=UNKNOWN&currency=USD&minAmount=10&maxAmount=90' +
+        '&onlyNeedsAttention=true&sort=ATTENTION_FIRST&page=2&size=20',
     );
   });
 
@@ -198,13 +200,15 @@ describe('unknownWarning 未知态提示', () => {
 
 describe('blockingText 不可直接重试的理由', () => {
   it('有 blocking 时带上前缀，运营才知道按钮为什么是灰的', () => {
-    expect(blockingText({ actionBlocking: '外部超时，未查证交易' }))
-      .toBe('不能直接重试：外部超时，未查证交易');
+    expect(blockingText({ actionBlocking: '外部超时，未查证交易' })).toBe(
+      '不能直接重试：外部超时，未查证交易',
+    );
   });
 
   it('只有 actionReason 时改用「判定依据」，不是硬套「不能直接重试」', () => {
-    expect(blockingText({ actionReason: '查证结论为确认未付出' }))
-      .toBe('判定依据：查证结论为确认未付出');
+    expect(blockingText({ actionReason: '查证结论为确认未付出' })).toBe(
+      '判定依据：查证结论为确认未付出',
+    );
   });
 
   it('blocking 优先于 reason', () => {
@@ -260,22 +264,27 @@ describe('formatAmount 金额展示', () => {
 
 describe('discrepancyPair 差异两边对比', () => {
   it('两边都有时分别报出方向，合成净额会把差异抹成 0', () => {
-    expect(discrepancyPair({
-      systemAmount: 100,
-      systemCurrency: 'USD',
-      platformAmount: 90,
-      platformCurrency: 'USD',
-    })).toBe('系统 100.0000 USD / 平台 90.0000 USD');
+    expect(
+      discrepancyPair({
+        systemAmount: 100,
+        systemCurrency: 'USD',
+        platformAmount: 90,
+        platformCurrency: 'USD',
+      }),
+    ).toBe('系统 100.0000 USD / 平台 90.0000 USD');
   });
 
   it('两边都没有时说明是存在性差异', () => {
     expect(discrepancyPair({})).toBe('存在性差异（一边有、一边无）');
-    expect(discrepancyPair({ systemAmount: null, platformAmount: null })).toBe('存在性差异（一边有、一边无）');
+    expect(discrepancyPair({ systemAmount: null, platformAmount: null })).toBe(
+      '存在性差异（一边有、一边无）',
+    );
   });
 
   it('只有一边有时不谎称两边都有', () => {
-    expect(discrepancyPair({ systemAmount: 100, systemCurrency: 'USD' }))
-      .toBe('系统 100.0000 USD / 平台 —');
+    expect(discrepancyPair({ systemAmount: 100, systemCurrency: 'USD' })).toBe(
+      '系统 100.0000 USD / 平台 —',
+    );
   });
 });
 
@@ -303,10 +312,16 @@ describe('文本兜底：留空要说明，不要留白', () => {
   });
 
   it('失败原因带上码与定性，不确定与明确要分得开', () => {
-    expect(failureText({ failureCode: 'GATEWAY_TIMEOUT', failureClass: 'INDETERMINATE', failureReason: '网关超时' }))
-      .toBe('[GATEWAY_TIMEOUT·不确定] 网关超时');
-    expect(failureText({ failureCode: 'X', failureClass: 'DEFINITIVE', failureReason: 'R' }))
-      .toBe('[X·明确] R');
+    expect(
+      failureText({
+        failureCode: 'GATEWAY_TIMEOUT',
+        failureClass: 'INDETERMINATE',
+        failureReason: '网关超时',
+      }),
+    ).toBe('[GATEWAY_TIMEOUT·不确定] 网关超时');
+    expect(failureText({ failureCode: 'X', failureClass: 'DEFINITIVE', failureReason: 'R' })).toBe(
+      '[X·明确] R',
+    );
     expect(failureText({ failureCode: 'X', failureReason: 'R' })).toBe('[X] R');
   });
 });
@@ -315,12 +330,17 @@ describe('文本兜底：留空要说明，不要留白', () => {
 
 describe('unavailableCell 不可得维度', () => {
   it('有值时原样显示，不加解释性 title', () => {
-    expect(unavailableCell('ACME', { label: '店铺', ownerModule: '02', reason: '未交付' }))
-      .toEqual({ text: 'ACME', title: '' });
+    expect(unavailableCell('ACME', { label: '店铺', ownerModule: '02', reason: '未交付' })).toEqual(
+      { text: 'ACME', title: '' },
+    );
   });
 
   it('缺失时显示「—」并把归属模块与原因写进 title（不是空白单元格）', () => {
-    const c = unavailableCell(null, { label: '店铺', ownerModule: '11.3.1.2', reason: '跨服务不可读' });
+    const c = unavailableCell(null, {
+      label: '店铺',
+      ownerModule: '11.3.1.2',
+      reason: '跨服务不可读',
+    });
     expect(c.text).toBe('—');
     expect(c.title).toContain('11.3.1.2');
     expect(c.title).toContain('跨服务不可读');

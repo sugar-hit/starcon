@@ -197,19 +197,16 @@ export function FilingDraftWorkspace() {
     load,
   ]);
 
-  const runExport = useCallback(
-    async (id: string, format: 'CSV' | 'JSON') => {
-      setActionError('');
-      try {
-        await downloadFilingExport(id, format);
-        setNotice(`已导出 ${format} 文件（服务端已记一条导出留痕）。`);
-        setExports(await fetchFilingExports());
-      } catch (err) {
-        setActionError(err instanceof Error ? err.message : '导出失败');
-      }
-    },
-    [],
-  );
+  const runExport = useCallback(async (id: string, format: 'CSV' | 'JSON') => {
+    setActionError('');
+    try {
+      await downloadFilingExport(id, format);
+      setNotice(`已导出 ${format} 文件（服务端已记一条导出留痕）。`);
+      setExports(await fetchFilingExports());
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : '导出失败');
+    }
+  }, []);
 
   if (loading && !caps) {
     return (
@@ -387,7 +384,8 @@ export function FilingDraftWorkspace() {
             {busy ? '取数中…' : '取数生成底稿'}
           </Button>
           <span className="text-copy-12 text-muted-foreground">
-            重新取数会把同一（辖区 × 申报线 × 期间 × 周期）的旧底稿置为「已被取代」，历史版本仍然查得到、导得出。
+            重新取数会把同一（辖区 × 申报线 × 期间 ×
+            周期）的旧底稿置为「已被取代」，历史版本仍然查得到、导得出。
           </span>
         </div>
       </SectionCard>
@@ -490,18 +488,18 @@ export function FilingDraftWorkspace() {
                         {draftStatusLabel(draft.status)}
                       </Badge>
                     </td>
-                    <td className="py-2 pr-3 text-copy-12">
+                    <td className="text-copy-12 py-2 pr-3">
                       候选 {draft.orderCount} / 纳入 {draft.includedCount}
                       {draft.orderTruncated ? (
-                        <span className="ml-1 text-destructive">🔴 被截断</span>
+                        <span className="text-destructive ml-1">🔴 被截断</span>
                       ) : null}
                       {draft.unmappedCount > 0 ? (
-                        <span className="ml-1 text-muted-foreground">
+                        <span className="text-muted-foreground ml-1">
                           归属不到 {draft.unmappedCount}
                         </span>
                       ) : null}
                     </td>
-                    <td className="py-2 pr-3 text-copy-12">{formatMoment(draft.generatedAt)}</td>
+                    <td className="text-copy-12 py-2 pr-3">{formatMoment(draft.generatedAt)}</td>
                     <td className="py-2 pr-3">
                       <Button variant="ghost" onClick={() => void openDraft(draft.id)}>
                         查看
@@ -548,7 +546,7 @@ export function FilingDraftWorkspace() {
             <div className="text-copy-12 text-muted-foreground">
               {describeCoverage(selected.draft)}
             </div>
-            <div className="rounded-md border p-3 text-copy-12">
+            <div className="text-copy-12 rounded-md border p-3">
               <span className="text-muted-foreground">取数口径：</span>
               {selected.draft.generationBasis}
             </div>
@@ -595,7 +593,7 @@ export function FilingDraftWorkspace() {
                         )}
                       </td>
                       <td className="py-2 pr-3">{formatAmount(line.netPayable)}</td>
-                      <td className="py-2 pr-3 text-copy-12">
+                      <td className="text-copy-12 py-2 pr-3">
                         {line.exchangeRateAvailable ? formatExchangeRate(line.exchangeRate) : '—'}
                         {line.exchangeRateAsOf ? (
                           <span className="text-muted-foreground ml-1">
@@ -615,8 +613,9 @@ export function FilingDraftWorkspace() {
 
           {/* 税率版本（可核信息） */}
           {selected.lines[0] ? (
-            <div className="mt-3 text-copy-12 text-muted-foreground">
-              税率版本：税码 {selected.lines[0].taxCode} · 税率 {formatRate(selected.lines[0].taxRate)} ·{' '}
+            <div className="text-copy-12 text-muted-foreground mt-3">
+              税率版本：税码 {selected.lines[0].taxCode} · 税率{' '}
+              {formatRate(selected.lines[0].taxRate)} ·{' '}
               {formatEffectiveWindow(
                 selected.lines[0].taxRateEffectiveFrom,
                 selected.lines[0].taxRateEffectiveTo,
@@ -676,7 +675,10 @@ export function FilingDraftWorkspace() {
         description="导出是取证动作：每次导出都记下行数、字节数与内容哈希（sha-256）。"
       >
         {!exports || exports.items.length === 0 ? (
-          <EmptyState title="还没有导出过" description="在上方选中一份底稿后点「导出 CSV / JSON」，这里会留下导出记录。" />
+          <EmptyState
+            title="还没有导出过"
+            description="在上方选中一份底稿后点「导出 CSV / JSON」，这里会留下导出记录。"
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="text-copy-13 w-full text-left">
@@ -702,8 +704,10 @@ export function FilingDraftWorkspace() {
                     </td>
                     <td className="py-2 pr-3">{item.rowCount}</td>
                     <td className="py-2 pr-3">{item.byteSize}</td>
-                    <td className="py-2 pr-3 text-copy-12 font-mono">{item.contentHash.slice(0, 16)}…</td>
-                    <td className="py-2 pr-3 text-copy-12">{formatMoment(item.exportedAt)}</td>
+                    <td className="text-copy-12 py-2 pr-3 font-mono">
+                      {item.contentHash.slice(0, 16)}…
+                    </td>
+                    <td className="text-copy-12 py-2 pr-3">{formatMoment(item.exportedAt)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -720,7 +724,10 @@ export function FilingDraftWorkspace() {
         >
           <div className="grid gap-3 md:grid-cols-2">
             {caps.capabilities.map((capability) => (
-              <div key={`${capability.module}-${capability.name}`} className="rounded-md border p-3">
+              <div
+                key={`${capability.module}-${capability.name}`}
+                className="rounded-md border p-3"
+              >
                 <div className="flex items-center justify-between">
                   <span className="text-copy-13 font-medium">{capability.name}</span>
                   <Badge tone={capability.available ? 'success' : 'warning'}>

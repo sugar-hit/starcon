@@ -223,9 +223,7 @@ describe('差价单元格：算不出来不等于 0', () => {
     );
     expect(cells.spreadAfterFee).toBe(13.5);
     expect(cells.feeUnregistered).toBe(false);
-    expect(cells.spreadAfterFee).toBe(
-      30 - (10 + 2) - 4.5,
-    );
+    expect(cells.spreadAfterFee).toBe(30 - (10 + 2) - 4.5);
     expect(cells.note).toContain('已按登记费率');
   });
 
@@ -266,7 +264,9 @@ describe('口径隔离：代发不是自营', () => {
 
 describe('报表：跨币种不相加', () => {
   it('USD 与 CNY 分成两条，而不是加成一个假数', () => {
-    const totals = groupTotals(report([group(), group({ groupKey: 'SUP-B', currencyCode: 'CNY', sellAmount: 50 })]));
+    const totals = groupTotals(
+      report([group(), group({ groupKey: 'SUP-B', currencyCode: 'CNY', sellAmount: 50 })]),
+    );
     expect(totals).toHaveLength(2);
     expect(totals.map((t) => t.currencyCode)).toEqual(['CNY', 'USD']);
     const usd = totals.find((t) => t.currencyCode === 'USD');
@@ -325,7 +325,11 @@ describe('对账：三个桶互不吞并', () => {
 
   it('全部已登记时两个未登记桶如实说「没有」', () => {
     const buckets = reconciliationBuckets(
-      statement({ undeterminedOrderCount: 0, feeUnregisteredOrderCount: 0, totalPlatformFee: 13.5 }),
+      statement({
+        undeterminedOrderCount: 0,
+        feeUnregisteredOrderCount: 0,
+        totalPlatformFee: 13.5,
+      }),
     );
     expect(buckets.fxUnset.note).toContain('没有未登记桶');
     expect(buckets.feeUnregistered.note).toContain('都已登记');
@@ -351,7 +355,9 @@ describe('应付待办：已发出 ≠ 已受理', () => {
   });
 
   it('SENT 是「已交给下游」，且明确提示尚未受理', () => {
-    const badge = payableTaskBadge(task({ taskStatus: 'SENT', sentAt: '2026-01-02T00:00:00+08:00' }));
+    const badge = payableTaskBadge(
+      task({ taskStatus: 'SENT', sentAt: '2026-01-02T00:00:00+08:00' }),
+    );
     expect(badge.tone).toBe('progress');
     expect(badge.hint).toContain(SENT_NOT_ACKNOWLEDGED_HINT);
   });

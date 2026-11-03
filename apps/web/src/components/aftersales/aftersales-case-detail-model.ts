@@ -216,7 +216,10 @@ export function actionUsable(action: AftersalesActionEntry): boolean {
 // ================================================================ 展示工具
 
 /** 金额格式化（复用列表模块口径：codegen 把 number 展平，这里只做展示）。 */
-export function formatAmount(value: string | number | null | undefined, currency?: string | null): string {
+export function formatAmount(
+  value: string | number | null | undefined,
+  currency?: string | null,
+): string {
   if (value === null || value === undefined || value === '') return '—';
   const n = typeof value === 'number' ? value : Number(value);
   if (Number.isNaN(n)) return String(value);

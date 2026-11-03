@@ -43,11 +43,7 @@ describe('16.2.1.1 规则库前端模型', () => {
   });
 
   it('只有违禁词 / 极限词 / 侵权词三类规则带词条', () => {
-    expect(WORD_RULE_TYPES).toEqual([
-      'PROHIBITED_WORD',
-      'SUPERLATIVE_WORD',
-      'INFRINGEMENT_WORD',
-    ]);
+    expect(WORD_RULE_TYPES).toEqual(['PROHIBITED_WORD', 'SUPERLATIVE_WORD', 'INFRINGEMENT_WORD']);
     expect(isWordRuleType('PROHIBITED_WORD')).toBe(true);
     expect(isWordRuleType('SUPERLATIVE_WORD')).toBe(true);
     expect(isWordRuleType('INFRINGEMENT_WORD')).toBe(true);

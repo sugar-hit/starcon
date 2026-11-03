@@ -58,11 +58,27 @@ function task(overrides: Partial<BulkCollectTaskRow> = {}): BulkCollectTaskRow {
   };
 }
 
-function caps(overrides: Partial<ListingBulkCollectCapabilities> = {}): ListingBulkCollectCapabilities {
+function caps(
+  overrides: Partial<ListingBulkCollectCapabilities> = {},
+): ListingBulkCollectCapabilities {
   return {
     dimensions: [
-      { dimension: 'category_page_collect', description: '分类页批量采集', available: true, source: 't', ownerModule: '', impact: '' },
-      { dimension: 'collection_box', description: '采集箱', available: false, source: '—', ownerModule: '4.4.1.3 采集箱', impact: '本模块只负责产出草稿' },
+      {
+        dimension: 'category_page_collect',
+        description: '分类页批量采集',
+        available: true,
+        source: 't',
+        ownerModule: '',
+        impact: '',
+      },
+      {
+        dimension: 'collection_box',
+        description: '采集箱',
+        available: false,
+        source: '—',
+        ownerModule: '4.4.1.3 采集箱',
+        impact: '本模块只负责产出草稿',
+      },
     ],
     sources: [
       {
@@ -72,7 +88,8 @@ function caps(overrides: Partial<ListingBulkCollectCapabilities> = {}): ListingB
         kind: 'PLATFORM',
         minIntervalSeconds: 30,
         bulkMinIntervalSeconds: 2,
-        searchUrlTemplate: 'https://s.1688.com/selloffer/offer_search.htm?keywords={keyword}&beginPage={page}',
+        searchUrlTemplate:
+          'https://s.1688.com/selloffer/offer_search.htm?keywords={keyword}&beginPage={page}',
         categoryPageParam: 'page',
         pageOrigin: 1,
       },
@@ -107,9 +124,7 @@ describe('4.4.1.2 输入预检（只挡明显不合法的输入，不代替服�
     expect(precheckCategoryUrl('s.1688.com/category')).toBe(
       '分类页 URL 必须以 http:// 或 https:// 开头',
     );
-    expect(precheckCategoryUrl('ht!tp://x')).toBe(
-      '分类页 URL 必须以 http:// 或 https:// 开头',
-    );
+    expect(precheckCategoryUrl('ht!tp://x')).toBe('分类页 URL 必须以 http:// 或 https:// 开头');
     expect(precheckCategoryUrl('http://')).toBe('分类页 URL 格式不正确');
     expect(precheckCategoryUrl('https://s.1688.com/category/1')).toBeNull();
   });
@@ -223,7 +238,9 @@ describe('4.4.1.2 统计与原因', () => {
 
   it('成功态不显示失败原因', () => {
     expect(taskReason(task())).toBe('');
-    expect(taskReason(task({ state: 'FAILED', errorMessage: '页面抓取失败' }))).toBe('页面抓取失败');
+    expect(taskReason(task({ state: 'FAILED', errorMessage: '页面抓取失败' }))).toBe(
+      '页面抓取失败',
+    );
   });
 });
 
@@ -238,7 +255,9 @@ describe('4.4.1.2 金额：外部标价不是我方售价', () => {
 
 describe('4.4.1.2 时间与平台', () => {
   it('抓取时刻格式化，非法值原样返回', () => {
-    expect(capturedAtLabel('2026-10-20T01:02:03Z')).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
+    expect(capturedAtLabel('2026-10-20T01:02:03Z')).toMatch(
+      /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/,
+    );
     expect(capturedAtLabel('not-a-date')).toBe('not-a-date');
     expect(capturedAtLabel(null)).toBe('—');
   });

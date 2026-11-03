@@ -179,9 +179,15 @@ describe('14.5.1.1 达人库 · 表单校验', () => {
   it('评级档位区间必须自洽（上限严格大于下限）', () => {
     const base = { ...emptyInfluencerRatingTierInput(), tierCode: 'S', tierName: '顶级达人' };
     expect(validateInfluencerRatingTier({ ...base, minScore: '0.9', maxScore: '1' }).ok).toBe(true);
-    expect(validateInfluencerRatingTier({ ...base, minScore: '0.8', maxScore: '0.8' }).ok).toBe(false);
-    expect(validateInfluencerRatingTier({ ...base, minScore: '0.9', maxScore: '0.8' }).ok).toBe(false);
+    expect(validateInfluencerRatingTier({ ...base, minScore: '0.8', maxScore: '0.8' }).ok).toBe(
+      false,
+    );
+    expect(validateInfluencerRatingTier({ ...base, minScore: '0.9', maxScore: '0.8' }).ok).toBe(
+      false,
+    );
     expect(validateInfluencerRatingTier({ ...base, minScore: '', maxScore: '1' }).ok).toBe(false);
-    expect(validateInfluencerRatingTier({ ...base, minScore: '0', maxScore: '1.5' }).ok).toBe(false);
+    expect(validateInfluencerRatingTier({ ...base, minScore: '0', maxScore: '1.5' }).ok).toBe(
+      false,
+    );
   });
 });

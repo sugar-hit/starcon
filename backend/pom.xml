@@ -40,23 +40,65 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
+          <!--
+            🔴 钉死测试 JVM 的时区，否则同一份测试在不同机器上是两个答案。
+
+            为什么必须钉：
+            - GitHub Actions 的 ubuntu runner 是 UTC，开发机（东八区）是 Asia/Shanghai，
+              同一个断言在 CI 上读到 `Z`、在本地读到 `+08:00`。
+            - PostgreSQL 的 timestamptz **只保时刻、不保偏移量**；读回来的偏移量由
+              JDBC 驱动按 **JVM 默认时区** 换算（不是数据库的会话时区）。于是凡是断言
+              「读回来的偏移量是 +08:00」或「读回来的偏移量等于写进去的偏移量」的用例，
+              在 UTC runner 上必然失败 —— 2026-11-03 那次 CI 红灯就是这么来的
+              （PriceListIntegrationTest:502 / PriceListPriorityIntegrationTest:531）。
+            - 本仓的业务语义就是东八区（运营、班次、日切都按 +08:00 算），
+              代码里几十条断言也直接写着 ZoneOffset.ofHours(8)。
+
+            ⇒ 让 CI 与本地跑出同一个结果。两条启动期通道都设上：
+              · argLine 里的 -D 在 JVM 启动前生效，是 TimeZone.getDefault() 读到的值；
+              · 环境变量 TZ 是第二道保险（部分插件会在启动后 setProperty，那时
+                TimeZone 默认值已经被缓存住了，只靠 systemPropertyVariables 是不够的）。
+            注意：这是**测试环境**的约定，不改变运行时行为（生产部署时区由部署环境决定）；
+            凡是要断言「数据库保留了偏移量」的用例本身就是错的断言，应改为断言瞬间
+            （Instant）或换算回业务时区后的墙钟。
+
+            ⚠️ 将来引入 jacoco 之类的插件时，请把 -Duser.timezone 并进去而不是覆盖：
+            <argLine>@{argLine} -Duser.timezone=Asia/Shanghai</argLine>
+          -->
+          <argLine>-Duser.timezone=Asia/Shanghai</argLine>
+          <environmentVariables>
+            <TZ>Asia/Shanghai</TZ>
+          </environmentVariables>
           <systemPropertyVariables>
             <api.version>${docker.api.version}</api.version>
+            <user.timezone>Asia/Shanghai</user.timezone>
           </systemPropertyVariables>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>com.diffplug.spotless</groupId>
-        <artifactId>spotless-maven-plugin</artifactId>
-        <version>2.43.0</version>
-        <configuration>
-          <java>
-            <googleJavaFormat>
-              <version>1.22.0</version>
-            </googleJavaFormat>
-          </java>
-        </configuration>
-      </plugin>
+      <!--
+        🔴 这里**曾经**挂着 spotless-maven-plugin（google-java-format 1.22.0），
+        但没有 <executions> ⇒ 不绑定任何生命周期阶段，唯一的入口是 CI 里显式
+        跑的 `spotless:check`。那是一个「有配置、无执行入口、有 CI 校验」的三不管状态，
+        实际后果是：
+
+        - CI 的后端作业从 2026-10-30 起就一直是红的 —— `spotless:check` 报出 95 个文件
+          （全仓实际 2054 个文件）不合规，而它在 reactor 里排在 identity 之后，
+          于是从来没机会在 CI 日志里露面（identity 先炸，reactor 直接停）。
+        - 仓库自己的约定与它直接矛盾：`docs/backlog/2026-10-21-spotless-apply-mass-reformat-hazard.md`
+          记载了 `spotless:apply` 把 146 个文件重排版、夹带进无关交付的事故，
+          并明确「本仓 Java 格式化不归流水线管，风格要求改为与被改文件周围保持一致即可」。
+        - google-java-format 的 javadoc 折行会**损害**本仓的可读性：它把刻意分行写成
+          独立句子的中文说明并成一行（`…页面路由 {@code /pricing/calculator} （与 5.3.1.1`），
+          并把行内标签切断（`{@code` 与 `app.current_tenant}` 落到两行）。
+
+        ⇒ 处置：**撤掉 CI 里的格式闸，并把这个插件从 pom 里拿掉**，让仓库回到
+        「格式不集中管、改动与周边保持一致」的既定约定。留着不设闸的插件只会制造
+        「谁哪天跑一次 apply 就污染 2000 个文件」的噪音。
+
+        ⚠️ 若将来要重新引入自动格式化，先解决两件事：
+        (1) 中文 javadoc 的折行策略（需要能关闭 GJF 的 javadoc 格式化）；
+        (2) 全仓一次性归一的独立提交与配套的增量闸（存量债不能压在新交付上）。
+      -->
     </plugins>
   </build>
 </project>

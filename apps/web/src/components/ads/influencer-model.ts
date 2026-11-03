@@ -607,7 +607,13 @@ export function deleteInfluencerTagGroup(id: string): Promise<{ deleted: boolean
 }
 
 export function fetchInfluencerTags(
-  query: { groupCode?: string; status?: string; keyword?: string; page?: number; size?: number } = {},
+  query: {
+    groupCode?: string;
+    status?: string;
+    keyword?: string;
+    page?: number;
+    size?: number;
+  } = {},
 ): Promise<InfluencerTagPage> {
   return api<InfluencerTagPage>(`${base}/tags${queryString(query)}`);
 }

@@ -340,8 +340,8 @@ export function AdBudgetWorkspace() {
       <header className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold">广告预算分配</h1>
         <p className="text-muted-foreground max-w-4xl text-sm">
-          跨店铺 / 跨活动的预算分配与再平衡：按<strong>销售目标</strong>与
-          <strong>历史 ROAS</strong> 分配预算，识别<strong>预算受限</strong>（想花没预算）与
+          跨店铺 / 跨活动的预算分配与再平衡：按<strong>销售目标</strong>与<strong>历史 ROAS</strong>{' '}
+          分配预算，识别<strong>预算受限</strong>（想花没预算）与
           <strong>闲置预算</strong>（有预算花不出去）。输出三样：分配方案、再平衡建议、执行任务。
         </p>
       </header>
@@ -402,8 +402,8 @@ export function AdBudgetWorkspace() {
           <p className="text-muted-foreground text-sm">正在加载分配规则…</p>
         ) : rules && rules.items.length === 0 ? (
           <p className="text-muted-foreground text-sm">
-            还没有分配规则。分配规则决定「按什么分」：销售目标权重、历史 ROAS 权重，
-            以及<b>当前不可用</b>的利润权重位。
+            还没有分配规则。分配规则决定「按什么分」：销售目标权重、历史 ROAS 权重， 以及
+            <b>当前不可用</b>的利润权重位。
           </p>
         ) : (
           <table className="w-full text-sm">
@@ -427,7 +427,10 @@ export function AdBudgetWorkspace() {
                   <td className="py-1">{rule.currency}</td>
                   <td className="py-1 text-xs">
                     {rule.weights.map((w) => (
-                      <span key={w.weightSource} className={`mr-2 ${weightSourceTone(w.weightSource)}`}>
+                      <span
+                        key={w.weightSource}
+                        className={`mr-2 ${weightSourceTone(w.weightSource)}`}
+                      >
                         {weightSourceLabel(w.weightSource)} {w.weight}
                       </span>
                     ))}
@@ -544,7 +547,9 @@ export function AdBudgetWorkspace() {
             <input
               className="rounded border px-2 py-1"
               value={ruleInput.constrainedUtilization}
-              onChange={(e) => setRuleInput({ ...ruleInput, constrainedUtilization: e.target.value })}
+              onChange={(e) =>
+                setRuleInput({ ...ruleInput, constrainedUtilization: e.target.value })
+              }
             />
           </Field>
           <Field label="闲置阈值（利用率 &lt;）">
@@ -642,8 +647,9 @@ export function AdBudgetWorkspace() {
 
         {poolDetail ? (
           <p className="rounded border p-3 text-sm">
-            <strong>{poolDetail.poolName}</strong> · 总额 {money(poolDetail.totalAmount, poolDetail.currency)} ·{' '}
-            {poolDetail.periodStart} ~ {poolDetail.periodEnd} · 规则 {poolDetail.ruleName}
+            <strong>{poolDetail.poolName}</strong> · 总额{' '}
+            {money(poolDetail.totalAmount, poolDetail.currency)} · {poolDetail.periodStart} ~{' '}
+            {poolDetail.periodEnd} · 规则 {poolDetail.ruleName}
           </p>
         ) : null}
 
@@ -891,7 +897,9 @@ export function AdBudgetWorkspace() {
                       <td className={`py-1 ${ratioTone(line.utilization)}`}>
                         {ratioText(line.utilization)}
                       </td>
-                      <td className={`py-1 ${ratioTone(line.roas)}`}>{ratioText(line.roas, false)}</td>
+                      <td className={`py-1 ${ratioTone(line.roas)}`}>
+                        {ratioText(line.roas, false)}
+                      </td>
                       <td className="py-1">{ratioText(line.weight, false)}</td>
                       <td className="py-1">{money(line.allocatedBudget, line.currency)}</td>
                       <td className="py-1">{deltaMoney(line.budgetDelta, line.currency)}</td>
@@ -899,7 +907,7 @@ export function AdBudgetWorkspace() {
                         {recommendationLabel(line.recommendation)}
                         {line.budgetConstrained ? ' · 预算受限' : ''}
                         {line.idleBudget ? ' · 闲置' : ''}
-                        <span className="block text-muted-foreground">{line.reason}</span>
+                        <span className="text-muted-foreground block">{line.reason}</span>
                       </td>
                     </tr>
                   ))}
@@ -932,7 +940,7 @@ export function AdBudgetWorkspace() {
                       <td className="py-1">{money(row.currentBudget, row.currency)}</td>
                       <td className="py-1">
                         {skipReasonLabel(row.skipReason)}
-                        <span className="block text-muted-foreground">{row.reason}</span>
+                        <span className="text-muted-foreground block">{row.reason}</span>
                       </td>
                     </tr>
                   ))}
@@ -961,7 +969,7 @@ export function AdBudgetWorkspace() {
                       <td className="py-1">{rb.fromCampaignName}</td>
                       <td className="py-1">{rb.toCampaignName}</td>
                       <td className="py-1">{money(rb.amount, planDetail.plan.currency)}</td>
-                      <td className="py-1 text-muted-foreground">{rb.reason}</td>
+                      <td className="text-muted-foreground py-1">{rb.reason}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -998,8 +1006,8 @@ export function AdBudgetWorkspace() {
                     {taskStatusLabel(task.status)}
                   </td>
                   <td className="py-1 text-xs">
-                    共 {task.lineCount} 条：生效 {task.appliedCount} · 被拒 {task.rejectedCount} · 跳过{' '}
-                    {task.skippedCount}
+                    共 {task.lineCount} 条：生效 {task.appliedCount} · 被拒 {task.rejectedCount} ·
+                    跳过 {task.skippedCount}
                   </td>
                   <td className="py-1 text-xs">{timestampText(task.appliedAt)}</td>
                   <td className="py-1">
@@ -1060,7 +1068,7 @@ export function AdBudgetWorkspace() {
                       <td className={`py-1 ${taskResultTone(line.result)}`}>
                         {taskResultLabel(line.result)}
                       </td>
-                      <td className="py-1 text-muted-foreground">{line.message || '—'}</td>
+                      <td className="text-muted-foreground py-1">{line.message || '—'}</td>
                     </tr>
                   ))}
                 </tbody>

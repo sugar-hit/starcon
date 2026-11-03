@@ -165,9 +165,9 @@ describe('手工录入的本地校验', () => {
 
 describe('来源配置校验', () => {
   it('代码与名称必填，代码只能是字母数字下划线', () => {
-    expect(validateSourceInput({ code: '', name: 'x', kind: 'MANUAL', endpoint: '' }).join()).toContain(
-      '来源代码必填',
-    );
+    expect(
+      validateSourceInput({ code: '', name: 'x', kind: 'MANUAL', endpoint: '' }).join(),
+    ).toContain('来源代码必填');
     expect(
       validateSourceInput({ code: 'a b', name: 'x', kind: 'MANUAL', endpoint: '' }).join(),
     ).toContain('2~32 位');

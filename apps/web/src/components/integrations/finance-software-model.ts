@@ -140,7 +140,9 @@ export function fetchCurrencies(): Promise<string[]> {
 // ================================================================ 写入
 
 /** 登记或修改一个连接档案。 */
-export function saveAccount(input: FinanceSoftwareAccountInput): Promise<FinanceSoftwareAccountRow> {
+export function saveAccount(
+  input: FinanceSoftwareAccountInput,
+): Promise<FinanceSoftwareAccountRow> {
   return api<FinanceSoftwareAccountRow>(`${base}/accounts`, 'POST', input);
 }
 
@@ -162,7 +164,9 @@ export function deleteSubjectMap(id: string): Promise<void> {
 }
 
 /** 登记或修改一条主数据映射。 */
-export function saveMasterMap(input: FinanceSoftwareMasterMapInput): Promise<FinanceSoftwareMasterMapRow> {
+export function saveMasterMap(
+  input: FinanceSoftwareMasterMapInput,
+): Promise<FinanceSoftwareMasterMapRow> {
   return api<FinanceSoftwareMasterMapRow>(`${base}/master-maps`, 'POST', input);
 }
 
@@ -289,7 +293,10 @@ export function formatAmount(value: number | null | undefined): string {
 }
 
 /** 金额的显示口径（带币种）。 */
-export function formatMoney(value: number | null | undefined, currency?: string | undefined): string {
+export function formatMoney(
+  value: number | null | undefined,
+  currency?: string | undefined,
+): string {
   const amount = formatAmount(value);
   if (amount === '—') return amount;
   return currency ? `${amount} ${currency}` : amount;
@@ -349,7 +356,9 @@ export function diffExternalCodeLabel(code: string): { label: string; placeholde
  *
  * <p>🔴 财务看核对结果时最关心的是「哪条金额对不上」，不是「哪条只是缺一个科目」。
  */
-export function sortDiffs(diffs: FinanceSoftwareReconcileDiffRow[]): FinanceSoftwareReconcileDiffRow[] {
+export function sortDiffs(
+  diffs: FinanceSoftwareReconcileDiffRow[],
+): FinanceSoftwareReconcileDiffRow[] {
   const rank = (reason: string) =>
     reason === 'BALANCE_DIFF' ? 0 : reason === 'ONLY_LOCAL' || reason === 'ONLY_EXTERNAL' ? 1 : 2;
   return [...diffs].sort((a, b) => rank(a.reason) - rank(b.reason));
@@ -456,6 +465,9 @@ export function directionLabel(direction: string): string {
  * 🔴 用**后端返回的** filename —— 那一半是账套号 + 日期区间，
  * 现场对账时要按这个名字去对方系统里找对应的那一份。
  */
-export function downloadName(row: { filename?: string | undefined; fileNo?: string | undefined }): string {
+export function downloadName(row: {
+  filename?: string | undefined;
+  fileNo?: string | undefined;
+}): string {
   return row.filename || row.fileNo || 'vouchers.csv';
 }

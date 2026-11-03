@@ -107,11 +107,7 @@ export function registerPaymentChannel(input: FinancePaymentChannelInput) {
 
 /** 改一个支付渠道的配置。 */
 export function updatePaymentChannel(id: string, input: FinancePaymentChannelInput) {
-  return api<FinancePaymentChannelRow>(
-    `${base}/channels/${encodeURIComponent(id)}`,
-    'PUT',
-    input,
-  );
+  return api<FinancePaymentChannelRow>(`${base}/channels/${encodeURIComponent(id)}`, 'PUT', input);
 }
 
 /** 发起一次付款执行（对一张**已批**付款单）。 */
@@ -125,10 +121,7 @@ export function executePayment(input: FinancePaymentExecutionInput) {
  * <p>⚠️ 查证结论由后端如实落库：渠道侧成功 ⇒ 收敛成「已付」；查不出来 ⇒ 结果仍未知。
  */
 export function verifyPaymentExecution(id: string) {
-  return api<FinancePaymentExecutionResult>(
-    `${base}/${encodeURIComponent(id)}/verify`,
-    'POST',
-  );
+  return api<FinancePaymentExecutionResult>(`${base}/${encodeURIComponent(id)}/verify`, 'POST');
 }
 
 /**
@@ -138,10 +131,7 @@ export function verifyPaymentExecution(id: string) {
  * 页面不替后端做这个判断 —— 重发是有代价的动作，判据必须在服务端。
  */
 export function retryPaymentExecution(id: string) {
-  return api<FinancePaymentExecutionResult>(
-    `${base}/${encodeURIComponent(id)}/retry`,
-    'POST',
-  );
+  return api<FinancePaymentExecutionResult>(`${base}/${encodeURIComponent(id)}/retry`, 'POST');
 }
 
 /** 当前市场汇率（**只读** catalog 5.2.2.1），用来对照单据**锁定**的汇率。 */

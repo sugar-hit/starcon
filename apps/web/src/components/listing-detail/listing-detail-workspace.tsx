@@ -3,14 +3,7 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Badge, Button, EmptyState, PageHeader, SectionCard } from '@starcon/ui';
-import {
-  ArrowLeft,
-  Loader2,
-  PencilLine,
-  RefreshCw,
-  Send,
-  TriangleAlert,
-} from 'lucide-react';
+import { ArrowLeft, Loader2, PencilLine, RefreshCw, Send, TriangleAlert } from 'lucide-react';
 import {
   cellText,
   contentSourceLabel,
@@ -102,7 +95,7 @@ export function ListingDetailWorkspace({ listingId }: { listingId: string }) {
     return (
       <div className="flex flex-col gap-4">
         <PageHeader title="Listing 详情" description="加载中…" />
-        <div className="text-muted-foreground flex items-center gap-2 text-copy-13">
+        <div className="text-muted-foreground text-copy-13 flex items-center gap-2">
           <Loader2 className="h-4 w-4 animate-spin" />
           正在读取平台原始信息与差异对照…
         </div>
@@ -153,7 +146,11 @@ export function ListingDetailWorkspace({ listingId }: { listingId: string }) {
               </Button>
             </Link>
             <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+              {loading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4" />
+              )}
               刷新
             </Button>
             {/* 🔴 两个入口本批次都不可用：禁用 + 说明归属，而不是点了没反应 */}
@@ -209,15 +206,13 @@ export function ListingDetailWorkspace({ listingId }: { listingId: string }) {
       >
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Field label="平台商品 ID">
-            <span className="font-mono text-copy-13">{profile.externalItemId}</span>
+            <span className="text-copy-13 font-mono">{profile.externalItemId}</span>
           </Field>
           <Field label="店铺 / 站点">
             {profile.shopCode}
             {profile.marketplaceCode ? ` · ${profile.marketplaceCode}` : ' · 未归站点'}
           </Field>
-          <Field label="平台">
-            {profile.platformCode ?? '—'}
-          </Field>
+          <Field label="平台">{profile.platformCode ?? '—'}</Field>
           <Field label="类目路径">
             <span className="text-copy-13">{profile.categoryPath || '平台未给'}</span>
           </Field>
@@ -231,12 +226,12 @@ export function ListingDetailWorkspace({ listingId }: { listingId: string }) {
               {reviewLabel(profile.reviewStatus)}
             </Badge>
             {profile.reviewMessage && (
-              <span className="text-copy-13 text-muted-foreground ml-2">{profile.reviewMessage}</span>
+              <span className="text-copy-13 text-muted-foreground ml-2">
+                {profile.reviewMessage}
+              </span>
             )}
           </Field>
-          <Field label="评分 / 评论数">
-            {ratingText(profile.rating, profile.ratingCount)}
-          </Field>
+          <Field label="评分 / 评论数">{ratingText(profile.rating, profile.ratingCount)}</Field>
           <Field label="🔴 平台侧可售状态">
             <Badge
               tone={
@@ -277,16 +272,20 @@ export function ListingDetailWorkspace({ listingId }: { listingId: string }) {
       <SectionCard
         title="差异对照"
         description="左右两列逐项对照，差异高亮。「未接入」与「相同」是两种不同的结论，本模块不把它们混为一谈。"
-        extra={<Badge tone={detail.differentCount > 0 ? 'danger' : 'success'}>{diffSummary(detail.diff)}</Badge>}
+        extra={
+          <Badge tone={detail.differentCount > 0 ? 'danger' : 'success'}>
+            {diffSummary(detail.diff)}
+          </Badge>
+        }
       >
         {grouped.map(([group, rows]) => (
           <div key={group} className="mb-6 last:mb-0">
-            <div className="text-muted-foreground mb-2 flex items-center gap-2 text-copy-13">
+            <div className="text-muted-foreground text-copy-13 mb-2 flex items-center gap-2">
               <span className="text-foreground font-medium">{groupLabel(group)}</span>
               <span>{groupHint(group)}</span>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-copy-13">
+              <table className="text-copy-13 w-full text-left">
                 <thead>
                   <tr className="border-b">
                     <th className="py-2 pr-3 font-medium">对照项</th>
@@ -317,7 +316,7 @@ export function ListingDetailWorkspace({ listingId }: { listingId: string }) {
         }
       >
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-copy-13">
+          <table className="text-copy-13 w-full text-left">
             <thead>
               <tr className="border-b">
                 <th className="py-2 pr-3 font-medium">字段</th>
@@ -336,8 +335,12 @@ export function ListingDetailWorkspace({ listingId }: { listingId: string }) {
                   </td>
                   <td className="py-2 pr-3">
                     {/* 🔴 右列恒为未接入，且永远显示这一列 —— 隐藏它就看不见缺口 */}
-                    <span className="text-muted-foreground">{cellText(f.internalValue, f.internalKnown)}</span>
-                    <span className="text-copy-12 text-muted-foreground ml-2">归 {f.ownerModule}</span>
+                    <span className="text-muted-foreground">
+                      {cellText(f.internalValue, f.internalKnown)}
+                    </span>
+                    <span className="text-copy-12 text-muted-foreground ml-2">
+                      归 {f.ownerModule}
+                    </span>
                   </td>
                 </tr>
               ))}
@@ -358,7 +361,7 @@ export function ListingDetailWorkspace({ listingId }: { listingId: string }) {
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-copy-13">
+            <table className="text-copy-13 w-full text-left">
               <thead>
                 <tr className="border-b">
                   <th className="py-2 pr-3 font-medium">平台变体</th>
@@ -373,7 +376,9 @@ export function ListingDetailWorkspace({ listingId }: { listingId: string }) {
                     <td className="py-2 pr-3 font-mono">{v.externalVariantId}</td>
                     <td className="text-muted-foreground py-2 pr-3">{v.attributes || '{}'}</td>
                     <td className="py-2 pr-3 font-mono">
-                      {v.internalSkuId ?? <span className="text-muted-foreground">未挂内部 SKU</span>}
+                      {v.internalSkuId ?? (
+                        <span className="text-muted-foreground">未挂内部 SKU</span>
+                      )}
                     </td>
                     <td className="py-2">
                       <Badge tone={v.mappingStatus === 'UNMAPPED' ? 'warning' : 'success'}>
@@ -406,13 +411,16 @@ export function ListingDetailWorkspace({ listingId }: { listingId: string }) {
               </Badge>
               <span className="text-copy-13">
                 当前库存快照{' '}
-                <span className="font-medium">{quantityText(detail.writebackRegistry.currentStock, '未登记')}</span>
+                <span className="font-medium">
+                  {quantityText(detail.writebackRegistry.currentStock, '未登记')}
+                </span>
               </span>
               <span className="text-copy-13">
                 当前价快照{' '}
                 <span className="font-medium">
                   {quantityText(detail.writebackRegistry.currentPrice, '未登记')}
-                  {detail.writebackRegistry.currentPrice !== null && detail.writebackRegistry.currency
+                  {detail.writebackRegistry.currentPrice !== null &&
+                  detail.writebackRegistry.currency
                     ? ` ${detail.writebackRegistry.currency}`
                     : ''}
                 </span>
@@ -476,7 +484,10 @@ export function ListingDetailWorkspace({ listingId }: { listingId: string }) {
       </SectionCard>
 
       {/* 平台操作记录 */}
-      <SectionCard title="平台操作记录" description="发往平台的写操作及其回执（直接读 2.5.1.1 的任务清单，零复制）。">
+      <SectionCard
+        title="平台操作记录"
+        description="发往平台的写操作及其回执（直接读 2.5.1.1 的任务清单，零复制）。"
+      >
         {detail.platformOperations.length === 0 ? (
           <EmptyState
             title="没有可归属到本商品的操作记录"
@@ -508,18 +519,26 @@ export function ListingDetailWorkspace({ listingId }: { listingId: string }) {
           </ul>
         )}
         {caps?.platformOperationNote && (
-          <p className="text-copy-13 text-muted-foreground border-t pt-3">{caps.platformOperationNote}</p>
+          <p className="text-copy-13 text-muted-foreground border-t pt-3">
+            {caps.platformOperationNote}
+          </p>
         )}
       </SectionCard>
 
       {/* 状态变更轨迹 */}
-      <SectionCard title="状态变更轨迹" description="与发布历史不是一回事：状态变了不等于发过一次布。">
+      <SectionCard
+        title="状态变更轨迹"
+        description="与发布历史不是一回事：状态变了不等于发过一次布。"
+      >
         {detail.statusChanges.length === 0 ? (
           <EmptyState title="状态未变过" description="首次登记即为当前状态，尚无变更记录。" />
         ) : (
           <ul className="space-y-1">
             {detail.statusChanges.map((s, i) => (
-              <li key={`${s.occurredAt}-${i}`} className="text-copy-13 flex flex-wrap items-center gap-2">
+              <li
+                key={`${s.occurredAt}-${i}`}
+                className="text-copy-13 flex flex-wrap items-center gap-2"
+              >
                 <Badge tone={s.source === 'PLATFORM' ? 'info' : 'neutral'}>{s.source}</Badge>
                 <span>
                   {s.fromStatus ? `${statusLabel(s.fromStatus)} → ` : '首次登记 → '}
@@ -631,9 +650,7 @@ function groupHint(group: DiffGroup): string {
   }
 }
 
-function operationTone(
-  status: string,
-): 'success' | 'danger' | 'warning' | 'info' | 'neutral' {
+function operationTone(status: string): 'success' | 'danger' | 'warning' | 'info' | 'neutral' {
   switch (status) {
     case 'SUCCEEDED':
       return 'success';

@@ -1,3 +1,10 @@
+> **补充（2026-11-03）**：本条目记录的是 **catalog / warehouse** 两个类的并发 flake，仍然有效。
+> 但 `.dev-agent/l2-baseline.txt` 里列的**另外三个类**（`PendingShipmentIntegrationTest` 18 errors、
+> `FulfillmentMonitorIntegrationTest` 5 failures、`FulfillmentRoutingIntegrationTest` 1 failure）
+> 在当前代码里**已经全绿**（本地实跑：21 / 26 / 32 例，失败与错误均为 0）
+> ⇒ **那份 L2 基线文件已过时**，拿它当「存量红」清单会把已经修好的东西算成欠账。
+> 建议重跑一次全量 L2 后重写基线。
+
 # 两个既有集成测试在全量并发下 flake（L2 误报来源）
 
 **发现时间**：2026-10-13 20:00 tick，L2 批次闸

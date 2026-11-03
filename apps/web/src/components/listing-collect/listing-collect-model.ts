@@ -148,7 +148,9 @@ export function capturedAtLabel(capturedAt: string | null): string {
 }
 
 /** 键值项列表 → 便于渲染的 Map（同名键后者覆盖前者，与页面显示一致）。 */
-export function keyValueMap(items: ListingCollectKeyValue[] | null | undefined): Record<string, string> {
+export function keyValueMap(
+  items: ListingCollectKeyValue[] | null | undefined,
+): Record<string, string> {
   const out: Record<string, string> = {};
   for (const item of items ?? []) {
     if (!item?.name) continue;
@@ -185,8 +187,8 @@ export const IMAGE_URL_ONLY_NOTE =
 
 /** 🔴 草稿边界的说明：采集只产生草稿。 */
 export const DRAFT_ONLY_NOTE =
-  '🔴 采集**只产生草稿**：这里没有 SPU / SKU、不是平台 listing、也没有我方售价与库存。'
-  + '进正式商品库要走 4.4.1.3 采集箱 → 3.1.1.1 商品建档，并补全属性与合规信息。';
+  '🔴 采集**只产生草稿**：这里没有 SPU / SKU、不是平台 listing、也没有我方售价与库存。' +
+  '进正式商品库要走 4.4.1.3 采集箱 → 3.1.1.1 商品建档，并补全属性与合规信息。';
 
 /** 未交付的维度（媒体库 / 采集箱 / 批量采集 / 认领 / 售价 / 库存）。 */
 export function unavailableDimensions(caps: ListingCollectCapabilities | null) {
@@ -221,8 +223,10 @@ export function sourceKindLabel(kind: string): string {
 
 /** 空态文案：还没有采集历史时显示什么。 */
 export function emptyCollectsMessage(): string {
-  return '还没有采集记录。粘贴一个白名单内的商品链接（1688 / 淘宝 / 天猫 / 供应商站等），'
-    + '点「开始采集」就会真的去抓那个页面。';
+  return (
+    '还没有采集记录。粘贴一个白名单内的商品链接（1688 / 淘宝 / 天猫 / 供应商站等），' +
+    '点「开始采集」就会真的去抓那个页面。'
+  );
 }
 
 /** 空态文案：白名单为空时显示什么（运维没配白名单也是一种状态）。 */

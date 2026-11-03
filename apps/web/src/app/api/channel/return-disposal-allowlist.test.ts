@@ -171,9 +171,10 @@ it('🔴 兄弟车道的白名单条目未被本车道挤掉或污染', async ()
       .filter((path) => path.startsWith(sibling))
       .map((path) => path.replace(/^\//, '').replace('{id}', ID))
       .filter((path) => !path.includes('{'));
-    expect(siblingSites.length, `兄弟模块 ${sibling} 的 path 抽不到 —— 断言本身失效了`).toBeGreaterThan(
-      0,
-    );
+    expect(
+      siblingSites.length,
+      `兄弟模块 ${sibling} 的 path 抽不到 —— 断言本身失效了`,
+    ).toBeGreaterThan(0);
     for (const path of siblingSites) {
       const response = await callProxy(path, {
         headers: { cookie: 'starcon_session=private-session' },
@@ -204,7 +205,10 @@ it('🔴 本模块的前缀不与兄弟模块互相吃掉（首 token 不同）'
   vi.stubGlobal('fetch', fetcher);
 
   // 兄弟模块自己的前缀仍然走它自己的分支（不是被本车道的前缀截走）
-  for (const sibling of ['channel/return-dispositions/orders', 'channel/return-shipbacks/consignments']) {
+  for (const sibling of [
+    'channel/return-dispositions/orders',
+    'channel/return-shipbacks/consignments',
+  ]) {
     const response = await callProxy(sibling, {
       headers: { cookie: 'starcon_session=private-session' },
     });

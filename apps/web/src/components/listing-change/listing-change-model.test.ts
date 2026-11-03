@@ -179,7 +179,14 @@ describe('4.5.2.2 上新与变更监控 · 前端模型', () => {
   describe('🔴 参考数据与动作声明必须在页面上', () => {
     const caps = {
       dimensions: [
-        { dimension: 'a', description: 'x', available: true, source: 's', ownerModule: '', impact: '' },
+        {
+          dimension: 'a',
+          description: 'x',
+          available: true,
+          source: 's',
+          ownerModule: '',
+          impact: '',
+        },
         {
           dimension: 'real_crawl_scheduler',
           description: 'y',

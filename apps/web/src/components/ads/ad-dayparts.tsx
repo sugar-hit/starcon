@@ -390,7 +390,9 @@ export function AdDaypartWorkspace() {
             ))}
           </div>
           <details className="text-muted-foreground text-xs">
-            <summary className="cursor-pointer">口径说明（时区 / 系数 / 上限 / 执行 / 上游 / 边界）</summary>
+            <summary className="cursor-pointer">
+              口径说明（时区 / 系数 / 上限 / 执行 / 上游 / 边界）
+            </summary>
             <ul className="flex list-disc flex-col gap-1 pl-5">
               <li>{capabilities.timezoneNote}</li>
               <li>{capabilities.multiplierNote}</li>
@@ -604,7 +606,9 @@ export function AdDaypartWorkspace() {
                   </td>
                   <td className={`py-1 ${daypartStatusTone(row.status)}`}>
                     {daypartStatusLabel(row.status)}
-                    {row.dryRun ? <span className="text-muted-foreground text-xs"> · 试运行</span> : null}
+                    {row.dryRun ? (
+                      <span className="text-muted-foreground text-xs"> · 试运行</span>
+                    ) : null}
                   </td>
                   <td className="py-1">{row.effectiveHourCount} / 24</td>
                   <td className="py-1">{row.currency}</td>
@@ -624,17 +628,16 @@ export function AdDaypartWorkspace() {
           </h2>
           <p className="text-muted-foreground text-xs">
             店铺 <strong>{detail.shopName || detail.shopCode}</strong> 的本地时区：
-            <strong>{detail.shopTimezone || '定不了'}</strong>
-            （{timezoneStatusLabel(detail.timezoneStatus)}）
+            <strong>{detail.shopTimezone || '定不了'}</strong>（
+            {timezoneStatusLabel(detail.timezoneStatus)}）
             {detail.timezoneReason ? ` · ${detail.timezoneReason}` : ''}
             ；币种 {detail.currency}；单次上限 {money(detail.singleAdjustCapAmount)} /
-            {multiplierText(detail.singleAdjustCapPercent)}；总额上限{' '}
-            {money(detail.totalCapAmount)} / {detail.totalCapCount} 次 /{' '}
-            {detail.totalCapWindowHours} 小时。
+            {multiplierText(detail.singleAdjustCapPercent)}；总额上限 {money(detail.totalCapAmount)}{' '}
+            / {detail.totalCapCount} 次 / {detail.totalCapWindowHours} 小时。
           </p>
 
           {blockers.length > 0 ? (
-            <ul className="text-amber-600 flex list-disc flex-col gap-1 pl-5 text-xs">
+            <ul className="flex list-disc flex-col gap-1 pl-5 text-xs text-amber-600">
               {blockers.map((problem) => (
                 <li key={problem}>{problem}</li>
               ))}
@@ -693,7 +696,7 @@ export function AdDaypartWorkspace() {
             </button>
           </div>
           {detail.dryRun ? (
-            <p className="text-amber-600 text-xs">
+            <p className="text-xs text-amber-600">
               🔴 这条策略处于<b>试运行</b>：跑一轮只算「本来会变成多少」，**不真调**。
               要真调必须先在策略属性里关掉试运行。
             </p>
@@ -757,7 +760,9 @@ export function AdDaypartWorkspace() {
                       onChange={(event) => {
                         const value = Number(event.target.value);
                         setCurve((prev) =>
-                          prev.map((row, i) => (i === index ? { ...row, bidMultiplier: value } : row)),
+                          prev.map((row, i) =>
+                            i === index ? { ...row, bidMultiplier: value } : row,
+                          ),
                         );
                       }}
                     />
@@ -782,9 +787,9 @@ export function AdDaypartWorkspace() {
             </tbody>
           </table>
           <p className="text-muted-foreground text-xs">
-            在动的小时数：{effectiveHourCount(curve)} / 24。
-            🔴 「停投」= 预算系数置 0（该小时不再花钱），<b>不是</b>把活动状态改成暂停 ——
-            那是 14.1.1.1 的能力，本模块不越界。
+            在动的小时数：{effectiveHourCount(curve)} / 24。 🔴 「停投」= 预算系数置
+            0（该小时不再花钱），<b>不是</b>把活动状态改成暂停 —— 那是 14.1.1.1
+            的能力，本模块不越界。
           </p>
         </section>
       ) : null}
@@ -807,11 +812,12 @@ export function AdDaypartWorkspace() {
                   <span className="text-muted-foreground text-xs">
                     {' '}
                     窗口 {batch.windowFrom} ~ {batch.windowTo} · 口径 {batch.alignment} · 时区{' '}
-                    {batch.shopTimezone || '定不了'} · 投影 {batch.projectedDays}/{batch.expectedDays} 天
+                    {batch.shopTimezone || '定不了'} · 投影 {batch.projectedDays}/
+                    {batch.expectedDays} 天
                   </span>
                 </p>
                 {batch.timezoneReason || batch.upstreamMessage ? (
-                  <p className="text-amber-600 text-xs">
+                  <p className="text-xs text-amber-600">
                     {batch.timezoneReason || batch.upstreamMessage}
                   </p>
                 ) : null}
@@ -839,7 +845,9 @@ export function AdDaypartWorkspace() {
                               {daypartActionLabel(hour.suggestedAction)}
                             </td>
                             <td className="py-1">{multiplierText(hour.suggestedBidMultiplier)}</td>
-                            <td className="py-1">{multiplierText(hour.suggestedBudgetMultiplier)}</td>
+                            <td className="py-1">
+                              {multiplierText(hour.suggestedBudgetMultiplier)}
+                            </td>
                             <td className="text-muted-foreground py-1 text-xs">{hour.basisNote}</td>
                           </tr>
                         ))}
@@ -875,7 +883,7 @@ export function AdDaypartWorkspace() {
               {runResult.skippedCount} 条
             </p>
             {runResult.skips.map((skip) => (
-              <p key={skip.strategyId} className="text-amber-600 text-xs">
+              <p key={skip.strategyId} className="text-xs text-amber-600">
                 跳过 {skip.strategyCode}（{skip.shopCode}）：{skip.reason}
               </p>
             ))}
@@ -968,7 +976,9 @@ export function AdDaypartWorkspace() {
                         {taskResultLabel(line.result)}
                       </td>
                       <td className="text-muted-foreground py-1 text-xs">
-                        {guardrailLabel(line.guardrailCode) ? `${guardrailLabel(line.guardrailCode)}：` : ''}
+                        {guardrailLabel(line.guardrailCode)
+                          ? `${guardrailLabel(line.guardrailCode)}：`
+                          : ''}
                         {line.message}
                       </td>
                     </tr>

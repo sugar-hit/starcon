@@ -277,9 +277,7 @@ export function SupplierRatingWorkspace() {
                   id="period-start"
                   type="date"
                   value={filters.periodStart}
-                  onChange={(e) =>
-                    setFilters({ ...filters, periodStart: e.target.value, page: 0 })
-                  }
+                  onChange={(e) => setFilters({ ...filters, periodStart: e.target.value, page: 0 })}
                 />
               </FormField>
               <FormField id="grade" label="等级">
@@ -373,9 +371,7 @@ export function SupplierRatingWorkspace() {
                     id="adjustment"
                     value={adjustment.adjustment}
                     placeholder="例如 -5"
-                    onChange={(e) =>
-                      setAdjustment({ ...adjustment, adjustment: e.target.value })
-                    }
+                    onChange={(e) => setAdjustment({ ...adjustment, adjustment: e.target.value })}
                   />
                 </FormField>
                 <FormField id="reason" label="理由" hint="必填">
@@ -477,11 +473,7 @@ export function SupplierRatingWorkspace() {
                   </FormField>
                 </div>
                 <div className="mt-3 flex items-center gap-2">
-                  <Button
-                    size="sm"
-                    disabled={busy}
-                    onClick={() => void submitPolicy(policyForm)}
-                  >
+                  <Button size="sm" disabled={busy} onClick={() => void submitPolicy(policyForm)}>
                     保存权重配置
                   </Button>
                   <Button
@@ -591,7 +583,8 @@ export function SupplierRatingWorkspace() {
                   </div>
                   {row.unavailableDimensions ? (
                     <p className="text-muted-foreground mt-1 text-xs">
-                      没有依据的维度：{unavailableText(row.unavailableDimensions)}（已排除在合成之外）
+                      没有依据的维度：{unavailableText(row.unavailableDimensions)}
+                      （已排除在合成之外）
                     </p>
                   ) : null}
                 </li>
@@ -659,7 +652,8 @@ function RatingCard({
           质量合格率 <b className="text-foreground">{rateLabel(row.qualityPassRate)}</b>
           <br />
           <span className="text-muted-foreground">
-            检 {quantityLabel(row.qualityInspectedQuantity)} 件 · 得分 {scoreLabel(row.qualityScore)}
+            检 {quantityLabel(row.qualityInspectedQuantity)} 件 · 得分{' '}
+            {scoreLabel(row.qualityScore)}
           </span>
         </span>
         <span>
@@ -688,8 +682,7 @@ function RatingCard({
       {unavailableText(row.unavailableDimensions) ? (
         <p className="text-muted-foreground mt-2 text-xs">
           没有依据的维度：{unavailableText(row.unavailableDimensions)}（已排除在合成之外，
-          <b>不是 0 分</b>）
-          {row.unavailableReason ? ` · ${row.unavailableReason}` : ''}
+          <b>不是 0 分</b>）{row.unavailableReason ? ` · ${row.unavailableReason}` : ''}
         </p>
       ) : null}
     </div>

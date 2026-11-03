@@ -157,12 +157,12 @@ describe('4.4.2.2 筛选规则', () => {
   });
 
   it('类目选项的显示名：路径优先，没有路径时退回平台类目 ID', () => {
-    expect(categoryOptionLabel({ categoryPath: 'A > B', platformCategoryId: 'c-1', listingCount: 2 })).toBe(
-      'A > B',
-    );
-    expect(categoryOptionLabel({ categoryPath: '', platformCategoryId: 'c-1', listingCount: 2 })).toBe(
-      'c-1',
-    );
+    expect(
+      categoryOptionLabel({ categoryPath: 'A > B', platformCategoryId: 'c-1', listingCount: 2 }),
+    ).toBe('A > B');
+    expect(
+      categoryOptionLabel({ categoryPath: '', platformCategoryId: 'c-1', listingCount: 2 }),
+    ).toBe('c-1');
     expect(categoryOptionLabel({ categoryPath: '', platformCategoryId: '', listingCount: 2 })).toBe(
       '（未登记类目）',
     );

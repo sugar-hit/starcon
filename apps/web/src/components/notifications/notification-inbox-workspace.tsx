@@ -229,7 +229,10 @@ export function NotificationInboxWorkspace() {
       setCapabilities(caps);
 
       /** 没有读权限的来源**不去读** —— 读了必然 403，且会把「无权限」说成「服务挂了」。 */
-      const read = <T,>(code: NotificationType, work: () => Promise<Loaded<T>>): Promise<Loaded<T>> =>
+      const read = <T,>(
+        code: NotificationType,
+        work: () => Promise<Loaded<T>>,
+      ): Promise<Loaded<T>> =>
         allowed[code]
           ? work()
           : Promise.resolve({ data: [], total: 0, truncated: false, error: '' });
@@ -237,61 +240,46 @@ export function NotificationInboxWorkspace() {
       const [stockout, overdue, syncFailed, recon, messages] = await Promise.all([
         // 07 库存：缺货预警
         read<StockoutAlertRow>('STOCKOUT', () =>
-          loadAll<StockoutAlertRow>(
-            async (pageNo) => {
-              const result = await api<StockoutAlertPage>(
-                `warehouse/inventory/stockout-alerts/stockouts?page=${pageNo}&size=${PAGE_SIZE}`,
-              );
-              return { items: result.rows, total: result.total };
-            },
-            MAX_PAGES,
-          ),
+          loadAll<StockoutAlertRow>(async (pageNo) => {
+            const result = await api<StockoutAlertPage>(
+              `warehouse/inventory/stockout-alerts/stockouts?page=${pageNo}&size=${PAGE_SIZE}`,
+            );
+            return { items: result.rows, total: result.total };
+          }, MAX_PAGES),
         ),
         // 09 订单：履约超时
         read<TimelinessOverdueRow>('TIMELINESS_OVERDUE', () =>
-          loadAll<TimelinessOverdueRow>(
-            async (pageNo) => {
-              const result = await api<TimelinessOverduePage>(
-                `trade/fulfillment/timeliness/overdue?page=${pageNo}&size=${PAGE_SIZE}`,
-              );
-              return { items: result.items, total: result.total };
-            },
-            MAX_PAGES,
-          ),
+          loadAll<TimelinessOverdueRow>(async (pageNo) => {
+            const result = await api<TimelinessOverduePage>(
+              `trade/fulfillment/timeliness/overdue?page=${pageNo}&size=${PAGE_SIZE}`,
+            );
+            return { items: result.items, total: result.total };
+          }, MAX_PAGES),
         ),
         // 02 渠道：同步失败
         read<SyncFailureView>('SYNC_FAILURE', () =>
-          loadAll<SyncFailureView>(
-            async () => {
-              const result = await api<SyncFailureView[]>('channel/sync-failures?limit=200');
-              return { items: result, total: result.length };
-            },
-            1,
-          ),
+          loadAll<SyncFailureView>(async () => {
+            const result = await api<SyncFailureView[]>('channel/sync-failures?limit=200');
+            return { items: result, total: result.length };
+          }, 1),
         ),
         // 12 财务：对账差异
         read<FinanceSupplierReconciliationRow>('RECONCILIATION_DIFF', () =>
-          loadAll<FinanceSupplierReconciliationRow>(
-            async (pageNo) => {
-              const result = await api<FinanceSupplierReconciliationPage>(
-                `finance/supplier-reconciliation?page=${pageNo}&size=${PAGE_SIZE}`,
-              );
-              return { items: result.rows, total: result.total };
-            },
-            MAX_PAGES,
-          ),
+          loadAll<FinanceSupplierReconciliationRow>(async (pageNo) => {
+            const result = await api<FinanceSupplierReconciliationPage>(
+              `finance/supplier-reconciliation?page=${pageNo}&size=${PAGE_SIZE}`,
+            );
+            return { items: result.rows, total: result.total };
+          }, MAX_PAGES),
         ),
         // 15 客户：站内信
         read<CrmMessageRow>('MESSAGE', () =>
-          loadAll<CrmMessageRow>(
-            async (pageNo) => {
-              const result = await api<CrmMessagePage>(
-                `crm/message-inbox/messages?page=${pageNo}&size=${PAGE_SIZE}`,
-              );
-              return { items: result.items, total: result.total };
-            },
-            MAX_PAGES,
-          ),
+          loadAll<CrmMessageRow>(async (pageNo) => {
+            const result = await api<CrmMessagePage>(
+              `crm/message-inbox/messages?page=${pageNo}&size=${PAGE_SIZE}`,
+            );
+            return { items: result.items, total: result.total };
+          }, MAX_PAGES),
         ),
       ]);
 
@@ -373,7 +361,9 @@ export function NotificationInboxWorkspace() {
           'POST',
           { keys },
         );
-        const readKeys = new Set((result.read ?? []).map((entry: NotificationReadEntry) => entry.key));
+        const readKeys = new Set(
+          (result.read ?? []).map((entry: NotificationReadEntry) => entry.key),
+        );
         // 🔴 只把**服务端回报已读**的那些改成已读，其余条目**原样保留** ——
         //    把没点名的条目一并改成未读就是在乱改别人的状态。
         setItems((current) =>
@@ -435,10 +425,10 @@ export function NotificationInboxWorkspace() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-copy-13 text-muted-foreground">
-          通知收件箱是卷 01 的<b>只读聚合层</b>：它把 07 库存、09 订单、02 渠道、12 财务、
-          15 客户五处的通知投影并成<b>一条通知流</b>。通知是<b>投影</b> ——
-          允许丢弃后重算，<b>不作为业务事实来源</b>；本页不复制任何业务数据，
-          每条只给一条出口：<b>跳到归属系统的处理页</b>。
+          通知收件箱是卷 01 的<b>只读聚合层</b>：它把 07 库存、09 订单、02 渠道、12 财务、 15
+          客户五处的通知投影并成<b>一条通知流</b>。通知是<b>投影</b> —— 允许丢弃后重算，
+          <b>不作为业务事实来源</b>；本页不复制任何业务数据， 每条只给一条出口：
+          <b>跳到归属系统的处理页</b>。
         </p>
         <Button variant="ghost" size="sm" onClick={() => void load()} disabled={busy}>
           <RefreshCw className="h-4 w-4" />
@@ -461,7 +451,7 @@ export function NotificationInboxWorkspace() {
         <p
           key={notice}
           role="status"
-          className="border-warning/40 bg-warning/5 rounded-md border p-3 text-copy-12"
+          className="border-warning/40 bg-warning/5 text-copy-12 rounded-md border p-3"
         >
           {notice}
         </p>
@@ -495,8 +485,8 @@ export function NotificationInboxWorkspace() {
         </ul>
         <p className="text-copy-12 text-muted-foreground">
           当前工作空间 <b>{session?.tenantName ?? '—'}</b>（租户来自已认证的成员关系，
-          <b>不信任任何客户端租户头</b>）。数据范围<b>由归属服务按该会话在服务端判定</b>，
-          本页<b>不把范围当成可信输入往下传</b>。数据截至{' '}
+          <b>不信任任何客户端租户头</b>）。数据范围<b>由归属服务按该会话在服务端判定</b>， 本页
+          <b>不把范围当成可信输入往下传</b>。数据截至{' '}
           {dataAsOf ? dataAsOf.replace('T', ' ').slice(0, 19) : '—'}。
         </p>
       </section>
@@ -505,7 +495,7 @@ export function NotificationInboxWorkspace() {
       <section className="space-y-2">
         <h2 className="text-copy-16 font-semibold">收件箱概览</h2>
         <div className="flex flex-wrap gap-2">
-          <span className="rounded-md border px-3 py-2 text-copy-12">
+          <span className="text-copy-12 rounded-md border px-3 py-2">
             当前清单 <b className="ml-1">{summary.total}</b> 条
             {unreadBadge(summary) && (
               <Badge tone="info" className="ml-2">
@@ -516,19 +506,19 @@ export function NotificationInboxWorkspace() {
               （订阅内共 {inboxSummary.total} 条 · 已读 {summary.readCount} 条）
             </span>
           </span>
-          <span className="rounded-md border px-3 py-2 text-copy-12">
+          <span className="text-copy-12 rounded-md border px-3 py-2">
             严重 <b className="ml-1">{summary.bySeverity.CRITICAL ?? 0}</b> · 高{' '}
             <b className="ml-1">{summary.bySeverity.HIGH ?? 0}</b> · 中{' '}
             <b className="ml-1">{summary.bySeverity.MEDIUM ?? 0}</b> · 低{' '}
             <b className="ml-1">{summary.bySeverity.LOW ?? 0}</b>
           </span>
-          <span className="border-warning/40 bg-warning/5 rounded-md border px-3 py-2 text-copy-12">
+          <span className="border-warning/40 bg-warning/5 text-copy-12 rounded-md border px-3 py-2">
             判不了严重度 <b className="ml-1">{summary.unknownSeverityCount}</b> 条 · 时刻判不了{' '}
             <b className="ml-1">{summary.unknownTimeCount}</b> 条
             <span className="text-muted-foreground ml-2">（上游没给判定依据，不等于低优先级）</span>
           </span>
           {unreadable.length > 0 && (
-            <span className="border-destructive/30 bg-destructive/5 rounded-md border px-3 py-2 text-copy-12">
+            <span className="border-destructive/30 bg-destructive/5 text-copy-12 rounded-md border px-3 py-2">
               读不到来源 <b className="ml-1">{unreadable.length}</b> 个
               <span className="text-muted-foreground ml-2">
                 （这几类的通知本次**判不了**，不等于「没有通知」）
@@ -536,7 +526,7 @@ export function NotificationInboxWorkspace() {
             </span>
           )}
           {notPermittedCount > 0 && (
-            <span className="rounded-md border px-3 py-2 text-copy-12">
+            <span className="text-copy-12 rounded-md border px-3 py-2">
               无权限来源 <b className="ml-1">{notPermittedCount}</b> 个
               <span className="text-muted-foreground ml-2">
                 （这几类通知对你的角色不开放，不计入总数）
@@ -544,7 +534,7 @@ export function NotificationInboxWorkspace() {
             </span>
           )}
           {unknownType.length > 0 && (
-            <span className="border-destructive/30 bg-destructive/5 rounded-md border px-3 py-2 text-copy-12">
+            <span className="border-destructive/30 bg-destructive/5 text-copy-12 rounded-md border px-3 py-2">
               服务端词表缺 <b className="ml-1">{unknownType.length}</b> 类
               <span className="text-muted-foreground ml-2">
                 （前端这一类不会被订阅，也不会出现在收件箱里）
@@ -556,9 +546,7 @@ export function NotificationInboxWorkspace() {
           <p className="text-copy-12 text-muted-foreground">
             单次批量标记上限 <b>{capabilities.maxKeysPerRequest}</b> 条。
             {capabilities.boundaries.length > 0 && (
-              <>
-                未交付：{capabilities.boundaries.join('；')}。
-              </>
+              <>未交付：{capabilities.boundaries.join('；')}。</>
             )}
           </p>
         )}
@@ -572,37 +560,37 @@ export function NotificationInboxWorkspace() {
             const checked = subscribed.includes(code);
             const isLast = checked && subscribed.length === 1;
             return (
-              <label key={code} className="flex items-center gap-1 text-copy-12">
+              <label key={code} className="text-copy-12 flex items-center gap-1">
                 <input
                   type="checkbox"
                   checked={checked}
                   disabled={isLast}
                   onChange={() =>
                     void changeSubscriptions(
-                      checked
-                        ? subscribed.filter((item) => item !== code)
-                        : [...subscribed, code],
+                      checked ? subscribed.filter((item) => item !== code) : [...subscribed, code],
                     )
                   }
                 />
                 <span>{NOTIFICATION_TYPE_LABELS[code]}</span>
-                <span className="text-muted-foreground">（{inboxSummary.byType[code] ?? 0} 条）</span>
+                <span className="text-muted-foreground">
+                  （{inboxSummary.byType[code] ?? 0} 条）
+                </span>
               </label>
             );
           })}
         </div>
         <p className="text-copy-12 text-muted-foreground">
-          订阅是<b>个人设置</b>，只影响你自己的收件箱（它不改变任何业务数据）。
-          至少要订阅一类 —— 最后一类不能取消，取消后收件箱就空了。
+          订阅是<b>个人设置</b>，只影响你自己的收件箱（它不改变任何业务数据）。 至少要订阅一类 ——
+          最后一类不能取消，取消后收件箱就空了。
         </p>
       </section>
 
       {/* ---------------- 筛选 ---------------- */}
       <section className="flex flex-wrap items-end gap-3">
-        <label className="flex flex-col gap-1 text-copy-12">
+        <label className="text-copy-12 flex flex-col gap-1">
           <span className="text-muted-foreground">类型</span>
           <select
-            className="border rounded px-2 py-1 text-copy-12"
+            className="text-copy-12 rounded border px-2 py-1"
             value={type}
             onChange={(e) => {
               setType(e.target.value);
@@ -617,10 +605,10 @@ export function NotificationInboxWorkspace() {
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-copy-12">
+        <label className="text-copy-12 flex flex-col gap-1">
           <span className="text-muted-foreground">严重度</span>
           <select
-            className="border rounded px-2 py-1 text-copy-12"
+            className="text-copy-12 rounded border px-2 py-1"
             value={severity}
             onChange={(e) => {
               setSeverity(e.target.value);
@@ -635,10 +623,10 @@ export function NotificationInboxWorkspace() {
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-copy-12">
+        <label className="text-copy-12 flex flex-col gap-1">
           <span className="text-muted-foreground">已读状态</span>
           <select
-            className="border rounded px-2 py-1 text-copy-12"
+            className="text-copy-12 rounded border px-2 py-1"
             value={readState}
             onChange={(e) => {
               setReadState(e.target.value as 'ALL' | 'UNREAD' | 'READ');
@@ -650,10 +638,10 @@ export function NotificationInboxWorkspace() {
             <option value="READ">已读</option>
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-copy-12">
+        <label className="text-copy-12 flex flex-col gap-1">
           <span className="text-muted-foreground">单据引用 / 说明</span>
           <input
-            className="border rounded px-2 py-1 text-copy-12"
+            className="text-copy-12 rounded border px-2 py-1"
             value={keyword}
             onChange={(e) => {
               setKeyword(e.target.value);
@@ -725,9 +713,15 @@ export function NotificationInboxWorkspace() {
                     <Badge tone={severityTone(item.severity)}>
                       {SEVERITY_LABELS[item.severity]}
                     </Badge>
-                    {item.read ? <Badge tone="neutral">已读</Badge> : <Badge tone="brand">未读</Badge>}
-                    <span className="font-mono text-copy-13">{item.reference}</span>
-                    <span className="text-copy-12 text-muted-foreground">{item.referenceLabel}</span>
+                    {item.read ? (
+                      <Badge tone="neutral">已读</Badge>
+                    ) : (
+                      <Badge tone="brand">未读</Badge>
+                    )}
+                    <span className="text-copy-13 font-mono">{item.reference}</span>
+                    <span className="text-copy-12 text-muted-foreground">
+                      {item.referenceLabel}
+                    </span>
                   </div>
                   <div className="text-copy-12 text-muted-foreground mt-1">
                     {formatOccurredAt(item.occurredAt)} · {item.detail}
@@ -746,9 +740,7 @@ export function NotificationInboxWorkspace() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() =>
-                        void mark([item.key], item.read ? 'unread' : 'read')
-                      }
+                      onClick={() => void mark([item.key], item.read ? 'unread' : 'read')}
                     >
                       <BellRing className="h-4 w-4" />
                       {item.read ? '标为未读' : '标为已读'}

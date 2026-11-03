@@ -85,20 +85,22 @@ export const fetchPlatformDisputeAppealCapabilities = () =>
 // 申诉单
 // ==========================================================================
 
-export const fetchPlatformDisputeAppeals = (params: {
-  page?: number;
-  size?: number;
-  status?: string;
-  disputeId?: string;
-  currency?: string;
-  resolutionCode?: string;
-  submissionStatus?: string;
-  submittableOnly?: boolean;
-  from?: string;
-  to?: string;
-  keyword?: string;
-  sort?: string;
-} = {}) => call<PlatformAppealPage>(`${base}${query(params)}`);
+export const fetchPlatformDisputeAppeals = (
+  params: {
+    page?: number;
+    size?: number;
+    status?: string;
+    disputeId?: string;
+    currency?: string;
+    resolutionCode?: string;
+    submissionStatus?: string;
+    submittableOnly?: boolean;
+    from?: string;
+    to?: string;
+    keyword?: string;
+    sort?: string;
+  } = {},
+) => call<PlatformAppealPage>(`${base}${query(params)}`);
 
 export const fetchPlatformDisputeAppeal = (id: string) =>
   call<PlatformAppealDetail>(`${base}/${id}`);
@@ -107,10 +109,8 @@ export const fetchPlatformDisputeAppeal = (id: string) =>
 export const createPlatformDisputeAppeal = (body: PlatformAppealCreate) =>
   call<PlatformAppealDetail>(`${base}`, { method: 'POST', body: JSON.stringify(body) });
 
-export const updatePlatformDisputeAppealText = (
-  id: string,
-  body: PlatformAppealTextUpdate,
-) => call<PlatformAppealDetail>(`${base}/${id}/text`, { method: 'PUT', body: JSON.stringify(body) });
+export const updatePlatformDisputeAppealText = (id: string, body: PlatformAppealTextUpdate) =>
+  call<PlatformAppealDetail>(`${base}/${id}/text`, { method: 'PUT', body: JSON.stringify(body) });
 
 // ==========================================================================
 // 证据材料
@@ -125,7 +125,11 @@ export const updatePlatformDisputeAppealText = (
 export const attachPlatformDisputeAppealMaterial = (
   id: string,
   body: PlatformAppealMaterialCreate,
-) => call<PlatformAppealDetail>(`${base}/${id}/materials`, { method: 'POST', body: JSON.stringify(body) });
+) =>
+  call<PlatformAppealDetail>(`${base}/${id}/materials`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
 
 export const removePlatformDisputeAppealMaterial = (id: string, materialId: string) =>
   call<PlatformAppealDetail>(`${base}/${id}/materials/${materialId}`, { method: 'DELETE' });
@@ -135,12 +139,19 @@ export const removePlatformDisputeAppealMaterial = (id: string, materialId: stri
 // ==========================================================================
 
 export const submitPlatformDisputeAppeal = (id: string, body: PlatformAppealSubmit) =>
-  call<PlatformAppealDetail>(`${base}/${id}/submit`, { method: 'POST', body: JSON.stringify(body) });
+  call<PlatformAppealDetail>(`${base}/${id}/submit`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
 
 export const retryPlatformDisputeAppealSubmission = (
   id: string,
   body: PlatformAppealRetrySubmission,
-) => call<PlatformAppealDetail>(`${base}/${id}/retry-submission`, { method: 'POST', body: JSON.stringify(body) });
+) =>
+  call<PlatformAppealDetail>(`${base}/${id}/retry-submission`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
 
 export const recordPlatformDisputeAppealSubmissionAttempt = (
   id: string,
@@ -151,13 +162,17 @@ export const recordPlatformDisputeAppealSubmissionAttempt = (
     body: JSON.stringify(body),
   });
 
-export const recordPlatformDisputeAppealReply = (
-  id: string,
-  body: PlatformAppealPlatformReply,
-) => call<PlatformAppealDetail>(`${base}/${id}/platform-reply`, { method: 'POST', body: JSON.stringify(body) });
+export const recordPlatformDisputeAppealReply = (id: string, body: PlatformAppealPlatformReply) =>
+  call<PlatformAppealDetail>(`${base}/${id}/platform-reply`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
 
 export const withdrawPlatformDisputeAppeal = (id: string, body: PlatformAppealWithdraw) =>
-  call<PlatformAppealDetail>(`${base}/${id}/withdraw`, { method: 'POST', body: JSON.stringify(body) });
+  call<PlatformAppealDetail>(`${base}/${id}/withdraw`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
 
 // ==========================================================================
 // 取值域

@@ -128,9 +128,14 @@ it('写动作的 POST 形状被放行，且真的转发到 8087', async () => {
     expect.objectContaining({ method: 'POST' }),
   );
 
-  const recalculate = await POST(request(`finance/cost-calculation/runs/${ID}/recalculate`, 'POST'), {
-    params: Promise.resolve({ path: `finance/cost-calculation/runs/${ID}/recalculate`.split('/') }),
-  });
+  const recalculate = await POST(
+    request(`finance/cost-calculation/runs/${ID}/recalculate`, 'POST'),
+    {
+      params: Promise.resolve({
+        path: `finance/cost-calculation/runs/${ID}/recalculate`.split('/'),
+      }),
+    },
+  );
   expect(recalculate.status, 'POST runs/{id}/recalculate 未被放行').toBe(200);
 });
 

@@ -198,7 +198,7 @@ export function ListingChangeWorkspace() {
       />
 
       {error && (
-        <div className="border-destructive/40 bg-destructive/5 text-destructive flex items-center gap-2 rounded-lg border px-4 py-3 text-label-13">
+        <div className="border-destructive/40 bg-destructive/5 text-destructive text-label-13 flex items-center gap-2 rounded-lg border px-4 py-3">
           <TriangleAlert className="size-4 shrink-0" />
           <span className="flex-1">{error}</span>
           <Button size="sm" variant="secondary" onClick={() => void load()}>
@@ -209,13 +209,13 @@ export function ListingChangeWorkspace() {
       )}
 
       {notice && (
-        <div className="border-info/40 bg-info/5 text-foreground flex items-center gap-2 rounded-lg border px-4 py-3 text-label-13">
+        <div className="border-info/40 bg-info/5 text-foreground text-label-13 flex items-center gap-2 rounded-lg border px-4 py-3">
           <span className="flex-1">{notice}</span>
         </div>
       )}
 
       {/* ---- 🔴 来源标注 + 动作声明（蓝图加粗句：竞品数据只做参考指标） ---- */}
-      <div className="border-info/40 bg-info/5 text-foreground flex flex-col gap-2 rounded-lg border px-4 py-3 text-label-13">
+      <div className="border-info/40 bg-info/5 text-foreground text-label-13 flex flex-col gap-2 rounded-lg border px-4 py-3">
         <div className="flex items-start gap-3">
           <Badge tone="info" className="mt-0.5 shrink-0">
             {REFERENCE_DATA_BADGE}
@@ -261,26 +261,24 @@ export function ListingChangeWorkspace() {
         description="正在盯哪些 ASIN、抓取频率多少、机会阈值配没配。🔴 监控对象与自有商品分离 —— 这里只有平台 + ASIN，不是我们的商品。点一行选中，下面的事件流 / 机会 / 历史对比会跟着它走。"
         extra={
           watches ? (
-            <span className="text-muted-foreground text-label-12">
-              {pageSummary(watches)}
-            </span>
+            <span className="text-muted-foreground text-label-12">{pageSummary(watches)}</span>
           ) : undefined
         }
       >
         {loading && !watches ? (
-          <div className="text-muted-foreground flex items-center gap-2 px-1 py-8 text-label-13">
+          <div className="text-muted-foreground text-label-13 flex items-center gap-2 px-1 py-8">
             <Loader2 className="size-4 animate-spin" />
             正在加载监控对象…
           </div>
         ) : !watches || watches.items.length === 0 ? (
           <EmptyState
-            icon={<Sparkles className="size-8 text-muted-foreground" />}
+            icon={<Sparkles className="text-muted-foreground size-8" />}
             title="还没有监控对象"
             description="先建一个监控对象（平台 + ASIN），抓到竞品的上下架 / 价格 / 排名 / 评论数变化时才会落事件、才谈得上识别机会。"
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-label-13">
+            <table className="text-label-13 w-full text-left">
               <thead className="text-muted-foreground border-border border-b">
                 <tr>
                   <th className="px-4 py-2 font-medium">目标</th>
@@ -438,20 +436,20 @@ export function ListingChangeWorkspace() {
         }
       >
         {detailLoading && !events ? (
-          <div className="text-muted-foreground flex items-center gap-2 px-1 py-8 text-label-13">
+          <div className="text-muted-foreground text-label-13 flex items-center gap-2 px-1 py-8">
             <Loader2 className="size-4 animate-spin" />
             正在加载变更事件…
           </div>
         ) : !events || events.items.length === 0 ? (
           <EmptyState
-            icon={<LineChart className="size-8 text-muted-foreground" />}
+            icon={<LineChart className="text-muted-foreground size-8" />}
             title="没有变更事件"
             description={emptyEventsMessage(events?.watchCount ?? 0, events?.total ?? 0)}
           />
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-label-13">
+              <table className="text-label-13 w-full text-left">
                 <thead className="text-muted-foreground border-border border-b">
                   <tr>
                     <th className="px-4 py-2 font-medium">维度</th>
@@ -545,14 +543,14 @@ export function ListingChangeWorkspace() {
       >
         {!opportunities || opportunities.items.length === 0 ? (
           <EmptyState
-            icon={<Sparkles className="size-8 text-muted-foreground" />}
+            icon={<Sparkles className="text-muted-foreground size-8" />}
             title="没有市场机会"
             description="当前筛选条件下没有机会判定结论。机会要由「变化」触发 —— 没配阈值（涨价幅度 / 排名变差位数）的维度不判定，这跟「没变化」是两回事。"
           />
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-label-13">
+              <table className="text-label-13 w-full text-left">
                 <thead className="text-muted-foreground border-border border-b">
                   <tr>
                     <th className="px-4 py-2 font-medium">类型</th>
@@ -651,26 +649,26 @@ export function ListingChangeWorkspace() {
         extra={
           comparison ? (
             <span className="text-muted-foreground text-label-12">
-              {comparison.from} ~ {comparison.to} · 样本 {formatCount(comparison.sampleCount)} 条 · 事件{' '}
-              {formatCount(comparison.eventCount)} 条
+              {comparison.from} ~ {comparison.to} · 样本 {formatCount(comparison.sampleCount)} 条 ·
+              事件 {formatCount(comparison.eventCount)} 条
             </span>
           ) : undefined
         }
       >
         {!selectedWatch ? (
           <EmptyState
-            icon={<LineChart className="size-8 text-muted-foreground" />}
+            icon={<LineChart className="text-muted-foreground size-8" />}
             title="还没选中监控对象"
             description="在上面点一个监控对象，这里会显示这个竞品在所选区间内的四维历史对比。"
           />
         ) : !comparison ? (
-          <div className="text-muted-foreground flex items-center gap-2 px-1 py-8 text-label-13">
+          <div className="text-muted-foreground text-label-13 flex items-center gap-2 px-1 py-8">
             <Loader2 className="size-4 animate-spin" />
             正在加载历史对比…
           </div>
         ) : !comparison.hasData ? (
           <EmptyState
-            icon={<LineChart className="size-8 text-muted-foreground" />}
+            icon={<LineChart className="text-muted-foreground size-8" />}
             title="这个区间没有观测数据"
             description={emptyComparisonMessage(comparison)}
           />
@@ -699,7 +697,7 @@ export function ListingChangeWorkspace() {
               />
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-label-13">
+              <table className="text-label-13 w-full text-left">
                 <thead className="text-muted-foreground border-border border-b">
                   <tr>
                     <th className="px-4 py-2 font-medium">维度</th>
@@ -736,7 +734,8 @@ export function ListingChangeWorkspace() {
                     <td className="px-4 py-2">{formatCount(comparison.rank.firstRank)}</td>
                     <td className="px-4 py-2">{formatCount(comparison.rank.lastRank)}</td>
                     <td className="px-4 py-2">
-                      {formatCount(comparison.rank.bestRank)} / {formatCount(comparison.rank.worstRank)}
+                      {formatCount(comparison.rank.bestRank)} /{' '}
+                      {formatCount(comparison.rank.worstRank)}
                     </td>
                     <td className="px-4 py-2">{rankChangeText(comparison.rank.changeAmount)}</td>
                     <td className="px-4 py-2">{formatCount(comparison.rank.sampleCount)}</td>
@@ -746,26 +745,34 @@ export function ListingChangeWorkspace() {
                     <td className="px-4 py-2">{formatCount(comparison.reviewCount.firstCount)}</td>
                     <td className="px-4 py-2">{formatCount(comparison.reviewCount.lastCount)}</td>
                     <td className="px-4 py-2">—</td>
-                    <td className="px-4 py-2">{formatCount(comparison.reviewCount.changeAmount)}</td>
+                    <td className="px-4 py-2">
+                      {formatCount(comparison.reviewCount.changeAmount)}
+                    </td>
                     <td className="px-4 py-2">{formatCount(comparison.reviewCount.sampleCount)}</td>
                   </tr>
                   <tr className="border-border border-b last:border-0">
                     <td className="text-foreground px-4 py-2">上下架</td>
-                    <td className="px-4 py-2">{listingStatusLabel(comparison.listingStatus.currentStatus)}</td>
-                    <td className="px-4 py-2">{listingStatusLabel(comparison.listingStatus.currentStatus)}</td>
+                    <td className="px-4 py-2">
+                      {listingStatusLabel(comparison.listingStatus.currentStatus)}
+                    </td>
+                    <td className="px-4 py-2">
+                      {listingStatusLabel(comparison.listingStatus.currentStatus)}
+                    </td>
                     <td className="px-4 py-2">—</td>
                     <td className="px-4 py-2">
                       {formatCount(comparison.listingStatus.transitionCount)} 次迁移
                     </td>
-                    <td className="px-4 py-2">{formatCount(comparison.listingStatus.sampleCount)}</td>
+                    <td className="px-4 py-2">
+                      {formatCount(comparison.listingStatus.sampleCount)}
+                    </td>
                   </tr>
                 </tbody>
               </table>
             </div>
-            <p className="text-muted-foreground mt-3 text-label-12">
+            <p className="text-muted-foreground text-label-12 mt-3">
               🔴 比率由服务端现算，<strong>分母（区间首个价格）为 0 时是「—」</strong> ——
-              「没有基准」与「价格没变」是两件事，页面不替它下结论。
-              价格变化比例只在上次价格为非 0 时才有意义。
+              「没有基准」与「价格没变」是两件事，页面不替它下结论。 价格变化比例只在上次价格为非 0
+              时才有意义。
               {formatRate(comparison.price.changeRatio) === '—' ? '（本次区间显示为「—」）' : ''}
             </p>
           </>

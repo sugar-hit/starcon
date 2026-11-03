@@ -73,8 +73,16 @@ describe('🔴 差异状态：UNAVAILABLE 与 SAME 是两件不同的事', () =>
     expect(diffLabel('INTERNAL_ONLY')).toBe('只有内部侧有值');
     expect(diffLabel('UNKNOWN')).toBe('两侧都没值');
 
-    const labels = (['DIFFERENT', 'SAME', 'PLATFORM_ONLY', 'INTERNAL_ONLY', 'UNAVAILABLE', 'UNKNOWN'] as DiffStatus[])
-      .map(diffLabel);
+    const labels = (
+      [
+        'DIFFERENT',
+        'SAME',
+        'PLATFORM_ONLY',
+        'INTERNAL_ONLY',
+        'UNAVAILABLE',
+        'UNKNOWN',
+      ] as DiffStatus[]
+    ).map(diffLabel);
     expect(new Set(labels).size).toBe(labels.length);
   });
 

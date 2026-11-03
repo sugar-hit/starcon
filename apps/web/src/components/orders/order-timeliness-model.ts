@@ -152,7 +152,8 @@ export function formatDuration(seconds: number | null | undefined): string {
   const h = Math.floor((abs % 86400) / 3600);
   const m = Math.floor((abs % 3600) / 60);
   const s = abs % 60;
-  const body = d > 0 ? `${d}天${h}小时` : h > 0 ? `${h}小时${m}分` : m > 0 ? `${m}分${s}秒` : `${s}秒`;
+  const body =
+    d > 0 ? `${d}天${h}小时` : h > 0 ? `${h}小时${m}分` : m > 0 ? `${m}分${s}秒` : `${s}秒`;
   return negative ? `提前 ${body}` : body;
 }
 

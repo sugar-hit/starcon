@@ -83,9 +83,9 @@ it('请求真的转发到 identity 服务端口', async () => {
   await call('identity/shortcut-templates/effective');
 
   const targets = fetcher.mock.calls.map((call) => String(call[0]));
-  expect(
-    targets.some((url) => url.includes(':8081/identity/shortcut-templates/effective')),
-  ).toBe(true);
+  expect(targets.some((url) => url.includes(':8081/identity/shortcut-templates/effective'))).toBe(
+    true,
+  );
 });
 
 it('刻意不放行的形状仍然被拒 —— 放行后端不存在的映射比 404 更糟', async () => {

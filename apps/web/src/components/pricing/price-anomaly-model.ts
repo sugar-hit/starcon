@@ -31,10 +31,7 @@ import { api } from '../inventory/api';
 
 /** 四类价格异常。与后端 {@code AnomalyType} 逐字对应。 */
 export type AnomalyType =
-  | 'PLATFORM_INTERNAL_DIVERGENCE'
-  | 'BELOW_COST'
-  | 'PLATFORM_AUTO_DISCOUNT'
-  | 'CROSS_SITE_INVERSION';
+  'PLATFORM_INTERNAL_DIVERGENCE' | 'BELOW_COST' | 'PLATFORM_AUTO_DISCOUNT' | 'CROSS_SITE_INVERSION';
 
 /** 异常事件的状态。与后端 {@code EventStatus} 逐字对应。 */
 export type EventStatus = 'OPEN' | 'ACKNOWLEDGED' | 'RESOLVED';
@@ -44,10 +41,7 @@ export type Severity = 'HIGH' | 'MEDIUM' | 'LOW';
 
 /** 这次价格是**谁动的**。与后端 {@code PriceChangeSource} 逐字对应。 */
 export type PriceChangeSource =
-  | 'AUTOMATIC_PLATFORM'
-  | 'MANUAL_INTERNAL'
-  | 'PLATFORM_FEEDBACK'
-  | 'UNKNOWN';
+  'AUTOMATIC_PLATFORM' | 'MANUAL_INTERNAL' | 'PLATFORM_FEEDBACK' | 'UNKNOWN';
 
 /** 观测从哪个通道进来。与后端 {@code ObservationSource} 逐字对应。 */
 export type ObservationSource = 'PLATFORM_FEEDBACK' | 'PRICE_LIST' | 'MANUAL_ATTESTATION';
@@ -511,10 +505,7 @@ export function ratioText(value: string | null | undefined, empty = '—'): stri
  * <p>🔴 蓝图加粗句「德国站定价低于美国站会引发跨区窜货」在界面上必须读得出方向，
  * 所以固定写成「A 低于 B」，而不是「A / B」或只给一个价差。
  */
-export function sitePairText(event: {
-  siteCode: string;
-  relatedSiteCode: string;
-}): string {
+export function sitePairText(event: { siteCode: string; relatedSiteCode: string }): string {
   if (!event.relatedSiteCode) return event.siteCode;
   return `${event.siteCode} 低于 ${event.relatedSiteCode}`;
 }
@@ -525,10 +516,7 @@ export function sitePairText(event: {
  * <p>🔴 「持续了多久」只对**状态型**异常有意义（①②④）；③ 平台自动降价是发生过的事，
  * 它的持续天数恒为 0 —— 那不是「持续了 0 天」，而是「这不是一个持续状态」。
  */
-export function durationText(event: {
-  anomalyType: string;
-  durationDays: number;
-}): string {
+export function durationText(event: { anomalyType: string; durationDays: number }): string {
   if (event.anomalyType === 'PLATFORM_AUTO_DISCOUNT') return '发生过的事（不按持续计）';
   if (event.durationDays <= 0) return '不到 1 天';
   return `持续 ${event.durationDays} 天`;
@@ -673,7 +661,10 @@ export function fetchPriceAnomalyEvent(eventId: string): Promise<EventDetail> {
 }
 
 export function acknowledgePriceAnomaly(eventId: string): Promise<EventStatusSaved> {
-  return api<EventStatusSaved>(`catalog/price-anomaly-alerts/events/${eventId}/acknowledge`, 'POST');
+  return api<EventStatusSaved>(
+    `catalog/price-anomaly-alerts/events/${eventId}/acknowledge`,
+    'POST',
+  );
 }
 
 export function resolvePriceAnomaly(eventId: string): Promise<EventStatusSaved> {
@@ -707,7 +698,9 @@ export function fetchPriceAnomalyNotifications(
   if (filters.status) query.set('status', filters.status);
   query.set('page', String(filters.page));
   query.set('size', String(filters.size));
-  return api<NotificationListPage>(`catalog/price-anomaly-alerts/notifications?${query.toString()}`);
+  return api<NotificationListPage>(
+    `catalog/price-anomaly-alerts/notifications?${query.toString()}`,
+  );
 }
 
 export function runPriceAnomalyDetection(

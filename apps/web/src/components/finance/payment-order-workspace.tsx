@@ -176,10 +176,7 @@ export function PaymentOrderWorkspace() {
     setActionError('');
     setRateHint('');
     try {
-      const rate = await fetchPaymentExchangeRate(
-        orderCurrency.trim(),
-        baseCurrency.trim(),
-      );
+      const rate = await fetchPaymentExchangeRate(orderCurrency.trim(), baseCurrency.trim());
       setExchangeRate(String(rate.rate));
       setRateHint(paymentExchangeRateHint(rate));
     } catch (e) {
@@ -210,9 +207,16 @@ export function PaymentOrderWorkspace() {
           amount: lineAmounts[id] ?? found?.unpaidAmount.toString() ?? '0',
         };
       });
-      const installments = installmentDate && installmentAmount
-        ? [{ plannedPaidDate: installmentDate, currency: orderCurrency, amount: installmentAmount }]
-        : [];
+      const installments =
+        installmentDate && installmentAmount
+          ? [
+              {
+                plannedPaidDate: installmentDate,
+                currency: orderCurrency,
+                amount: installmentAmount,
+              },
+            ]
+          : [];
       const first = payableLines.find((l) => selectedLines.includes(l.payableLineId));
       const order = await createPaymentOrder(
         buildPaymentOrderInput({
@@ -326,9 +330,7 @@ export function PaymentOrderWorkspace() {
           )}
           {unavailable.length > 0 && (
             <Notice tone="warning" title="本模块当前不可用的能力">
-              {unavailable
-                .map((c) => `${c.name}（归属 ${c.ownerModule}）：${c.detail}`)
-                .join('；')}
+              {unavailable.map((c) => `${c.name}（归属 ${c.ownerModule}）：${c.detail}`).join('；')}
             </Notice>
           )}
 
@@ -344,9 +346,7 @@ export function PaymentOrderWorkspace() {
             />
             <StatCard
               label="已批待执行"
-              value={
-                page?.summaryByCurrency.reduce((sum, s) => sum + s.approvedCount, 0) ?? 0
-              }
+              value={page?.summaryByCurrency.reduce((sum, s) => sum + s.approvedCount, 0) ?? 0}
               unit="张"
               comparisonLabel="已批 ≠ 已付（付款执行属 12.2.2.2）"
             />
@@ -384,7 +384,9 @@ export function PaymentOrderWorkspace() {
 
               {payableLines.length > 0 && (
                 <div>
-                  <p className="text-copy-13 mb-2 font-medium">应付明细（{payableLines.length} 条）</p>
+                  <p className="text-copy-13 mb-2 font-medium">
+                    应付明细（{payableLines.length} 条）
+                  </p>
                   <table className="text-copy-13 w-full text-left">
                     <thead className="text-muted-foreground">
                       <tr>
@@ -525,13 +527,13 @@ export function PaymentOrderWorkspace() {
                 }}
               >
                 <option value="">全部状态</option>
-                {(['DRAFT', 'PENDING_APPROVAL', 'APPROVED', 'EXECUTING', 'PAID', 'FAILED'] as const).map(
-                  (value) => (
-                    <option key={value} value={value}>
-                      {paymentOrderStatusLabel(value)}
-                    </option>
-                  ),
-                )}
+                {(
+                  ['DRAFT', 'PENDING_APPROVAL', 'APPROVED', 'EXECUTING', 'PAID', 'FAILED'] as const
+                ).map((value) => (
+                  <option key={value} value={value}>
+                    {paymentOrderStatusLabel(value)}
+                  </option>
+                ))}
               </select>
               <select
                 className="border-border bg-background h-9 rounded-md border px-3 text-sm"
@@ -594,7 +596,9 @@ export function PaymentOrderWorkspace() {
 
             {!page || page.items.length === 0 ? (
               <EmptyState
-                title={keyword || status || approvalStatus ? '没有符合条件的付款单' : '还没有付款单'}
+                title={
+                  keyword || status || approvalStatus ? '没有符合条件的付款单' : '还没有付款单'
+                }
                 description={
                   keyword || status || approvalStatus
                     ? '换个筛选条件再看看。'
@@ -624,7 +628,9 @@ export function PaymentOrderWorkspace() {
                           {paymentCounterpartyTypeLabel(order.counterpartyType)}
                         </span>
                       </td>
-                      <td className="py-2">{formatPaymentOrderMoney(order.amount, order.currency)}</td>
+                      <td className="py-2">
+                        {formatPaymentOrderMoney(order.amount, order.currency)}
+                      </td>
                       <td className="py-2">{paymentMethodLabel(order.paymentMethod)}</td>
                       <td className="py-2">
                         <Badge tone={paymentOrderStatusTone(order.status)}>
@@ -645,10 +651,7 @@ export function PaymentOrderWorkspace() {
                             <Button onClick={() => void runSubmit(order.id)}>提交审批</Button>
                           )}
                           {order.status === 'PENDING_APPROVAL' && (
-                            <Button
-                              variant="secondary"
-                              onClick={() => void runSync(order.id)}
-                            >
+                            <Button variant="secondary" onClick={() => void runSync(order.id)}>
                               同步审批结果
                             </Button>
                           )}
@@ -865,7 +868,9 @@ export function PaymentOrderWorkspace() {
                 </div>
 
                 <div>
-                  <p className="text-copy-13 mb-2 font-medium">事件流（{detail.events.length} 条）</p>
+                  <p className="text-copy-13 mb-2 font-medium">
+                    事件流（{detail.events.length} 条）
+                  </p>
                   <ul className="text-copy-13 space-y-1">
                     {detail.events.map((event) => (
                       <li key={event.id}>

@@ -30,7 +30,9 @@ import {
   type AttributeRuleDraft,
 } from './platform-mapping-model';
 
-function mappingRow(overrides: Partial<PlatformCategoryMappingRow> = {}): PlatformCategoryMappingRow {
+function mappingRow(
+  overrides: Partial<PlatformCategoryMappingRow> = {},
+): PlatformCategoryMappingRow {
   return {
     id: 'map-1',
     internalCategoryId: '11111111-1111-1111-1111-111111111111',
@@ -136,7 +138,10 @@ describe('4.2.3.1 平台类目映射 · 编码规范化与校验（与后端同�
 
   it('候选值去空白、去重、丢弃空项，并能在编辑框与数组之间往返', () => {
     expect(normalizeAllowedValues(null)).toEqual([]);
-    expect(normalizeAllowedValues(['  红色 ', '蓝色', '红色', '', '   '])).toEqual(['红色', '蓝色']);
+    expect(normalizeAllowedValues(['  红色 ', '蓝色', '红色', '', '   '])).toEqual([
+      '红色',
+      '蓝色',
+    ]);
 
     const text = '红色\n\n  蓝色 \n红色';
     expect(parseAllowedValues(text)).toEqual(['红色', '蓝色']);
@@ -147,9 +152,7 @@ describe('4.2.3.1 平台类目映射 · 编码规范化与校验（与后端同�
 describe('4.2.3.1 平台类目映射 · 属性规则逐项校验', () => {
   it('合法规则不报错', () => {
     expect(
-      attributeProblem(
-        draft({ platformAttributeCode: 'material', platformAttributeName: '材质' }),
-      ),
+      attributeProblem(draft({ platformAttributeCode: 'material', platformAttributeName: '材质' })),
     ).toBeNull();
   });
 
@@ -181,9 +184,7 @@ describe('4.2.3.1 平台类目映射 · 属性规则逐项校验', () => {
       '平台属性编码不能为空',
     );
     expect(
-      attributeProblem(
-        draft({ platformAttributeCode: 'material', platformAttributeName: '' }),
-      ),
+      attributeProblem(draft({ platformAttributeCode: 'material', platformAttributeName: '' })),
     ).toContain('平台属性显示名不能为空');
     expect(
       attributeProblem(
@@ -261,7 +262,11 @@ describe('4.2.3.1 平台类目映射 · 草稿与契约输入', () => {
 
   it('空的内部属性选择不会被当成空字符串提交（服务端会当 id 查不到）', () => {
     const input = toAttributeInput(
-      draft({ platformAttributeCode: 'material', platformAttributeName: '材质', internalAttributeId: '  ' }),
+      draft({
+        platformAttributeCode: 'material',
+        platformAttributeName: '材质',
+        internalAttributeId: '  ',
+      }),
     );
     expect(input.internalAttributeId).toBeNull();
   });

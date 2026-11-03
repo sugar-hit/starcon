@@ -533,7 +533,10 @@ export function fetchRuleConditions(id: string): Promise<AdRuleConditionRow[]> {
 }
 
 export function setRuleStatus(id: string, status: string): Promise<AdRuleRow> {
-  return api<AdRuleRow>(`channel/ad-rules/rules/${id}/status?status=${encodeURIComponent(status)}`, 'POST');
+  return api<AdRuleRow>(
+    `channel/ad-rules/rules/${id}/status?status=${encodeURIComponent(status)}`,
+    'POST',
+  );
 }
 
 /**
@@ -658,7 +661,11 @@ export function fetchRun(id: string): Promise<AdRuleRunDetail> {
  * 🔴 `runMode` 是「本次运行的口径」，**不能**把一条开着试运行的规则推成真实执行 ——
  * 取更严的那个是服务端的规则，页面只是把选择送过去。
  */
-export function runEvaluation(runMode: string, ruleId?: string, note?: string): Promise<AdRuleRunDetail> {
+export function runEvaluation(
+  runMode: string,
+  ruleId?: string,
+  note?: string,
+): Promise<AdRuleRunDetail> {
   return api<AdRuleRunDetail>('channel/ad-rules/runs', 'POST', {
     runMode,
     ruleId: ruleId || undefined,
@@ -804,7 +811,9 @@ export function validateRule(input: RuleInput): AdValidation {
 
   // 🔴 上限：必填且为正。页面**不提供**「不限」这一档。
   if (!positive(input.singleAdjustCapAmount)) {
-    errors.push('🔴 单次调整金额上限必填且必须大于 0 —— 没有上限的自动调价一次异常就能烧掉大量预算');
+    errors.push(
+      '🔴 单次调整金额上限必填且必须大于 0 —— 没有上限的自动调价一次异常就能烧掉大量预算',
+    );
   }
   if (input.singleAdjustCapPercent.trim() !== '' && !nonNegative(input.singleAdjustCapPercent)) {
     errors.push('单次调整比例上限不能为负（填 0 表示不启用比例上限）');
@@ -815,7 +824,10 @@ export function validateRule(input: RuleInput): AdValidation {
   if (!Number.isInteger(Number(input.totalCapCount)) || Number(input.totalCapCount) < 1) {
     errors.push('🔴 总上限（窗口内累计次数）必须至少为 1');
   }
-  if (!Number.isInteger(Number(input.totalCapWindowHours)) || Number(input.totalCapWindowHours) < 1) {
+  if (
+    !Number.isInteger(Number(input.totalCapWindowHours)) ||
+    Number(input.totalCapWindowHours) < 1
+  ) {
     errors.push('🔴 累计窗口长度必须至少为 1 小时');
   }
 
@@ -846,7 +858,9 @@ export function validateRule(input: RuleInput): AdValidation {
         errors.push(`${label}：${condition.metric} 是比率 / 计数口径，阈值不能填在「金额阈值」上`);
       }
       if (!condition.thresholdValue.trim()) {
-        errors.push(`${label}：${condition.metric} 是比率 / 计数口径，阈值必须填在「比率 / 计数阈值」上`);
+        errors.push(
+          `${label}：${condition.metric} 是比率 / 计数口径，阈值必须填在「比率 / 计数阈值」上`,
+        );
       }
     } else if (AMOUNT_METRICS.includes(condition.metric)) {
       if (condition.thresholdValue.trim() !== '') {
@@ -889,7 +903,8 @@ export function validateMetric(input: MetricInput): AdValidation {
   if (input.attributedRevenue.trim() && !nonNegative(input.attributedRevenue)) {
     errors.push('归因销售额不能为负');
   }
-  if (input.currentBudget.trim() && !nonNegative(input.currentBudget)) errors.push('当前预算不能为负');
+  if (input.currentBudget.trim() && !nonNegative(input.currentBudget))
+    errors.push('当前预算不能为负');
   if (input.currentBid.trim() && !nonNegative(input.currentBid)) errors.push('当前出价不能为负');
   return { ok: errors.length === 0, errors };
 }

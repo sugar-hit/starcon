@@ -317,16 +317,8 @@ export function PaymentExecutionWorkspace() {
           polarity="negative"
           icon={<TriangleAlert className="h-4 w-4" />}
         />
-        <StatCard
-          label="已登记渠道"
-          value={channels.length}
-          polarity="neutral"
-        />
-        <StatCard
-          label="可发起付款的付款单"
-          value={pending.length}
-          polarity="neutral"
-        />
+        <StatCard label="已登记渠道" value={channels.length} polarity="neutral" />
+        <StatCard label="可发起付款的付款单" value={pending.length} polarity="neutral" />
       </div>
 
       <SectionCard
@@ -341,9 +333,9 @@ export function PaymentExecutionWorkspace() {
         ) : (
           <div className="space-y-4">
             <label className="block text-sm">
-              <span className="mb-1 block text-muted-foreground">付款单</span>
+              <span className="text-muted-foreground mb-1 block">付款单</span>
               <select
-                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+                className="border-border bg-background w-full rounded-md border px-3 py-2 text-sm"
                 value={pendingKey}
                 onChange={(e) => setPendingKey(e.target.value)}
               >
@@ -357,9 +349,9 @@ export function PaymentExecutionWorkspace() {
               </select>
             </label>
             <label className="block text-sm">
-              <span className="mb-1 block text-muted-foreground">支付渠道</span>
+              <span className="text-muted-foreground mb-1 block">支付渠道</span>
               <select
-                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+                className="border-border bg-background w-full rounded-md border px-3 py-2 text-sm"
                 value={executeChannel}
                 onChange={(e) => setExecuteChannel(e.target.value)}
               >
@@ -373,7 +365,7 @@ export function PaymentExecutionWorkspace() {
               </select>
             </label>
             <label className="block text-sm">
-              <span className="mb-1 block text-muted-foreground">备注</span>
+              <span className="text-muted-foreground mb-1 block">备注</span>
               <Input
                 value={executeNote}
                 onChange={(e) => setExecuteNote(e.target.value)}
@@ -396,7 +388,7 @@ export function PaymentExecutionWorkspace() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="text-left text-muted-foreground">
+              <thead className="text-muted-foreground text-left">
                 <tr>
                   <th className="py-2 pr-3">编码</th>
                   <th className="py-2 pr-3">名称</th>
@@ -408,7 +400,7 @@ export function PaymentExecutionWorkspace() {
               </thead>
               <tbody>
                 {channels.map((c) => (
-                  <tr key={c.id} className="border-t border-border">
+                  <tr key={c.id} className="border-border border-t">
                     <td className="py-2 pr-3">{c.code}</td>
                     <td className="py-2 pr-3">{c.name}</td>
                     <td className="py-2 pr-3">{paymentExecutionMethodLabel(c.paymentMethod)}</td>
@@ -438,7 +430,7 @@ export function PaymentExecutionWorkspace() {
             placeholder="渠道名称"
           />
           <select
-            className="rounded-md border border-border bg-background px-3 py-2 text-sm"
+            className="border-border bg-background rounded-md border px-3 py-2 text-sm"
             value={channelMethod}
             onChange={(e) => setChannelMethod(e.target.value)}
           >
@@ -470,7 +462,7 @@ export function PaymentExecutionWorkspace() {
       >
         <div className="mb-4 grid gap-3 md:grid-cols-5">
           <select
-            className="rounded-md border border-border bg-background px-3 py-2 text-sm"
+            className="border-border bg-background rounded-md border px-3 py-2 text-sm"
             value={status}
             onChange={(e) => {
               setStatus(e.target.value);
@@ -485,7 +477,7 @@ export function PaymentExecutionWorkspace() {
             ))}
           </select>
           <select
-            className="rounded-md border border-border bg-background px-3 py-2 text-sm"
+            className="border-border bg-background rounded-md border px-3 py-2 text-sm"
             value={failureClass}
             onChange={(e) => {
               setFailureClass(e.target.value);
@@ -500,7 +492,7 @@ export function PaymentExecutionWorkspace() {
             ))}
           </select>
           <select
-            className="rounded-md border border-border bg-background px-3 py-2 text-sm"
+            className="border-border bg-background rounded-md border px-3 py-2 text-sm"
             value={currency}
             onChange={(e) => {
               setCurrency(e.target.value);
@@ -515,7 +507,7 @@ export function PaymentExecutionWorkspace() {
             ))}
           </select>
           <select
-            className="rounded-md border border-border bg-background px-3 py-2 text-sm"
+            className="border-border bg-background rounded-md border px-3 py-2 text-sm"
             value={channelCode}
             onChange={(e) => {
               setChannelCode(e.target.value);
@@ -540,10 +532,14 @@ export function PaymentExecutionWorkspace() {
         </div>
 
         {loading && !page ? (
-          <p className="text-sm text-muted-foreground">加载中…</p>
+          <p className="text-muted-foreground text-sm">加载中…</p>
         ) : page && page.items.length === 0 ? (
           <EmptyState
-            title={status || failureClass || currency || channelCode || keyword ? '没有符合条件的执行单' : '还没有付款执行记录'}
+            title={
+              status || failureClass || currency || channelCode || keyword
+                ? '没有符合条件的执行单'
+                : '还没有付款执行记录'
+            }
             description={
               status || failureClass || currency || channelCode || keyword
                 ? '换个筛选条件再看看。'
@@ -555,7 +551,7 @@ export function PaymentExecutionWorkspace() {
             <>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead className="text-left text-muted-foreground">
+                  <thead className="text-muted-foreground text-left">
                     <tr>
                       <th className="py-2 pr-3">执行单号</th>
                       <th className="py-2 pr-3">付款单</th>
@@ -570,7 +566,7 @@ export function PaymentExecutionWorkspace() {
                     {page.items.map((item) => (
                       <tr
                         key={item.id}
-                        className="cursor-pointer border-t border-border hover:bg-muted/40"
+                        className="border-border hover:bg-muted/40 cursor-pointer border-t"
                         onClick={() => void openDetail(item.id)}
                       >
                         <td className="py-2 pr-3">{item.executionNo}</td>
@@ -597,7 +593,7 @@ export function PaymentExecutionWorkspace() {
                 </table>
               </div>
 
-              <div className="mt-4 flex flex-wrap gap-4 border-t border-border pt-3 text-sm">
+              <div className="border-border mt-4 flex flex-wrap gap-4 border-t pt-3 text-sm">
                 {page.summaryByCurrency.map((s) => (
                   <span key={s.currency} className="text-muted-foreground">
                     {s.currency}：{formatPaymentExecutionAmount(s.amount, s.currency)} · 共{' '}
@@ -704,11 +700,11 @@ export function PaymentExecutionWorkspace() {
 
           <h4 className="mt-5 text-sm font-medium">尝试记录</h4>
           {detail.attempts.length === 0 ? (
-            <p className="text-sm text-muted-foreground">还没有任何尝试。</p>
+            <p className="text-muted-foreground text-sm">还没有任何尝试。</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="text-left text-muted-foreground">
+                <thead className="text-muted-foreground text-left">
                   <tr>
                     <th className="py-2 pr-3">类型</th>
                     <th className="py-2 pr-3">序号</th>
@@ -719,7 +715,7 @@ export function PaymentExecutionWorkspace() {
                 </thead>
                 <tbody>
                   {detail.attempts.map((a) => (
-                    <tr key={a.id} className="border-t border-border">
+                    <tr key={a.id} className="border-border border-t">
                       <td className="py-2 pr-3">{paymentAttemptKindLabel(a.attemptKind)}</td>
                       <td className="py-2 pr-3">{a.attemptNo}</td>
                       <td className="py-2 pr-3">
@@ -738,7 +734,7 @@ export function PaymentExecutionWorkspace() {
 
           <h4 className="mt-5 text-sm font-medium">汇率锁定</h4>
           {detail.rateLocks.length === 0 ? (
-            <p className="text-sm text-muted-foreground">单币种付款没有换算，因此没有锁汇。</p>
+            <p className="text-muted-foreground text-sm">单币种付款没有换算，因此没有锁汇。</p>
           ) : (
             <ul className="space-y-1 text-sm">
               {detail.rateLocks.map((lock) => (
@@ -748,7 +744,9 @@ export function PaymentExecutionWorkspace() {
                   <Badge tone={lock.status === 'LOCKED' ? 'warning' : 'neutral'}>
                     {paymentRateLockStatusLabel(lock.status)}
                   </Badge>{' '}
-                  <span className="text-muted-foreground">来源：{lock.sourceName || lock.sourceCode}</span>
+                  <span className="text-muted-foreground">
+                    来源：{lock.sourceName || lock.sourceCode}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -756,12 +754,13 @@ export function PaymentExecutionWorkspace() {
 
           <h4 className="mt-5 text-sm font-medium">付款分摊</h4>
           {detail.allocations.length === 0 ? (
-            <p className="text-sm text-muted-foreground">还没有付款分摊记录。</p>
+            <p className="text-muted-foreground text-sm">还没有付款分摊记录。</p>
           ) : (
             <ul className="space-y-1 text-sm">
               {detail.allocations.map((a) => (
                 <li key={a.id}>
-                  应付明细 {a.payableLineId} ← {formatPaymentExecutionAmount(a.amount, detail.execution.currency)}
+                  应付明细 {a.payableLineId} ←{' '}
+                  {formatPaymentExecutionAmount(a.amount, detail.execution.currency)}
                 </li>
               ))}
             </ul>

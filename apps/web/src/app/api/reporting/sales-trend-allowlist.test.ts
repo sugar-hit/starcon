@@ -32,7 +32,10 @@ import { proxy } from '../../../lib/api-proxy';
 const SPEC = JSON.parse(
   readFileSync(
     fileURLToPath(
-      new URL('../../../../../../packages/api-contracts/src/reporting.openapi.json', import.meta.url),
+      new URL(
+        '../../../../../../packages/api-contracts/src/reporting.openapi.json',
+        import.meta.url,
+      ),
     ),
     'utf8',
   ),
@@ -202,11 +205,7 @@ it('本车道没有把 sales-trend 放到别的服务前缀下', async () => {
   const fetcher = vi.fn();
   vi.stubGlobal('fetch', fetcher);
   // 销量趋势落在 reporting 服务，不在 finance / catalog / trade 上开第二条映射
-  for (const path of [
-    'finance/sales-trend',
-    'catalog/sales-trend',
-    'trade/sales-trend',
-  ]) {
+  for (const path of ['finance/sales-trend', 'catalog/sales-trend', 'trade/sales-trend']) {
     const response = await callProxy(path, {
       headers: { cookie: 'starcon_session=private-session' },
     });

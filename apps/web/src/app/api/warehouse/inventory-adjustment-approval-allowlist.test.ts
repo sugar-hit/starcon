@@ -30,7 +30,10 @@ import { DELETE, GET, POST } from './[...path]/route';
 // 相对**本文件**定位：vitest 从仓库根或 apps/web 跑时 cwd 都不同，用 cwd 会静默读空。
 const SOURCE = readFileSync(
   fileURLToPath(
-    new URL('../../../components/inventory/inventory-adjustment-approval-model.ts', import.meta.url),
+    new URL(
+      '../../../components/inventory/inventory-adjustment-approval-model.ts',
+      import.meta.url,
+    ),
   ),
   'utf8',
 );
@@ -249,9 +252,14 @@ it('刻意不放行的形状：删除、单独的链路记录读端点、汇总'
   // 写成 404 会把「白名单按路径登记」这条纪律误写成「代理按方法过滤」。
   const fetcher2 = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
   vi.stubGlobal('fetch', fetcher2);
-  const deleted = await DELETE(request(`warehouse/inventory/adjustment-approvals/${ID}`, 'DELETE'), {
-    params: Promise.resolve({ path: `warehouse/inventory/adjustment-approvals/${ID}`.split('/') }),
-  });
+  const deleted = await DELETE(
+    request(`warehouse/inventory/adjustment-approvals/${ID}`, 'DELETE'),
+    {
+      params: Promise.resolve({
+        path: `warehouse/inventory/adjustment-approvals/${ID}`.split('/'),
+      }),
+    },
+  );
   expect(deleted.status, 'DELETE 不由代理裁决，应转发给后端（后端返 405）').toBe(200);
   expect(fetcher2).toHaveBeenCalledWith(
     expect.stringContaining(':8084/warehouse/inventory/adjustment-approvals'),

@@ -176,8 +176,22 @@ describe('取数覆盖情况', () => {
 describe('数据来源可用性', () => {
   it('只列出读不到的来源，不把「读不到」说成「没有数据」', () => {
     const sources = [
-      { key: 'TAX_RATE', module: '12.6.1.1', name: '按生效时间取税率', available: true, ownerService: 'finance', detail: '' },
-      { key: 'IOSS_ORDER_LIST', module: '16.3.2.1', name: 'IOSS 订单清单', available: false, ownerService: 'channel', detail: '🔴 读不到 IOSS 订单清单' },
+      {
+        key: 'TAX_RATE',
+        module: '12.6.1.1',
+        name: '按生效时间取税率',
+        available: true,
+        ownerService: 'finance',
+        detail: '',
+      },
+      {
+        key: 'IOSS_ORDER_LIST',
+        module: '16.3.2.1',
+        name: 'IOSS 订单清单',
+        available: false,
+        ownerService: 'channel',
+        detail: '🔴 读不到 IOSS 订单清单',
+      },
     ];
     const missing = unavailableSources(sources);
     expect(missing).toHaveLength(1);

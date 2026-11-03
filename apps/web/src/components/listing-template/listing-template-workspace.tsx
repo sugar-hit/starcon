@@ -191,7 +191,7 @@ export function ListingTemplateWorkspace() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center gap-2 py-16 text-muted-foreground">
+      <div className="text-muted-foreground flex items-center justify-center gap-2 py-16">
         <Loader2 className="size-4 animate-spin" />
         <span className="text-label-13">正在加载刊登模板…</span>
       </div>
@@ -202,7 +202,7 @@ export function ListingTemplateWorkspace() {
     return (
       <SectionCard title="刊登模板">
         <EmptyState
-          icon={<TriangleAlert className="size-8 text-destructive" />}
+          icon={<TriangleAlert className="text-destructive size-8" />}
           title="刊登模板加载失败"
           description={error}
           action={
@@ -239,18 +239,18 @@ export function ListingTemplateWorkspace() {
       {/* ---- 三条边界的界面措辞（后端给原文，前端原样展示） ---- */}
       {caps && (
         <div className="border-brand/40 bg-brand-soft/40 rounded-lg border px-4 py-3">
-          <p className="text-foreground mb-1 text-label-13 font-medium">刊登模板的三条硬边界</p>
-          <ul className="text-muted-foreground space-y-1 text-label-12">
+          <p className="text-foreground text-label-13 mb-1 font-medium">刊登模板的三条硬边界</p>
+          <ul className="text-muted-foreground text-label-12 space-y-1">
             <li className="flex items-start gap-2">
-              <Wand2 className="mt-0.5 size-3.5 shrink-0 text-brand" />
+              <Wand2 className="text-brand mt-0.5 size-3.5 shrink-0" />
               <span>{caps.rulesOnlyNote}</span>
             </li>
             <li className="flex items-start gap-2">
-              <ShieldCheck className="mt-0.5 size-3.5 shrink-0 text-brand" />
+              <ShieldCheck className="text-brand mt-0.5 size-3.5 shrink-0" />
               <span>{caps.draftNote}</span>
             </li>
             <li className="flex items-start gap-2">
-              <PackagePlus className="mt-0.5 size-3.5 shrink-0 text-brand" />
+              <PackagePlus className="text-brand mt-0.5 size-3.5 shrink-0" />
               <span>{caps.idempotencyNote}</span>
             </li>
           </ul>
@@ -260,8 +260,8 @@ export function ListingTemplateWorkspace() {
       {/* ---- 未接入维度明账 ---- */}
       {caps && unavailableDimensions(caps).length > 0 && (
         <div className="border-warning/40 bg-warning/5 rounded-lg border px-4 py-3">
-          <p className="text-warning mb-1 text-label-13 font-medium">部分能力未接入</p>
-          <ul className="text-muted-foreground space-y-1 text-label-12">
+          <p className="text-warning text-label-13 mb-1 font-medium">部分能力未接入</p>
+          <ul className="text-muted-foreground text-label-12 space-y-1">
             {unavailableDimensions(caps).map((d) => (
               <li key={d.dimension}>
                 <span className="text-foreground">{d.description}</span>
@@ -315,7 +315,7 @@ export function ListingTemplateWorkspace() {
           <div className="grid gap-2 sm:grid-cols-5">
             <select
               aria-label="适用范围"
-              className="border-control-border bg-card h-9 rounded-md border px-2 text-copy-13"
+              className="border-control-border bg-card text-copy-13 h-9 rounded-md border px-2"
               value={filters.scope}
               onChange={(e) => {
                 setPage(0);
@@ -331,7 +331,7 @@ export function ListingTemplateWorkspace() {
             </select>
             <select
               aria-label="平台"
-              className="border-control-border bg-card h-9 rounded-md border px-2 text-copy-13"
+              className="border-control-border bg-card text-copy-13 h-9 rounded-md border px-2"
               value={filters.platformCode}
               onChange={(e) => {
                 setPage(0);
@@ -347,7 +347,7 @@ export function ListingTemplateWorkspace() {
             </select>
             <select
               aria-label="店铺"
-              className="border-control-border bg-card h-9 rounded-md border px-2 text-copy-13"
+              className="border-control-border bg-card text-copy-13 h-9 rounded-md border px-2"
               value={filters.shopCode}
               onChange={(e) => {
                 setPage(0);
@@ -363,7 +363,7 @@ export function ListingTemplateWorkspace() {
             </select>
             <select
               aria-label="状态"
-              className="border-control-border bg-card h-9 rounded-md border px-2 text-copy-13"
+              className="border-control-border bg-card text-copy-13 h-9 rounded-md border px-2"
               value={filters.status}
               onChange={(e) => {
                 setPage(0);
@@ -400,10 +400,10 @@ export function ListingTemplateWorkspace() {
                       {t.name}
                       <span className="text-muted-foreground">（{t.code}）</span>
                     </span>
-                    <span className="text-muted-foreground ml-2 text-label-12">
+                    <span className="text-muted-foreground text-label-12 ml-2">
                       {t.scope === 'CATEGORY' ? '类目级' : '店铺级'} · {t.platformCode} ·{' '}
-                      {t.scope === 'CATEGORY' ? t.scopeTarget : t.scopeTarget} ·{' '}
-                      {t.fieldCount} 条规则 · {t.requiredFieldCount} 条必填
+                      {t.scope === 'CATEGORY' ? t.scopeTarget : t.scopeTarget} · {t.fieldCount}{' '}
+                      条规则 · {t.requiredFieldCount} 条必填
                     </span>
                     <span className="ml-2">
                       <Badge tone={statusTone(t.status)}>{statusLabel(t.status)}</Badge>
@@ -466,10 +466,15 @@ export function ListingTemplateWorkspace() {
             <label className="space-y-1 text-sm">
               <span className="block font-medium">适用范围</span>
               <select
-                className="border-control-border bg-card h-9 w-full rounded-md border px-2 text-copy-13"
+                className="border-control-border bg-card text-copy-13 h-9 w-full rounded-md border px-2"
                 value={draft.scope}
                 onChange={(e) =>
-                  setDraft((prev) => ({ ...prev, scope: e.target.value, categoryPath: '', shopId: '' }))
+                  setDraft((prev) => ({
+                    ...prev,
+                    scope: e.target.value,
+                    categoryPath: '',
+                    shopId: '',
+                  }))
                 }
               >
                 {SCOPE_OPTIONS.map((s) => (
@@ -482,7 +487,7 @@ export function ListingTemplateWorkspace() {
             <label className="space-y-1 text-sm">
               <span className="block font-medium">平台</span>
               <select
-                className="border-control-border bg-card h-9 w-full rounded-md border px-2 text-copy-13"
+                className="border-control-border bg-card text-copy-13 h-9 w-full rounded-md border px-2"
                 value={draft.platformId}
                 onChange={(e) =>
                   setDraft((prev) => ({
@@ -503,7 +508,7 @@ export function ListingTemplateWorkspace() {
             <label className="space-y-1 text-sm">
               <span className="block font-medium">站点</span>
               <select
-                className="border-control-border bg-card h-9 w-full rounded-md border px-2 text-copy-13"
+                className="border-control-border bg-card text-copy-13 h-9 w-full rounded-md border px-2"
                 value={draft.marketplaceId}
                 onChange={(e) => setDraft((prev) => ({ ...prev, marketplaceId: e.target.value }))}
               >
@@ -520,9 +525,7 @@ export function ListingTemplateWorkspace() {
                 <span className="block font-medium">类目路径</span>
                 <Input
                   value={draft.categoryPath}
-                  onChange={(e) =>
-                    setDraft((prev) => ({ ...prev, categoryPath: e.target.value }))
-                  }
+                  onChange={(e) => setDraft((prev) => ({ ...prev, categoryPath: e.target.value }))}
                   placeholder="例：Electronics > Audio"
                 />
               </label>
@@ -530,7 +533,7 @@ export function ListingTemplateWorkspace() {
               <label className="space-y-1 text-sm">
                 <span className="block font-medium">店铺</span>
                 <select
-                  className="border-control-border bg-card h-9 w-full rounded-md border px-2 text-copy-13"
+                  className="border-control-border bg-card text-copy-13 h-9 w-full rounded-md border px-2"
                   value={draft.shopId}
                   onChange={(e) => setDraft((prev) => ({ ...prev, shopId: e.target.value }))}
                 >
@@ -554,7 +557,7 @@ export function ListingTemplateWorkspace() {
             <label className="space-y-1 text-sm">
               <span className="block font-medium">状态</span>
               <select
-                className="border-control-border bg-card h-9 w-full rounded-md border px-2 text-copy-13"
+                className="border-control-border bg-card text-copy-13 h-9 w-full rounded-md border px-2"
                 value={draft.status}
                 onChange={(e) => setDraft((prev) => ({ ...prev, status: e.target.value }))}
               >
@@ -567,7 +570,7 @@ export function ListingTemplateWorkspace() {
 
           {/* ---- 字段规则 ---- */}
           <div>
-            <p className="text-foreground mb-2 text-label-13 font-medium">字段填充规则</p>
+            <p className="text-foreground text-label-13 mb-2 font-medium">字段填充规则</p>
             <div className="space-y-2">
               {draft.fields.map((field, index) => {
                 const option = FIELD_OPTIONS.find((o) => o.value === field.field);
@@ -580,7 +583,7 @@ export function ListingTemplateWorkspace() {
                     <div className="flex flex-wrap items-center gap-2">
                       <select
                         aria-label="字段"
-                        className="border-control-border bg-card h-9 rounded-md border px-2 text-copy-13"
+                        className="border-control-border bg-card text-copy-13 h-9 rounded-md border px-2"
                         value={field.field}
                         onChange={(e) =>
                           setDraft((prev) => ({
@@ -599,7 +602,7 @@ export function ListingTemplateWorkspace() {
                       </select>
                       <select
                         aria-label="取值来源"
-                        className="border-control-border bg-card h-9 rounded-md border px-2 text-copy-13"
+                        className="border-control-border bg-card text-copy-13 h-9 rounded-md border px-2"
                         value={field.sourceKind}
                         onChange={(e) =>
                           setDraft((prev) => ({
@@ -631,7 +634,7 @@ export function ListingTemplateWorkspace() {
                           }
                         />
                       )}
-                      <label className="text-muted-foreground flex items-center gap-1 text-label-12">
+                      <label className="text-muted-foreground text-label-12 flex items-center gap-1">
                         <input
                           type="checkbox"
                           checked={field.required}
@@ -713,7 +716,7 @@ export function ListingTemplateWorkspace() {
 
           {/* ---- 图片组 ---- */}
           <div>
-            <p className="text-foreground mb-2 text-label-13 font-medium">
+            <p className="text-foreground text-label-13 mb-2 font-medium">
               图片组
               <span className="text-muted-foreground font-normal">
                 （素材 id 指向 03 媒体库，跨服务只读；套用时解析成当前存储键）
@@ -721,7 +724,10 @@ export function ListingTemplateWorkspace() {
             </p>
             <div className="space-y-2">
               {draft.groups.map((group, index) => (
-                <div key={`${group.groupCode}-${index}`} className="border-border flex flex-wrap items-center gap-2 rounded-md border px-3 py-2">
+                <div
+                  key={`${group.groupCode}-${index}`}
+                  className="border-border flex flex-wrap items-center gap-2 rounded-md border px-3 py-2"
+                >
                   <Input
                     className="max-w-40"
                     placeholder="组编码"
@@ -737,7 +743,7 @@ export function ListingTemplateWorkspace() {
                   />
                   <select
                     aria-label="取组方式"
-                    className="border-control-border bg-card h-9 rounded-md border px-2 text-copy-13"
+                    className="border-control-border bg-card text-copy-13 h-9 rounded-md border px-2"
                     value={group.groupKind}
                     onChange={(e) =>
                       setDraft((prev) => ({
@@ -890,8 +896,7 @@ export function ListingTemplateWorkspace() {
                 disabled={busy}
                 onClick={() =>
                   void run(async () => {
-                    const next =
-                      detail.template.status === 'ACTIVE' ? 'DISABLED' : 'ACTIVE';
+                    const next = detail.template.status === 'ACTIVE' ? 'DISABLED' : 'ACTIVE';
                     const updated = await setTemplateStatus(detail.template.id, next);
                     setDetail(updated);
                     setNotice(`模板状态已改为 ${statusLabel(updated.template.status)}`);
@@ -921,20 +926,22 @@ export function ListingTemplateWorkspace() {
         >
           <div className="space-y-4">
             <div>
-              <p className="text-foreground mb-2 text-label-13 font-medium">字段规则（存的是规则，不是值）</p>
+              <p className="text-foreground text-label-13 mb-2 font-medium">
+                字段规则（存的是规则，不是值）
+              </p>
               <ul className="space-y-1">
                 {detail.fields.map((f) => (
                   <li
                     key={f.id}
                     className="border-border flex flex-wrap items-center gap-2 rounded-md border px-3 py-2"
                   >
-                    <span className="text-foreground w-32 text-label-13">
+                    <span className="text-foreground text-label-13 w-32">
                       {FIELD_OPTIONS.find((o) => o.value === f.field)?.label ?? f.field}
                     </span>
-                    <span className="text-muted-foreground w-32 text-label-12">
+                    <span className="text-muted-foreground text-label-12 w-32">
                       {sourceKindLabel(f.sourceKind)}
                     </span>
-                    <span className="text-muted-foreground flex-1 text-label-12">
+                    <span className="text-muted-foreground text-label-12 flex-1">
                       {f.sourceKind === 'LITERAL'
                         ? f.valueExpression
                         : `${f.sourceRef}${f.valueExpression ? ` · ${f.valueExpression}` : ''}`}
@@ -946,7 +953,7 @@ export function ListingTemplateWorkspace() {
             </div>
 
             <div>
-              <p className="text-foreground mb-2 text-label-13 font-medium">
+              <p className="text-foreground text-label-13 mb-2 font-medium">
                 适用范围命中的商品
                 <span className="text-muted-foreground font-normal">
                   （{matches?.scopeNote ?? '按真实 listing 查出来的命中行，不是写死的字符串比较'}）
@@ -1008,7 +1015,7 @@ export function ListingTemplateWorkspace() {
                   <button
                     type="button"
                     onClick={() => setApplyDraft((prev) => ({ ...prev, listingId: c.id }))}
-                    className="border-border hover:border-foreground/40 hover:text-foreground text-muted-foreground w-full rounded-md border px-3 py-1.5 text-left text-label-13"
+                    className="border-border hover:border-foreground/40 hover:text-foreground text-muted-foreground text-label-13 w-full rounded-md border px-3 py-1.5 text-left"
                   >
                     {c.title}
                     <span className="text-muted-foreground">
@@ -1082,21 +1089,21 @@ export function ListingTemplateWorkspace() {
                     （产出草稿 {result.targetDraftId}，状态 {result.draftState}）
                   </span>
                 </p>
-                <p className="text-muted-foreground mt-1 text-label-12">
+                <p className="text-muted-foreground text-label-12 mt-1">
                   {validationSummary(result)} · 取到 {result.appliedCount} 项 · 处于「不知道」{' '}
                   {result.unknownCount} 项
                 </p>
                 {replayNote(result) && (
-                  <p className="text-warning mt-1 text-label-12">{replayNote(result)}</p>
+                  <p className="text-warning text-label-12 mt-1">{replayNote(result)}</p>
                 )}
               </div>
 
               {result.violations.length > 0 && (
                 <div className="border-destructive/40 bg-destructive/5 rounded-lg border px-3 py-2">
-                  <p className="text-destructive mb-1 text-label-13 font-medium">
+                  <p className="text-destructive text-label-13 mb-1 font-medium">
                     必填违规（指到具体字段与规则）
                   </p>
-                  <ul className="text-muted-foreground space-y-1 text-label-12">
+                  <ul className="text-muted-foreground text-label-12 space-y-1">
                     {result.violations.map((v) => (
                       <li key={v.field}>
                         <span className="text-foreground">{v.field}</span> · {v.ruleRef} ·{' '}
@@ -1109,17 +1116,19 @@ export function ListingTemplateWorkspace() {
               )}
 
               <div>
-                <p className="text-foreground mb-2 text-label-13 font-medium">逐字段结果</p>
+                <p className="text-foreground text-label-13 mb-2 font-medium">逐字段结果</p>
                 <ul className="space-y-1">
                   {result.fields.map((f) => (
                     <li
                       key={f.field}
                       className="border-border flex flex-wrap items-center gap-2 rounded-md border px-3 py-2"
                     >
-                      <span className="text-foreground w-32 text-label-13">{f.field}</span>
-                      <span className="text-muted-foreground w-40 text-label-12">{f.ruleRef}</span>
-                      <Badge tone={evaluationTone(f.status)}>{evaluationStatusLabel(f.status)}</Badge>
-                      <span className="text-muted-foreground flex-1 text-label-12">
+                      <span className="text-foreground text-label-13 w-32">{f.field}</span>
+                      <span className="text-muted-foreground text-label-12 w-40">{f.ruleRef}</span>
+                      <Badge tone={evaluationTone(f.status)}>
+                        {evaluationStatusLabel(f.status)}
+                      </Badge>
+                      <span className="text-muted-foreground text-label-12 flex-1">
                         {valueLines(f.field, f.value).join(' / ') || f.reason}
                       </span>
                       {f.ownerModule && (
@@ -1135,7 +1144,10 @@ export function ListingTemplateWorkspace() {
       </SectionCard>
 
       {/* ---- 套用记录 ---- */}
-      <SectionCard title="套用记录" description="谁在什么时候把哪个模板套到了哪个商品上，产出了什么草稿。">
+      <SectionCard
+        title="套用记录"
+        description="谁在什么时候把哪个模板套到了哪个商品上，产出了什么草稿。"
+      >
         {!applies || applies.items.length === 0 ? (
           <p className="text-muted-foreground text-label-12">还没有套用记录。</p>
         ) : (
@@ -1168,7 +1180,13 @@ export function ListingTemplateWorkspace() {
 /** 加号图标（lucide 里的 Plus，单独 import 会多一行，这里内联保持依赖最小）。 */
 function PlusIcon() {
   return (
-    <svg className="mr-2 size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg
+      className="mr-2 size-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
       <path d="M12 5v14M5 12h14" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );

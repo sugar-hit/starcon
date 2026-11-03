@@ -139,8 +139,11 @@ export function BrandAuthorizationWorkspace() {
   const [shopId, setShopId] = useState('');
   const [countryCode, setCountryCode] = useState('');
   const [categoryId, setCategoryId] = useState('');
-  const [brandCandidates, setBrandCandidates] = useState<BrandAuthorizationCandidatePage | null>(null);
-  const [supplierCandidates, setSupplierCandidates] = useState<BrandAuthorizationCandidatePage | null>(null);
+  const [brandCandidates, setBrandCandidates] = useState<BrandAuthorizationCandidatePage | null>(
+    null,
+  );
+  const [supplierCandidates, setSupplierCandidates] =
+    useState<BrandAuthorizationCandidatePage | null>(null);
 
   const [editing, setEditing] = useState<BrandAuthorizationRecord | null>(null);
   const [formOpen, setFormOpen] = useState(false);
@@ -150,17 +153,23 @@ export function BrandAuthorizationWorkspace() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const loadAuthorizations = useCallback(async (target: number) => {
-    const result = await fetchAuthorizations(target, PAGE_SIZE, { keyword, state });
-    setAuthorizations(result);
-    return result;
-  }, [keyword, state]);
+  const loadAuthorizations = useCallback(
+    async (target: number) => {
+      const result = await fetchAuthorizations(target, PAGE_SIZE, { keyword, state });
+      setAuthorizations(result);
+      return result;
+    },
+    [keyword, state],
+  );
 
-  const loadReminders = useCallback(async (target: number) => {
-    const result = await fetchExpiryReminders(target, PAGE_SIZE, { state: reminderState });
-    setReminders(result);
-    return result;
-  }, [reminderState]);
+  const loadReminders = useCallback(
+    async (target: number) => {
+      const result = await fetchExpiryReminders(target, PAGE_SIZE, { state: reminderState });
+      setReminders(result);
+      return result;
+    },
+    [reminderState],
+  );
 
   const loadChecks = useCallback(async (target: number) => {
     const result = await fetchChecks(target, PAGE_SIZE);
@@ -340,7 +349,7 @@ export function BrandAuthorizationWorkspace() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center gap-2 py-16 text-muted-foreground">
+      <div className="text-muted-foreground flex items-center justify-center gap-2 py-16">
         <Loader2 className="size-4 animate-spin" />
         <span className="text-label-13">正在加载品牌授权…</span>
       </div>
@@ -351,7 +360,7 @@ export function BrandAuthorizationWorkspace() {
     return (
       <SectionCard title="品牌授权">
         <EmptyState
-          icon={<TriangleAlert className="size-8 text-destructive" />}
+          icon={<TriangleAlert className="text-destructive size-8" />}
           title="品牌授权加载失败"
           description={error}
           action={
@@ -386,7 +395,7 @@ export function BrandAuthorizationWorkspace() {
 
       {error && (
         <SectionCard>
-          <div className="text-destructive flex items-center gap-2 text-copy-13">
+          <div className="text-destructive text-copy-13 flex items-center gap-2">
             <TriangleAlert className="size-4" />
             {error}
           </div>
@@ -394,7 +403,11 @@ export function BrandAuthorizationWorkspace() {
       )}
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="授权档案" value={authorizations?.total ?? 0} icon={<FileCheck2 className="size-4" />} />
+        <StatCard
+          label="授权档案"
+          value={authorizations?.total ?? 0}
+          icon={<FileCheck2 className="size-4" />}
+        />
         <StatCard
           label="即将到期"
           value={reminders?.expiringCount ?? 0}
@@ -428,7 +441,7 @@ export function BrandAuthorizationWorkspace() {
               </li>
             ))}
           </ul>
-          <p className="text-muted-foreground mt-3 text-copy-12">{caps.boundaryNote}</p>
+          <p className="text-muted-foreground text-copy-12 mt-3">{caps.boundaryNote}</p>
         </SectionCard>
       )}
 
@@ -479,7 +492,11 @@ export function BrandAuthorizationWorkspace() {
                   <span className="text-copy-12 text-muted-foreground">
                     {daysToExpiryText(row.daysToExpiry)}
                   </span>
-                  <Button variant="ghost" size="sm" onClick={() => void openDetail(row.authorizationId)}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => void openDetail(row.authorizationId)}
+                  >
                     查看
                   </Button>
                 </div>
@@ -560,7 +577,11 @@ export function BrandAuthorizationWorkspace() {
                   <span className="text-copy-12 text-muted-foreground">
                     {daysToExpiryText(record.daysToExpiry)}
                   </span>
-                  <Button variant="ghost" size="sm" onClick={() => void openDetail(record.authorizationId)}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => void openDetail(record.authorizationId)}
+                  >
                     详情
                   </Button>
                   <Button variant="ghost" size="sm" onClick={() => void openEdit(record)}>
@@ -637,7 +658,11 @@ export function BrandAuthorizationWorkspace() {
             <ClipboardCheck className="mr-2 size-4" />
             跑一次范围校验
           </Button>
-          <Button variant="outline" onClick={() => void doGate()} disabled={busy || !brandId.trim()}>
+          <Button
+            variant="outline"
+            onClick={() => void doGate()}
+            disabled={busy || !brandId.trim()}
+          >
             <ShieldAlert className="mr-2 size-4" />
             跑刊登闸门
           </Button>
@@ -667,7 +692,9 @@ export function BrandAuthorizationWorkspace() {
         {gate && (
           <div className="border-border mt-4 rounded-md border px-3 py-3">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge tone={conclusionTone(gate.conclusion)}>{conclusionLabel(gate.conclusion)}</Badge>
+              <Badge tone={conclusionTone(gate.conclusion)}>
+                {conclusionLabel(gate.conclusion)}
+              </Badge>
               <Badge tone={severityTone(gate.severity)}>{severityLabel(gate.severity)}</Badge>
               <span className="text-copy-13 text-foreground">{gateSummary(gate)}</span>
             </div>
@@ -713,8 +740,8 @@ export function BrandAuthorizationWorkspace() {
                     {item.categoryId ? ` · ${item.categoryId.slice(0, 8)}` : ''}
                   </div>
                   <div className="text-copy-12 text-muted-foreground">
-                    {item.evaluatedAt.slice(0, 19).replace('T', ' ')} · 规则版本 {item.ruleVersion} ·{' '}
-                    {item.reasonCount} 条原因
+                    {item.evaluatedAt.slice(0, 19).replace('T', ' ')} · 规则版本 {item.ruleVersion}{' '}
+                    · {item.reasonCount} 条原因
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -746,7 +773,7 @@ export function BrandAuthorizationWorkspace() {
             </ModalDescription>
           </ModalHeader>
           {detail && (
-            <div className="space-y-3 text-copy-13">
+            <div className="text-copy-13 space-y-3">
               <Row label="品牌" value={detail.record.brandName || detail.record.brandId} />
               <Row label="授权方" value={detail.record.grantor} />
               <Row label="被授权主体" value={detail.record.licenseeName} />
@@ -787,8 +814,8 @@ export function BrandAuthorizationWorkspace() {
           <ModalHeader>
             <ModalTitle>{editing ? '修改授权' : '录入授权'}</ModalTitle>
             <ModalDescription>
-              授权方 / 授权范围（店铺 · 国家 · 类目）/ 被授权主体 / 期限。
-              同一维度上没登记任何范围 = 该维度不限制。
+              授权方 / 授权范围（店铺 · 国家 · 类目）/ 被授权主体 / 期限。 同一维度上没登记任何范围
+              = 该维度不限制。
             </ModalDescription>
           </ModalHeader>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -967,8 +994,7 @@ export function BrandAuthorizationWorkspace() {
           </Button>
           {supplierCandidates && candidatesUnavailable(supplierCandidates) && (
             <p className="text-copy-12 text-muted-foreground mt-1">
-              🔴 6.1.2.3 供应商候选**读不到**（{supplierCandidates.note}）——
-              这不是「没有供应商」。
+              🔴 6.1.2.3 供应商候选**读不到**（{supplierCandidates.note}）—— 这不是「没有供应商」。
             </p>
           )}
 
@@ -1041,7 +1067,10 @@ function ReasonList({
   return (
     <ul className="mt-2 space-y-1">
       {reasons.map((reason) => (
-        <li key={`${reason.code}-${reason.message}`} className="text-copy-13 flex items-start gap-2">
+        <li
+          key={`${reason.code}-${reason.message}`}
+          className="text-copy-13 flex items-start gap-2"
+        >
           <Badge tone={severityTone(reason.severity)}>{reason.label}</Badge>
           <span className="text-foreground">{reason.message}</span>
         </li>

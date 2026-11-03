@@ -140,7 +140,9 @@ export function waitingReturnLabel(status?: string | null): string {
 export function waitingReturnBadge(line: ExchangeLineView): string {
   const qty = line.waitingReturnQuantity;
   if (line.returnRequirementStatus === 'WAITING') {
-    return qty ? `${waitingReturnLabel(line.returnRequirementStatus)} ${qty}` : waitingReturnLabel(line.returnRequirementStatus);
+    return qty
+      ? `${waitingReturnLabel(line.returnRequirementStatus)} ${qty}`
+      : waitingReturnLabel(line.returnRequirementStatus);
   }
   return waitingReturnLabel(line.returnRequirementStatus);
 }
@@ -151,7 +153,10 @@ export function decisionTone(decision?: string | null): Tone {
 }
 
 export function decisionBadge(row: ExchangeRow): string {
-  return row.decisionLabel || (row.decision === 'PARTIALLY_APPROVED' ? '部分批准（库存不足）' : '整量批准');
+  return (
+    row.decisionLabel ||
+    (row.decision === 'PARTIALLY_APPROVED' ? '部分批准（库存不足）' : '整量批准')
+  );
 }
 
 export function statusBadge(row: ExchangeRow): string {
@@ -260,4 +265,11 @@ export function emptyHint(capabilities: ExchangeCapabilities | null): string {
   return '还没有换货授权。到「售后单」里挑一张类型为「换货」且未结案的售后单，在这里批准换货。';
 }
 
-export type { ExchangeCaseOption, ExchangeDetail, ExchangeLineView, ExchangePage, ExchangeRow, ExchangeSummary };
+export type {
+  ExchangeCaseOption,
+  ExchangeDetail,
+  ExchangeLineView,
+  ExchangePage,
+  ExchangeRow,
+  ExchangeSummary,
+};

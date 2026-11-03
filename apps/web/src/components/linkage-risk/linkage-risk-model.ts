@@ -377,11 +377,7 @@ export async function savePolicy(input: LinkageRiskPolicyInput): Promise<Linkage
   return api<LinkageRiskPolicy>(`${BASE}/policy`, 'PUT', input);
 }
 
-export async function fetchShops(
-  keyword = '',
-  page = 0,
-  size = 20,
-): Promise<LinkageRiskShopPage> {
+export async function fetchShops(keyword = '', page = 0, size = 20): Promise<LinkageRiskShopPage> {
   const query = new URLSearchParams({ page: String(page), size: String(size) });
   if (keyword.trim()) query.set('keyword', keyword.trim());
   return api<LinkageRiskShopPage>(`${BASE}/shops?${query}`);
@@ -540,7 +536,9 @@ export function actionLabel(action: string): string {
  *
  * 🔴 页面必须把它们显示成「读不到 + 归属模块」，**绝不能**显示成「该维度无风险」。
  */
-export function unavailableCapabilities(caps: LinkageRiskCapabilities | null): LinkageRiskCapability[] {
+export function unavailableCapabilities(
+  caps: LinkageRiskCapabilities | null,
+): LinkageRiskCapability[] {
   if (!caps) return [];
   return caps.capabilities.filter((c) => !c.available);
 }
@@ -608,9 +606,10 @@ export function canActOnRemediation(remediation: LinkageRiskRemediation | null):
  * 🔴 「还没判定」「读不到」「确实没有」「出错」必须能被一眼分开，
  *   否则「没登记策略」会被读成「没有关联风险」，那是最贵的一种误导。
  */
-export function emptyState(
-  kind: 'NO_POLICY' | 'NO_SHOPS' | 'NO_FACTS' | 'NO_CLUSTER' | 'ERROR',
-): { title: string; description: string } {
+export function emptyState(kind: 'NO_POLICY' | 'NO_SHOPS' | 'NO_FACTS' | 'NO_CLUSTER' | 'ERROR'): {
+  title: string;
+  description: string;
+} {
   if (kind === 'NO_POLICY') {
     return {
       title: '还没登记关联风险策略',

@@ -226,7 +226,7 @@ export function RmaAuthorizationWorkspace() {
 
       {error && (
         <SectionCard>
-          <p className="text-sm text-danger" role="alert">
+          <p className="text-danger text-sm" role="alert">
             {error}
           </p>
         </SectionCard>
@@ -234,7 +234,7 @@ export function RmaAuthorizationWorkspace() {
 
       {loading && !data ? (
         <SectionCard>
-          <p className="text-sm text-muted">加载中…</p>
+          <p className="text-muted text-sm">加载中…</p>
         </SectionCard>
       ) : !data || data.rows.length === 0 ? (
         <EmptyState
@@ -261,7 +261,7 @@ export function RmaAuthorizationWorkspace() {
                   <td className="p-2 font-mono text-xs">{row.rmaNo}</td>
                   <td className="p-2">
                     <div>{row.caseNo ?? '—'}</div>
-                    <div className="text-xs text-muted">{row.orderNo ?? '—'}</div>
+                    <div className="text-muted text-xs">{row.orderNo ?? '—'}</div>
                   </td>
                   <td className="p-2">
                     <div className="flex flex-col gap-1">
@@ -273,9 +273,11 @@ export function RmaAuthorizationWorkspace() {
                   </td>
                   <td className="p-2">
                     {quantity(row.authorizedQty)} / {quantity(row.requestedQty)}
-                    <div className="text-xs text-muted">{row.targetDispositionLabel}</div>
+                    <div className="text-muted text-xs">{row.targetDispositionLabel}</div>
                   </td>
-                  <td className="p-2 text-xs">{row.returnByAt ? new Date(row.returnByAt).toLocaleString() : '—'}</td>
+                  <td className="p-2 text-xs">
+                    {row.returnByAt ? new Date(row.returnByAt).toLocaleString() : '—'}
+                  </td>
                   <td className="p-2 text-xs">
                     {row.returnTrackingNo ? `${row.returnCarrier} ${row.returnTrackingNo}` : '—'}
                     {/* 登记了运单号也**不等于**收到 —— 这里刻意不加「已收到」徽标。 */}
@@ -297,7 +299,11 @@ export function RmaAuthorizationWorkspace() {
                                 returnByAt: new Date(Date.now() + 14 * 86400_000).toISOString(),
                                 decisionReason: null,
                                 expectedVersion: detail.head.version,
-                                lines: detail.lines.map((l) => ({ lineId: l.id, authorizedQty: l.returnableQty ?? 0, lineNote: null })),
+                                lines: detail.lines.map((l) => ({
+                                  lineId: l.id,
+                                  authorizedQty: l.returnableQty ?? 0,
+                                  lineNote: null,
+                                })),
                               }),
                             );
                           } else {
@@ -318,7 +324,11 @@ export function RmaAuthorizationWorkspace() {
               第 {data.page + 1} 页 · 每页 {data.size} · 共 {data.total} 张
             </span>
             <div className="flex gap-2">
-              <Button variant="secondary" disabled={data.page === 0} onClick={() => setPage((p) => p - 1)}>
+              <Button
+                variant="secondary"
+                disabled={data.page === 0}
+                onClick={() => setPage((p) => p - 1)}
+              >
                 上一页
               </Button>
               <Button
@@ -339,14 +349,14 @@ export function RmaAuthorizationWorkspace() {
             <div>
               <dt className="text-muted">退货地址</dt>
               <dd>{addressText(detail.head) || '—'}</dd>
-              <dd className="text-xs text-muted">
+              <dd className="text-muted text-xs">
                 {detail.head.returnAddressSourceLabel} · {detail.head.returnRecipientPhone}
               </dd>
             </div>
             <div>
               <dt className="text-muted">目标处理方式（意图，非处置结论）</dt>
               <dd>{detail.head.targetDispositionLabel}</dd>
-              <dd className="text-xs text-muted">{dispositionHint}</dd>
+              <dd className="text-muted text-xs">{dispositionHint}</dd>
             </div>
             <div>
               <dt className="text-muted">买家回寄物流</dt>
@@ -355,7 +365,7 @@ export function RmaAuthorizationWorkspace() {
                   ? `${detail.head.returnCarrier} ${detail.head.returnTrackingNo}`
                   : '未登记'}
               </dd>
-              <dd className="text-xs text-muted">{detail.head.returnLogisticsSourceLabel}</dd>
+              <dd className="text-muted text-xs">{detail.head.returnLogisticsSourceLabel}</dd>
             </div>
             <div>
               <dt className="text-muted">寄回时限</dt>
@@ -368,7 +378,11 @@ export function RmaAuthorizationWorkspace() {
           </dl>
 
           <div className="mt-4 flex flex-wrap gap-2">
-            <Button variant="secondary" onClick={() => void checkQuantities(detail.head.caseId)} disabled={busy}>
+            <Button
+              variant="secondary"
+              onClick={() => void checkQuantities(detail.head.caseId)}
+              disabled={busy}
+            >
               校验可退数量
             </Button>
             <Button
@@ -391,7 +405,14 @@ export function RmaAuthorizationWorkspace() {
             <Button
               variant="secondary"
               disabled={busy}
-              onClick={() => void act(() => cancelRma(detail.head.id, { reason: '人工撤销', expectedVersion: detail.head.version }))}
+              onClick={() =>
+                void act(() =>
+                  cancelRma(detail.head.id, {
+                    reason: '人工撤销',
+                    expectedVersion: detail.head.version,
+                  }),
+                )
+              }
             >
               撤销授权
             </Button>
@@ -414,7 +435,7 @@ export function RmaAuthorizationWorkspace() {
                 <tr key={line.id} className="border-b">
                   <td className="p-2">
                     <div className="font-mono text-xs">{line.skuCode}</div>
-                    <div className="text-xs text-muted">{line.skuName}</div>
+                    <div className="text-muted text-xs">{line.skuName}</div>
                   </td>
                   <td className="p-2">{quantity(line.requestedQty)}</td>
                   <td className="p-2">{quantity(line.authorizedQty)}</td>
@@ -436,7 +457,8 @@ export function RmaAuthorizationWorkspace() {
           <ul className="space-y-1 text-sm">
             {detail.events.map((e) => (
               <li key={e.id}>
-                <span className="text-muted">{new Date(e.occurredAt).toLocaleString()}</span> · {eventText(e)}
+                <span className="text-muted">{new Date(e.occurredAt).toLocaleString()}</span> ·{' '}
+                {eventText(e)}
                 {e.reasonNote ? <span className="text-muted"> — {e.reasonNote}</span> : null}
               </li>
             ))}
@@ -466,7 +488,7 @@ export function RmaAuthorizationWorkspace() {
                   <tr key={line.caseLineId} className="border-b">
                     <td className="p-2">
                       <div className="font-mono text-xs">{line.skuCode}</div>
-                      <div className="text-xs text-muted">{line.skuName}</div>
+                      <div className="text-muted text-xs">{line.skuName}</div>
                     </td>
                     <td className="p-2">{quantity(line.caseRequestedQty)}</td>
                     <td className="p-2">{quantity(line.orderedQty)}</td>
@@ -475,11 +497,11 @@ export function RmaAuthorizationWorkspace() {
                     </td>
                     <td className="p-2">{quantity(line.inflightAuthorizedQty)}</td>
                     {/* 不可得就显示不可得 —— 显示 0 会让人以为「从来没退过」。 */}
-                    <td className="p-2 text-xs text-muted">{receivedQuantityText(line)}</td>
+                    <td className="text-muted p-2 text-xs">{receivedQuantityText(line)}</td>
                     <td className="p-2">
                       <Badge tone={r.tone}>{r.value}</Badge>
                     </td>
-                    <td className="p-2 text-xs text-muted">
+                    <td className="text-muted p-2 text-xs">
                       {line.blockingReasons.length > 0 ? line.blockingReasons.join('；') : '—'}
                     </td>
                   </tr>
@@ -487,7 +509,7 @@ export function RmaAuthorizationWorkspace() {
               })}
             </tbody>
           </table>
-          <p className="mt-2 text-xs text-muted">{quantities.note}</p>
+          <p className="text-muted mt-2 text-xs">{quantities.note}</p>
         </SectionCard>
       )}
 

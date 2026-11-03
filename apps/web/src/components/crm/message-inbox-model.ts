@@ -91,7 +91,8 @@ export function messageQuery(params: MessageParams = {}): string {
   if (params.keyword) parts.push(`keyword=${encodeURIComponent(params.keyword)}`);
   if (params.platformTimeFrom)
     parts.push(`platformTimeFrom=${encodeURIComponent(params.platformTimeFrom)}`);
-  if (params.platformTimeTo) parts.push(`platformTimeTo=${encodeURIComponent(params.platformTimeTo)}`);
+  if (params.platformTimeTo)
+    parts.push(`platformTimeTo=${encodeURIComponent(params.platformTimeTo)}`);
   if (params.page !== undefined) parts.push(`page=${params.page}`);
   if (params.size !== undefined) parts.push(`size=${params.size}`);
   return parts.length ? `?${parts.join('&')}` : '';
@@ -272,16 +273,16 @@ export function messageSourceLabel(source: string): string {
 export function hasActiveFilter(params: MessageParams = {}): boolean {
   return Boolean(
     params.shopId ||
-      params.platformCode ||
-      params.messageType ||
-      params.priority ||
-      params.direction ||
-      params.readStatus ||
-      params.buyerReference ||
-      params.orderReference ||
-      params.keyword ||
-      params.platformTimeFrom ||
-      params.platformTimeTo,
+    params.platformCode ||
+    params.messageType ||
+    params.priority ||
+    params.direction ||
+    params.readStatus ||
+    params.buyerReference ||
+    params.orderReference ||
+    params.keyword ||
+    params.platformTimeFrom ||
+    params.platformTimeTo,
   );
 }
 
@@ -302,7 +303,11 @@ export function orderContextText(context: CrmMessageOrderContext | null | undefi
   parts.push(context.orderNo ? `订单号 ${context.orderNo}` : '订单号未知');
   if (context.externalOrderNo) parts.push(`平台单号 ${context.externalOrderNo}`);
   if (context.orderSource) parts.push(`来源 ${context.orderSource}`);
-  if (context.currency && context.grandTotalAmount !== null && context.grandTotalAmount !== undefined) {
+  if (
+    context.currency &&
+    context.grandTotalAmount !== null &&
+    context.grandTotalAmount !== undefined
+  ) {
     // ⚠️ 金额**原样展示**，JS 侧不做任何算术（AGENTS.md）。
     parts.push(`金额 ${context.currency} ${context.grandTotalAmount}`);
   }
@@ -330,9 +335,7 @@ export function summaryText(summary: CrmMessageSummary | null | undefined): stri
     `带附件 ${summary.withAttachmentCount} 条`,
   ];
   if (summary.byPriority.length > 0) {
-    parts.push(
-      `优先级 ${summary.byPriority.map((b) => `${b.label}×${b.count}`).join(' · ')}`,
-    );
+    parts.push(`优先级 ${summary.byPriority.map((b) => `${b.label}×${b.count}`).join(' · ')}`);
   }
   if (summary.byType.length > 0) {
     parts.push(`类型 ${summary.byType.map((b) => `${b.label}×${b.count}`).join(' · ')}`);

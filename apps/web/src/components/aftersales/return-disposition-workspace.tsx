@@ -2,7 +2,16 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { RefreshCw, TriangleAlert } from 'lucide-react';
-import { Badge, Button, EmptyState, Input, Notice, PageHeader, SectionCard, StatCard } from '@starcon/ui';
+import {
+  Badge,
+  Button,
+  EmptyState,
+  Input,
+  Notice,
+  PageHeader,
+  SectionCard,
+  StatCard,
+} from '@starcon/ui';
 import type {
   ReturnInventoryDispositionCapabilities,
   ReturnInventoryDispositionDetail,
@@ -63,9 +72,8 @@ export function ReturnInventoryDispositionWorkspace() {
   const [targetState, setTargetState] = useState('');
   const [keyword, setKeyword] = useState('');
   const [data, setData] = useState<ReturnInventoryDispositionPage | null>(null);
-  const [instructions, setInstructions] = useState<ReturnInventoryDispositionInstructionPage | null>(
-    null,
-  );
+  const [instructions, setInstructions] =
+    useState<ReturnInventoryDispositionInstructionPage | null>(null);
   const [caps, setCaps] = useState<ReturnInventoryDispositionCapabilities | null>(null);
   const [detail, setDetail] = useState<ReturnInventoryDispositionDetail | null>(null);
   const [options, setOptions] = useState<ReturnInventoryDispositionOptions | null>(null);
@@ -123,7 +131,9 @@ export function ReturnInventoryDispositionWorkspace() {
       setOptions(opts);
       setDraftInstructionId(instructionId);
       setDraftSourceBucketId(opts.pendingBuckets[0]?.bucketId ?? '');
-      setDraftTargetLocationId(requiresTargetLocation(state) ? (opts.targetLocations[0]?.locationId ?? '') : '');
+      setDraftTargetLocationId(
+        requiresTargetLocation(state) ? (opts.targetLocations[0]?.locationId ?? '') : '',
+      );
       setDraftReason('');
       setDraftScrapReason('');
     } catch (e) {
@@ -170,9 +180,7 @@ export function ReturnInventoryDispositionWorkspace() {
     if (!detail) return;
     const id = detail.disposition.id;
     const version = detail.disposition.version;
-    void run(() =>
-      submitReturnInventoryDisposition(id, { expectedVersion: version, note: null }),
-    );
+    void run(() => submitReturnInventoryDisposition(id, { expectedVersion: version, note: null }));
   };
 
   const approve = () => {
@@ -256,22 +264,10 @@ export function ReturnInventoryDispositionWorkspace() {
 
       {/* ---- 第一屏：现在有多少件货等着处置 ---- */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          label="待处置指令"
-          value={instructions?.total ?? 0}
-          polarity="neutral"
-        />
+        <StatCard label="待处置指令" value={instructions?.total ?? 0} polarity="neutral" />
         <StatCard label="待审批" value={summary?.pendingApprovalCount ?? 0} polarity="neutral" />
-        <StatCard
-          label="已执行"
-          value={summary?.executedCount ?? 0}
-          polarity="positive"
-        />
-        <StatCard
-          label="报废件数"
-          value={summary?.executedScrapQty ?? 0}
-          polarity="negative"
-        />
+        <StatCard label="已执行" value={summary?.executedCount ?? 0} polarity="positive" />
+        <StatCard label="报废件数" value={summary?.executedScrapQty ?? 0} polarity="negative" />
       </div>
 
       {/* ---- 待处置指令：11.2.3.1 判完了还没处置的 ---- */}
@@ -293,23 +289,17 @@ export function ReturnInventoryDispositionWorkspace() {
                 <div className="min-w-0 flex-1">
                   <div className="text-sm font-medium">{i.skuName || i.skuCode}</div>
                   <div className="text-muted-foreground text-xs">
-                    {i.skuCode} · 数量 <b>{String(i.qty)}</b> · 批次 {i.batchNo || '无批次'} · 判定为{' '}
-                    <b>{targetStateLabel(i.targetInventoryState)}</b>
+                    {i.skuCode} · 数量 <b>{String(i.qty)}</b> · 批次 {i.batchNo || '无批次'} ·
+                    判定为 <b>{targetStateLabel(i.targetInventoryState)}</b>
                   </div>
                   <div className="text-muted-foreground mt-0.5 text-xs">
-                    残值 {String(i.salvageAmount)} {i.salvageCurrency} · 原值 {String(i.originalValue)} ·
-                    成色系数 {String(i.gradeCoefficient)}
+                    残值 {String(i.salvageAmount)} {i.salvageCurrency} · 原值{' '}
+                    {String(i.originalValue)} · 成色系数 {String(i.gradeCoefficient)}
                   </div>
                 </div>
                 <Button
                   disabled={busy}
-                  onClick={() =>
-                    void startDraft(
-                      i.id,
-                      i.skuId ?? '',
-                      i.targetInventoryState,
-                    )
-                  }
+                  onClick={() => void startDraft(i.id, i.skuId ?? '', i.targetInventoryState)}
                 >
                   发起处置
                 </Button>
@@ -327,8 +317,8 @@ export function ReturnInventoryDispositionWorkspace() {
           </Notice>
           <div className="mt-3 space-y-3">
             <div className="text-muted-foreground text-xs">
-              质检结论数量 <b>{String(instruction?.qty ?? '')}</b> 件 ——{' '}
-              <b>数量不可改</b>：一批退货必须被全部处置掉（处置一半意味着另一半永远没有结论）。
+              质检结论数量 <b>{String(instruction?.qty ?? '')}</b> 件 —— <b>数量不可改</b>
+              ：一批退货必须被全部处置掉（处置一半意味着另一半永远没有结论）。
             </div>
             <label className="block text-sm">
               <span className="mb-1 block">来源库位（待检库存行）</span>
@@ -339,7 +329,8 @@ export function ReturnInventoryDispositionWorkspace() {
               >
                 {options?.pendingBuckets.map((b) => (
                   <option key={b.bucketId} value={b.bucketId}>
-                    {b.warehouseCode} / {b.locationCode} · 在手 {String(b.onHand)} · {b.qualityStatusCode}
+                    {b.warehouseCode} / {b.locationCode} · 在手 {String(b.onHand)} ·{' '}
+                    {b.qualityStatusCode}
                   </option>
                 ))}
               </select>
@@ -455,8 +446,8 @@ export function ReturnInventoryDispositionWorkspace() {
                     {row.dispositionNo} · {row.skuName || row.skuCode}
                   </div>
                   <div className="text-muted-foreground text-xs">
-                    去向 <b>{targetStateLabel(row.targetInventoryState)}</b> · 数量 {String(row.qty)} ·{' '}
-                    {row.sourceWarehouseCode} / {row.sourceLocationCode} →{' '}
+                    去向 <b>{targetStateLabel(row.targetInventoryState)}</b> · 数量{' '}
+                    {String(row.qty)} · {row.sourceWarehouseCode} / {row.sourceLocationCode} →{' '}
                     {row.targetLocationCode || '核销（不在任何库位）'}
                   </div>
                   <div className="text-muted-foreground mt-0.5 text-xs">
@@ -532,8 +523,7 @@ export function ReturnInventoryDispositionWorkspace() {
                 <div className="text-muted-foreground text-xs">
                   报废 {String(detail.loss.scrapQty)} 件 · 原值 {String(detail.loss.originalValue)}{' '}
                   {detail.loss.salvageCurrency} · 残值 {String(detail.loss.salvageAmount)} ·
-                  本模块口径损耗{' '}
-                  <b>{String(detail.loss.proposedLossAmount)}</b>
+                  本模块口径损耗 <b>{String(detail.loss.proposedLossAmount)}</b>
                 </div>
                 {financePending(detail.loss) ? (
                   <div className="mt-1 text-xs text-amber-600">
@@ -584,7 +574,10 @@ export function ReturnInventoryDispositionWorkspace() {
                     />
                   </label>
                   <div className="flex gap-2">
-                    <Button disabled={busy || decisionNote.trim() === ''} onClick={() => void approve()}>
+                    <Button
+                      disabled={busy || decisionNote.trim() === ''}
+                      onClick={() => void approve()}
+                    >
                       批准
                     </Button>
                     <Button

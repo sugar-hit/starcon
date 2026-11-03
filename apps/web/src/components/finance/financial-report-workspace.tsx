@@ -176,15 +176,7 @@ export function FinancialReportWorkspace() {
     } finally {
       setLoading(false);
     }
-  }, [
-    periodFromId,
-    periodToId,
-    compareFromId,
-    compareToId,
-    currency,
-    subjectCode,
-    reportType,
-  ]);
+  }, [periodFromId, periodToId, compareFromId, compareToId, currency, subjectCode, reportType]);
 
   useEffect(() => {
     if (periodFromId && periodToId) void loadReport();
@@ -244,20 +236,14 @@ export function FinancialReportWorkspace() {
           ...(currency ? { currency } : {}),
           ...(reportType === 'GENERAL_LEDGER' && subjectCode ? { subjectCode } : {}),
         });
-        setNotice(`已导出 ${reportTypeLabel(reportType)}（${format}），服务端已写一条导出留痕（含 SHA-256）`);
+        setNotice(
+          `已导出 ${reportTypeLabel(reportType)}（${format}），服务端已写一条导出留痕（含 SHA-256）`,
+        );
       } catch (err) {
         setActionError(err instanceof Error ? err.message : '导出失败');
       }
     },
-    [
-      reportType,
-      periodFromId,
-      periodToId,
-      compareFromId,
-      compareToId,
-      currency,
-      subjectCode,
-    ],
+    [reportType, periodFromId, periodToId, compareFromId, compareToId, currency, subjectCode],
   );
 
   /** 登记一条报表模板（系统不预置任何一行）。 */
@@ -389,9 +375,7 @@ export function FinancialReportWorkspace() {
           {/* ---------- 能力缺口 ---------- */}
           {unavailable.length > 0 && (
             <Notice tone="warning" title="当前需要租户自己配置的口径">
-              {unavailable
-                .map((c) => `${c.name}：${c.detail}`)
-                .join('；')}
+              {unavailable.map((c) => `${c.name}：${c.detail}`).join('；')}
             </Notice>
           )}
           {downstreamGaps.length > 0 && (
@@ -602,7 +586,9 @@ export function FinancialReportWorkspace() {
                         {group.rows.map((row) => (
                           <tr key={row.rowKey} className="border-border border-t">
                             <td className="py-2">
-                              <span className={isReportTotalRow(row) ? 'font-semibold' : 'font-medium'}>
+                              <span
+                                className={isReportTotalRow(row) ? 'font-semibold' : 'font-medium'}
+                              >
                                 {row.lineName}
                               </span>
                               {row.subjectCode ? (
@@ -625,7 +611,9 @@ export function FinancialReportWorkspace() {
                                 <td className="py-2">
                                   {formatReportAmount(row.comparisonClosingBalance)}
                                 </td>
-                                <td className="py-2">{formatReportDelta(row.deltaClosingBalance)}</td>
+                                <td className="py-2">
+                                  {formatReportDelta(row.deltaClosingBalance)}
+                                </td>
                               </>
                             )}
                             <td className="py-2">{row.voucherCount}</td>
@@ -659,7 +647,8 @@ export function FinancialReportWorkspace() {
                           <tr key={entry.rowKey} className="border-border border-t">
                             <td className="py-2">{entry.entryDate}</td>
                             <td className="py-2">
-                              {entry.voucherNo} · 行 {entry.lineNo} · {reportLineTypeLabel(entry.lineType)}
+                              {entry.voucherNo} · 行 {entry.lineNo} ·{' '}
+                              {reportLineTypeLabel(entry.lineType)}
                             </td>
                             <td className="py-2">{entry.summary}</td>
                             <td className="py-2">{entry.counterpartSummary}</td>
@@ -735,7 +724,11 @@ export function FinancialReportWorkspace() {
                   </select>
                 </>
               )}
-              <Button variant="secondary" onClick={() => void runCreateTemplate()} disabled={!templateSubject}>
+              <Button
+                variant="secondary"
+                onClick={() => void runCreateTemplate()}
+                disabled={!templateSubject}
+              >
                 登记模板
               </Button>
             </div>
@@ -820,7 +813,10 @@ export function FinancialReportWorkspace() {
                   </thead>
                   <tbody>
                     {drill.entries.map((entry) => (
-                      <tr key={`${entry.voucherId}-${entry.lineId}`} className="border-border border-t">
+                      <tr
+                        key={`${entry.voucherId}-${entry.lineId}`}
+                        className="border-border border-t"
+                      >
                         <td className="py-2">{entry.voucherDate}</td>
                         <td className="py-2">{entry.voucherNo}</td>
                         <td className="py-2">

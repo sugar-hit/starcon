@@ -392,7 +392,9 @@ export interface RestrictionQuery {
   size?: number;
 }
 
-export function fetchRestrictions(query: RestrictionQuery = {}): Promise<ReturnResaleRestrictionPage> {
+export function fetchRestrictions(
+  query: RestrictionQuery = {},
+): Promise<ReturnResaleRestrictionPage> {
   const params = new URLSearchParams();
   if (query.subjectType) params.set('subjectType', query.subjectType);
   if (query.status) params.set('status', query.status);
@@ -420,7 +422,9 @@ export function revokeRestriction(
   id: string,
   revokeReason: string,
 ): Promise<ReturnResaleRestrictionRow> {
-  return api<ReturnResaleRestrictionRow>(`${BASE}/restrictions/${id}/revoke`, 'POST', { revokeReason });
+  return api<ReturnResaleRestrictionRow>(`${BASE}/restrictions/${id}/revoke`, 'POST', {
+    revokeReason,
+  });
 }
 
 export interface DecisionQuery {
@@ -486,7 +490,9 @@ export interface IssueOrderPayload {
   costs?: CostDraft[] | undefined;
 }
 
-export function issueDispositionOrder(payload: IssueOrderPayload): Promise<ReturnDispositionOrderRow> {
+export function issueDispositionOrder(
+  payload: IssueOrderPayload,
+): Promise<ReturnDispositionOrderRow> {
   return api<ReturnDispositionOrderRow>(`${BASE}/orders`, 'POST', payload);
 }
 
@@ -677,9 +683,7 @@ export function validateDecisionForm(form: DecisionForm): string {
 }
 
 /** 校验通过后构造请求体（**只在这里**把空串变成拒绝，不在别处兜底）。 */
-export function buildDecisionPayload(
-  form: DecisionForm,
-): DecidePayload | { error: string } {
+export function buildDecisionPayload(form: DecisionForm): DecidePayload | { error: string } {
   const error = validateDecisionForm(form);
   if (error) return { error };
   return {
@@ -748,7 +752,8 @@ export function pendingDecisionCount(overview: ReturnDispositionOverview | null)
 export function errorText(error: unknown): string {
   if (error instanceof ApiError) {
     if (error.status === 422 || error.status === 409) return error.message;
-    if (error.status === 503) return '退货实收 / 质检结论暂时读不到，请稍后重试（不是「没有数据」）';
+    if (error.status === 503)
+      return '退货实收 / 质检结论暂时读不到，请稍后重试（不是「没有数据」）';
     if (error.status === 403) return '当前角色没有退货处置的操作权限';
     if (error.status === 0) return '正在连接渠道服务，请稍后重试';
     return error.message;

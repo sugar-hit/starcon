@@ -157,21 +157,18 @@ export function PurchaseOrderListWorkspace() {
     targetWarehouseId,
   ]);
 
-  const run = useCallback(
-    async (work: () => Promise<void>) => {
-      setBusy(true);
-      setError('');
-      setNotice('');
-      try {
-        await work();
-      } catch (e) {
-        setError(errorText(e));
-      } finally {
-        setBusy(false);
-      }
-    },
-    [],
-  );
+  const run = useCallback(async (work: () => Promise<void>) => {
+    setBusy(true);
+    setError('');
+    setNotice('');
+    try {
+      await work();
+    } catch (e) {
+      setError(errorText(e));
+    } finally {
+      setBusy(false);
+    }
+  }, []);
 
   const toggle = useCallback((id: string) => {
     setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
@@ -181,10 +178,7 @@ export function PurchaseOrderListWorkspace() {
     setSelected((prev) => (prev.length === rows.length ? [] : rows.map((r) => r.id)));
   }, [rows]);
 
-  const selectedRows = useMemo(
-    () => rows.filter((r) => selected.includes(r.id)),
-    [rows, selected],
-  );
+  const selectedRows = useMemo(() => rows.filter((r) => selected.includes(r.id)), [rows, selected]);
 
   // 已关闭的单不再催单也不再关：批量按钮据此禁用，
   // 而不是让用户点下去再从逐单失败原因里读出来。
@@ -228,12 +222,9 @@ export function PurchaseOrderListWorkspace() {
     });
   }, [nextParams, run]);
 
-  const goPage = useCallback(
-    (page: number) => {
-      setParams((prev) => ({ ...prev, page }));
-    },
-    [],
-  );
+  const goPage = useCallback((page: number) => {
+    setParams((prev) => ({ ...prev, page }));
+  }, []);
 
   const total = data?.total ?? 0;
   const size = data?.size ?? 20;
@@ -307,7 +298,9 @@ export function PurchaseOrderListWorkspace() {
       {summary?.functionalTotal?.note && (
         <p className="text-muted-foreground text-xs">{summary.functionalTotal.note}</p>
       )}
-      {summary?.totalAmountNote && <p className="text-muted-foreground text-xs">{summary.totalAmountNote}</p>}
+      {summary?.totalAmountNote && (
+        <p className="text-muted-foreground text-xs">{summary.totalAmountNote}</p>
+      )}
 
       {/* 数据范围常驻：采购员要能知道「我为什么只看到这几张单」 */}
       {data && (
@@ -616,9 +609,7 @@ function OrderRow({
       <td className="px-2 py-1 font-medium">{row.orderNo}</td>
       <td className="px-2 py-1">
         {row.supplierCode}
-        {row.supplierName && (
-          <span className="text-muted-foreground"> · {row.supplierName}</span>
-        )}
+        {row.supplierName && <span className="text-muted-foreground"> · {row.supplierName}</span>}
       </td>
       <td className="px-2 py-1">
         {row.lineCount}
@@ -703,8 +694,8 @@ function UrgeDialog({
         <ModalHeader>
           <ModalTitle>批量催单（{count} 张）</ModalTitle>
           <ModalDescription>
-            催单只留痕：催单次数 + 最近催单时刻 + 一条留痕。**不会**改承诺到货日 ——
-            交期变更历史归 6.3.2.1 跟单。
+            催单只留痕：催单次数 + 最近催单时刻 + 一条留痕。**不会**改承诺到货日 —— 交期变更历史归
+            6.3.2.1 跟单。
           </ModalDescription>
         </ModalHeader>
         <label className="flex flex-col gap-1 text-sm">

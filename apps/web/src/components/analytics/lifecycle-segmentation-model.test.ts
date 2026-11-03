@@ -61,7 +61,9 @@ import type {
  * </ul>
  */
 
-function amount(overrides: Partial<LifecycleSegmentationAmountRow> = {}): LifecycleSegmentationAmountRow {
+function amount(
+  overrides: Partial<LifecycleSegmentationAmountRow> = {},
+): LifecycleSegmentationAmountRow {
   return {
     currency: 'USD',
     salesAmount: 3000,
@@ -121,7 +123,9 @@ function summary(overrides: Partial<LifecycleSegmentSummary> = {}): LifecycleSeg
   };
 }
 
-function response(overrides: Partial<LifecycleSegmentationResponse> = {}): LifecycleSegmentationResponse {
+function response(
+  overrides: Partial<LifecycleSegmentationResponse> = {},
+): LifecycleSegmentationResponse {
   return {
     requestedFrom: '2026-09-25',
     requestedTo: '2026-10-04',
@@ -154,7 +158,9 @@ function response(overrides: Partial<LifecycleSegmentationResponse> = {}): Lifec
   };
 }
 
-function rule(overrides: Partial<LifecycleSegmentationRuleView> = {}): LifecycleSegmentationRuleView {
+function rule(
+  overrides: Partial<LifecycleSegmentationRuleView> = {},
+): LifecycleSegmentationRuleView {
   return {
     ruleCode: 'LIFECYCLE_DEFAULT_SKU',
     ruleName: '默认分层规则（SKU 层）',

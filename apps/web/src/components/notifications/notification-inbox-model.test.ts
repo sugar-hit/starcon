@@ -290,22 +290,13 @@ describe('合并：已处置的事项不再被报成通知', () => {
       stockoutRow({ id: 'healthy', alertState: 'HEALTHY' }),
       stockoutRow({ id: 'resolved', lifecycleState: 'RESOLVED' }),
     ]),
-    syncFailure: source([
-      syncFailureRow(),
-      syncFailureRow({ id: 'replayed', status: 'RESOLVED' }),
-    ]),
+    syncFailure: source([syncFailureRow(), syncFailureRow({ id: 'replayed', status: 'RESOLVED' })]),
     reconciliationDiff: source([
       reconciliationRow(),
       reconciliationRow({ id: 'clean', openDifferenceCount: 0, differenceCount: 0 }),
     ]),
-    message: source([
-      messageRow(),
-      messageRow({ id: 'outbound', direction: 'OUTBOUND' }),
-    ]),
-    timelinessOverdue: source([
-      overdueRow(),
-      overdueRow({ factId: 'ontime', overdueSeconds: 0 }),
-    ]),
+    message: source([messageRow(), messageRow({ id: 'outbound', direction: 'OUTBOUND' })]),
+    timelinessOverdue: source([overdueRow(), overdueRow({ factId: 'ontime', overdueSeconds: 0 })]),
   });
 
   it('五类各留下一条真实通知', () => {

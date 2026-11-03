@@ -178,9 +178,7 @@ export interface StructureTrendSeries {
  *
  * <p>🔴 **不可比的期间没有点**（不是 0%）：曲线上「跳过去」和「掉到 0」是两件事。
  */
-export function structureTrendSeries(
-  trend: CostStructureTrendPoint[],
-): StructureTrendSeries[] {
+export function structureTrendSeries(trend: CostStructureTrendPoint[]): StructureTrendSeries[] {
   const series = new Map<string, StructureTrendSeries>();
   for (const point of trend) {
     if (point.share === null) continue;

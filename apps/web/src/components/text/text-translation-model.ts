@@ -176,11 +176,7 @@ export function fetchTemplateBinding(
 }
 
 /** 翻译任务列表（真分页 + 真筛选）。 */
-export function fetchTasks(
-  page: number,
-  size: number,
-  params: TaskParams,
-): Promise<TextTaskPage> {
+export function fetchTasks(page: number, size: number, params: TaskParams): Promise<TextTaskPage> {
   return api<TextTaskPage>(
     `${base}/tasks?${query({ ...params, page: String(page), size: String(size) })}`,
   );
@@ -212,9 +208,7 @@ export function fetchSourceCandidates(
   refType: string,
   refId: string,
 ): Promise<TextSourceCandidateView> {
-  return api<TextSourceCandidateView>(
-    `${base}/source-candidates?${query({ refType, refId })}`,
-  );
+  return api<TextSourceCandidateView>(`${base}/source-candidates?${query({ refType, refId })}`);
 }
 
 // ================================================================ 写入
@@ -369,7 +363,11 @@ export function confidenceRows(confidence: TextConfidence | null): {
 }[] {
   if (!confidence) return [];
   return [
-    { label: '术语覆盖率', value: dimensionLabel(confidence.termCoverage), tone: dimensionTone(confidence.termCoverage) },
+    {
+      label: '术语覆盖率',
+      value: dimensionLabel(confidence.termCoverage),
+      tone: dimensionTone(confidence.termCoverage),
+    },
     {
       label: '占位符完整率',
       value: dimensionLabel(confidence.placeholderIntegrity),

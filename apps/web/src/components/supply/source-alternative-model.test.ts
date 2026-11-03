@@ -100,9 +100,7 @@ describe('6.1.2.2 同款货源推荐前端模型', () => {
       expect(ratingLabel('70.0000', '75.0000', 'B', true)).toBe(
         '客观 70.00 / 最终 75.00（B） · 人工调整',
       );
-      expect(ratingLabel('80.0000', '80.0000', 'A', false)).toBe(
-        '客观 80.00 / 最终 80.00（A）',
-      );
+      expect(ratingLabel('80.0000', '80.0000', 'A', false)).toBe('客观 80.00 / 最终 80.00（A）');
       expect(ratingLabel(null, null, null, null)).toBe('暂无评级');
     });
   });
@@ -174,7 +172,11 @@ describe('6.1.2.2 同款货源推荐前端模型', () => {
     });
 
     it('弱匹配没确认 ⇒ 不给生成，且说清为什么', () => {
-      const weak = { ...base, matchType: 'TITLE_SPEC_MATCH' as const, requiresManualConfirmation: true };
+      const weak = {
+        ...base,
+        matchType: 'TITLE_SPEC_MATCH' as const,
+        requiresManualConfirmation: true,
+      };
       expect(canCreateRequest(weak)).toBe(false);
       expect(requestBlockedReason(weak)).toContain('必须先人工确认');
     });
@@ -228,12 +230,8 @@ describe('6.1.2.2 同款货源推荐前端模型', () => {
 
     it('权重为负或越界要报错', () => {
       const form = toPolicyForm(policy);
-      expect(validatePolicyForm({ ...form, priceWeight: '-0.1' }).join()).toContain(
-        '不小于 0',
-      );
-      expect(validatePolicyForm({ ...form, maxCandidates: '0' }).join()).toContain(
-        '单次候选上限',
-      );
+      expect(validatePolicyForm({ ...form, priceWeight: '-0.1' }).join()).toContain('不小于 0');
+      expect(validatePolicyForm({ ...form, maxCandidates: '0' }).join()).toContain('单次候选上限');
       expect(validatePolicyForm({ ...form, weakMatchMinConfidence: '1.5' }).join()).toContain(
         '弱匹配最低置信度',
       );

@@ -53,8 +53,20 @@ const CAPS: ContentWritebackCapabilities = {
   rejectedChangeTypes: ['PRICE', 'STOCK', 'QUANTITY'],
   channels: [
     { channel: 'CONTENT', label: '内容回写', ownerModule: '4.3.2.1', handledHere: true, note: '' },
-    { channel: 'PRICE', label: '价格回写', ownerModule: '05 定价', handledHere: false, note: '改价走 UPDATE_PRICE' },
-    { channel: 'STOCK', label: '库存回写', ownerModule: '07 库存', handledHere: false, note: '改库存走 UPDATE_STOCK' },
+    {
+      channel: 'PRICE',
+      label: '价格回写',
+      ownerModule: '05 定价',
+      handledHere: false,
+      note: '改价走 UPDATE_PRICE',
+    },
+    {
+      channel: 'STOCK',
+      label: '库存回写',
+      ownerModule: '07 库存',
+      handledHere: false,
+      note: '改库存走 UPDATE_STOCK',
+    },
   ],
   triggerStates: ['RUNNING', 'COMPLETED', 'CANCELLED'],
   taskStates: ['PENDING', 'SKIPPED_NO_CHANGE', 'DISPATCHED', 'SUCCEEDED', 'FAILED'],

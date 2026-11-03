@@ -394,7 +394,10 @@ export function saveAdDiagnosisRule(input: AdDiagnosisRuleInput): Promise<AdDiag
 }
 
 export function setAdDiagnosisRuleStatus(id: string, status: string): Promise<AdDiagnosisRuleRow> {
-  return api<AdDiagnosisRuleRow>(`channel/ad-diagnostics/rules/${id}/status?status=${status}`, 'POST');
+  return api<AdDiagnosisRuleRow>(
+    `channel/ad-diagnostics/rules/${id}/status?status=${status}`,
+    'POST',
+  );
 }
 
 /** 为本租户初始化默认诊断规则（幂等：已存在的不覆盖）。 */
@@ -633,10 +636,7 @@ export function emptyStateText(reason: string | null, note: string): string {
 }
 
 /** 建议幅度的展示：比例优先，没有比例才看绝对额。 */
-export function actionAmountText(
-  percent: AdRatio,
-  amount: AdMoney,
-): string {
+export function actionAmountText(percent: AdRatio, amount: AdMoney): string {
   if (percent !== null && percent !== undefined) return `${percent.toFixed(2)}%`;
   if (amount !== null && amount !== undefined) return amount.toFixed(2);
   return '—';
@@ -704,7 +704,10 @@ export function validateAdDiagnosisRule(input: AdDiagnosisRuleInput): {
   // 🔴 阈值按判定口径分别必填
   switch (input.ruleType) {
     case 'HIGH_SPEND_NO_CONVERSION':
-      if (numeric(input.thresholdAmount, '金额门槛') === null && input.thresholdAmount.trim() !== '') {
+      if (
+        numeric(input.thresholdAmount, '金额门槛') === null &&
+        input.thresholdAmount.trim() !== ''
+      ) {
         // 数字非法已在上面报过
       } else if (input.thresholdAmount.trim() === '') {
         errors.push('高花费零转化规则必须给出金额门槛');

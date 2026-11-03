@@ -401,7 +401,9 @@ export function CartRecoveryWorkspace() {
             : action === 'enable'
               ? await enableCartMessage(row.id)
               : await disableCartMessage(row.id);
-        setNotice(`话术 ${updated.messageCode} 现在是「${cartMessageStatusLabel(updated.status)}」。`);
+        setNotice(
+          `话术 ${updated.messageCode} 现在是「${cartMessageStatusLabel(updated.status)}」。`,
+        );
         await load();
       } catch (e) {
         setActionError(errorText(e, '话术状态流转失败'));
@@ -636,7 +638,10 @@ export function CartRecoveryWorkspace() {
             )}
             {rate.byChannel.length > 0 && (
               <p className="text-muted-foreground text-copy-12">
-                触达量：{rate.byChannel.map((c) => `${cartChannelLabel(c.channel)} ${c.touchCount}`).join(' · ')}
+                触达量：
+                {rate.byChannel
+                  .map((c) => `${cartChannelLabel(c.channel)} ${c.touchCount}`)
+                  .join(' · ')}
               </p>
             )}
             <p className="text-muted-foreground text-copy-12">{rate.windowNote}</p>
@@ -663,8 +668,7 @@ export function CartRecoveryWorkspace() {
                 <option value="">（全部店铺）</option>
                 {shops.map((shop) => (
                   <option key={shop.id} value={shop.id}>
-                    {shop.name} · {shop.platformCode} ·{' '}
-                    {cartPlatformTypeLabel(shop.platformType)}
+                    {shop.name} · {shop.platformCode} · {cartPlatformTypeLabel(shop.platformType)}
                   </option>
                 ))}
               </select>
@@ -778,8 +782,8 @@ export function CartRecoveryWorkspace() {
                     </div>
                     <div className="text-muted-foreground text-copy-12 mt-1">
                       {cartStageLabel(row.stage)} · {row.abandonedAt} · 挽回时点{' '}
-                      {row.recoverDeadlineAt} · 金额 {cartAmountText(row.amount, row.currency)} · 件数{' '}
-                      {row.itemCount} · {cartRecoveryStateLabel(row)}
+                      {row.recoverDeadlineAt} · 金额 {cartAmountText(row.amount, row.currency)} ·
+                      件数 {row.itemCount} · {cartRecoveryStateLabel(row)}
                     </div>
                   </button>
                 </li>
@@ -823,8 +827,8 @@ export function CartRecoveryWorkspace() {
         >
           <div className="space-y-3">
             <p className="text-muted-foreground text-copy-12">
-              买家 {detail.abandonment.buyerRef} · 邮箱 {detail.abandonment.buyerEmail || '（无）'} ·
-              手机 {detail.abandonment.buyerPhone || '（无）'} · 金额{' '}
+              买家 {detail.abandonment.buyerRef} · 邮箱 {detail.abandonment.buyerEmail || '（无）'}{' '}
+              · 手机 {detail.abandonment.buyerPhone || '（无）'} · 金额{' '}
               {cartAmountText(detail.abandonment.amount, detail.abandonment.currency)} · 件数{' '}
               {detail.abandonment.itemCount}
             </p>
@@ -1018,8 +1022,7 @@ export function CartRecoveryWorkspace() {
                   <option value="">（选择店铺）</option>
                   {shops.map((shop) => (
                     <option key={shop.id} value={shop.id}>
-                      {shop.name} · {shop.platformCode} ·{' '}
-                      {cartPlatformTypeLabel(shop.platformType)}
+                      {shop.name} · {shop.platformCode} · {cartPlatformTypeLabel(shop.platformType)}
                     </option>
                   ))}
                 </select>
@@ -1115,12 +1118,7 @@ export function CartRecoveryWorkspace() {
                 <ShoppingCart className="mr-1 h-4 w-4" />
                 登记弃单
               </Button>
-              <Button
-                size="sm"
-                variant="secondary"
-                disabled={busy}
-                onClick={() => void runSync()}
-              >
+              <Button size="sm" variant="secondary" disabled={busy} onClick={() => void runSync()}>
                 <RefreshCw className="mr-1 h-4 w-4" />
                 从平台同步购物车事件
               </Button>
@@ -1196,9 +1194,7 @@ export function CartRecoveryWorkspace() {
                       {row.usageCount} 次
                     </span>
                   </div>
-                  {row.subject && (
-                    <p className="text-copy-12 mt-1">标题：{row.subject}</p>
-                  )}
+                  {row.subject && <p className="text-copy-12 mt-1">标题：{row.subject}</p>}
                   <p className="text-muted-foreground text-copy-12 mt-1 line-clamp-2">{row.body}</p>
                   <p className="text-muted-foreground text-copy-12 mt-1">
                     {row.approvedAt
@@ -1436,7 +1432,12 @@ export function CartRecoveryWorkspace() {
                     onChange={(e) => setTimeoutHours(e.target.value)}
                   />
                 </Field>
-                <Button size="sm" variant="secondary" disabled={busy} onClick={() => void submitPolicy()}>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  disabled={busy}
+                  onClick={() => void submitPolicy()}
+                >
                   保存策略
                 </Button>
               </div>

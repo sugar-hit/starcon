@@ -202,9 +202,7 @@ export function QualityInspectionWorkspace() {
         <div className="flex items-start gap-2 rounded-md border border-sky-500/40 bg-sky-500/10 p-3 text-sm">
           <TriangleAlert className="mt-0.5 size-4 shrink-0" />
           <div>
-            <p className="font-medium">
-              库存分流未接线 → {dispositionUnavailable.ownerModule}
-            </p>
+            <p className="font-medium">库存分流未接线 → {dispositionUnavailable.ownerModule}</p>
             <p className="text-muted-foreground">{dispositionUnavailable.impact}</p>
           </div>
         </div>
@@ -306,9 +304,7 @@ export function QualityInspectionWorkspace() {
               ))}
             </select>
           </label>
-          <Button
-            onClick={() => setParams({ ...params, keyword, status, result, page: 0 })}
-          >
+          <Button onClick={() => setParams({ ...params, keyword, status, result, page: 0 })}>
             查询
           </Button>
         </div>
@@ -368,7 +364,7 @@ export function QualityInspectionWorkspace() {
                       {fmtQuantity(order.sampleQuantity)} / {fmtQuantity(order.sampledQuantity)}
                     </td>
                     <td className="px-2 py-1">{fmtQuantity(order.qualifiedQuantity)}</td>
-                    <td className="px-2 py-1 text-destructive">
+                    <td className="text-destructive px-2 py-1">
                       {fmtQuantity(order.defectiveQuantity)}
                     </td>
                     <td className="px-2 py-1">{fmtQuantity(order.concessionQuantity)}</td>
@@ -577,17 +573,15 @@ function DetailModal({
           </div>
           <p
             className={
-              balanced
-                ? 'text-muted-foreground mt-2 text-sm'
-                : 'mt-2 text-sm text-destructive'
+              balanced ? 'text-muted-foreground mt-2 text-sm' : 'text-destructive mt-2 text-sm'
             }
           >
             {balanceText(order)}
             {balanced ? '（自洽）' : '（**不自洽** —— 这三个数对不上，请重新核对）'}
           </p>
           <p className="text-muted-foreground mt-1 text-xs">
-            到货量 {fmtQuantity(order.arrivedQuantity)} ·{' '}
-            {samplingText(order)} · 抽样算式：{detail.samplingBasis}
+            到货量 {fmtQuantity(order.arrivedQuantity)} · {samplingText(order)} · 抽样算式：
+            {detail.samplingBasis}
           </p>
           <p className="text-muted-foreground mt-1 text-xs">{detail.balanceNote}</p>
           <p className="text-muted-foreground mt-1 text-xs">{detail.safetyNote}</p>
@@ -795,12 +789,10 @@ function DetailModal({
               </div>
             </div>
           )}
-          {concessionError && (
-            <p className="mt-2 text-sm text-destructive">{concessionError}</p>
-          )}
+          {concessionError && <p className="text-destructive mt-2 text-sm">{concessionError}</p>}
         </SectionCard>
 
-        {itemError && <p className="text-sm text-destructive">{itemError}</p>}
+        {itemError && <p className="text-destructive text-sm">{itemError}</p>}
 
         <ModalFooter>
           {!terminal && (
@@ -810,9 +802,7 @@ function DetailModal({
                 onClick={() => void complete()}
                 disabled={busy || !canComplete(detail)}
                 title={
-                  canComplete(detail)
-                    ? '完结质检单并判出三量'
-                    : '还有检验项没有结论，不能完结'
+                  canComplete(detail) ? '完结质检单并判出三量' : '还有检验项没有结论，不能完结'
                 }
               >
                 完结并判三量
@@ -900,7 +890,8 @@ function CreateOrderModal({
         <ModalHeader>
           <ModalTitle>新建质检单</ModalTitle>
           <ModalDescription>
-            到货量读 8 收货的收货单（服务端写入，不认客户端报的数量）；应抽数量按模板的抽样规则在服务端算。
+            到货量读 8
+            收货的收货单（服务端写入，不认客户端报的数量）；应抽数量按模板的抽样规则在服务端算。
           </ModalDescription>
         </ModalHeader>
 
@@ -973,11 +964,14 @@ function CreateOrderModal({
           <p className="text-muted-foreground text-xs">
             三量之和 = 本次质检覆盖的批量（不是到货量）—— 分批到货时每次质检只覆盖其中一批。
           </p>
-          {formError && <p className="text-sm text-destructive">{formError}</p>}
+          {formError && <p className="text-destructive text-sm">{formError}</p>}
         </div>
 
         <ModalFooter>
-          <Button onClick={() => void submit()} disabled={busy || !templateId || !skuCode || !receiptCode}>
+          <Button
+            onClick={() => void submit()}
+            disabled={busy || !templateId || !skuCode || !receiptCode}
+          >
             建单
           </Button>
           <Button variant="outline" onClick={onClose}>
@@ -1000,7 +994,9 @@ function TemplatesModal({
   onClose: () => void;
   onBusy: (busy: boolean) => void;
 }) {
-  const [templates, setTemplates] = useState<Awaited<ReturnType<typeof fetchTemplates>> | null>(null);
+  const [templates, setTemplates] = useState<Awaited<ReturnType<typeof fetchTemplates>> | null>(
+    null,
+  );
   const [selected, setSelected] = useState<IncomingTemplateDetail | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -1012,9 +1008,9 @@ function TemplatesModal({
   const [roundingMode, setRoundingMode] = useState('CEILING');
   const [criticalFailureAction, setCriticalFailureAction] = useState('REJECT_LOT');
   const [defectiveTarget, setDefectiveTarget] = useState('PENDING_INSPECTION');
-  const [items, setItems] = useState<
-    { itemCode: string; name: string; critical: boolean }[]
-  >([{ itemCode: 'APPEARANCE', name: '外观检查', critical: true }]);
+  const [items, setItems] = useState<{ itemCode: string; name: string; critical: boolean }[]>([
+    { itemCode: 'APPEARANCE', name: '外观检查', critical: true },
+  ]);
 
   const load = useCallback(async () => {
     try {
@@ -1258,7 +1254,9 @@ function TemplatesModal({
                     value={item.name}
                     onChange={(e) =>
                       setItems((prev) =>
-                        prev.map((row, i) => (i === index ? { ...row, name: e.target.value } : row)),
+                        prev.map((row, i) =>
+                          i === index ? { ...row, name: e.target.value } : row,
+                        ),
                       )
                     }
                     className="w-48"
@@ -1292,14 +1290,17 @@ function TemplatesModal({
               variant="outline"
               size="sm"
               onClick={() =>
-                setItems((prev) => [...prev, { itemCode: 'FUNCTION', name: '功能检查', critical: false }])
+                setItems((prev) => [
+                  ...prev,
+                  { itemCode: 'FUNCTION', name: '功能检查', critical: false },
+                ])
               }
             >
               加一个检验项
             </Button>
           </div>
 
-          {formError && <p className="text-sm text-destructive">{formError}</p>}
+          {formError && <p className="text-destructive text-sm">{formError}</p>}
         </SectionCard>
 
         <ModalFooter>

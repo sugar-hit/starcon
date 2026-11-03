@@ -637,8 +637,15 @@ export function validateTemplate(input: TemplateInput): ValidationError | null {
       if (adjustment.daysCoverThreshold === null || adjustment.daysCoverThreshold < 0) {
         return { field: 'adjustments', message: '按库存周转调整的调整项必须给可售天数阈值' };
       }
-      if (adjustment.discountRate === null || adjustment.discountRate < 0 || adjustment.discountRate > 1) {
-        return { field: 'adjustments', message: '按库存周转调整的调整项必须给折扣率（0 与 1 之间）' };
+      if (
+        adjustment.discountRate === null ||
+        adjustment.discountRate < 0 ||
+        adjustment.discountRate > 1
+      ) {
+        return {
+          field: 'adjustments',
+          message: '按库存周转调整的调整项必须给折扣率（0 与 1 之间）',
+        };
       }
     }
   }
@@ -681,7 +688,8 @@ export function validateApply(
   if (hasTurnoverRule && (request.daysOfCover === null || request.daysOfCover < 0)) {
     return {
       field: 'daysOfCover',
-      message: '这条模板配了按库存周转调整的规则，必须填当前可售天数（上游 7 库存 / 09 订单未提供可读端点）',
+      message:
+        '这条模板配了按库存周转调整的规则，必须填当前可售天数（上游 7 库存 / 09 订单未提供可读端点）',
     };
   }
   return null;

@@ -90,7 +90,10 @@ function row(overrides: Partial<ExchangeOrderRow> = {}): ExchangeOrderRow {
   };
 }
 
-function detail(overrides: Partial<ExchangeOrderRow> = {}, blockers: string[] = []): ExchangeOrderDetail {
+function detail(
+  overrides: Partial<ExchangeOrderRow> = {},
+  blockers: string[] = [],
+): ExchangeOrderDetail {
   return {
     link: row(overrides),
     lines: [],
@@ -255,11 +258,19 @@ describe('可执行动作只认后端', () => {
     expect(cancelBlocking(null)).toBe('先打开一张换货新单');
     expect(cancelBlocking(detail())).toBeNull();
     expect(
-      cancelBlocking({ ...detail(), allowedActions: ['SYNC'], link: row({ newOrderStatus: 'SUBMITTED' }) }),
+      cancelBlocking({
+        ...detail(),
+        allowedActions: ['SYNC'],
+        link: row({ newOrderStatus: 'SUBMITTED' }),
+      }),
     ).toContain('9.2 审单');
-    expect(cancelBlocking({ ...detail(), allowedActions: ['SYNC'], link: row({ closureStatus: 'CANCELLED' }) })).toContain(
-      '已撤销',
-    );
+    expect(
+      cancelBlocking({
+        ...detail(),
+        allowedActions: ['SYNC'],
+        link: row({ closureStatus: 'CANCELLED' }),
+      }),
+    ).toContain('已撤销');
     expect(submitBlocking(null)).toBe('先打开一张换货新单');
     expect(submitBlocking(detail())).toBeNull();
   });
@@ -302,7 +313,9 @@ describe('硬规则逐条显示', () => {
 
 describe('建单可用性', () => {
   it('原单没有收货地址快照时提前给出理由，而不是让人填完再收 422', () => {
-    expect(authorizationBlocker(authorization({ hasShippingSnapshot: false }))).toContain('收货地址快照');
+    expect(authorizationBlocker(authorization({ hasShippingSnapshot: false }))).toContain(
+      '收货地址快照',
+    );
     expect(authorizationBlocker(authorization())).toBeNull();
     expect(authorizationBlocker(undefined)).toBeNull();
   });

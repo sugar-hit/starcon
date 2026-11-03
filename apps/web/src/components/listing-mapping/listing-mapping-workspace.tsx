@@ -1,14 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  Badge,
-  Button,
-  EmptyState,
-  Input,
-  PageHeader,
-  SectionCard,
-} from '@starcon/ui';
+import { Badge, Button, EmptyState, Input, PageHeader, SectionCard } from '@starcon/ui';
 import { Loader2, RefreshCw, TriangleAlert, Waypoints } from 'lucide-react';
 import {
   activeFilterCount,
@@ -245,7 +238,11 @@ export function ListingMappingWorkspace() {
         description="建立并维护「平台变体 → 内部 SKU/套装」的映射：一对一、一对多（套装）、多对一。映射未建立时订单行进入待映射状态，绝不按名称猜 SKU。"
         actions={
           <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
             刷新
           </Button>
         }
@@ -417,7 +414,10 @@ export function ListingMappingWorkspace() {
               emptyLabel="默认"
             />
           </Field>
-          <Field label="搜索（标题 / 平台商品 ID / 变体 ID）" className="sm:col-span-2 lg:col-span-4">
+          <Field
+            label="搜索（标题 / 平台商品 ID / 变体 ID）"
+            className="sm:col-span-2 lg:col-span-4"
+          >
             <Input
               value={filters.search}
               onChange={(e) => setFilters(applyFilterChange(filters, { search: e.target.value }))}
@@ -455,7 +455,7 @@ export function ListingMappingWorkspace() {
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-copy-13">
+            <table className="text-copy-13 w-full text-left">
               <thead className="text-muted-foreground border-b">
                 <tr>
                   <th className="px-3 py-2">平台变体</th>
@@ -473,7 +473,7 @@ export function ListingMappingWorkspace() {
                   <tr key={r.id} className="border-border/60 border-b last:border-0">
                     <td className="px-3 py-2">
                       <div className="text-foreground font-medium">{r.title}</div>
-                      <div className="text-muted-foreground font-mono text-label-12">
+                      <div className="text-muted-foreground text-label-12 font-mono">
                         {r.externalItemId} / {r.externalVariantId}
                       </div>
                     </td>
@@ -481,7 +481,7 @@ export function ListingMappingWorkspace() {
                     <td className="px-3 py-2">
                       <Badge tone="info">{relationLabel(r.relationType)}</Badge>
                       {r.componentQuantity !== null && (
-                        <div className="text-muted-foreground mt-1 text-label-12">
+                        <div className="text-muted-foreground text-label-12 mt-1">
                           组件数量 {String(r.componentQuantity)}
                         </div>
                       )}
@@ -490,13 +490,11 @@ export function ListingMappingWorkspace() {
                       <Badge tone={mappingStatusTone(r.mappingStatus)}>
                         {mappingStatusLabel(r.mappingStatus)}
                       </Badge>
-                      <div className="text-muted-foreground mt-1 text-label-12">
+                      <div className="text-muted-foreground text-label-12 mt-1">
                         {mappingStateLabel(r.status)}
                       </div>
                     </td>
-                    <td className="px-3 py-2 font-mono text-label-12">
-                      {r.internalSkuId ?? '—'}
-                    </td>
+                    <td className="text-label-12 px-3 py-2 font-mono">{r.internalSkuId ?? '—'}</td>
                     <td className="px-3 py-2">
                       <div>第 {r.currentVersionNo ?? '—'} 版</div>
                       <div className="text-muted-foreground text-label-12">
@@ -572,8 +570,8 @@ export function ListingMappingWorkspace() {
             <span className="text-muted-foreground">变体</span>
             <span className="font-mono">{detail.mapping.externalVariantId}</span>
           </div>
-          <div className="overflow-x-auto mt-3">
-            <table className="w-full text-left text-copy-13">
+          <div className="mt-3 overflow-x-auto">
+            <table className="text-copy-13 w-full text-left">
               <thead className="text-muted-foreground border-b">
                 <tr>
                   <th className="px-3 py-2">版本</th>
@@ -602,9 +600,7 @@ export function ListingMappingWorkspace() {
                       </div>
                     </td>
                     <td className="px-3 py-2">{relationLabel(v.relationType)}</td>
-                    <td className="px-3 py-2 font-mono text-label-12">
-                      {v.internalSkuId ?? '—'}
-                    </td>
+                    <td className="text-label-12 px-3 py-2 font-mono">{v.internalSkuId ?? '—'}</td>
                     <td className="px-3 py-2">{v.changeReason}</td>
                     <td className="px-3 py-2">
                       {v.changeSource === 'BATCH_CONFIRMED' ? '批量候选人工确认' : '人工建立'}
@@ -656,7 +652,7 @@ export function ListingMappingWorkspace() {
         )}
         {batch && (
           <>
-            <div className="flex flex-wrap items-center gap-3 mt-3">
+            <div className="mt-3 flex flex-wrap items-center gap-3">
               <Badge tone="primary">候选 {batch.candidateCount} 条</Badge>
               <Badge tone={batch.requiresConfirmationCount > 0 ? 'warning' : 'neutral'}>
                 需人工确认 {batch.requiresConfirmationCount}
@@ -670,8 +666,8 @@ export function ListingMappingWorkspace() {
                 没有可推荐的候选 —— 这是真状态（这些变体确实没有可匹配项），不是查不到。
               </p>
             ) : (
-              <div className="overflow-x-auto mt-3">
-                <table className="w-full text-left text-copy-13">
+              <div className="mt-3 overflow-x-auto">
+                <table className="text-copy-13 w-full text-left">
                   <thead className="text-muted-foreground border-b">
                     <tr>
                       <th className="px-3 py-2">平台变体</th>
@@ -685,22 +681,20 @@ export function ListingMappingWorkspace() {
                   <tbody>
                     {batch.candidates.map((c) => (
                       <tr key={c.id} className="border-border/60 border-b last:border-0">
-                        <td className="px-3 py-2 font-mono text-label-12">
-                          {c.externalVariantId}
-                        </td>
+                        <td className="text-label-12 px-3 py-2 font-mono">{c.externalVariantId}</td>
                         <td className="px-3 py-2">
-                          <div className="font-mono text-label-12">{c.internalSkuId}</div>
+                          <div className="text-label-12 font-mono">{c.internalSkuId}</div>
                           <div className="text-muted-foreground text-label-12">
                             {c.internalSkuCode} · {c.internalSkuName}
                           </div>
                         </td>
-                        <td className="px-3 py-2 text-label-12">{c.matchedText}</td>
+                        <td className="text-label-12 px-3 py-2">{c.matchedText}</td>
                         <td className="px-3 py-2">{scoreText(c)}</td>
                         <td className="px-3 py-2">
                           <Badge tone={c.requiresConfirmation ? 'warning' : 'neutral'}>
                             {c.requiresConfirmation ? '待人工确认' : '精确命中'}
                           </Badge>
-                          <div className="text-muted-foreground mt-1 text-label-12">
+                          <div className="text-muted-foreground text-label-12 mt-1">
                             {decisionLabel(c.decision)}
                           </div>
                         </td>
@@ -739,9 +733,7 @@ export function ListingMappingWorkspace() {
         title="未映射清单"
         description="平台变体还没有任何生效映射 —— 它们的订单行会进入待映射状态。"
       >
-        {unmappedError && (
-          <p className="text-copy-13 text-destructive mb-3">{unmappedError}</p>
-        )}
+        {unmappedError && <p className="text-copy-13 text-destructive mb-3">{unmappedError}</p>}
         <p className="text-copy-13 text-muted-foreground">{unmappedSummary(unmapped)}</p>
         {unmapped && !unmapped.backflowDelivered && (
           <p className="text-copy-13 text-warning mt-2">
@@ -750,8 +742,8 @@ export function ListingMappingWorkspace() {
           </p>
         )}
         {unmapped && unmapped.items.length > 0 && (
-          <div className="overflow-x-auto mt-3">
-            <table className="w-full text-left text-copy-13">
+          <div className="mt-3 overflow-x-auto">
+            <table className="text-copy-13 w-full text-left">
               <thead className="text-muted-foreground border-b">
                 <tr>
                   <th className="px-3 py-2">平台商品</th>
@@ -766,14 +758,14 @@ export function ListingMappingWorkspace() {
                   <tr key={v.listingVariantId} className="border-border/60 border-b last:border-0">
                     <td className="px-3 py-2">
                       <div className="text-foreground font-medium">{v.title}</div>
-                      <div className="text-muted-foreground font-mono text-label-12">
+                      <div className="text-muted-foreground text-label-12 font-mono">
                         {v.externalItemId}
                       </div>
                     </td>
-                    <td className="px-3 py-2 font-mono text-label-12">{v.externalVariantId}</td>
+                    <td className="text-label-12 px-3 py-2 font-mono">{v.externalVariantId}</td>
                     <td className="px-3 py-2">{v.shopCode}</td>
                     <td className="px-3 py-2">{v.unmappedDays} 天</td>
-                    <td className="px-3 py-2 font-mono text-label-12">{v.listingId}</td>
+                    <td className="text-label-12 px-3 py-2 font-mono">{v.listingId}</td>
                   </tr>
                 ))}
               </tbody>
@@ -854,7 +846,7 @@ function Select({
 }) {
   return (
     <select
-      className="border-control-border bg-card h-9 rounded-md border px-2 text-copy-13"
+      className="border-control-border bg-card text-copy-13 h-9 rounded-md border px-2"
       value={value}
       onChange={(e) => onChange(e.target.value)}
     >

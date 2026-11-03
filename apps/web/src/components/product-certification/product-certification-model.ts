@@ -544,10 +544,7 @@ export async function fetchCoverageForSku(skuId: string): Promise<CoverageSkuDet
   return api<CoverageSkuDetail>(`${BASE}/coverage/skus/${skuId}`);
 }
 
-export async function fetchExpiryReminders(
-  page = 0,
-  size = 50,
-): Promise<ExpiryReminderPage> {
+export async function fetchExpiryReminders(page = 0, size = 50): Promise<ExpiryReminderPage> {
   return api<ExpiryReminderPage>(`${BASE}/expiry-reminders?page=${page}&size=${size}`);
 }
 

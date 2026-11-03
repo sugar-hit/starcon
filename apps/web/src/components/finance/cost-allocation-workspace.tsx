@@ -276,8 +276,7 @@ export function CostAllocationWorkspace() {
     );
   }
 
-  const allocatedPoolCount =
-    pools?.items.filter((pool) => isPoolAllocated(pool)).length ?? 0;
+  const allocatedPoolCount = pools?.items.filter((pool) => isPoolAllocated(pool)).length ?? 0;
   const activeBatchCount =
     batches?.items.filter((batch) => batch.status === 'ALLOCATED').length ?? 0;
 
@@ -304,11 +303,15 @@ export function CostAllocationWorkspace() {
       ) : null}
 
       <Notice tone="info" title="分摊结果之和必须等于被分摊总额">
-        这是本模块唯一必须恒成立的等式（蓝图原文：否则利润报表总额对不上）。
-        舍入产生的零头<b>不消失</b>：它落到规则指定的���象上，并逐行留痕。
+        这是本模块唯一必须恒成立的等式（蓝图原文：否则利润报表总额对不上）。 舍入产生的零头
+        <b>不消失</b>：它落到规则指定的���象上，并逐行留痕。
       </Notice>
 
-      {notice ? <Notice tone="success" title="操作完成">{notice}</Notice> : null}
+      {notice ? (
+        <Notice tone="success" title="操作完成">
+          {notice}
+        </Notice>
+      ) : null}
       {actionError ? (
         <Notice tone="danger" title="操作失败">
           {actionError}
@@ -328,10 +331,9 @@ export function CostAllocationWorkspace() {
         description="分摊维度 · 分摊基数 · 生效区间 · 分摊顺序 · 舍入差处理"
       >
         <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            规则由租户自己维护，系统<b>不预置任何一行</b>。
-            生效区间必须覆盖费用池的归属期间才命中 ⇒ 新规则<b>不会追溯改写历史分摊</b>；
-            多条规则命中时<b>分摊顺序数字小的先用</b>。
+          <p className="text-muted-foreground text-sm">
+            规则由租户自己维护，系统<b>不预置任何一行</b>。 生效区间必须覆盖费用池的归属期间才命中 ⇒
+            新规则<b>不会追溯改写历史分摊</b>； 多条规则命中时<b>分摊顺序数字小的先用</b>。
           </p>
 
           {rules.length === 0 ? (
@@ -343,7 +345,7 @@ export function CostAllocationWorkspace() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b text-left text-xs text-muted-foreground">
+                  <tr className="text-muted-foreground border-b text-left text-xs">
                     <th className="py-2 pr-3">规则</th>
                     <th className="py-2 pr-3">分摊维度</th>
                     <th className="py-2 pr-3">分摊基数</th>
@@ -359,9 +361,13 @@ export function CostAllocationWorkspace() {
                     <tr key={rule.id} className="border-b last:border-0">
                       <td className="py-2 pr-3">
                         <div>{rule.ruleName}</div>
-                        <div className="font-mono text-xs text-muted-foreground">{rule.ruleCode}</div>
+                        <div className="text-muted-foreground font-mono text-xs">
+                          {rule.ruleCode}
+                        </div>
                       </td>
-                      <td className="py-2 pr-3">{allocationDimensionLabel(rule.targetDimension)}</td>
+                      <td className="py-2 pr-3">
+                        {allocationDimensionLabel(rule.targetDimension)}
+                      </td>
                       <td className="py-2 pr-3">{allocationBasisLabel(rule.allocationBasis)}</td>
                       <td className="py-2 pr-3 font-mono text-xs">{rule.poolKey}</td>
                       <td className="py-2 pr-3">{rule.priority}</td>
@@ -371,7 +377,7 @@ export function CostAllocationWorkspace() {
                       <td className="py-2 pr-3">
                         <div>{roundingPolicyLabel(rule.roundingPolicy)}</div>
                         {rule.roundingTargetCode ? (
-                          <div className="font-mono text-xs text-muted-foreground">
+                          <div className="text-muted-foreground font-mono text-xs">
                             落到 {rule.roundingTargetCode}
                           </div>
                         ) : null}
@@ -418,7 +424,7 @@ export function CostAllocationWorkspace() {
               <label className="text-sm">
                 分摊维度
                 <select
-                  className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
+                  className="bg-background mt-1 w-full rounded-md border px-2 py-1.5 text-sm"
                   value={ruleDimension}
                   onChange={(event) => setRuleDimension(event.target.value)}
                 >
@@ -432,7 +438,7 @@ export function CostAllocationWorkspace() {
               <label className="text-sm">
                 分摊基数
                 <select
-                  className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
+                  className="bg-background mt-1 w-full rounded-md border px-2 py-1.5 text-sm"
                   value={ruleBasis}
                   onChange={(event) => setRuleBasis(event.target.value)}
                 >
@@ -470,7 +476,7 @@ export function CostAllocationWorkspace() {
               <label className="text-sm">
                 舍入差处理
                 <select
-                  className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
+                  className="bg-background mt-1 w-full rounded-md border px-2 py-1.5 text-sm"
                   value={rulePolicy}
                   onChange={(event) => setRulePolicy(event.target.value)}
                 >
@@ -486,7 +492,7 @@ export function CostAllocationWorkspace() {
                   <label className="text-sm">
                     零头落点类型
                     <select
-                      className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
+                      className="bg-background mt-1 w-full rounded-md border px-2 py-1.5 text-sm"
                       value={ruleRoundingType}
                       onChange={(event) => setRuleRoundingType(event.target.value)}
                     >
@@ -521,7 +527,7 @@ export function CostAllocationWorkspace() {
         description="上游 12.4.2.1 归集出来的池 · 采集分摊对象后执行分摊"
       >
         <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             分摊对象<b>来自真实上游事实</b>（平台订单 / 销售订单行 / 商品主数据），
             本模块不凭空造对象。对象采集后会被<b>快照</b>下来 —— 之后上游改了也不影响已发生的分摊。
           </p>
@@ -530,7 +536,7 @@ export function CostAllocationWorkspace() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b text-left text-xs text-muted-foreground">
+                  <tr className="text-muted-foreground border-b text-left text-xs">
                     <th className="py-2 pr-3">费用池</th>
                     <th className="py-2 pr-3">归属期间</th>
                     <th className="py-2 pr-3">币种</th>
@@ -545,7 +551,9 @@ export function CostAllocationWorkspace() {
                     <tr key={pool.poolId} className="border-b last:border-0">
                       <td className="py-2 pr-3">
                         <div>{pool.poolName}</div>
-                        <div className="font-mono text-xs text-muted-foreground">{pool.poolKey}</div>
+                        <div className="text-muted-foreground font-mono text-xs">
+                          {pool.poolKey}
+                        </div>
                       </td>
                       <td className="py-2 pr-3">
                         {formatAllocationPeriod(pool.periodStart, pool.periodEnd)}
@@ -583,7 +591,7 @@ export function CostAllocationWorkspace() {
               <label className="text-sm">
                 目标费用池
                 <select
-                  className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
+                  className="bg-background mt-1 w-full rounded-md border px-2 py-1.5 text-sm"
                   value={selectedPoolId}
                   onChange={(event) => setSelectedPoolId(event.target.value)}
                 >
@@ -598,7 +606,7 @@ export function CostAllocationWorkspace() {
               <label className="text-sm">
                 分摊维度（采集对象用）
                 <select
-                  className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
+                  className="bg-background mt-1 w-full rounded-md border px-2 py-1.5 text-sm"
                   value={collectDimension}
                   onChange={(event) => setCollectDimension(event.target.value)}
                 >
@@ -612,7 +620,7 @@ export function CostAllocationWorkspace() {
               <label className="text-sm">
                 规则（留空 = 按分摊顺序自动选）
                 <select
-                  className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
+                  className="bg-background mt-1 w-full rounded-md border px-2 py-1.5 text-sm"
                   value={allocateRuleId}
                   onChange={(event) => setAllocateRuleId(event.target.value)}
                 >
@@ -635,11 +643,10 @@ export function CostAllocationWorkspace() {
               </Button>
             </div>
             {selectedPool ? (
-              <p className="text-sm text-muted-foreground">
-                当前选中：{selectedPool.poolKey} · {formatAllocationMoney(
-                  selectedPool.totalAmount,
-                  selectedPool.currency,
-                )} · 已采集 {selectedPool.targetCount} 个分摊对象
+              <p className="text-muted-foreground text-sm">
+                当前选中：{selectedPool.poolKey} ·{' '}
+                {formatAllocationMoney(selectedPool.totalAmount, selectedPool.currency)} · 已采集{' '}
+                {selectedPool.targetCount} 个分摊对象
               </p>
             ) : null}
           </div>
@@ -648,7 +655,7 @@ export function CostAllocationWorkspace() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b text-left text-xs text-muted-foreground">
+                  <tr className="text-muted-foreground border-b text-left text-xs">
                     <th className="py-2 pr-3">分摊对象</th>
                     <th className="py-2 pr-3">维度</th>
                     <th className="py-2 pr-3">数量基数</th>
@@ -664,7 +671,7 @@ export function CostAllocationWorkspace() {
                     <tr key={target.id} className="border-b last:border-0">
                       <td className="py-2 pr-3">
                         <div>{target.targetName}</div>
-                        <div className="font-mono text-xs text-muted-foreground">
+                        <div className="text-muted-foreground font-mono text-xs">
                           {target.targetCode}
                         </div>
                       </td>
@@ -686,7 +693,7 @@ export function CostAllocationWorkspace() {
                       <td className="py-2 pr-3">
                         {allocationBasisSourceLabel(target.basisSource)}
                       </td>
-                      <td className="py-2 pr-3 text-xs text-muted-foreground">
+                      <td className="text-muted-foreground py-2 pr-3 text-xs">
                         {target.basisNote || '—'}
                       </td>
                     </tr>
@@ -710,7 +717,7 @@ export function CostAllocationWorkspace() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b text-left text-xs text-muted-foreground">
+                  <tr className="text-muted-foreground border-b text-left text-xs">
                     <th className="py-2 pr-3">费用池</th>
                     <th className="py-2 pr-3">规则</th>
                     <th className="py-2 pr-3">被分摊总额</th>
@@ -726,11 +733,15 @@ export function CostAllocationWorkspace() {
                     <tr key={batch.id} className="border-b last:border-0">
                       <td className="py-2 pr-3">
                         <div>{batch.poolName}</div>
-                        <div className="font-mono text-xs text-muted-foreground">{batch.poolKey}</div>
+                        <div className="text-muted-foreground font-mono text-xs">
+                          {batch.poolKey}
+                        </div>
                       </td>
                       <td className="py-2 pr-3">
                         <div>{batch.ruleName}</div>
-                        <div className="font-mono text-xs text-muted-foreground">{batch.ruleCode}</div>
+                        <div className="text-muted-foreground font-mono text-xs">
+                          {batch.ruleCode}
+                        </div>
                       </td>
                       <td className="py-2 pr-3 font-mono">
                         {formatAllocationAmount(batch.sourceTotal)}
@@ -771,8 +782,9 @@ export function CostAllocationWorkspace() {
               <div className="space-y-1 text-sm">
                 {batches.totalsByCurrency.map((total) => (
                   <div key={total.currency} className="text-muted-foreground">
-                    {total.currency}：被分摊总额 {formatAllocationAmount(total.sourceTotal)} · 分摊总额{' '}
-                    {formatAllocationAmount(total.allocatedTotal)} · {total.batchCount} 个批次
+                    {total.currency}：被分摊总额 {formatAllocationAmount(total.sourceTotal)} ·
+                    分摊总额 {formatAllocationAmount(total.allocatedTotal)} · {total.batchCount}{' '}
+                    个批次
                   </div>
                 ))}
               </div>
@@ -801,7 +813,7 @@ export function CostAllocationWorkspace() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b text-left text-xs text-muted-foreground">
+                <tr className="text-muted-foreground border-b text-left text-xs">
                   <th className="py-2 pr-3">分摊对象</th>
                   <th className="py-2 pr-3">基数</th>
                   <th className="py-2 pr-3">占比</th>
@@ -816,7 +828,7 @@ export function CostAllocationWorkspace() {
                   <tr key={result.id} className="border-b last:border-0">
                     <td className="py-2 pr-3">
                       <div>{result.targetName}</div>
-                      <div className="font-mono text-xs text-muted-foreground">
+                      <div className="text-muted-foreground font-mono text-xs">
                         {result.targetCode}
                         {result.isRoundingTarget ? ' · 零头落点' : ''}
                       </div>
@@ -836,7 +848,7 @@ export function CostAllocationWorkspace() {
                     <td className="py-2 pr-3 font-mono">
                       {formatAllocationAmount(result.roundingAdjustment)}
                     </td>
-                    <td className="py-2 pr-3 text-xs text-muted-foreground">
+                    <td className="text-muted-foreground py-2 pr-3 text-xs">
                       {allocationUnavailableText(result) || '—'}
                     </td>
                   </tr>
@@ -858,17 +870,21 @@ export function CostAllocationWorkspace() {
                     {capability.available ? '已接通' : '未接通'}
                   </Badge>
                   <span className="font-medium">{capability.dimension}</span>
-                  <span className="font-mono text-xs text-muted-foreground">{capability.moduleId}</span>
+                  <span className="text-muted-foreground font-mono text-xs">
+                    {capability.moduleId}
+                  </span>
                 </div>
-                <p className="mt-1 text-muted-foreground">{capability.note}</p>
-                <p className="mt-1 font-mono text-xs text-muted-foreground">{capability.evidence}</p>
+                <p className="text-muted-foreground mt-1">{capability.note}</p>
+                <p className="text-muted-foreground mt-1 font-mono text-xs">
+                  {capability.evidence}
+                </p>
               </div>
             ))}
             {caps.gaps.length > 0 ? (
               <div className="rounded-md border p-3">
                 <p className="font-medium">下游缺口</p>
                 {caps.gaps.map((gap) => (
-                  <div key={gap.moduleId} className="mt-1 text-muted-foreground">
+                  <div key={gap.moduleId} className="text-muted-foreground mt-1">
                     <span className="font-mono text-xs">{gap.moduleId}</span> {gap.name} —{' '}
                     {gap.note}
                   </div>

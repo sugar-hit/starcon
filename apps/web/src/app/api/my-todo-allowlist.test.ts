@@ -172,9 +172,7 @@ it('查询串不影响放行判定', async () => {
   vi.stubGlobal('fetch', fetcher);
 
   // 筛选条件不会让路径落到白名单之外。
-  expect(
-    await call('crm/message-inbox/messages?readStatus=UNREAD&page=0&size=50'),
-  ).toBe(200);
+  expect(await call('crm/message-inbox/messages?readStatus=UNREAD&page=0&size=50')).toBe(200);
   expect(await call('warehouse/inventory/safety-stock/alerts?page=1&size=50')).toBe(200);
 });
 

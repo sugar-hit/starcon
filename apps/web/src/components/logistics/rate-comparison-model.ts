@@ -404,7 +404,10 @@ export function saveRating(input: RatingInput): Promise<ChannelRatingRow> {
   });
 }
 
-export function fetchShopPriorities(params: { shopCode?: string; status?: string }): Promise<ShopPriorityOverview> {
+export function fetchShopPriorities(params: {
+  shopCode?: string;
+  status?: string;
+}): Promise<ShopPriorityOverview> {
   const query = new URLSearchParams();
   if (params.shopCode) query.set('shopCode', params.shopCode);
   if (params.status) query.set('status', params.status);
@@ -565,7 +568,9 @@ export function validateRating(input: RatingInput): CompareValidation {
   }
   if (!toInstant(input.windowFrom) || !toInstant(input.windowTo)) {
     errors.push('统计窗口的开始与结束时刻都要填');
-  } else if (new Date(toInstant(input.windowTo) as string) <= new Date(toInstant(input.windowFrom) as string)) {
+  } else if (
+    new Date(toInstant(input.windowTo) as string) <= new Date(toInstant(input.windowFrom) as string)
+  ) {
     errors.push('统计窗口的结束时刻必须晚于开始时刻');
   }
   if (!toInstant(input.observedAt)) {

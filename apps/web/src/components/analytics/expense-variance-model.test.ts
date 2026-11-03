@@ -124,17 +124,19 @@ describe('费用差异前端模型', () => {
   it('金额为 null 时显示「—」，绝不显示 0', () => {
     expect(amountText(null, 'USD')).toBe('—');
     expect(amountText(0, 'USD')).toBe('0.00 USD');
-    expect(unmatchedAmountText({
-      feeType: 'AD_FEE',
-      feeTypeLabel: '广告费',
-      feeSubType: '',
-      currency: 'USD',
-      actualAmount: null,
-      actualCount: 1,
-      scopeLabel: '全部',
-      actualSource: 'finance',
-      reason: '没有可比预计值。',
-    })).toBe('—');
+    expect(
+      unmatchedAmountText({
+        feeType: 'AD_FEE',
+        feeTypeLabel: '广告费',
+        feeSubType: '',
+        currency: 'USD',
+        actualAmount: null,
+        actualCount: 1,
+        scopeLabel: '全部',
+        actualSource: 'finance',
+        reason: '没有可比预计值。',
+      }),
+    ).toBe('—');
   });
 
   it('金额必须带自己的币种（不跨币种相加）', () => {
@@ -172,7 +174,12 @@ describe('费用差异前端模型', () => {
   });
 
   it('不可比的一行必须把服务端给的原因原样带出来', () => {
-    const r = row({ comparable: false, varianceAmount: null, varianceRate: null, note: '只有实际侧。' });
+    const r = row({
+      comparable: false,
+      varianceAmount: null,
+      varianceRate: null,
+      note: '只有实际侧。',
+    });
     expect(comparableNote(r)).toBe('只有实际侧。');
     expect(comparableNote(row())).toBe('可比');
   });

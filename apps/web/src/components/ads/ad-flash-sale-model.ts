@@ -287,7 +287,10 @@ export function saveAdFlashSale(input: SaveFlashSaleInput): Promise<AdFlashSaleD
   return api<AdFlashSaleDetail>('channel/ad-flash-sales/flash-sales', 'POST', input);
 }
 
-export function updateAdFlashSale(id: string, input: SaveFlashSaleInput): Promise<AdFlashSaleDetail> {
+export function updateAdFlashSale(
+  id: string,
+  input: SaveFlashSaleInput,
+): Promise<AdFlashSaleDetail> {
   return api<AdFlashSaleDetail>(`channel/ad-flash-sales/flash-sales/${id}`, 'POST', input);
 }
 
@@ -298,7 +301,10 @@ export function changeAdFlashSaleStatus(
   return api<AdFlashSaleDetail>(`channel/ad-flash-sales/flash-sales/${id}/status`, 'POST', input);
 }
 
-export function claimAdFlashSale(id: string, input: ClaimFlashSaleInput): Promise<AdFlashSaleDetail> {
+export function claimAdFlashSale(
+  id: string,
+  input: ClaimFlashSaleInput,
+): Promise<AdFlashSaleDetail> {
   return api<AdFlashSaleDetail>(`channel/ad-flash-sales/flash-sales/${id}/claims`, 'POST', input);
 }
 
@@ -306,7 +312,11 @@ export function redeemAdFlashSale(
   id: string,
   input: RedeemFlashSaleInput,
 ): Promise<AdFlashSaleDetail> {
-  return api<AdFlashSaleDetail>(`channel/ad-flash-sales/flash-sales/${id}/redemptions`, 'POST', input);
+  return api<AdFlashSaleDetail>(
+    `channel/ad-flash-sales/flash-sales/${id}/redemptions`,
+    'POST',
+    input,
+  );
 }
 
 export function fetchAdFlashSaleStatistics(id: string): Promise<AdFlashSaleStatistics> {

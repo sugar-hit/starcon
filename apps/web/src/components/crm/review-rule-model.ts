@@ -269,7 +269,11 @@ export function createHoliday(input: CrmReviewHolidayInput) {
 
 /** 更新节假日。 */
 export function updateHoliday(holidayId: string, input: CrmReviewHolidayInput) {
-  return api<CrmReviewHolidayRow>(`${base}/holidays/${encodeURIComponent(holidayId)}`, 'PUT', input);
+  return api<CrmReviewHolidayRow>(
+    `${base}/holidays/${encodeURIComponent(holidayId)}`,
+    'PUT',
+    input,
+  );
 }
 
 /** 删除节假日。 */
@@ -417,9 +421,7 @@ export function averageRatingText(rating: number | null | undefined): string {
  * <p>⚠️ 没有分桶种子时后端报 `pickedVariantId` 为空 —— **不能**随便挑一个显示：
  * 「说不出分到哪个臂」和「分到了 A」是两件完全不同的事。
  */
-export function pickedVariant(
-  policy: CrmReviewEffectivePolicy | null,
-): CrmReviewVariantRow | null {
+export function pickedVariant(policy: CrmReviewEffectivePolicy | null): CrmReviewVariantRow | null {
   if (!policy || !policy.pickedVariantId) return null;
   return policy.variants.find((variant) => variant.id === policy.pickedVariantId) ?? null;
 }

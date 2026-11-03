@@ -356,7 +356,9 @@ export async function updateEntry(
   return api<FilingCalendarEntryView>(`${BASE}/entries/${id}`, 'PUT', input);
 }
 
-export async function generateEntries(referenceDate?: string): Promise<FilingCalendarGenerateResult> {
+export async function generateEntries(
+  referenceDate?: string,
+): Promise<FilingCalendarGenerateResult> {
   const query = referenceDate ? `?referenceDate=${encodeURIComponent(referenceDate)}` : '';
   return api<FilingCalendarGenerateResult>(`${BASE}/entries/generate${query}`, 'POST');
 }
@@ -375,7 +377,12 @@ export async function refreshReadiness(): Promise<{ refreshed: number; note: str
 export async function fetchCycleConfigs(
   page = 0,
   size = 10,
-  filters: { jurisdictionCode?: string; taxType?: string; filingCycle?: string; status?: string } = {},
+  filters: {
+    jurisdictionCode?: string;
+    taxType?: string;
+    filingCycle?: string;
+    status?: string;
+  } = {},
 ): Promise<FilingCalendarCycleConfigPage> {
   const query = new URLSearchParams({ page: String(page), size: String(size) });
   if (filters.jurisdictionCode) query.set('jurisdictionCode', filters.jurisdictionCode);
@@ -413,8 +420,7 @@ export async function fetchReminders(
   const query = new URLSearchParams({ page: String(page), size: String(size) });
   if (filters.kind) query.set('kind', filters.kind);
   if (filters.jurisdictionCode) query.set('jurisdictionCode', filters.jurisdictionCode);
-  if (filters.acknowledged !== undefined)
-    query.set('acknowledged', String(filters.acknowledged));
+  if (filters.acknowledged !== undefined) query.set('acknowledged', String(filters.acknowledged));
   if (filters.withinDays !== undefined) query.set('withinDays', String(filters.withinDays));
   return api<FilingCalendarReminderPage>(`${BASE}/reminders?${query.toString()}`);
 }

@@ -55,10 +55,18 @@ describe('14.2.2.2 规则校验：上限是必填项', () => {
   });
 
   it('总上限（金额 / 次数 / 窗口）留空或非正都被拒', () => {
-    expect(validateRule(rule({ totalCapAmount: '' })).errors.join('\n')).toContain('总上限（窗口内累计金额）');
-    expect(validateRule(rule({ totalCapCount: '0' })).errors.join('\n')).toContain('总上限（窗口内累计次数）');
-    expect(validateRule(rule({ totalCapWindowHours: '0' })).errors.join('\n')).toContain('累计窗口长度');
-    expect(validateRule(rule({ totalCapWindowHours: '1.5' })).errors.join('\n')).toContain('累计窗口长度');
+    expect(validateRule(rule({ totalCapAmount: '' })).errors.join('\n')).toContain(
+      '总上限（窗口内累计金额）',
+    );
+    expect(validateRule(rule({ totalCapCount: '0' })).errors.join('\n')).toContain(
+      '总上限（窗口内累计次数）',
+    );
+    expect(validateRule(rule({ totalCapWindowHours: '0' })).errors.join('\n')).toContain(
+      '累计窗口长度',
+    );
+    expect(validateRule(rule({ totalCapWindowHours: '1.5' })).errors.join('\n')).toContain(
+      '累计窗口长度',
+    );
   });
 
   it('比例上限可以是 0（表示不启用），但不能是负数', () => {
@@ -90,7 +98,9 @@ describe('14.2.2.2 规则校验：启停动作没有幅度', () => {
   });
 
   it('改价改预算必须有幅度', () => {
-    expect(validateRule(rule({ actionType: 'INCREASE_BUDGET', adjustmentValue: '' })).ok).toBe(false);
+    expect(validateRule(rule({ actionType: 'INCREASE_BUDGET', adjustmentValue: '' })).ok).toBe(
+      false,
+    );
   });
 });
 

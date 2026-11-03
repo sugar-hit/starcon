@@ -195,7 +195,7 @@ export function ListingHijackerWorkspace() {
       />
 
       {error && (
-        <div className="border-destructive/40 bg-destructive/5 text-destructive flex items-center gap-2 rounded-lg border px-4 py-3 text-label-13">
+        <div className="border-destructive/40 bg-destructive/5 text-destructive text-label-13 flex items-center gap-2 rounded-lg border px-4 py-3">
           <TriangleAlert className="size-4 shrink-0" />
           <span className="flex-1">{error}</span>
           <Button size="sm" variant="secondary" onClick={() => void load()}>
@@ -206,13 +206,13 @@ export function ListingHijackerWorkspace() {
       )}
 
       {notice && (
-        <div className="border-info/40 bg-info/5 text-foreground flex items-center gap-2 rounded-lg border px-4 py-3 text-label-13">
+        <div className="border-info/40 bg-info/5 text-foreground text-label-13 flex items-center gap-2 rounded-lg border px-4 py-3">
           <span className="flex-1">{notice}</span>
         </div>
       )}
 
       {/* ---- 🔴 来源标注 + 处置动作声明（蓝图加粗句：跟卖数据只能作为参考） ---- */}
-      <div className="border-info/40 bg-info/5 text-foreground flex flex-col gap-2 rounded-lg border px-4 py-3 text-label-13">
+      <div className="border-info/40 bg-info/5 text-foreground text-label-13 flex flex-col gap-2 rounded-lg border px-4 py-3">
         <div className="flex items-start gap-3">
           <Badge tone="info" className="mt-0.5 shrink-0">
             {REFERENCE_ONLY_BADGE}
@@ -258,26 +258,24 @@ export function ListingHijackerWorkspace() {
         description="正在盯哪些 ASIN、各自的阈值配没配、有没有未处理的预警。点一行选中，下面的记录 / 预警 / 对比视图会跟着它走。"
         extra={
           watches ? (
-            <span className="text-muted-foreground text-label-12">
-              {pageSummary(watches)}
-            </span>
+            <span className="text-muted-foreground text-label-12">{pageSummary(watches)}</span>
           ) : undefined
         }
       >
         {loading && !watches ? (
-          <div className="text-muted-foreground flex items-center gap-2 px-1 py-8 text-label-13">
+          <div className="text-muted-foreground text-label-13 flex items-center gap-2 px-1 py-8">
             <Loader2 className="size-4 animate-spin" />
             正在加载监控对象…
           </div>
         ) : !watches || watches.items.length === 0 ? (
           <EmptyState
-            icon={<ShieldAlert className="size-8 text-muted-foreground" />}
+            icon={<ShieldAlert className="text-muted-foreground size-8" />}
             title="还没有监控对象"
             description="先建一个监控对象（按 ASIN / listing 配），抓到跟卖时才会落记录、才会判预警。"
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-label-13">
+            <table className="text-label-13 w-full text-left">
               <thead className="text-muted-foreground border-border border-b">
                 <tr>
                   <th className="px-4 py-2 font-medium">商品</th>
@@ -312,7 +310,9 @@ export function ListingHijackerWorkspace() {
                         人工维护
                       </Badge>
                     </td>
-                    <td className="px-4 py-2">{formatAmount(row.priceCutThreshold, row.currency)}</td>
+                    <td className="px-4 py-2">
+                      {formatAmount(row.priceCutThreshold, row.currency)}
+                    </td>
                     <td className="px-4 py-2">{formatRate(row.priceGapRatioThreshold)}</td>
                     <td className="px-4 py-2">{formatCount(row.recordCount)}</td>
                     <td className="px-4 py-2">
@@ -440,20 +440,20 @@ export function ListingHijackerWorkspace() {
         }
       >
         {detailLoading && !records ? (
-          <div className="text-muted-foreground flex items-center gap-2 px-1 py-8 text-label-13">
+          <div className="text-muted-foreground text-label-13 flex items-center gap-2 px-1 py-8">
             <Loader2 className="size-4 animate-spin" />
             正在加载跟卖记录…
           </div>
         ) : !records || records.items.length === 0 ? (
           <EmptyState
-            icon={<ShieldAlert className="size-8 text-muted-foreground" />}
+            icon={<ShieldAlert className="text-muted-foreground size-8" />}
             title="没有跟卖记录"
             description={emptyRecordsMessage(records?.watchCount ?? 0, records?.total ?? 0)}
           />
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-label-13">
+              <table className="text-label-13 w-full text-left">
                 <thead className="text-muted-foreground border-border border-b">
                   <tr>
                     <th className="px-4 py-2 font-medium">跟卖者</th>
@@ -487,7 +487,9 @@ export function ListingHijackerWorkspace() {
                           {SCRAPED_SOURCE_BADGE}
                         </Badge>
                       </td>
-                      <td className="px-4 py-2">{formatAmount(row.referencePrice, row.currency)}</td>
+                      <td className="px-4 py-2">
+                        {formatAmount(row.referencePrice, row.currency)}
+                      </td>
                       <td className="px-4 py-2">{gapText(row.priceGapRatio)}</td>
                       <td className="px-4 py-2">{formatTime(row.observedAt)}</td>
                       <td className="px-4 py-2">
@@ -536,14 +538,14 @@ export function ListingHijackerWorkspace() {
       >
         {!alerts || alerts.items.length === 0 ? (
           <EmptyState
-            icon={<ShieldAlert className="size-8 text-muted-foreground" />}
+            icon={<ShieldAlert className="text-muted-foreground size-8" />}
             title="没有预警"
             description="当前筛选条件下没有异常跟卖 / 恶意压价的判定结论。抓到的跟卖价不越过阈值时不会产生预警 —— 没有预警不等于没有跟卖，请看上面的跟卖记录。"
           />
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-label-13">
+              <table className="text-label-13 w-full text-left">
                 <thead className="text-muted-foreground border-border border-b">
                   <tr>
                     <th className="px-4 py-2 font-medium">类型</th>
@@ -650,18 +652,18 @@ export function ListingHijackerWorkspace() {
       >
         {!selectedWatch ? (
           <EmptyState
-            icon={<ShieldAlert className="size-8 text-muted-foreground" />}
+            icon={<ShieldAlert className="text-muted-foreground size-8" />}
             title="还没选中监控对象"
             description="在上面点一个监控对象，这里会显示自家参考售价与各跟卖者的价格对比。"
           />
         ) : !comparison ? (
-          <div className="text-muted-foreground flex items-center gap-2 px-1 py-8 text-label-13">
+          <div className="text-muted-foreground text-label-13 flex items-center gap-2 px-1 py-8">
             <Loader2 className="size-4 animate-spin" />
             正在加载对比视图…
           </div>
         ) : !comparison.hasData ? (
           <EmptyState
-            icon={<ShieldAlert className="size-8 text-muted-foreground" />}
+            icon={<ShieldAlert className="text-muted-foreground size-8" />}
             title="这个区间没有跟卖数据"
             description={emptyComparisonMessage(comparison)}
           />
@@ -690,7 +692,7 @@ export function ListingHijackerWorkspace() {
               />
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-label-13">
+              <table className="text-label-13 w-full text-left">
                 <thead className="text-muted-foreground border-border border-b">
                   <tr>
                     <th className="px-4 py-2 font-medium">跟卖者</th>
@@ -729,7 +731,9 @@ export function ListingHijackerWorkspace() {
                         {formatAmount(row.maxPrice, row.currency)}
                       </td>
                       <td className="px-4 py-2">{formatAmount(row.avgPrice, row.currency)}</td>
-                      <td className="px-4 py-2">{formatAmount(row.referencePrice, row.currency)}</td>
+                      <td className="px-4 py-2">
+                        {formatAmount(row.referencePrice, row.currency)}
+                      </td>
                       <td className="px-4 py-2">{gapText(row.priceGapRatio)}</td>
                       <td className="px-4 py-2">{formatCount(row.observationCount)}</td>
                       <td className="px-4 py-2">{formatTime(row.lastObservedAt)}</td>

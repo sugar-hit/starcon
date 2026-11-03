@@ -2,10 +2,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
-const PAGE = readFileSync(
-  fileURLToPath(new URL('./page.tsx', import.meta.url)),
-  'utf8',
-);
+const PAGE = readFileSync(fileURLToPath(new URL('./page.tsx', import.meta.url)), 'utf8');
 
 const WORKSPACE = readFileSync(
   fileURLToPath(

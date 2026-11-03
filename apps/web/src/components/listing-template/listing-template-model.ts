@@ -213,7 +213,9 @@ export type TemplateListFilters = {
   size?: number;
 };
 
-export async function fetchTemplates(filters: TemplateListFilters = {}): Promise<ListingTemplatePage> {
+export async function fetchTemplates(
+  filters: TemplateListFilters = {},
+): Promise<ListingTemplatePage> {
   const query = new URLSearchParams();
   if (filters.scope) query.set('scope', filters.scope);
   if (filters.platformCode) query.set('platformCode', filters.platformCode);
@@ -230,11 +232,16 @@ export async function fetchTemplate(id: string): Promise<ListingTemplateDetail> 
   return api<ListingTemplateDetail>(`channel/listing-templates/${id}`);
 }
 
-export async function saveTemplate(body: SaveListingTemplateRequest): Promise<ListingTemplateDetail> {
+export async function saveTemplate(
+  body: SaveListingTemplateRequest,
+): Promise<ListingTemplateDetail> {
   return api<ListingTemplateDetail>('channel/listing-templates', 'POST', body);
 }
 
-export async function setTemplateStatus(id: string, status: string): Promise<ListingTemplateDetail> {
+export async function setTemplateStatus(
+  id: string,
+  status: string,
+): Promise<ListingTemplateDetail> {
   return api<ListingTemplateDetail>(
     `channel/listing-templates/${id}/status?status=${encodeURIComponent(status)}`,
     'PUT',
@@ -282,7 +289,9 @@ export async function fetchTemplateApply(applyId: string): Promise<ListingTempla
 /** 套用目标候选（走 4.1.1.1 的既有列表端点：真分页 + 真搜索）。 */
 export async function fetchListingCandidates(
   search: string,
-): Promise<{ id: string; externalItemId: string; title: string; shopCode: string; platformCode: string }[]> {
+): Promise<
+  { id: string; externalItemId: string; title: string; shopCode: string; platformCode: string }[]
+> {
   const query = new URLSearchParams({ page: '0', size: '20' });
   if (search.trim()) query.set('search', search.trim());
   const page = await api<{ items: ListingRow[] }>(`channel/listings?${query.toString()}`);
@@ -306,7 +315,14 @@ export function emptyTemplateDraft(): TemplateDraft {
     language: 'en-US',
     status: 'DRAFT',
     fields: [
-      { field: 'TITLE', sourceKind: 'LISTING_FIELD', sourceRef: 'TITLE', valueExpression: '', required: false, slotNo: 0 },
+      {
+        field: 'TITLE',
+        sourceKind: 'LISTING_FIELD',
+        sourceRef: 'TITLE',
+        valueExpression: '',
+        required: false,
+        slotNo: 0,
+      },
     ],
     groups: [],
   };

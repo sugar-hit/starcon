@@ -68,7 +68,8 @@ export function AdPromotionWorkspace() {
   const [errors, setErrors] = useState<string[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  const [guardrailInput, setGuardrailInput] = useState<AdGuardrailInputState>(emptyAdGuardrailInput);
+  const [guardrailInput, setGuardrailInput] =
+    useState<AdGuardrailInputState>(emptyAdGuardrailInput);
   const [guardrailErrors, setGuardrailErrors] = useState<string[]>([]);
 
   const [loading, setLoading] = useState(true);
@@ -378,7 +379,9 @@ export function AdPromotionWorkspace() {
                       <span className="text-emerald-600"> · 在促销期内</span>
                     ) : null}
                   </td>
-                  <td className="py-1">{p.budgetCap === null ? '不限' : money(p.budgetCap, p.currency)}</td>
+                  <td className="py-1">
+                    {p.budgetCap === null ? '不限' : money(p.budgetCap, p.currency)}
+                  </td>
                   <td className="py-1 text-xs">{p.shopCode}</td>
                   <td className="py-1">{p.productCount}</td>
                   <td className={`py-1 ${statusTone(p.status)}`}>{statusLabel(p.status)}</td>
@@ -417,7 +420,8 @@ export function AdPromotionWorkspace() {
         )}
         {promotions ? (
           <p className="text-muted-foreground text-xs">
-            共 {promotions.total} 条（本页 {promotions.items.length} 条，第 {promotions.page + 1} 页）
+            共 {promotions.total} 条（本页 {promotions.items.length} 条，第 {promotions.page + 1}{' '}
+            页）
           </p>
         ) : null}
       </Section>
@@ -495,7 +499,7 @@ export function AdPromotionWorkspace() {
             </button>
           </div>
 
-          <h3 className="font-medium text-sm">适用商品与折后价</h3>
+          <h3 className="text-sm font-medium">适用商品与折后价</h3>
           {detail.products.length === 0 ? (
             <p className="text-muted-foreground text-sm">
               这条促销还没有挂适用商品。适用商品是**多对多**的：同一个商品可以被多个促销覆盖 ——
@@ -517,7 +521,8 @@ export function AdPromotionWorkspace() {
                 {detail.products.map((p) => (
                   <tr key={p.id} className="border-t">
                     <td className="py-1">
-                      {p.title} <span className="text-muted-foreground text-xs">{p.externalItemId}</span>
+                      {p.title}{' '}
+                      <span className="text-muted-foreground text-xs">{p.externalItemId}</span>
                     </td>
                     <td className="py-1">{money(p.basePrice, p.currency)}</td>
                     <td className="py-1">{money(p.netPrice, p.currency)}</td>
@@ -538,7 +543,7 @@ export function AdPromotionWorkspace() {
             </table>
           )}
 
-          <h3 className="font-medium text-sm">
+          <h3 className="text-sm font-medium">
             最近一次检查的结论（拦截 {detail.blockedCount} · 预警 {detail.warningCount}）
           </h3>
           {detail.checks.length === 0 ? (
@@ -559,7 +564,9 @@ export function AdPromotionWorkspace() {
                 {detail.checks.map((c) => (
                   <tr key={c.id} className="border-t">
                     <td className="py-1">{ruleLabel(c.ruleCode)}</td>
-                    <td className={`py-1 ${severityTone(c.severity)}`}>{severityLabel(c.severity)}</td>
+                    <td className={`py-1 ${severityTone(c.severity)}`}>
+                      {severityLabel(c.severity)}
+                    </td>
                     <td className="py-1 text-xs">
                       {c.observedValue === null ? '—' : c.observedValue} /{' '}
                       {c.thresholdValue === null ? '—' : c.thresholdValue}
@@ -680,10 +687,10 @@ export function AdPromotionWorkspace() {
           </Field>
         </div>
 
-        <h3 className="font-medium text-sm">适用商品（多对多）</h3>
+        <h3 className="text-sm font-medium">适用商品（多对多）</h3>
         <p className="text-muted-foreground text-xs">
-          基准价是**促销定义里登记的输入**（listing 没有价格列 —— 售价归 05 定价）。
-          留空 ⇒ 折后价**不可比**（不是 0），促销叠加判定仍然生效。
+          基准价是**促销定义里登记的输入**（listing 没有价格列 —— 售价归 05 定价）。 留空 ⇒
+          折后价**不可比**（不是 0），促销叠加判定仍然生效。
         </p>
         {input.products.map((product, index) => (
           <div key={index} className="grid gap-2 md:grid-cols-3">
@@ -743,7 +750,11 @@ export function AdPromotionWorkspace() {
         ) : null}
 
         <div className="flex gap-2">
-          <button className="rounded border px-2 py-1" disabled={busy} onClick={() => void onSave()}>
+          <button
+            className="rounded border px-2 py-1"
+            disabled={busy}
+            onClick={() => void onSave()}
+          >
             {editingId ? '保存修改' : '登记促销'}
           </button>
           {editingId ? (
@@ -800,14 +811,18 @@ export function AdPromotionWorkspace() {
             <input
               className="rounded border px-2 py-1"
               value={guardrailInput.guardrailCode}
-              onChange={(e) => setGuardrailInput({ ...guardrailInput, guardrailCode: e.target.value })}
+              onChange={(e) =>
+                setGuardrailInput({ ...guardrailInput, guardrailCode: e.target.value })
+              }
             />
           </Field>
           <Field label="规则名称">
             <input
               className="rounded border px-2 py-1"
               value={guardrailInput.guardrailName}
-              onChange={(e) => setGuardrailInput({ ...guardrailInput, guardrailName: e.target.value })}
+              onChange={(e) =>
+                setGuardrailInput({ ...guardrailInput, guardrailName: e.target.value })
+              }
             />
           </Field>
           <Field label="折扣幅度上限（0.8 = 让利不超过八成）">
@@ -823,7 +838,9 @@ export function AdPromotionWorkspace() {
             <input
               className="rounded border px-2 py-1"
               value={guardrailInput.minNetPrice}
-              onChange={(e) => setGuardrailInput({ ...guardrailInput, minNetPrice: e.target.value })}
+              onChange={(e) =>
+                setGuardrailInput({ ...guardrailInput, minNetPrice: e.target.value })
+              }
             />
           </Field>
           <Field label="促销叠加">

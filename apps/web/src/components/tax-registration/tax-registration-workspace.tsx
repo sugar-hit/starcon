@@ -169,16 +169,23 @@ export function TaxRegistrationWorkspace({ focus }: Props) {
     setLoading(true);
     setError(null);
     try {
-      const [capsResult, jurisdictionResult, shopResult, gapResult, summaryResult, coverageResult, regResult] =
-        await Promise.all([
-          fetchCapabilities(),
-          fetchJurisdictions(),
-          fetchShops(),
-          fetchGaps(gapPage, PAGE_SIZE, gapFilters),
-          fetchGapSummary(gapFilters),
-          fetchCoverage(),
-          fetchRegistrations(regPage),
-        ]);
+      const [
+        capsResult,
+        jurisdictionResult,
+        shopResult,
+        gapResult,
+        summaryResult,
+        coverageResult,
+        regResult,
+      ] = await Promise.all([
+        fetchCapabilities(),
+        fetchJurisdictions(),
+        fetchShops(),
+        fetchGaps(gapPage, PAGE_SIZE, gapFilters),
+        fetchGapSummary(gapFilters),
+        fetchCoverage(),
+        fetchRegistrations(regPage),
+      ]);
       setCaps(capsResult);
       setJurisdictions(jurisdictionResult);
       setShops(shopResult);
@@ -287,17 +294,13 @@ export function TaxRegistrationWorkspace({ focus }: Props) {
   /** 🔴 空态三态：没有店铺 ≠ 筛选无结果 ≠ 一条登记都没有。 */
   const emptyKind = useMemo(
     () =>
-      emptyStateKind(
-        shops?.total ?? 0,
-        registrations?.total ?? 0,
-        (registrations?.total ?? 0) > 0,
-      ),
+      emptyStateKind(shops?.total ?? 0, registrations?.total ?? 0, (registrations?.total ?? 0) > 0),
     [shops, registrations],
   );
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center gap-2 py-16 text-muted-foreground">
+      <div className="text-muted-foreground flex items-center justify-center gap-2 py-16">
         <Loader2 className="size-4 animate-spin" />
         <span className="text-label-13">正在加载税号与辖区…</span>
       </div>
@@ -308,7 +311,7 @@ export function TaxRegistrationWorkspace({ focus }: Props) {
     return (
       <SectionCard title="税号与辖区">
         <EmptyState
-          icon={<TriangleAlert className="size-8 text-destructive" />}
+          icon={<TriangleAlert className="text-destructive size-8" />}
           title="税号与辖区加载失败"
           description={error}
           action={
@@ -343,7 +346,7 @@ export function TaxRegistrationWorkspace({ focus }: Props) {
 
       {error && (
         <SectionCard>
-          <div className="text-destructive flex items-center gap-2 text-copy-13">
+          <div className="text-destructive text-copy-13 flex items-center gap-2">
             <TriangleAlert className="size-4" />
             {error}
           </div>
@@ -404,7 +407,7 @@ export function TaxRegistrationWorkspace({ focus }: Props) {
               ))}
             </ul>
           )}
-          <p className="text-muted-foreground mt-3 text-copy-12">{caps.reportingScopeNote}</p>
+          <p className="text-muted-foreground text-copy-12 mt-3">{caps.reportingScopeNote}</p>
         </SectionCard>
       )}
 
@@ -453,15 +456,11 @@ export function TaxRegistrationWorkspace({ focus }: Props) {
         {gapItems.length === 0 ? (
           <EmptyState
             icon={<ShieldCheck className="size-8" />}
-            title={
-              (summary?.total ?? 0) === 0
-                ? '当前没有缺失项'
-                : emptyState(emptyKind).title
-            }
+            title={(summary?.total ?? 0) === 0 ? '当前没有缺失项' : emptyState(emptyKind).title}
             description={
               (summary?.total ?? 0) === 0
-                ? '按当前口径算下来，没有该补的登记。**注意**：这不等于「所有辖区都查过了」——'
-                  + '推不出要求的辖区（美国的州一级登记）不在这个口径里，能力声明里写明了这条边界。'
+                ? '按当前口径算下来，没有该补的登记。**注意**：这不等于「所有辖区都查过了」——' +
+                  '推不出要求的辖区（美国的州一级登记）不在这个口径里，能力声明里写明了这条边界。'
                 : emptyState(emptyKind).description
             }
           />
@@ -474,7 +473,9 @@ export function TaxRegistrationWorkspace({ focus }: Props) {
               >
                 <div className="text-copy-13 text-foreground flex flex-wrap items-center gap-2">
                   <Badge tone={severityTone(gap.severity)}>{severityLabel(gap.severity)}</Badge>
-                  <span className="font-medium">{gap.gapTypeLabel || gapTypeLabel(gap.gapType)}</span>
+                  <span className="font-medium">
+                    {gap.gapTypeLabel || gapTypeLabel(gap.gapType)}
+                  </span>
                   <span className="text-muted-foreground">
                     {subjectText(
                       gap.subjectType,
@@ -604,8 +605,7 @@ export function TaxRegistrationWorkspace({ focus }: Props) {
                 </div>
                 <div className="text-copy-12 text-muted-foreground mt-1">
                   税号 {item.taxNumber || '未填'} · VAT 号 {item.vatNumber || '未填'} · EPR{' '}
-                  {item.eprRegistrationNo || '未填'} · 申报周期{' '}
-                  {filingCycleLabel(item.filingCycle)}
+                  {item.eprRegistrationNo || '未填'} · 申报周期 {filingCycleLabel(item.filingCycle)}
                 </div>
               </div>
             ))}
@@ -628,8 +628,8 @@ export function TaxRegistrationWorkspace({ focus }: Props) {
           <ModalHeader>
             <ModalTitle>{editing ? '改税务登记' : '登记一条税务登记'}</ModalTitle>
             <ModalDescription>
-              辖区从**受控码表**里选（值域钉死在 DB 层，不接受自由文本）。
-              有效期用带偏移量的 ISO 时间（写错了 8 小时是常事，页面会原样回显实际时刻）。
+              辖区从**受控码表**里选（值域钉死在 DB 层，不接受自由文本）。 有效期用带偏移量的 ISO
+              时间（写错了 8 小时是常事，页面会原样回显实际时刻）。
             </ModalDescription>
           </ModalHeader>
           <div className="space-y-3">
@@ -678,8 +678,7 @@ export function TaxRegistrationWorkspace({ focus }: Props) {
                 <option value="">请选择</option>
                 {jurisdictions?.items.map((item) => (
                   <option key={item.code} value={item.code}>
-                    {item.name}（{item.code}）
-                    {item.vatRequired ? ' · 要登记号' : ''}
+                    {item.name}（{item.code}）{item.vatRequired ? ' · 要登记号' : ''}
                     {item.requiresEpr ? ' · 要 EPR' : ''}
                   </option>
                 ))}

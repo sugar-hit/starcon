@@ -81,9 +81,13 @@ export function setApprovalApproverStatus(
   approverId: string,
   status: string,
 ): Promise<InventoryAdjustmentApprovalApprover> {
-  return api<InventoryAdjustmentApprovalApprover>(`${base}/approvers/${approverId}/status`, 'POST', {
-    status,
-  } satisfies InventoryAdjustmentApprovalStatusInput);
+  return api<InventoryAdjustmentApprovalApprover>(
+    `${base}/approvers/${approverId}/status`,
+    'POST',
+    {
+      status,
+    } satisfies InventoryAdjustmentApprovalStatusInput,
+  );
 }
 
 export function fetchPendingApprovals(
@@ -265,16 +269,20 @@ export function approvalCaseSummary(approvalCase: InventoryAdjustmentApprovalCas
 export function submitProblem(amount: string, currency: string): string | null {
   const text = amount.trim();
   if (text === '') {
-    return '必须申报调整的估值金额：金额阈值与审批人的金额授权区间都以它为准，'
-      + '「不申报就能躲开金额档」是不能接受的';
+    return (
+      '必须申报调整的估值金额：金额阈值与审批人的金额授权区间都以它为准，' +
+      '「不申报就能躲开金额档」是不能接受的'
+    );
   }
   const parsed = Number(text);
   if (!Number.isFinite(parsed)) return '申报金额必须是数字';
   if (parsed <= 0) return '申报金额必须大于 0';
-  const decimals = text.includes('.') ? text.split('.')[1]?.length ?? 0 : 0;
+  const decimals = text.includes('.') ? (text.split('.')[1]?.length ?? 0) : 0;
   if (decimals > 4) {
-    return '申报金额最多 4 位小数（numeric(19,4)）：系统不会替你四舍五入 —— '
-      + '被悄悄改掉的数字会让人以为记的是那个数';
+    return (
+      '申报金额最多 4 位小数（numeric(19,4)）：系统不会替你四舍五入 —— ' +
+      '被悄悄改掉的数字会让人以为记的是那个数'
+    );
   }
   const code = currency.trim().toUpperCase();
   if (code !== 'ANY' && !/^[A-Z]{3}$/.test(code)) {
@@ -351,7 +359,8 @@ export function approverProblem(input: {
 
 /** 批准必须写理由（与后端同一条纪律）。 */
 export function approveProblem(note: string): string | null {
-  if (note.trim() === '') return '批准必须写理由：只留一个「已批」状态，事后没人说得清批的是哪一条判断';
+  if (note.trim() === '')
+    return '批准必须写理由：只留一个「已批」状态，事后没人说得清批的是哪一条判断';
   if (note.trim().length > 500) return '审批意见超过 500 字';
   return null;
 }
@@ -375,10 +384,7 @@ export function batchItemText(item: {
 }
 
 /** 批量结果的整体摘要。 */
-export function batchSummary(result: {
-  successCount: number;
-  failureCount: number;
-}): string {
+export function batchSummary(result: { successCount: number; failureCount: number }): string {
   if (result.failureCount === 0) return `全部处理成功（${result.successCount} 张）`;
   return `成功 ${result.successCount} 张，失败 ${result.failureCount} 张（失败原因见下）`;
 }

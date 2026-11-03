@@ -259,9 +259,7 @@ export function returnRateReading(input: {
  * 在界面上悄无声息地出现。
  */
 export function crossCurrencyTotal(): never {
-  throw new Error(
-    '跨币种不允许合计：金额与比率必须按币种分组 —— 请逐个币种渲染，不要合并。',
-  );
+  throw new Error('跨币种不允许合计：金额与比率必须按币种分组 —— 请逐个币种渲染，不要合并。');
 }
 
 /** 币种摘要：把一个币种的退货概况拼成一句话（给卡片与提示行用）。 */

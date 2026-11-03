@@ -205,9 +205,30 @@ describe('未接入维度逐条点名 ownerModule', () => {
   it('available=false 的维度全部带 ownerModule 与影响，不静默漏掉', () => {
     const capabilities = {
       dimensions: [
-        { dimension: 'PENDING_PARCEL', description: '待发货包裹', available: true, source: 'x', ownerModule: null, impact: '' },
-        { dimension: 'CARRIER_CONNECTION', description: '承运商连接', available: false, source: 'x', ownerModule: '10.1.1.1', impact: '未接通时如实失败' },
-        { dimension: 'RATE_LIMIT_CONFIG', description: '限流配额', available: false, source: 'x', ownerModule: '10.1.1.3', impact: '用登记值兜底' },
+        {
+          dimension: 'PENDING_PARCEL',
+          description: '待发货包裹',
+          available: true,
+          source: 'x',
+          ownerModule: null,
+          impact: '',
+        },
+        {
+          dimension: 'CARRIER_CONNECTION',
+          description: '承运商连接',
+          available: false,
+          source: 'x',
+          ownerModule: '10.1.1.1',
+          impact: '未接通时如实失败',
+        },
+        {
+          dimension: 'RATE_LIMIT_CONFIG',
+          description: '限流配额',
+          available: false,
+          source: 'x',
+          ownerModule: '10.1.1.3',
+          impact: '用登记值兜底',
+        },
       ],
       requestStatuses: [],
       queueStatuses: [],
@@ -226,7 +247,16 @@ describe('未接入维度逐条点名 ownerModule', () => {
 
   it('ownerModule 缺失时显示「未标注」而不是空白格子', () => {
     const capabilities = {
-      dimensions: [{ dimension: 'X', description: '某维度', available: false, source: 'x', ownerModule: null, impact: 'y' }],
+      dimensions: [
+        {
+          dimension: 'X',
+          description: '某维度',
+          available: false,
+          source: 'x',
+          ownerModule: null,
+          impact: 'y',
+        },
+      ],
     } as unknown as WaybillCapabilities;
     const gaps = unavailableDimensions(capabilities);
     expect(gaps).toHaveLength(1);
@@ -284,7 +314,11 @@ describe('承运商行', () => {
   it('登记为接通但没有 vendor 适配器时也要说清（两道口径都要）', () => {
     // 登记口径（connected）与运行时口径（adapterAvailable）是**两件事**：
     // 只看登记会把「登记过」显示成「能下单」。
-    const row = carrier({ connected: true, adapterAvailable: false, submitBlockReason: '没有 vendor 适配器' });
+    const row = carrier({
+      connected: true,
+      adapterAvailable: false,
+      submitBlockReason: '没有 vendor 适配器',
+    });
     expect(row.connected).toBe(true);
     expect(row.adapterAvailable).toBe(false);
     expect(row.submitBlockReason).not.toBe('');

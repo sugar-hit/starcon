@@ -180,7 +180,9 @@ export function fetchPurchaseOrderApprovalPayables(params: PurchaseOrderApproval
 
 /** 财务确认（登记的应付变生效）。 */
 export function confirmPurchaseOrderPayable(id: string, financeReference: string) {
-  const input: PurchaseOrderApprovalPayableConfirmRequest = { financeReference: financeReference.trim() };
+  const input: PurchaseOrderApprovalPayableConfirmRequest = {
+    financeReference: financeReference.trim(),
+  };
   return api<PurchaseOrderApprovalPayableView>(`${base}/payables/${id}/confirm`, 'POST', input);
 }
 

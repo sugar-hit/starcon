@@ -1471,6 +1471,66 @@ class OrderChangeCancelIntegrationTest {
     assertThat(updated.version()).isEqualTo(created.version() + 1);
   }
 
+  /**
+   * 规则生效期的**默认值**必须取自 DB 时钟，不是 JVM 墙钟。
+   *
+   * <p>🔴 判据是**确定性**的 —— 不是「两个时钟恰好同步时也对」：
+   *
+   * <ul>
+   *   <li>PostgreSQL 的 {@code now()} = {@code transaction_timestamp()}，在事务内**冻结**在事务起点；
+   *   <li>JVM 墙钟不冻结，随等待推进。
+   * </ul>
+   *
+   * <p>⇒ 在**同一个事务**里先睡 1.5 秒再建规则（不显式给 effectiveFrom）：
+   * 写进去的 {@code effective_from} 应当**仍然是事务起点**（DB 时钟）；
+   * 若服务层改回 {@code OffsetDateTime.now()}，写进去的就是「事务起点 + 1.5 秒」。
+   *
+   * <p>这条性质的实际意义：生效窗口的判定在 DB 侧用 {@code effective_from <= now()}，
+   * 两边不同源 ⇒「刚登记的规则已生效」这件事取决于两个时钟恰好同步，
+   * 健康态余量只有几十毫秒（见
+   * {@code docs/backlog/2026-10-21-order-change-rule-effective-from-clock-domain.md}）。
+   */
+  @Test
+  void 规则生效期默认值取自DB时钟而不是JVM墙钟() throws Exception {
+    var pair =
+        asA(
+            () -> {
+              try {
+                Thread.sleep(1500);
+              } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new IllegalStateException(e);
+              }
+              var created =
+                  service.createRule(
+                      new OrderChangeCancelRuleInput(
+                          "AMAZON",
+                          "SHOP-CLOCK",
+                          OrderChangeKind.ADDRESS_MODIFY,
+                          true,
+                          new BigDecimal("24"),
+                          null,
+                          true,
+                          null, // effectiveFrom 缺省 ⇒ 走服务层默认值
+                          null,
+                          "生效期默认值取自 DB 时钟",
+                          null),
+                      actorA.membershipId());
+              var txStart =
+                  sql.fetchOne("select transaction_timestamp() as t").get("t", OffsetDateTime.class);
+              return new Object[] {created.effectiveFrom(), txStart};
+            });
+
+    var stored = (OffsetDateTime) pair[0];
+    var txStart = (OffsetDateTime) pair[1];
+
+    assertThat(Duration.between(stored, txStart).abs())
+        .as(
+            "生效期默认值必须取自 DB 时钟（事务内的 now() = transaction_timestamp()，冻结在事务起点）；"
+                + "若改回 OffsetDateTime.now()，写进去的就是「事务起点 + 等待时长」")
+        .isLessThan(Duration.ofSeconds(1));
+  }
+
   @Test
   void 集合分页是真分页_汇总不受分页影响() {
     for (int i = 0; i < 7; i++) rule("SHOP-P" + i, "CANCEL", true, "48", null);

@@ -138,7 +138,8 @@ export function AccountingPeriodWorkspace() {
       setOptions(optionsData);
       setPage(pageData);
       setCalendars(calendarData);
-      if (!generateCalendarId && calendarData.length > 0) setGenerateCalendarId(calendarData[0]!.id);
+      if (!generateCalendarId && calendarData.length > 0)
+        setGenerateCalendarId(calendarData[0]!.id);
     } catch (e) {
       setError(e instanceof Error ? e.message : '加载失败');
     } finally {
@@ -409,7 +410,12 @@ export function AccountingPeriodWorkspace() {
 
           {/* ---------- 概览 ---------- */}
           <div className="grid gap-4 md:grid-cols-4">
-            <StatCard label="期间" value={page?.total ?? 0} unit="个" comparisonLabel="按当前筛选条件" />
+            <StatCard
+              label="期间"
+              value={page?.total ?? 0}
+              unit="个"
+              comparisonLabel="按当前筛选条件"
+            />
             <StatCard label="开放" value={openCount} unit="个" comparisonLabel="可以过账" />
             <StatCard label="已关闭" value={closedCount} unit="个" comparisonLabel="禁止过账" />
             <StatCard label="会计日历" value={calendarCount} unit="套" comparisonLabel="账期体系" />
@@ -521,7 +527,11 @@ export function AccountingPeriodWorkspace() {
                         </Badge>
                       </td>
                       <td className="py-2">
-                        <Button size="sm" variant="outline" onClick={() => void runToggleCalendar(c)}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => void runToggleCalendar(c)}
+                        >
                           {c.status === 'ACTIVE' ? '停用' : '启用'}
                         </Button>
                       </td>
@@ -755,7 +765,11 @@ export function AccountingPeriodWorkspace() {
                         </div>
                       </td>
                       <td className="py-2">
-                        <Button size="sm" variant="outline" onClick={() => void runShowDetail(p.id)}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => void runShowDetail(p.id)}
+                        >
                           详情
                         </Button>
                       </td>

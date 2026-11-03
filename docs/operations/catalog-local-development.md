@@ -100,7 +100,22 @@ pnpm build
 pnpm exec playwright test tests/e2e/catalog.spec.ts
 ```
 
-有本机 JDK21 时可用 `cd backend && ./mvnw verify`；格式检查 `./mvnw spotless:check`。Docker 29 与当前 Testcontainers 组合需要 `-Dapi.version=1.44`，容器测试脚本已配置。
+有本机 JDK21 时可用 `cd backend && ./mvnw verify`。Docker 29 与当前 Testcontainers 组合需要 `-Dapi.version=1.44`，容器测试脚本已配置。
+
+> ⚠️ 后端**没有**集中的 Java 格式闸：`spotless` 插件已从 `backend/pom.xml` 移除
+> （原先它没有绑定生命周期阶段，唯一入口是 CI 里显式跑的 `spotless:check`，实际效果是
+> 让后端作业长期挂着 95 个文件的存量格式债而一直红）。约定是
+> **改动与被改文件周围保持一致即可**；若要批量格式化，先看
+> `docs/backlog/2026-10-21-spotless-apply-mass-reformat-hazard.md` 记录的事故与代价。
+
+> 🕒 后端测试的**时区是钉死的**：`backend/pom.xml` 把 surefire 的测试 JVM 固定在
+> `Asia/Shanghai`（`-Duser.timezone` + 环境变量 `TZ` 两条启动期通道）。
+> 这不是随手为之 —— PostgreSQL 的 `timestamptz` 只保时刻、不保偏移量，读回来的偏移量
+> 由 JDBC 驱动按 **JVM 默认时区** 换算。GitHub Actions 的 ubuntu runner 是 UTC、
+> 开发机是东八区，不钉死就是「同一份测试两个答案」：仓库里几十条
+> `ZoneOffset.ofHours(8)` 断言在 CI 上必然红（2026-11-03 那次后端作业红灯即源于此）。
+> 写涉及 `OffsetDateTime` 的断言时：**断言瞬间（`toInstant()`）或换算回业务时区后的墙钟**，
+> 不要断言「读回来的偏移量等于写进去的偏移量」——那是数据库不保证的性质。
 
 后端测试覆盖：两租户互不可见、伪造 header 无效、单连接池复用不串租户、跨租户关联拒绝、普通角色非 bypass、会话注销与祖先停用、角色拒绝写入、属性继承/覆写/清空/恢复、false/0、重复组合回滚、版本冲突、状态校验及附属页面记录。
 

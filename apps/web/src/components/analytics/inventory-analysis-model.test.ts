@@ -36,7 +36,9 @@ import type { InventoryStructureResponse } from './inventory-analysis-model';
  * 5. **前端不做业务算术**。金额、占比、周转率、周转天数、ABC 分类一律来自服务端。
  */
 
-function structure(overrides: Partial<InventoryStructureResponse> = {}): InventoryStructureResponse {
+function structure(
+  overrides: Partial<InventoryStructureResponse> = {},
+): InventoryStructureResponse {
   return {
     asOf: '2026-10-10',
     dimension: 'ALL',

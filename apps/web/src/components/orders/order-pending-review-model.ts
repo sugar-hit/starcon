@@ -135,8 +135,10 @@ export function riskScoreHint(row: {
   riskEvaluationStatus: string | null;
 }): string {
   if (row.riskScore === null || row.riskScore === undefined) {
-    return '未评估：9.2.2.2 风控校验还没有对这一单出过分（信号不足或压根没触发过评估）。'
-      + '「未评估」不是 0 分 —— 0 分在风控语境里是「量过了，安全」。';
+    return (
+      '未评估：9.2.2.2 风控校验还没有对这一单出过分（信号不足或压根没触发过评估）。' +
+      '「未评估」不是 0 分 —— 0 分在风控语境里是「量过了，安全」。'
+    );
   }
   return row.riskEvaluationStatus === 'SCORED'
     ? '已出分（9.2.2.2 风控校验）'

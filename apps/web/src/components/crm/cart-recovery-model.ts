@@ -83,8 +83,7 @@ export function cartAbandonmentQuery(params: CartAbandonmentParams = {}): string
   if (params.buyerRef) parts.push(`buyerRef=${encodeURIComponent(params.buyerRef)}`);
   if (params.cartRef) parts.push(`cartRef=${encodeURIComponent(params.cartRef)}`);
   if (params.keyword) parts.push(`keyword=${encodeURIComponent(params.keyword)}`);
-  if (params.abandonedFrom)
-    parts.push(`abandonedFrom=${encodeURIComponent(params.abandonedFrom)}`);
+  if (params.abandonedFrom) parts.push(`abandonedFrom=${encodeURIComponent(params.abandonedFrom)}`);
   if (params.abandonedTo) parts.push(`abandonedTo=${encodeURIComponent(params.abandonedTo)}`);
   if (params.page !== undefined) parts.push(`page=${params.page}`);
   if (params.size !== undefined) parts.push(`size=${params.size}`);
@@ -139,8 +138,7 @@ export interface CartRecoveryRateParams {
 export function cartRecoveryRateQuery(params: CartRecoveryRateParams = {}): string {
   const parts: string[] = [];
   if (params.shopId) parts.push(`shopId=${encodeURIComponent(params.shopId)}`);
-  if (params.abandonedFrom)
-    parts.push(`abandonedFrom=${encodeURIComponent(params.abandonedFrom)}`);
+  if (params.abandonedFrom) parts.push(`abandonedFrom=${encodeURIComponent(params.abandonedFrom)}`);
   if (params.abandonedTo) parts.push(`abandonedTo=${encodeURIComponent(params.abandonedTo)}`);
   return parts.length ? `?${parts.join('&')}` : '';
 }
@@ -239,11 +237,7 @@ export function fetchCartMessage(messageId: string) {
 
 /** 改话术（改了内容服务端自动回到草稿、版本 +1）。 */
 export function updateCartMessage(messageId: string, input: CrmCartMessageInput) {
-  return api<CrmCartMessageRow>(
-    `${base}/messages/${encodeURIComponent(messageId)}`,
-    'PUT',
-    input,
-  );
+  return api<CrmCartMessageRow>(`${base}/messages/${encodeURIComponent(messageId)}`, 'PUT', input);
 }
 
 /** 审核话术（草稿 → 已审核）。 */

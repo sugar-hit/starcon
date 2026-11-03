@@ -222,7 +222,9 @@ export function voucherStatusLabel(status: string): string {
  * <p>🔴 「已红冲」与「已过账」**不是**同一种语气：红冲意味着这张凭证的金额已经被
  * 另一张反向凭证冲掉了，报表口径不再计入它 —— 用「成功」的绿色会让人以为它还在账上。
  */
-export function voucherStatusTone(status: string): 'neutral' | 'info' | 'success' | 'warning' | 'danger' {
+export function voucherStatusTone(
+  status: string,
+): 'neutral' | 'info' | 'success' | 'warning' | 'danger' {
   switch (status) {
     case 'DRAFT':
       return 'neutral';

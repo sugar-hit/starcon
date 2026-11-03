@@ -76,7 +76,9 @@ describe('受理结论语气', () => {
     // 后端加了新口径时，按「通过」处理会直接放过一张本该拒的单。
     expect(eligibilityPresentation('SOME_NEW_VERDICT').tone).toBe('pending');
     expect(eligibilityPresentation(null).tone).toBe('pending');
-    expect(eligibilityBadgeClass('SOME_NEW_VERDICT')).toBe(eligibilityBadgeClass('OUT_OF_WINDOW_PENDING'));
+    expect(eligibilityBadgeClass('SOME_NEW_VERDICT')).toBe(
+      eligibilityBadgeClass('OUT_OF_WINDOW_PENDING'),
+    );
   });
 });
 
@@ -132,9 +134,9 @@ describe('列表查询串', () => {
   });
 
   it('分页与筛选拼在一起，顺序稳定', () => {
-    expect(aftersalesIntakeQuery({ eligibility: 'ACCEPTED', mustRefund: true, page: 2, size: 20 })).toBe(
-      '?eligibility=ACCEPTED&mustRefund=true&page=2&size=20',
-    );
+    expect(
+      aftersalesIntakeQuery({ eligibility: 'ACCEPTED', mustRefund: true, page: 2, size: 20 }),
+    ).toBe('?eligibility=ACCEPTED&mustRefund=true&page=2&size=20');
   });
 
   it('关键字做 URL 编码，避免空格与中文把查询串拆坏', () => {

@@ -149,34 +149,25 @@ export function AnomalyOrderWorkspace() {
       const [caps, opts, trade, flags, sellable] = await Promise.all([
         api<AnomalyOrderCapabilities>('trade/anomaly-orders/capabilities'),
         api<AnomalyOrderOptions>('trade/anomaly-orders/options'),
-        loadAll<AnomalyOrderPage['items'][number]>(
-          async (pageNo) => {
-            const query = new URLSearchParams(serverQuery);
-            query.set('page', String(pageNo));
-            query.set('size', String(TRADE_PAGE_SIZE));
-            const result = await api<AnomalyOrderPage>(`trade/anomaly-orders?${query.toString()}`);
-            return { items: result.items, total: result.total };
-          },
-          TRADE_MAX_PAGES,
-        ),
-        loadAll<BuyerBlacklistOrderFlagView>(
-          async (pageNo) => {
-            const result = await api<BuyerBlacklistFlagPage>(
-              `channel/buyer-blacklist/flags?page=${pageNo}&size=${CHANNEL_PAGE_SIZE}`,
-            );
-            return { items: result.items, total: result.total };
-          },
-          CHANNEL_MAX_PAGES,
-        ),
-        loadAll<AvailableQuantityRow>(
-          async (pageNo) => {
-            const result = await api<AvailableQuantityPage>(
-              `warehouse/inventory/sellable/skus?page=${pageNo}&size=${WAREHOUSE_PAGE_SIZE}`,
-            );
-            return { items: result.rows, total: result.total };
-          },
-          WAREHOUSE_MAX_PAGES,
-        ),
+        loadAll<AnomalyOrderPage['items'][number]>(async (pageNo) => {
+          const query = new URLSearchParams(serverQuery);
+          query.set('page', String(pageNo));
+          query.set('size', String(TRADE_PAGE_SIZE));
+          const result = await api<AnomalyOrderPage>(`trade/anomaly-orders?${query.toString()}`);
+          return { items: result.items, total: result.total };
+        }, TRADE_MAX_PAGES),
+        loadAll<BuyerBlacklistOrderFlagView>(async (pageNo) => {
+          const result = await api<BuyerBlacklistFlagPage>(
+            `channel/buyer-blacklist/flags?page=${pageNo}&size=${CHANNEL_PAGE_SIZE}`,
+          );
+          return { items: result.items, total: result.total };
+        }, CHANNEL_MAX_PAGES),
+        loadAll<AvailableQuantityRow>(async (pageNo) => {
+          const result = await api<AvailableQuantityPage>(
+            `warehouse/inventory/sellable/skus?page=${pageNo}&size=${WAREHOUSE_PAGE_SIZE}`,
+          );
+          return { items: result.rows, total: result.total };
+        }, WAREHOUSE_MAX_PAGES),
       ]);
 
       setCapabilities(caps);
@@ -236,7 +227,10 @@ export function AnomalyOrderWorkspace() {
   const summary = useMemo(() => summarizeMerged(visible), [visible]);
   const pageCount = Math.max(1, Math.ceil(visible.length / VIEW_PAGE_SIZE));
   const current = Math.min(page, pageCount - 1);
-  const pageRows = visible.slice(current * VIEW_PAGE_SIZE, current * VIEW_PAGE_SIZE + VIEW_PAGE_SIZE);
+  const pageRows = visible.slice(
+    current * VIEW_PAGE_SIZE,
+    current * VIEW_PAGE_SIZE + VIEW_PAGE_SIZE,
+  );
   const selectedRows = visible.filter((row) => selected.includes(row.row.orderId));
   const actions = batchActions(capabilities);
 
@@ -279,9 +273,8 @@ export function AnomalyOrderWorkspace() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-copy-13 text-muted-foreground">
-          异常订单队列是卷 01 的<b>只读聚合层</b>：它不产生新的业务事实，
-          只把 09 订单、07 库存、16 合规三处的投影并到一屏上。
-          页面上的每个数字都能点进去看到明细，
+          异常订单队列是卷 01 的<b>只读聚合层</b>：它不产生新的业务事实， 只把 09 订单、07 库存、16
+          合规三处的投影并到一屏上。 页面上的每个数字都能点进去看到明细，
           <b>处置动作一律回到归属系统完成</b>（工作台不写业务数据）。
         </p>
         <Button variant="ghost" size="sm" onClick={() => void load()} disabled={busy}>
@@ -305,7 +298,7 @@ export function AnomalyOrderWorkspace() {
         <p
           key={notice}
           role="status"
-          className="border-warning/40 bg-warning/5 rounded-md border p-3 text-copy-12"
+          className="border-warning/40 bg-warning/5 text-copy-12 rounded-md border p-3"
         >
           {notice}
         </p>
@@ -325,8 +318,8 @@ export function AnomalyOrderWorkspace() {
                   {dimension.aggregation === 'FRONTEND' ? '前端聚合' : '本服务判定'}
                 </Badge>
                 <span className="ml-2">
-                  {ANOMALY_TYPE_LABELS[dimension.dimension] ?? dimension.dimension}：
-                  事实来源 {dimension.source} · 归属 {dimension.ownerModule}
+                  {ANOMALY_TYPE_LABELS[dimension.dimension] ?? dimension.dimension}： 事实来源{' '}
+                  {dimension.source} · 归属 {dimension.ownerModule}
                 </span>
               </li>
             ))}
@@ -345,15 +338,18 @@ export function AnomalyOrderWorkspace() {
             </ul>
           )}
           {capabilities.notConnected.map((text) => (
-            <p key={text} className="border-warning/40 bg-warning/5 rounded-md border p-2 text-copy-12">
+            <p
+              key={text}
+              className="border-warning/40 bg-warning/5 text-copy-12 rounded-md border p-2"
+            >
               <Badge tone="warning">未接通</Badge>
               <span className="ml-2">{text}</span>
             </p>
           ))}
           <p className="text-copy-12 text-muted-foreground">
             判定阈值：平台发货回传超过 {capabilities.platformWritebackTimeoutHours} 小时未确认、
-            平台单超过 {capabilities.buyerMessageTimeoutHours} 小时未确认，才算异常。
-            数据截至 {capabilities.dataAsOf}。
+            平台单超过 {capabilities.buyerMessageTimeoutHours} 小时未确认，才算异常。 数据截至{' '}
+            {capabilities.dataAsOf}。
           </p>
         </section>
       )}
@@ -370,7 +366,7 @@ export function AnomalyOrderWorkspace() {
                 setType((current) => (current === code ? '' : code));
                 setPage(0);
               }}
-              className={`rounded-md border px-3 py-2 text-left text-copy-12 ${
+              className={`text-copy-12 rounded-md border px-3 py-2 text-left ${
                 type === code ? 'border-primary bg-primary/5' : ''
               }`}
             >
@@ -390,10 +386,10 @@ export function AnomalyOrderWorkspace() {
 
       {/* ---------------- 筛选 ---------------- */}
       <section className="flex flex-wrap items-end gap-3">
-        <label className="flex flex-col gap-1 text-copy-12">
+        <label className="text-copy-12 flex flex-col gap-1">
           <span className="text-muted-foreground">异常类型</span>
           <select
-            className="border rounded px-2 py-1 text-copy-12"
+            className="text-copy-12 rounded border px-2 py-1"
             value={type}
             onChange={(e) => {
               setType(e.target.value);
@@ -409,10 +405,10 @@ export function AnomalyOrderWorkspace() {
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-copy-12">
+        <label className="text-copy-12 flex flex-col gap-1">
           <span className="text-muted-foreground">店铺</span>
           <select
-            className="border rounded px-2 py-1 text-copy-12"
+            className="text-copy-12 rounded border px-2 py-1"
             value={shopCode}
             onChange={(e) => {
               setShopCode(e.target.value);
@@ -427,27 +423,29 @@ export function AnomalyOrderWorkspace() {
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-copy-12">
+        <label className="text-copy-12 flex flex-col gap-1">
           <span className="text-muted-foreground">停留时长</span>
           <select
-            className="border rounded px-2 py-1 text-copy-12"
+            className="text-copy-12 rounded border px-2 py-1"
             value={dwell}
             onChange={(e) => {
               setDwell(e.target.value);
               setPage(0);
             }}
           >
-            {(options?.dwellPresets ?? [{ code: 'ALL', label: '不限', minHours: 0 }]).map((preset) => (
-              <option key={preset.code} value={preset.code}>
-                {preset.label}
-              </option>
-            ))}
+            {(options?.dwellPresets ?? [{ code: 'ALL', label: '不限', minHours: 0 }]).map(
+              (preset) => (
+                <option key={preset.code} value={preset.code}>
+                  {preset.label}
+                </option>
+              ),
+            )}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-copy-12">
+        <label className="text-copy-12 flex flex-col gap-1">
           <span className="text-muted-foreground">订单号 / 外部单号</span>
           <input
-            className="border rounded px-2 py-1 text-copy-12"
+            className="text-copy-12 rounded border px-2 py-1"
             value={keyword}
             onChange={(e) => {
               setKeyword(e.target.value);
@@ -464,16 +462,15 @@ export function AnomalyOrderWorkspace() {
         {visible.length === 0 ? (
           <div className="bg-card rounded-lg border p-8 text-center">
             <p className="text-copy-13 text-muted-foreground">
-              当前筛选下**没有**异常订单。
-              这既可能说明这批订单都正常，也可能说明相关的判定还没跑过
-              （地址校验、风控评估、发货回传任务都是各模块自己的留痕，
-              没有留痕就没有异常）—— 能力声明里写明了每类异常的事实来源。
+              当前筛选下**没有**异常订单。 这既可能说明这批订单都正常，也可能说明相关的判定还没跑过
+              （地址校验、风控评估、发货回传任务都是各模块自己的留痕， 没有留痕就没有异常）——
+              能力声明里写明了每类异常的事实来源。
             </p>
           </div>
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="w-full text-copy-12">
+              <table className="text-copy-12 w-full">
                 <thead className="text-muted-foreground text-left">
                   <tr>
                     <th className="p-2">
@@ -528,7 +525,13 @@ export function AnomalyOrderWorkspace() {
                         </div>
                         {row.shortages.length > 0 && (
                           <p className="text-muted-foreground mt-1">
-                            缺货：{row.shortages.map((s) => `${s.skuCode} 需 ${formatQuantity(s.need)} / 可售 ${formatQuantity(s.sellable)}`).join('；')}
+                            缺货：
+                            {row.shortages
+                              .map(
+                                (s) =>
+                                  `${s.skuCode} 需 ${formatQuantity(s.need)} / 可售 ${formatQuantity(s.sellable)}`,
+                              )
+                              .join('；')}
                           </p>
                         )}
                         {row.unknownSkus.length > 0 && (
@@ -571,7 +574,11 @@ export function AnomalyOrderWorkspace() {
                         </div>
                       </td>
                       <td className="p-2">
-                        <Button variant="link" size="sm" onClick={() => void openDetail(row.row.orderId)}>
+                        <Button
+                          variant="link"
+                          size="sm"
+                          onClick={() => void openDetail(row.row.orderId)}
+                        >
                           查看
                         </Button>
                       </td>
@@ -580,7 +587,7 @@ export function AnomalyOrderWorkspace() {
                 </tbody>
               </table>
             </div>
-            <div className="flex items-center justify-between text-copy-12">
+            <div className="text-copy-12 flex items-center justify-between">
               <span className="text-muted-foreground">
                 第 {current + 1} / {pageCount} 页 · 共 {visible.length} 单
               </span>
@@ -610,13 +617,11 @@ export function AnomalyOrderWorkspace() {
       {/* ---------------- 批量处置 ---------------- */}
       {selectedRows.length > 0 && (
         <section className="bg-card space-y-2 rounded-lg border p-3">
-          <h2 className="text-copy-15 font-medium">
-            批量处置（已选 {selectedRows.length} 单）
-          </h2>
+          <h2 className="text-copy-15 font-medium">批量处置（已选 {selectedRows.length} 单）</h2>
           <p className="text-copy-12 text-muted-foreground">
             🔴 工作台**不写业务数据**：批量动作一律落到归属系统完成。
-            下面每个入口都是归属系统的真实页面，页面不会替你改订单状态 ——
-            选中订单号 {orderNumberDigest(selectedRows) || '（无）'} 请带过去。
+            下面每个入口都是归属系统的真实页面，页面不会替你改订单状态 —— 选中订单号{' '}
+            {orderNumberDigest(selectedRows) || '（无）'} 请带过去。
           </p>
           <div className="flex flex-wrap gap-2">
             {actions.map((action) => {
@@ -639,7 +644,7 @@ export function AnomalyOrderWorkspace() {
                 <a
                   key={action.code}
                   href={target}
-                  className="border rounded-md border-control-border px-3 py-2 text-copy-12 hover:bg-muted"
+                  className="border-control-border text-copy-12 hover:bg-muted rounded-md border px-3 py-2"
                 >
                   {ACTION_LABELS[action.code] ?? action.label}
                   <span className="text-muted-foreground ml-2">→ {action.ownerModule}</span>
@@ -664,23 +669,24 @@ export function AnomalyOrderWorkspace() {
 
       {/* ---------------- 单条明细 ---------------- */}
       {detailError && (
-        <p role="alert" className="border-destructive/30 bg-destructive/5 text-destructive rounded-md border p-3 text-sm">
+        <p
+          role="alert"
+          className="border-destructive/30 bg-destructive/5 text-destructive rounded-md border p-3 text-sm"
+        >
           {detailError}
         </p>
       )}
       {detail && (
         <section className="bg-card space-y-3 rounded-lg border p-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-copy-15 font-medium">
-              明细 · {detail.order.orderNo}
-            </h2>
+            <h2 className="text-copy-15 font-medium">明细 · {detail.order.orderNo}</h2>
             <Button variant="ghost" size="sm" onClick={() => setDetail(null)}>
               关闭
             </Button>
           </div>
           <p className="text-copy-12 text-muted-foreground">
-            买家 {detail.buyerName || '—'} · {detail.buyerPhone || '—'} · {detail.buyerEmail || '—'} ·
-            收货地 {detail.shippingCountry || '—'} {detail.shippingAddress}
+            买家 {detail.buyerName || '—'} · {detail.buyerPhone || '—'} · {detail.buyerEmail || '—'}{' '}
+            · 收货地 {detail.shippingCountry || '—'} {detail.shippingAddress}
           </p>
 
           <div>
@@ -692,7 +698,7 @@ export function AnomalyOrderWorkspace() {
             ) : (
               <ul className="space-y-2">
                 {detail.evidence.map((evidence) => (
-                  <li key={evidence.dimension} className="rounded-md border p-2 text-copy-12">
+                  <li key={evidence.dimension} className="text-copy-12 rounded-md border p-2">
                     <Badge tone="warning">
                       {ANOMALY_TYPE_LABELS[evidence.dimension] ?? evidence.dimension}
                     </Badge>
@@ -777,9 +783,7 @@ export function AnomalyOrderWorkspace() {
         </section>
       )}
 
-      {dataAsOf && (
-        <p className="text-copy-12 text-muted-foreground">数据截至 {dataAsOf}</p>
-      )}
+      {dataAsOf && <p className="text-copy-12 text-muted-foreground">数据截至 {dataAsOf}</p>}
     </div>
   );
 }

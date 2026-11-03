@@ -191,8 +191,30 @@ describe('自由文本只是补充，不是归因本身', () => {
         items: [
           // ⚠️ 主因**故意排在第二位**：后端把主因排第一是展示顺序，
           // 前端按 isPrimary 判定才不会在排序规则变更时静默取错。
-          { id: uuid(1), categoryId: size.id, categoryCode: 'SM', categoryName: '尺寸不符', rootKind: 'SIZE_MISMATCH', rootKindLabel: '尺寸不符', depth: 1, isPrimary: false, weight: 0.3, codePath: 'SM' },
-          { id: uuid(2), categoryId: quality.id, categoryCode: 'QD', categoryName: '质量问题', rootKind: 'QUALITY_DEFECT', rootKindLabel: '质量问题', depth: 1, isPrimary: true, weight: 0.7, codePath: 'QD' },
+          {
+            id: uuid(1),
+            categoryId: size.id,
+            categoryCode: 'SM',
+            categoryName: '尺寸不符',
+            rootKind: 'SIZE_MISMATCH',
+            rootKindLabel: '尺寸不符',
+            depth: 1,
+            isPrimary: false,
+            weight: 0.3,
+            codePath: 'SM',
+          },
+          {
+            id: uuid(2),
+            categoryId: quality.id,
+            categoryCode: 'QD',
+            categoryName: '质量问题',
+            rootKind: 'QUALITY_DEFECT',
+            rootKindLabel: '质量问题',
+            depth: 1,
+            isPrimary: true,
+            weight: 0.7,
+            codePath: 'QD',
+          },
         ],
         itemCount: 2,
         primaryCount: 1,
@@ -223,14 +245,21 @@ describe('分类树展示口径：判定全部来自后端', () => {
   });
 
   it('自己停用 ⇒ disabled', () => {
-    const p = nodePresentation(node({ categoryStatus: 'DISABLED', assignable: false, notAssignableReason: '分类已停用' }));
+    const p = nodePresentation(
+      node({ categoryStatus: 'DISABLED', assignable: false, notAssignableReason: '分类已停用' }),
+    );
     expect(p.tone).toBe('disabled');
     expect(p.hint).toContain('已停用');
   });
 
   it('上级停用 ⇒ blocked（本地数据看不出来，必须用后端给的 assignable）', () => {
     const p = nodePresentation(
-      node({ depth: 2, categoryStatus: 'ACTIVE', assignable: false, notAssignableReason: '上级分类已停用' }),
+      node({
+        depth: 2,
+        categoryStatus: 'ACTIVE',
+        assignable: false,
+        notAssignableReason: '上级分类已停用',
+      }),
     );
     expect(p.tone).toBe('blocked');
     expect(p.hint).toContain('上级');
@@ -261,7 +290,15 @@ describe('分类树展示口径：判定全部来自后端', () => {
 
   it('assignableNodes 只留后端判定可归因的', () => {
     const tree: AftersalesReasonTree = {
-      nodes: [quality, node({ id: uuid(4), categoryCode: 'X', assignable: false, notAssignableReason: '上级分类已停用' })],
+      nodes: [
+        quality,
+        node({
+          id: uuid(4),
+          categoryCode: 'X',
+          assignable: false,
+          notAssignableReason: '上级分类已停用',
+        }),
+      ],
       totalCount: 2,
       activeCount: 2,
       disabledCount: 0,
@@ -295,13 +332,55 @@ describe('报表展示口径', () => {
     const report: AftersalesReasonReport = {
       rows: [],
       rootTotals: [
-        { rootKind: 'QUALITY_DEFECT', rootKindLabel: '质量问题', primaryCaseCount: 0, attributionCaseCount: 0, caseSharePercent: 0 },
-        { rootKind: 'DESCRIPTION_MISMATCH', rootKindLabel: '描述不符', primaryCaseCount: 0, attributionCaseCount: 0, caseSharePercent: 0 },
-        { rootKind: 'SIZE_MISMATCH', rootKindLabel: '尺寸不符', primaryCaseCount: 0, attributionCaseCount: 0, caseSharePercent: 0 },
-        { rootKind: 'LOGISTICS_DAMAGE', rootKindLabel: '物流损坏', primaryCaseCount: 0, attributionCaseCount: 0, caseSharePercent: 0 },
-        { rootKind: 'BUYER_REASON', rootKindLabel: '买家原因', primaryCaseCount: 0, attributionCaseCount: 0, caseSharePercent: 0 },
-        { rootKind: 'MISTAKE_BUY', rootKindLabel: '误购', primaryCaseCount: 0, attributionCaseCount: 0, caseSharePercent: 0 },
-        { rootKind: 'FRAUD_RETURN', rootKindLabel: '欺诈退货', primaryCaseCount: 0, attributionCaseCount: 0, caseSharePercent: 0 },
+        {
+          rootKind: 'QUALITY_DEFECT',
+          rootKindLabel: '质量问题',
+          primaryCaseCount: 0,
+          attributionCaseCount: 0,
+          caseSharePercent: 0,
+        },
+        {
+          rootKind: 'DESCRIPTION_MISMATCH',
+          rootKindLabel: '描述不符',
+          primaryCaseCount: 0,
+          attributionCaseCount: 0,
+          caseSharePercent: 0,
+        },
+        {
+          rootKind: 'SIZE_MISMATCH',
+          rootKindLabel: '尺寸不符',
+          primaryCaseCount: 0,
+          attributionCaseCount: 0,
+          caseSharePercent: 0,
+        },
+        {
+          rootKind: 'LOGISTICS_DAMAGE',
+          rootKindLabel: '物流损坏',
+          primaryCaseCount: 0,
+          attributionCaseCount: 0,
+          caseSharePercent: 0,
+        },
+        {
+          rootKind: 'BUYER_REASON',
+          rootKindLabel: '买家原因',
+          primaryCaseCount: 0,
+          attributionCaseCount: 0,
+          caseSharePercent: 0,
+        },
+        {
+          rootKind: 'MISTAKE_BUY',
+          rootKindLabel: '误购',
+          primaryCaseCount: 0,
+          attributionCaseCount: 0,
+          caseSharePercent: 0,
+        },
+        {
+          rootKind: 'FRAUD_RETURN',
+          rootKindLabel: '欺诈退货',
+          primaryCaseCount: 0,
+          attributionCaseCount: 0,
+          caseSharePercent: 0,
+        },
       ],
       evaluatedAt: '2026-03-01T00:00:00Z',
       attributedCaseCount: 0,

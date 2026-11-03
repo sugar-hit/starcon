@@ -198,10 +198,7 @@ export function ListingKeywordRankingWorkspace() {
   );
 
   const missing = useMemo(() => unavailableDimensions(caps), [caps]);
-  const chartData = useMemo(
-    () => trendSeries(trend?.points ?? [], 'lastNaturalRank'),
-    [trend],
-  );
+  const chartData = useMemo(() => trendSeries(trend?.points ?? [], 'lastNaturalRank'), [trend]);
 
   return (
     <div className="space-y-4">
@@ -217,7 +214,7 @@ export function ListingKeywordRankingWorkspace() {
       />
 
       {error && (
-        <div className="border-destructive/40 bg-destructive/5 text-destructive flex items-center gap-2 rounded-lg border px-4 py-3 text-label-13">
+        <div className="border-destructive/40 bg-destructive/5 text-destructive text-label-13 flex items-center gap-2 rounded-lg border px-4 py-3">
           <TriangleAlert className="size-4 shrink-0" />
           <span className="flex-1">{error}</span>
           <Button size="sm" variant="secondary" onClick={() => void load()}>
@@ -228,7 +225,7 @@ export function ListingKeywordRankingWorkspace() {
       )}
 
       {/* ---- 🔴 抓取时间与不准确窗口的标注（蓝图加粗句，契约级要求） ---- */}
-      <div className="border-info/40 bg-info/5 text-foreground flex items-start gap-3 rounded-lg border px-4 py-3 text-label-13">
+      <div className="border-info/40 bg-info/5 text-foreground text-label-13 flex items-start gap-3 rounded-lg border px-4 py-3">
         <Badge tone="info" className="mt-0.5 shrink-0">
           抓取时间
         </Badge>
@@ -261,7 +258,7 @@ export function ListingKeywordRankingWorkspace() {
       )}
 
       {loading && !page ? (
-        <div className="text-muted-foreground flex items-center gap-2 px-1 py-8 text-label-13">
+        <div className="text-muted-foreground text-label-13 flex items-center gap-2 px-1 py-8">
           <Loader2 className="size-4 animate-spin" />
           正在加载关键词排名数据…
         </div>
@@ -297,7 +294,7 @@ export function ListingKeywordRankingWorkspace() {
                 <select
                   id="lkr-platform"
                   value={platformCode}
-                  className="border-border h-8 rounded-md border px-2 text-label-13"
+                  className="border-border text-label-13 h-8 rounded-md border px-2"
                   onChange={(e) => setPlatformCode(e.target.value)}
                 >
                   <option value="">全部平台</option>
@@ -315,7 +312,7 @@ export function ListingKeywordRankingWorkspace() {
                 <select
                   id="lkr-site"
                   value={siteCode}
-                  className="border-border h-8 rounded-md border px-2 text-label-13"
+                  className="border-border text-label-13 h-8 rounded-md border px-2"
                   onChange={(e) => setSiteCode(e.target.value)}
                 >
                   <option value="">全部站点</option>
@@ -333,7 +330,7 @@ export function ListingKeywordRankingWorkspace() {
                 <select
                   id="lkr-status"
                   value={status}
-                  className="border-border h-8 rounded-md border px-2 text-label-13"
+                  className="border-border text-label-13 h-8 rounded-md border px-2"
                   onChange={(e) => setStatus(e.target.value)}
                 >
                   <option value="ALL">全部</option>
@@ -366,14 +363,14 @@ export function ListingKeywordRankingWorkspace() {
 
             {!page || page.items.length === 0 ? (
               <EmptyState
-                icon={<Search className="size-8 text-muted-foreground" />}
+                icon={<Search className="text-muted-foreground size-8" />}
                 title="没有关键词"
                 description={emptyKeywordsMessage(page?.total ?? 0)}
               />
             ) : (
               <>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-label-13">
+                  <table className="text-label-13 w-full text-left">
                     <thead className="text-muted-foreground border-border border-b">
                       <tr>
                         <th className="px-4 py-2 font-medium">关键词</th>
@@ -424,14 +421,14 @@ export function ListingKeywordRankingWorkspace() {
                               {rankChangeText(row.adRankChange)}
                             </div>
                           </td>
-                          <td className="text-muted-foreground px-4 py-2 text-label-12">
+                          <td className="text-muted-foreground text-label-12 px-4 py-2">
                             自然 {thresholdLabel(row.naturalRankThreshold)}
                             <br />
                             广告 {thresholdLabel(row.adRankThreshold)}
                             <br />
                             退步 {thresholdLabel(row.rankDropThreshold)}
                           </td>
-                          <td className="text-muted-foreground px-4 py-2 text-label-12">
+                          <td className="text-muted-foreground text-label-12 px-4 py-2">
                             {accuracyLabel(row.latestCrawledAt, row.latestAccuracyWindowMinutes)}
                           </td>
                           <td className="px-4 py-2">
@@ -487,7 +484,7 @@ export function ListingKeywordRankingWorkspace() {
                 <select
                   value={granularity}
                   aria-label="趋势粒度"
-                  className="border-border h-8 rounded-md border px-2 text-label-13"
+                  className="border-border text-label-13 h-8 rounded-md border px-2"
                   onChange={(e) => setGranularity(e.target.value)}
                 >
                   <option value="DAY">按日</option>
@@ -501,19 +498,19 @@ export function ListingKeywordRankingWorkspace() {
             }
           >
             {detailLoading ? (
-              <div className="text-muted-foreground flex items-center gap-2 px-1 py-8 text-label-13">
+              <div className="text-muted-foreground text-label-13 flex items-center gap-2 px-1 py-8">
                 <Loader2 className="size-4 animate-spin" />
                 正在加载排名明细…
               </div>
             ) : !detail ? (
               <EmptyState
-                icon={<TrendingDown className="size-8 text-muted-foreground" />}
+                icon={<TrendingDown className="text-muted-foreground size-8" />}
                 title="还没有选中关键词"
                 description="在上方的关键词集合里点一行，这里会显示该关键词的名次、排名历史与趋势。"
               />
             ) : !detail.hasData ? (
               <EmptyState
-                icon={<TrendingDown className="size-8 text-muted-foreground" />}
+                icon={<TrendingDown className="text-muted-foreground size-8" />}
                 title="这个关键词还没有排名数据"
                 description={emptyDetailMessage(detail)}
               />
@@ -565,20 +562,22 @@ export function ListingKeywordRankingWorkspace() {
                 </div>
 
                 {/* 🔴 抓取时间与不准确窗口（明细区顶部固定） */}
-                <div className="border-border bg-muted/40 text-muted-foreground rounded-md border px-3 py-2 text-label-12">
+                <div className="border-border bg-muted/40 text-muted-foreground text-label-12 rounded-md border px-3 py-2">
                   🔴 数据截至 {crawledAtLabel(detail.latestCrawledAt)} · 可能有 ±
                   {detail.latestAccuracyWindowMinutes ?? '—'} 分钟偏差 —— 名次是抓取那一刻平台给出的
                   位置，超过窗口后不再代表当前排名。
                 </div>
 
-                <div className="text-muted-foreground text-label-12">{rankDefinitionBanner(caps)}</div>
+                <div className="text-muted-foreground text-label-12">
+                  {rankDefinitionBanner(caps)}
+                </div>
 
                 {/* ---- 趋势图 ---- */}
                 <div>
-                  <div className="text-foreground mb-2 text-label-13 font-medium">自然排名趋势</div>
+                  <div className="text-foreground text-label-13 mb-2 font-medium">自然排名趋势</div>
                   {!trend || trend.points.length === 0 ? (
                     <EmptyState
-                      icon={<TrendingDown className="size-8 text-muted-foreground" />}
+                      icon={<TrendingDown className="text-muted-foreground size-8" />}
                       title="这个区间没有排名数据"
                       description="没有数据时**不画平线** —— 一条平的假曲线会让人以为「排名没变」，而真相是「没抓到数据」。"
                     />
@@ -592,7 +591,11 @@ export function ListingKeywordRankingWorkspace() {
                             reversed
                             className="text-label-12"
                             allowDecimals={false}
-                            label={{ value: '名次（越小越好）', angle: -90, position: 'insideLeft' }}
+                            label={{
+                              value: '名次（越小越好）',
+                              angle: -90,
+                              position: 'insideLeft',
+                            }}
                           />
                           <Tooltip
                             formatter={(value: number | string) => [
@@ -619,18 +622,18 @@ export function ListingKeywordRankingWorkspace() {
 
                 {/* ---- 排名历史 ---- */}
                 <div>
-                  <div className="text-foreground mb-2 text-label-13 font-medium">
+                  <div className="text-foreground text-label-13 mb-2 font-medium">
                     排名历史（{history ? pageSummary(history) : '—'}）
                   </div>
                   {!history || history.items.length === 0 ? (
                     <EmptyState
-                      icon={<TrendingDown className="size-8 text-muted-foreground" />}
+                      icon={<TrendingDown className="text-muted-foreground size-8" />}
                       title="没有排名历史"
                       description="这个区间里没有抓取记录。"
                     />
                   ) : (
                     <div className="overflow-x-auto">
-                      <table className="w-full text-left text-label-13">
+                      <table className="text-label-13 w-full text-left">
                         <thead className="text-muted-foreground border-border border-b">
                           <tr>
                             <th className="px-4 py-2 font-medium">抓取时间</th>
@@ -643,7 +646,10 @@ export function ListingKeywordRankingWorkspace() {
                         </thead>
                         <tbody>
                           {history.items.map((row) => (
-                            <tr key={row.snapshotId} className="border-border border-b last:border-0">
+                            <tr
+                              key={row.snapshotId}
+                              className="border-border border-b last:border-0"
+                            >
                               <td className="px-4 py-2">{crawledAtLabel(row.crawledAt)}</td>
                               <td className="px-4 py-2">{formatRank(row.naturalRank)}</td>
                               <td className="px-4 py-2">{formatRank(row.adRank)}</td>
@@ -653,7 +659,7 @@ export function ListingKeywordRankingWorkspace() {
                                   广告 {rankChangeText(row.adRankChange)}
                                 </div>
                               </td>
-                              <td className="text-muted-foreground px-4 py-2 text-label-12">
+                              <td className="text-muted-foreground text-label-12 px-4 py-2">
                                 ±{row.accuracyWindowMinutes} 分钟
                               </td>
                               <td className="px-4 py-2">
@@ -687,13 +693,13 @@ export function ListingKeywordRankingWorkspace() {
           >
             {!alerts || alerts.items.length === 0 ? (
               <EmptyState
-                icon={<TriangleAlert className="size-8 text-muted-foreground" />}
+                icon={<TriangleAlert className="text-muted-foreground size-8" />}
                 title="没有预警记录"
                 description={emptyAlertsMessage(alerts?.openCount ?? 0)}
               />
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-label-13">
+                <table className="text-label-13 w-full text-left">
                   <thead className="text-muted-foreground border-border border-b">
                     <tr>
                       <th className="px-4 py-2 font-medium">关键词</th>
@@ -777,17 +783,17 @@ export function ListingKeywordRankingWorkspace() {
           >
             {!report || report.rows.length === 0 ? (
               <EmptyState
-                icon={<BarChart3 className="size-8 text-muted-foreground" />}
+                icon={<BarChart3 className="text-muted-foreground size-8" />}
                 title="没有报表数据"
                 description="这个区间里还没有排名样本。报表是排名历史的聚合，没有样本时是空数组（不是一行 0）。"
               />
             ) : (
               <>
-                <div className="mb-3 text-muted-foreground text-label-12">
+                <div className="text-muted-foreground text-label-12 mb-3">
                   {report.keywordCount} 个关键词 · {report.rows.length} 行
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-label-13">
+                  <table className="text-label-13 w-full text-left">
                     <thead className="text-muted-foreground border-border border-b">
                       <tr>
                         <th className="px-4 py-2 font-medium">关键词</th>
@@ -827,7 +833,7 @@ export function ListingKeywordRankingWorkspace() {
                               <span className="text-muted-foreground text-label-12">0</span>
                             )}
                           </td>
-                          <td className="text-muted-foreground px-4 py-2 text-label-12">
+                          <td className="text-muted-foreground text-label-12 px-4 py-2">
                             {accuracyLabel(row.lastCrawledAt, row.accuracyWindowMinutes)}
                           </td>
                         </tr>

@@ -334,7 +334,12 @@ export function fetchAdGroupOperations(
 
 export function fetchAdGroupProductCandidates(
   campaignId: string,
-  query: { groupId?: string | undefined; keyword?: string | undefined; page?: number; size?: number } = {},
+  query: {
+    groupId?: string | undefined;
+    keyword?: string | undefined;
+    page?: number;
+    size?: number;
+  } = {},
 ): Promise<AdGroupProductCandidatePage> {
   return api<AdGroupProductCandidatePage>(
     `${BASE}/product-candidates${queryString({ campaignId, ...query })}`,
@@ -553,7 +558,10 @@ export const emptyAdGroupSettingsInput: AdGroupSettingsInput = {
  * 🔴 「恢复继承活动预算」与「设一个预算数值」**互斥** ——
  * 同时给会让服务端不知道听谁的（服务端会直接拒）。
  */
-export function validateGroupSettings(input: AdGroupSettingsInput): { ok: boolean; errors: string[] } {
+export function validateGroupSettings(input: AdGroupSettingsInput): {
+  ok: boolean;
+  errors: string[];
+} {
   const errors: string[] = [];
   if (input.clearDailyBudget && input.dailyBudget.trim() !== '') {
     errors.push('组级预算数值与「恢复继承活动预算」不能同时给');

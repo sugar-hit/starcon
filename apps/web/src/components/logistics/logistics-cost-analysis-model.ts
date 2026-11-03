@@ -561,12 +561,12 @@ export function fetchCostChannelComparison(filters: CostFilters): Promise<CostCh
   const to = toIsoInstant(filters.dateTo, true);
   if (from) query.set('dateFrom', from);
   if (to) query.set('dateTo', to);
-  return api<CostChannelComparison>(`channel/logistics-cost-analysis/by-channel?${query.toString()}`);
+  return api<CostChannelComparison>(
+    `channel/logistics-cost-analysis/by-channel?${query.toString()}`,
+  );
 }
 
-export function fetchCostOverCostOrders(
-  filters: CostFilters,
-): Promise<CostOverCostOrderPage> {
+export function fetchCostOverCostOrders(filters: CostFilters): Promise<CostOverCostOrderPage> {
   const query = new URLSearchParams();
   const from = toIsoInstant(filters.dateFrom);
   const to = toIsoInstant(filters.dateTo, true);
@@ -597,12 +597,14 @@ export function fetchCostAllocationRules(
 export function createCostAllocationRule(
   request: CostAllocationRuleRequest,
 ): Promise<CostAllocationRuleRow> {
-  return api<CostAllocationRuleRow>('channel/logistics-cost-analysis/allocation-rules', 'POST', request);
+  return api<CostAllocationRuleRow>(
+    'channel/logistics-cost-analysis/allocation-rules',
+    'POST',
+    request,
+  );
 }
 
-export function fetchCostAllocations(
-  filters: CostAllocationFilters,
-): Promise<CostAllocationPage> {
+export function fetchCostAllocations(filters: CostAllocationFilters): Promise<CostAllocationPage> {
   const query = new URLSearchParams();
   query.set('page', String(filters.page));
   query.set('size', String(filters.size));
@@ -622,18 +624,33 @@ export function lockCostAllocation(
   id: string,
   request: CostAllocationLockRequest,
 ): Promise<CostAllocationRow> {
-  return api<CostAllocationRow>(`channel/logistics-cost-analysis/allocations/${id}/lock`, 'POST', request);
+  return api<CostAllocationRow>(
+    `channel/logistics-cost-analysis/allocations/${id}/lock`,
+    'POST',
+    request,
+  );
 }
 
-export function fetchCostParameters(page: number, size: number): Promise<LogisticsCostParameterPage> {
+export function fetchCostParameters(
+  page: number,
+  size: number,
+): Promise<LogisticsCostParameterPage> {
   const query = new URLSearchParams();
   query.set('page', String(page));
   query.set('size', String(size));
-  return api<LogisticsCostParameterPage>(`channel/logistics-cost-analysis/parameters?${query.toString()}`);
+  return api<LogisticsCostParameterPage>(
+    `channel/logistics-cost-analysis/parameters?${query.toString()}`,
+  );
 }
 
-export function saveCostParameter(request: LogisticsCostParameterRequest): Promise<LogisticsCostParameterRow> {
-  return api<LogisticsCostParameterRow>('channel/logistics-cost-analysis/parameters', 'POST', request);
+export function saveCostParameter(
+  request: LogisticsCostParameterRequest,
+): Promise<LogisticsCostParameterRow> {
+  return api<LogisticsCostParameterRow>(
+    'channel/logistics-cost-analysis/parameters',
+    'POST',
+    request,
+  );
 }
 
 export function deleteCostParameter(id: string): Promise<void> {

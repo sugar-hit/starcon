@@ -385,7 +385,7 @@ public class OrderChangeCancelService {
   public OrderChangeCancelRuleRow createRule(OrderChangeCancelRuleInput input, UUID actor) {
     var kind = ruleKind(input);
     OffsetDateTime from =
-        input.effectiveFrom() == null ? OffsetDateTime.now() : input.effectiveFrom();
+        input.effectiveFrom() == null ? dbNow() : input.effectiveFrom();
     if (input.effectiveTo() != null && !input.effectiveTo().isAfter(from))
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "生效结束时间必须晚于生效开始时间");
     BigDecimal deadline = input.deadlineHours();
@@ -431,7 +431,7 @@ public class OrderChangeCancelService {
   public OrderChangeCancelRuleRow updateRule(
       UUID id, OrderChangeCancelRuleInput input, UUID actor) {
     OffsetDateTime from =
-        input.effectiveFrom() == null ? OffsetDateTime.now() : input.effectiveFrom();
+        input.effectiveFrom() == null ? dbNow() : input.effectiveFrom();
     if (input.effectiveTo() != null && !input.effectiveTo().isAfter(from))
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "生效结束时间必须晚于生效开始时间");
     int updated =
@@ -571,7 +571,9 @@ public class OrderChangeCancelService {
             order.id());
     OffsetDateTime anchor = r == null ? null : r.get("anchor", OffsetDateTime.class);
     if (anchor == null) return 0d;
-    return Duration.between(anchor, OffsetDateTime.now()).toMinutes() / 60d;
+    // 🔴 「现在」必须取自 **DB 时钟**：锚点来自 DB，与 JVM 墙钟比就是跨时钟域比较
+    // （容器化 PG 的时钟可能比宿主慢几百毫秒）⇒ 可改窗口的判定会偏。
+    return Duration.between(anchor, dbNow()).toMinutes() / 60d;
   }
 
   // ================================================================ 变更请求
@@ -1654,5 +1656,23 @@ public class OrderChangeCancelService {
     all.add(size);
     all.add(offset);
     return all.toArray();
+  }
+
+  /**
+   * DB 时钟的当前时刻（{@code select now()}）。
+   *
+   * <p>🔴 凡是「要与库里读出来的时刻比」或「要落进库里当业务事实」的时刻，都必须走这里，
+   * 不能用 {@link OffsetDateTime#now()}：
+   *
+   * <ul>
+   *   <li>PostgreSQL 的 {@code now()} = {@code transaction_timestamp()}，与 {@code effective_from <= now()}
+   *       这类判定**同钟域**；
+   *   <li>JVM 墙钟与 DB 时钟是两个钟源 —— 容器化 PG 的时钟可能比宿主慢几百毫秒，
+   *       跨钟域比较会让「刚登记的规则已生效」这件事取决于两个时钟恰好同步，
+   *       健康态余量只有几十毫秒（见 {@code docs/backlog/2026-10-21-order-change-rule-effective-from-clock-domain.md}）。
+   * </ul>
+   */
+  private OffsetDateTime dbNow() {
+    return sql.fetchOne("select now()").get(0, OffsetDateTime.class);
   }
 }

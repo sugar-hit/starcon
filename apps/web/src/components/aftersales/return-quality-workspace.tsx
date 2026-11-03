@@ -265,10 +265,18 @@ export function ReturnQualityWorkspace() {
 
       {/* ---- 第一屏：现在有多少件货等着我判 ---- */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="待检队列" value={summary?.pendingQueue ?? queue?.total ?? 0} polarity="neutral" />
+        <StatCard
+          label="待检队列"
+          value={summary?.pendingQueue ?? queue?.total ?? 0}
+          polarity="neutral"
+        />
         <StatCard label="草稿" value={summary?.draft ?? 0} polarity="neutral" />
         <StatCard label="可再销售" value={summary?.resalable ?? 0} polarity="positive" />
-        <StatCard label="残次 / 报废" value={(summary?.defective ?? 0) + (summary?.scrapped ?? 0)} polarity="negative" />
+        <StatCard
+          label="残次 / 报废"
+          value={(summary?.defective ?? 0) + (summary?.scrapped ?? 0)}
+          polarity="negative"
+        />
       </div>
 
       {/* ---- 待检队列：质检员上班第一屏 ---- */}
@@ -291,7 +299,8 @@ export function ReturnQualityWorkspace() {
                   <div className="text-sm font-medium">{r.skuName || r.skuCode}</div>
                   {/* ⚠️ 两个判定维度**并排**显示：外箱压瘪但商品完好是蓝图点名的合法组合。 */}
                   <div className="text-muted-foreground text-xs">
-                    {r.skuCode} · 待检 <b>{String(r.pendingQty)}</b> · 外包装 {r.packagingConditionLabel}
+                    {r.skuCode} · 待检 <b>{String(r.pendingQty)}</b> · 外包装{' '}
+                    {r.packagingConditionLabel}
                     <span className="mx-1">|</span>
                     商品 {r.goodsConditionLabel}
                   </div>
@@ -317,14 +326,26 @@ export function ReturnQualityWorkspace() {
       {/* ---- 质检单列表 ---- */}
       <SectionCard title="质检单">
         <div className="mb-3 grid gap-2 md:grid-cols-4">
-          <Input placeholder="关键字（单号 / SKU / 退货单号）" value={keyword} onChange={(e) => setKeyword(e.target.value)} />
-          <select className="rounded border px-2 py-1 text-sm" value={status} onChange={(e) => setStatus(e.target.value)}>
+          <Input
+            placeholder="关键字（单号 / SKU / 退货单号）"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+          />
+          <select
+            className="rounded border px-2 py-1 text-sm"
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+          >
             <option value="">全部状态</option>
             <option value="DRAFT">草稿</option>
             <option value="CONCLUDED">已判定</option>
             <option value="CANCELLED">已撤销</option>
           </select>
-          <select className="rounded border px-2 py-1 text-sm" value={verdict} onChange={(e) => setVerdict(e.target.value)}>
+          <select
+            className="rounded border px-2 py-1 text-sm"
+            value={verdict}
+            onChange={(e) => setVerdict(e.target.value)}
+          >
             <option value="">全部结论</option>
             <option value="RESALABLE">可再销售</option>
             <option value="DEFECTIVE">残次</option>
@@ -351,7 +372,11 @@ export function ReturnQualityWorkspace() {
             </thead>
             <tbody>
               {data.rows.map((r) => (
-                <tr key={r.id} className="hover:bg-muted/50 cursor-pointer border-b" onClick={() => void open(r.id)}>
+                <tr
+                  key={r.id}
+                  className="hover:bg-muted/50 cursor-pointer border-b"
+                  onClick={() => void open(r.id)}
+                >
                   <td className="py-2">
                     <div>{r.inspectionNo}</div>
                     <div className="text-muted-foreground text-xs">
@@ -363,12 +388,17 @@ export function ReturnQualityWorkspace() {
                       {r.inspectionStatusLabel}
                     </Badge>
                   </td>
-                  <td className="py-2">{r.verdictLabel ?? <span className="text-muted-foreground">—</span>}</td>
+                  <td className="py-2">
+                    {r.verdictLabel ?? <span className="text-muted-foreground">—</span>}
+                  </td>
                   <td className="py-2 text-xs">
                     {r.verdict ? (
                       <>
                         {String(r.salvageAmount)} {r.salvageCurrency}
-                        <span className="text-muted-foreground"> / 原值 {String(r.originalValue)}</span>
+                        <span className="text-muted-foreground">
+                          {' '}
+                          / 原值 {String(r.originalValue)}
+                        </span>
                       </>
                     ) : (
                       <span className="text-muted-foreground">未判定</span>
@@ -382,11 +412,16 @@ export function ReturnQualityWorkspace() {
 
         {data && data.total > data.size ? (
           <div className="mt-3 flex gap-2">
-            <Button disabled={page === 0} onClick={() => setPage((p) => p - 1)}>上一页</Button>
+            <Button disabled={page === 0} onClick={() => setPage((p) => p - 1)}>
+              上一页
+            </Button>
             <span className="text-muted-foreground self-center text-sm">
               第 {data.page + 1} 页 / 共 {data.total} 条
             </span>
-            <Button disabled={(page + 1) * data.size >= data.total} onClick={() => setPage((p) => p + 1)}>
+            <Button
+              disabled={(page + 1) * data.size >= data.total}
+              onClick={() => setPage((p) => p + 1)}
+            >
               下一页
             </Button>
           </div>
@@ -437,7 +472,9 @@ export function ReturnQualityWorkspace() {
                         </Badge>
                       </div>
                       {server?.blockedReason ? (
-                        <div className="text-muted-foreground mt-1 text-xs">{server.blockedReason}</div>
+                        <div className="text-muted-foreground mt-1 text-xs">
+                          {server.blockedReason}
+                        </div>
                       ) : null}
                     </div>
                   );
@@ -450,13 +487,18 @@ export function ReturnQualityWorkspace() {
               <div className="rounded border p-3">
                 <div className="text-sm font-medium">残值试算</div>
                 <div className="text-muted-foreground mt-1 grid gap-1 text-xs md:grid-cols-4">
-                  <div>原值 {String(preview.originalValue)} {preview.salvageCurrency}</div>
+                  <div>
+                    原值 {String(preview.originalValue)} {preview.salvageCurrency}
+                  </div>
                   <div>扣减 {String(preview.salvageDeduction)}</div>
                   <div>成色系数 {String(preview.gradeCoefficient)}</div>
                   <div>档位上限 {String(preview.salvageCap)}</div>
                 </div>
                 <div className="mt-2 text-sm">
-                  试算残值 <b>{String(preview.salvageEstimate)} {preview.salvageCurrency}</b>
+                  试算残值{' '}
+                  <b>
+                    {String(preview.salvageEstimate)} {preview.salvageCurrency}
+                  </b>
                 </div>
                 <div className="text-muted-foreground mt-1 text-xs">{preview.note}</div>
               </div>
@@ -467,7 +509,9 @@ export function ReturnQualityWorkspace() {
               <div className="mb-2 flex items-center gap-2">
                 <span className="text-sm font-medium">逐项检查结果</span>
                 {detail.mandatoryMissingCount > 0 ? (
-                  <Badge tone="danger">还有 {detail.mandatoryMissingCount} 个强制检项没有结果</Badge>
+                  <Badge tone="danger">
+                    还有 {detail.mandatoryMissingCount} 个强制检项没有结果
+                  </Badge>
                 ) : null}
               </div>
               {drafts.length === 0 ? (
@@ -482,15 +526,22 @@ export function ReturnQualityWorkspace() {
                     const item = pendingItem ?? row;
                     const blocking = blocksResale(item?.itemDimension ?? null);
                     return (
-                      <div key={d.templateItemId} className="flex flex-wrap items-center gap-2 rounded border p-2">
+                      <div
+                        key={d.templateItemId}
+                        className="flex flex-wrap items-center gap-2 rounded border p-2"
+                      >
                         <div className="min-w-0 flex-1">
                           <div className="text-sm">
                             {item?.itemName ?? d.templateItemId}
-                            {pendingItem?.itemRequired ? <span className="ml-1 text-xs">· 强制</span> : null}
+                            {pendingItem?.itemRequired ? (
+                              <span className="ml-1 text-xs">· 强制</span>
+                            ) : null}
                           </div>
                           <div className="text-muted-foreground text-xs">
                             {item?.itemDimensionLabel ?? item?.itemDimension ?? ''}
-                            {blocking ? ' · 本项不合格将禁止判可再销售' : ' · 本项不合格只扣成色系数'}
+                            {blocking
+                              ? ' · 本项不合格将禁止判可再销售'
+                              : ' · 本项不合格只扣成色系数'}
                           </div>
                         </div>
                         <select
@@ -529,8 +580,8 @@ export function ReturnQualityWorkspace() {
               )}
               {missingNotes.length > 0 ? (
                 <div className="text-destructive mt-2 text-xs">
-                  还有 {missingNotes.length} 项判了不合格但没写说明 —— 判残次要拿去向供应商与平台索赔，
-                  没有理由的「不合格」在纠纷里等于没有不合格。
+                  还有 {missingNotes.length} 项判了不合格但没写说明 ——
+                  判残次要拿去向供应商与平台索赔， 没有理由的「不合格」在纠纷里等于没有不合格。
                 </div>
               ) : null}
               <Button className="mt-2" disabled={busy} onClick={saveResults}>
@@ -551,7 +602,11 @@ export function ReturnQualityWorkspace() {
                   {VERDICT_OPTIONS.map((o) => {
                     const server = detail.verdictOptions.find((v) => v.code === o.code);
                     return (
-                      <option key={o.code} value={o.code} disabled={server ? !server.allowed : false}>
+                      <option
+                        key={o.code}
+                        value={o.code}
+                        disabled={server ? !server.allowed : false}
+                      >
                         {o.label}
                         {server && !server.allowed ? '（不允许）' : ''}
                       </option>
@@ -569,7 +624,9 @@ export function ReturnQualityWorkspace() {
                 再由数据库触发器重算比对 —— 填一个数等于把损耗口径交给操作员自己编。
               </div>
               {concludeBlock ? (
-                <div className="text-muted-foreground mt-2 text-xs">判定不可用：{concludeBlock}</div>
+                <div className="text-muted-foreground mt-2 text-xs">
+                  判定不可用：{concludeBlock}
+                </div>
               ) : null}
               <Button
                 className="mt-2"
@@ -588,7 +645,9 @@ export function ReturnQualityWorkspace() {
                 />
                 <Button
                   variant="secondary"
-                  disabled={busy || !cancelReason.trim() || detail.head.inspectionStatus !== 'DRAFT'}
+                  disabled={
+                    busy || !cancelReason.trim() || detail.head.inspectionStatus !== 'DRAFT'
+                  }
                   onClick={cancel}
                 >
                   撤销
@@ -606,11 +665,13 @@ export function ReturnQualityWorkspace() {
                   <div>目标库存状态 {detail.instruction.targetInventoryState}</div>
                   <div>数量 {String(detail.instruction.qty)}</div>
                   <div>
-                    残值 {String(detail.instruction.salvageAmount)} {detail.instruction.salvageCurrency}
+                    残值 {String(detail.instruction.salvageAmount)}{' '}
+                    {detail.instruction.salvageCurrency}
                   </div>
                 </div>
                 <div className="text-muted-foreground mt-1 text-xs">
-                  状态恒为 {detail.instruction.instructionStatus}，消费方恒为 {detail.instruction.consumerModule}
+                  状态恒为 {detail.instruction.instructionStatus}，消费方恒为{' '}
+                  {detail.instruction.consumerModule}
                   （未交付）—— 本模块只出指令，不改库存。
                 </div>
               </div>
@@ -645,7 +706,8 @@ export function ReturnQualityWorkspace() {
                 <div key={t.id} className="flex flex-wrap items-center gap-2 rounded border p-2">
                   <div className="min-w-0 flex-1">
                     <div className="text-sm">
-                      {t.templateName} <span className="text-muted-foreground">v{t.templateVersion}</span>
+                      {t.templateName}{' '}
+                      <span className="text-muted-foreground">v{t.templateVersion}</span>
                     </div>
                     <div className="text-muted-foreground text-xs">
                       {t.categoryName} · {t.itemCount} 项（强制 {t.mandatoryItemCount}） · 成色基准{' '}
@@ -656,12 +718,21 @@ export function ReturnQualityWorkspace() {
                     {t.templateStatusLabel}
                   </Badge>
                   {t.templateStatus === 'DRAFT' ? (
-                    <Button size="sm" disabled={busy} onClick={() => void toggleTemplate(t.id, t.templateStatus)}>
+                    <Button
+                      size="sm"
+                      disabled={busy}
+                      onClick={() => void toggleTemplate(t.id, t.templateStatus)}
+                    >
                       启用
                     </Button>
                   ) : null}
                   {t.templateStatus === 'ACTIVE' ? (
-                    <Button size="sm" variant="secondary" disabled={busy} onClick={() => void toggleTemplate(t.id, t.templateStatus)}>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      disabled={busy}
+                      onClick={() => void toggleTemplate(t.id, t.templateStatus)}
+                    >
                       停用
                     </Button>
                   ) : null}
@@ -722,7 +793,11 @@ export function ReturnQualityWorkspace() {
 }
 
 /** 已录结果 → 本地草稿（重开一张已录过部分结果的质检单时不至于清空）。 */
-function toDraftFromRow(r: { templateItemId: string; checkOutcome: string; checkNote: string | null }): CheckDraft {
+function toDraftFromRow(r: {
+  templateItemId: string;
+  checkOutcome: string;
+  checkNote: string | null;
+}): CheckDraft {
   return {
     templateItemId: r.templateItemId,
     checkOutcome: r.checkOutcome,

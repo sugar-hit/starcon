@@ -194,9 +194,7 @@ export function DefectiveGoodsWorkspace() {
         <TriangleAlert className="mt-0.5 size-4 shrink-0" />
         <div>
           <p className="font-medium">让步接收需要权限与原因，不能由质检员随手放行</p>
-          <p className="text-muted-foreground">
-            {caps?.concessionNote ?? CONCESSION_HINT}
-          </p>
+          <p className="text-muted-foreground">{caps?.concessionNote ?? CONCESSION_HINT}</p>
         </div>
       </div>
 
@@ -389,7 +387,9 @@ export function DefectiveGoodsWorkspace() {
                       <Badge tone={statusTone(row.status)}>{row.statusLabel}</Badge>
                     </td>
                     <td className="px-2 py-1 text-xs">{inventoryStatusText(row)}</td>
-                    <td className="px-2 py-1 text-xs">{claimStatusText(row.claimStatus, row.claimStatusLabel)}</td>
+                    <td className="px-2 py-1 text-xs">
+                      {claimStatusText(row.claimStatus, row.claimStatusLabel)}
+                    </td>
                     <td className="px-2 py-1 text-right">
                       <Button variant="ghost" onClick={() => void openDetail(row.id)}>
                         详情
@@ -460,7 +460,9 @@ export function DefectiveGoodsWorkspace() {
   );
 }
 
-function statusTone(status: string): 'neutral' | 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'brand' {
+function statusTone(
+  status: string,
+): 'neutral' | 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'brand' {
   switch (status) {
     case 'COMPLETED':
       return 'success';
@@ -631,7 +633,9 @@ function DetailModal({
               </table>
             </div>
           )}
-          <p className="text-muted-foreground mt-2 text-xs">{detail.inventoryNote ?? INVENTORY_HINT}</p>
+          <p className="text-muted-foreground mt-2 text-xs">
+            {detail.inventoryNote ?? INVENTORY_HINT}
+          </p>
         </SectionCard>
 
         {/* 供应商索赔 */}
@@ -683,10 +687,7 @@ function DetailModal({
             关闭
           </Button>
           {detail.actions.includes('DECIDE') && (
-            <Button
-              disabled={busy}
-              onClick={() => void run(() => decideOrder(order.id))}
-            >
+            <Button disabled={busy} onClick={() => void run(() => decideOrder(order.id))}>
               决策定稿
             </Button>
           )}
@@ -774,11 +775,7 @@ function ClaimCard({
           {actions.includes('AGREE') && (
             <label className="flex flex-col gap-1 text-xs">
               <span className="text-muted-foreground">供应商认可金额</span>
-              <Input
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="w-36"
-              />
+              <Input value={amount} onChange={(e) => setAmount(e.target.value)} className="w-36" />
             </label>
           )}
           {(actions.includes('REJECT') || actions.includes('WITHDRAW')) && (
@@ -788,7 +785,10 @@ function ClaimCard({
             </label>
           )}
           {actions.includes('SUBMIT') && (
-            <Button disabled={busy} onClick={() => void onRun(() => submitClaim(orderId, claim.id))}>
+            <Button
+              disabled={busy}
+              onClick={() => void onRun(() => submitClaim(orderId, claim.id))}
+            >
               提交索赔
             </Button>
           )}
@@ -811,7 +811,9 @@ function ClaimCard({
             <Button
               variant="outline"
               disabled={busy || !reason.trim()}
-              onClick={() => void onRun(() => rejectClaim(orderId, claim.id, { reason: reason.trim() }))}
+              onClick={() =>
+                void onRun(() => rejectClaim(orderId, claim.id, { reason: reason.trim() }))
+              }
             >
               拒赔
             </Button>
@@ -820,7 +822,9 @@ function ClaimCard({
             <Button
               variant="ghost"
               disabled={busy || !reason.trim()}
-              onClick={() => void onRun(() => withdrawClaim(orderId, claim.id, { reason: reason.trim() }))}
+              onClick={() =>
+                void onRun(() => withdrawClaim(orderId, claim.id, { reason: reason.trim() }))
+              }
             >
               撤回
             </Button>
@@ -857,16 +861,12 @@ function CreateModal({
   const selected: DefectiveInspectionOption | undefined = inspections.find(
     (i) => i.id === inspectionId,
   );
-  const planned = totalQuantity(
-    lines.map((l) => ({ quantity: Number(l.quantity ?? 0) })),
-  );
+  const planned = totalQuantity(lines.map((l) => ({ quantity: Number(l.quantity ?? 0) })));
   const remaining = selected?.remainingQuantity ?? 0;
   const overLimit = selected ? !withinDisposalLimit(planned, remaining) : false;
 
   const patchLine = (index: number, patch: Partial<DefectiveLineInput>) => {
-    setLines((current) =>
-      current.map((line, i) => (i === index ? { ...line, ...patch } : line)),
-    );
+    setLines((current) => current.map((line, i) => (i === index ? { ...line, ...patch } : line)));
   };
 
   const submit = async () => {
@@ -937,8 +937,8 @@ function CreateModal({
                 <option value="">请选择</option>
                 {inspections.map((option) => (
                   <option key={option.id} value={option.id}>
-                    {option.inspectionNo} · {option.skuCode} · 不合格{' '}
-                    {option.defectiveQuantity} · 还能处置 {option.remainingQuantity}
+                    {option.inspectionNo} · {option.skuCode} · 不合格 {option.defectiveQuantity} ·
+                    还能处置 {option.remainingQuantity}
                   </option>
                 ))}
               </select>
@@ -965,8 +965,7 @@ function CreateModal({
                       value={line.dispositionType}
                       onChange={(e) =>
                         patchLine(index, {
-                          dispositionType: e.target
-                            .value as DefectiveLineInput['dispositionType'],
+                          dispositionType: e.target.value as DefectiveLineInput['dispositionType'],
                         })
                       }
                     >
@@ -981,9 +980,7 @@ function CreateModal({
                     <span className="text-muted-foreground">数量</span>
                     <Input
                       value={String(line.quantity ?? 0)}
-                      onChange={(e) =>
-                        patchLine(index, { quantity: Number(e.target.value) })
-                      }
+                      onChange={(e) => patchLine(index, { quantity: Number(e.target.value) })}
                       className="w-32"
                     />
                   </label>
@@ -1010,9 +1007,7 @@ function CreateModal({
                       <span className="text-muted-foreground">让步原因（必填）</span>
                       <Input
                         value={line.concessionReason ?? ''}
-                        onChange={(e) =>
-                          patchLine(index, { concessionReason: e.target.value })
-                        }
+                        onChange={(e) => patchLine(index, { concessionReason: e.target.value })}
                         className="w-72"
                       />
                     </label>
@@ -1028,7 +1023,10 @@ function CreateModal({
                   </div>
                 )}
                 <p className="text-muted-foreground mt-2 text-xs">
-                  放行量 {fmtQuantity(releaseQuantityFor(line.dispositionType, Number(line.quantity ?? 0)))}
+                  放行量{' '}
+                  {fmtQuantity(
+                    releaseQuantityFor(line.dispositionType, Number(line.quantity ?? 0)),
+                  )}
                   {concessionRequired(line.dispositionType)
                     ? '（让步接收整行回可售池）'
                     : '（该去向的货离仓或不可售，放行量恒为 0）'}
@@ -1051,11 +1049,7 @@ function CreateModal({
           <div className="flex flex-wrap items-end gap-2">
             <label className="flex flex-col gap-1 text-sm">
               <span className="text-muted-foreground">处置理由（必填）</span>
-              <Input
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                className="w-96"
-              />
+              <Input value={reason} onChange={(e) => setReason(e.target.value)} className="w-96" />
             </label>
             <label className="flex flex-col gap-1 text-sm">
               <span className="text-muted-foreground">币种</span>

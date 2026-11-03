@@ -149,16 +149,34 @@ describe('printable', () => {
 
 describe('unavailableStatuses', () => {
   const statuses: WaybillDisplayStatusOption[] = [
-    { status: 'PENDING_NUMBER', label: '待取号', available: true, source: 'x', ownerModule: '', note: '' },
-    { status: 'PICKED_UP', label: '已揽收', available: false, source: 'y', ownerModule: '10.3.1.1', note: 'n' },
-    { status: 'IN_TRANSIT', label: '运输中', available: false, source: 'y', ownerModule: '10.3.1.1', note: 'n' },
+    {
+      status: 'PENDING_NUMBER',
+      label: '待取号',
+      available: true,
+      source: 'x',
+      ownerModule: '',
+      note: '',
+    },
+    {
+      status: 'PICKED_UP',
+      label: '已揽收',
+      available: false,
+      source: 'y',
+      ownerModule: '10.3.1.1',
+      note: 'n',
+    },
+    {
+      status: 'IN_TRANSIT',
+      label: '运输中',
+      available: false,
+      source: 'y',
+      ownerModule: '10.3.1.1',
+      note: 'n',
+    },
   ];
 
   it('只挑出 available=false 的（界面上要禁用它们）', () => {
-    expect(unavailableStatuses(statuses).map((s) => s.status)).toEqual([
-      'PICKED_UP',
-      'IN_TRANSIT',
-    ]);
+    expect(unavailableStatuses(statuses).map((s) => s.status)).toEqual(['PICKED_UP', 'IN_TRANSIT']);
   });
 
   it('每个不可用态都带 ownerModule（禁用时要说清找谁）', () => {

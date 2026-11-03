@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import type { CrmReviewEffectivePolicy, CrmReviewVariantRow } from '../../../../../packages/api-contracts/src/index';
+import type {
+  CrmReviewEffectivePolicy,
+  CrmReviewVariantRow,
+} from '../../../../../packages/api-contracts/src/index';
 import {
   assignmentQuery,
   averageRatingText,

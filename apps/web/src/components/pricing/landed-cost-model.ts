@@ -402,10 +402,10 @@ export function landedCompleteness(missing: string[] | null | undefined): {
 }
 
 /** 一个分量的状态标签：计入 / 有事实但不计入 / 缺口。 */
-export function landedComponentState(component: {
-  available: boolean;
-  included: boolean;
-}): { tone: 'success' | 'warning' | 'danger'; text: string } {
+export function landedComponentState(component: { available: boolean; included: boolean }): {
+  tone: 'success' | 'warning' | 'danger';
+  text: string;
+} {
   if (!component.available) return { tone: 'danger', text: '缺口' };
   if (!component.included) return { tone: 'warning', text: '不计入' };
   return { tone: 'success', text: '计入' };
@@ -455,7 +455,8 @@ export function validateLandedCostParameter(input: LandedCostParameterInput): st
 export function validateLandedCostCompute(input: LandedCostComputeInput): string[] {
   const problems: string[] = [];
   const hasId = typeof input.sourceShipmentId === 'string' && input.sourceShipmentId.trim() !== '';
-  const hasCode = typeof input.sourceShipmentCode === 'string' && input.sourceShipmentCode.trim() !== '';
+  const hasCode =
+    typeof input.sourceShipmentCode === 'string' && input.sourceShipmentCode.trim() !== '';
   if (!hasId && !hasCode) {
     problems.push('必须给出上游头程发运单的 id 或单号：到岸成本是按一张发运单算的');
   }
@@ -505,7 +506,9 @@ export function fetchLandedCostParameters(): Promise<LandedCostParameterPage> {
   return api<LandedCostParameterPage>('catalog/landed-costs/parameters');
 }
 
-export function saveLandedCostParameter(input: LandedCostParameterInput): Promise<LandedCostParameterRow> {
+export function saveLandedCostParameter(
+  input: LandedCostParameterInput,
+): Promise<LandedCostParameterRow> {
   return api<LandedCostParameterRow>('catalog/landed-costs/parameters', 'PUT', input);
 }
 

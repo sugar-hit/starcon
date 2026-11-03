@@ -256,7 +256,11 @@ class PlatformFlagIntegrationTest extends IdentityIntegrationTestBase {
   void 公告生效期按值写回且窗外不展示() throws Exception {
     String token = login();
     // 窗口取相对当前时刻的区间：不依赖「今天是几号」，测试任何时候跑结论都一样。
-    var now = OffsetDateTime.now(java.time.ZoneOffset.UTC);
+    // 🔴 截断到微秒：PostgreSQL 的 timestamptz 只存微秒，写进去再读回来必然
+    // 丢掉纳秒尾巴（OffsetDateTime.now() 是纳秒精度），不截断的话下面的精确
+    // 相等断言必然红 —— 而这条断言要抓的是时区漂移（偏 8 小时），不是纳秒尾巴。
+    var now =
+        OffsetDateTime.now(java.time.ZoneOffset.UTC).truncatedTo(java.time.temporal.ChronoUnit.MICROS);
     var from = now.minusDays(30);
     var to = now.minusDays(1);
 

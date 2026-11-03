@@ -694,9 +694,7 @@ export function fetchLabelRenders(
   page: number,
   size: number,
 ): Promise<LabelRenderPage> {
-  return api<LabelRenderPage>(
-    `channel/label-templates/${id}/renders?page=${page}&size=${size}`,
-  );
+  return api<LabelRenderPage>(`channel/label-templates/${id}/renders?page=${page}&size=${size}`);
 }
 
 /**

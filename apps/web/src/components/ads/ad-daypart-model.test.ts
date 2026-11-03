@@ -140,12 +140,18 @@ describe('14.2.1.2 分时策略 · 曲线校验', () => {
   });
 
   it('🔴 竞价系数必须大于 0（0 或负数都不许）', () => {
-    expect(validateDaypartCurve(full({ bidMultiplier: 0 })).join('|')).toContain('竞价系数必须大于 0');
-    expect(validateDaypartCurve(full({ bidMultiplier: -1 })).join('|')).toContain('竞价系数必须大于 0');
+    expect(validateDaypartCurve(full({ bidMultiplier: 0 })).join('|')).toContain(
+      '竞价系数必须大于 0',
+    );
+    expect(validateDaypartCurve(full({ bidMultiplier: -1 })).join('|')).toContain(
+      '竞价系数必须大于 0',
+    );
   });
 
   it('🔴 预算系数不能为负', () => {
-    expect(validateDaypartCurve(full({ budgetMultiplier: -1 })).join('|')).toContain('预算系数不能为负');
+    expect(validateDaypartCurve(full({ budgetMultiplier: -1 })).join('|')).toContain(
+      '预算系数不能为负',
+    );
   });
 
   it('小时重复被拦下', () => {
@@ -204,10 +210,21 @@ describe('14.2.1.2 分时策略 · 激活闸', () => {
 describe('14.2.1.2 分时策略 · 曲线派生', () => {
   it('缺的小时补成 KEEP×1（页面上永远是 24 行）', () => {
     const editable = editableCurve([
-      { localHour: 3, action: 'BOOST', bidMultiplier: 1.5, budgetMultiplier: 1.5, source: 'MANUAL', basisNote: 'x' },
+      {
+        localHour: 3,
+        action: 'BOOST',
+        bidMultiplier: 1.5,
+        budgetMultiplier: 1.5,
+        source: 'MANUAL',
+        basisNote: 'x',
+      },
     ]);
     expect(editable).toHaveLength(24);
-    expect(editable[3]).toMatchObject({ action: 'BOOST', bidMultiplier: 1.5, budgetMultiplier: 1.5 });
+    expect(editable[3]).toMatchObject({
+      action: 'BOOST',
+      bidMultiplier: 1.5,
+      budgetMultiplier: 1.5,
+    });
     expect(editable[4]).toMatchObject({ action: 'KEEP', bidMultiplier: 1, budgetMultiplier: 1 });
   });
 });

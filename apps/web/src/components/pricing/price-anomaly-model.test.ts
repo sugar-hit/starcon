@@ -254,7 +254,9 @@ describe('5.5.2.1 异常告警前端模型', () => {
     });
 
     it('负价与非法币种都要挡', () => {
-      expect(validateObservation({ ...valid, platformPrice: '-1' }).join('；')).toContain('不能为负');
+      expect(validateObservation({ ...valid, platformPrice: '-1' }).join('；')).toContain(
+        '不能为负',
+      );
       expect(validateObservation({ ...valid, currency: 'US' }).join('；')).toContain('ISO 4217');
     });
 

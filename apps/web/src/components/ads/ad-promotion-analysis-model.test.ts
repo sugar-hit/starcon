@@ -153,7 +153,11 @@ describe('14.4.2.1 跳过不许静默消失', () => {
   it('跳过明细能渲染成一行行（促销编码 + 原因）', () => {
     const entries = analysisSkippedEntries(
       JSON.stringify([
-        { promotionId: 'p1', promotionCode: 'P-NOWINDOW', reason: '促销未设置起止时间，无法界定促销期与基期' },
+        {
+          promotionId: 'p1',
+          promotionCode: 'P-NOWINDOW',
+          reason: '促销未设置起止时间，无法界定促销期与基期',
+        },
       ]),
     );
     expect(entries).toHaveLength(1);

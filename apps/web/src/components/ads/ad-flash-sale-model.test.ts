@@ -110,7 +110,10 @@ describe('14.4.1.2 秒杀表单校验', () => {
     const missing = validateAdFlashSaleClaim(emptyAdFlashSaleClaimInput());
     expect(missing.errors.join('|')).toContain('领取人标识必填');
 
-    const badQuantity = validateAdFlashSaleClaim({ ...emptyAdFlashSaleClaimInput(), quantity: '0' });
+    const badQuantity = validateAdFlashSaleClaim({
+      ...emptyAdFlashSaleClaimInput(),
+      quantity: '0',
+    });
     expect(badQuantity.errors.join('|')).toContain('领取件数必须大于 0');
 
     const ok = validateAdFlashSaleClaim({ recipientKey: 'user-1', quantity: '1' });

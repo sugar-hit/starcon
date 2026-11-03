@@ -745,16 +745,12 @@ export function validateDaypartCurve(hours: AdDaypartHourInput[]): string[] {
 /** 曲线里真正在动的小时数（24 = 全天都在调）。 */
 export function effectiveHourCount(hours: AdDaypartHourInput[]): number {
   return hours.filter(
-    (hour) =>
-      !(hour.action === 'KEEP' && hour.bidMultiplier === 1 && hour.budgetMultiplier === 1),
+    (hour) => !(hour.action === 'KEEP' && hour.bidMultiplier === 1 && hour.budgetMultiplier === 1),
   ).length;
 }
 
 /** 🔴 **能否激活**：时区定不了 或 曲线全是「不动」 ⇒ 激活不了。 */
-export function activationBlockers(
-  timezoneStatus: string,
-  hours: AdDaypartHourInput[],
-): string[] {
+export function activationBlockers(timezoneStatus: string, hours: AdDaypartHourInput[]): string[] {
   const problems: string[] = [];
   if (timezoneStatus !== 'RESOLVED') {
     problems.push('店铺时区定不了 ⇒ 策略激活不了（跨时区店铺用错时区会完全失效）');

@@ -91,10 +91,7 @@ export const RATIO_SCALE = 4;
  *
  * @returns 缩放后的整数；输入为 null / undefined / 非数字时返回 null（「没有这个数」）
  */
-export function toScaled(
-  value: number | string | null | undefined,
-  scale: number,
-): bigint | null {
+export function toScaled(value: number | string | null | undefined, scale: number): bigint | null {
   if (value === null || value === undefined) return null;
   if (typeof value === 'number' && !Number.isFinite(value)) return null;
   // toFixed 不会产出科学计数法（1e21 以下），正好避开 JSON 里 "1e+21" 那种形态。
@@ -119,10 +116,7 @@ export function fromScaled(value: bigint, scale: number): number {
  * <p><b>逐项跳过 null</b>：null 是「没有这个数」，不是 0。调用方要区分
  * 「全部为 0」与「一项都取不到」时，用 {@link sumMoneyOrNull} 而不是它。
  */
-export function sumScaled(
-  values: readonly (number | null | undefined)[],
-  scale: number,
-): bigint {
+export function sumScaled(values: readonly (number | null | undefined)[], scale: number): bigint {
   let total = 0n;
   for (const value of values) {
     const scaled = toScaled(value, scale);
@@ -137,9 +131,7 @@ export function sumScaled(
  * <p>区别于 {@link sumMoney}：那个把「一项都取不到」当成 0，
  * 这个把它当成<b>不可判定</b> —— 页面上必须能分开。
  */
-export function sumMoneyOrNull(
-  values: readonly (number | null | undefined)[],
-): number | null {
+export function sumMoneyOrNull(values: readonly (number | null | undefined)[]): number | null {
   const usable = values.filter(
     (value): value is number => value !== null && value !== undefined && Number.isFinite(value),
   );
@@ -170,7 +162,7 @@ export function ratioOf(
   const a = toScaled(numerator, MONEY_SCALE);
   const b = toScaled(denominator, MONEY_SCALE);
   if (a === null || b === null || b === 0n) return null;
-  const negative = (a < 0n) !== (b < 0n);
+  const negative = a < 0n !== b < 0n;
   const absA = a < 0n ? -a : a;
   const absB = b < 0n ? -b : b;
   const factor = 10n ** BigInt(RATIO_SCALE);
@@ -652,10 +644,7 @@ export function buildPendingSettlement(
       pendingCount: 0,
       partialCount: 0,
     };
-    bucket.settlementAmount = sumMoney([
-      bucket.settlementAmount,
-      summary.settlementAmount,
-    ]);
+    bucket.settlementAmount = sumMoney([bucket.settlementAmount, summary.settlementAmount]);
     bucket.receivedAmount = sumMoney([bucket.receivedAmount, summary.receivedAmount]);
     bucket.pendingCount += pendingCount;
     bucket.partialCount += partialCount;
@@ -673,10 +662,7 @@ export function buildPendingSettlement(
       currency,
       settlementAmount: bucket.settlementAmount,
       receivedAmount: bucket.receivedAmount,
-      unsettledAmount: sumMoney([
-        bucket.settlementAmount,
-        -bucket.receivedAmount,
-      ]),
+      unsettledAmount: sumMoney([bucket.settlementAmount, -bucket.receivedAmount]),
       pendingCount: bucket.pendingCount,
       partialCount: bucket.partialCount,
       count: bucket.pendingCount + bucket.partialCount,
@@ -899,9 +885,7 @@ export interface InTransitGoods {
  * 只取回了一部分却报一个「总量」，就是在报一个假的数 ——
  * 所以截断时总量、分类量、腿数**一律 null（不可判定）**，并如实报出取回了多少。
  */
-export function buildInTransitGoods(
-  page: RiskProjectionPage | null | undefined,
-): InTransitGoods {
+export function buildInTransitGoods(page: RiskProjectionPage | null | undefined): InTransitGoods {
   if (!page) {
     return {
       totalQuantity: null,
@@ -1044,36 +1028,29 @@ export function buildCurrencySummaries(
   for (const item of payables.summaryByCurrency) currencies.add(item.currency);
   for (const item of inTransitMoney) currencies.add(item.currency);
 
-  return [...currencies].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0)).map((currency) => {
-    const agingHit = aging.find((item) => item.currency === currency) ?? null;
-    const overdueHit =
-      overdue.summaryByCurrency.find((item) => item.currency === currency) ?? null;
-    const settlementHit =
-      pendingSettlement.find((item) => item.currency === currency) ?? null;
-    const payableHit =
-      payables.summaryByCurrency.find((item) => item.currency === currency) ?? null;
-    const transitHit = inTransitMoney.find((item) => item.currency === currency) ?? null;
+  return [...currencies]
+    .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))
+    .map((currency) => {
+      const agingHit = aging.find((item) => item.currency === currency) ?? null;
+      const overdueHit =
+        overdue.summaryByCurrency.find((item) => item.currency === currency) ?? null;
+      const settlementHit = pendingSettlement.find((item) => item.currency === currency) ?? null;
+      const payableHit =
+        payables.summaryByCurrency.find((item) => item.currency === currency) ?? null;
+      const transitHit = inTransitMoney.find((item) => item.currency === currency) ?? null;
 
-    return {
-      currency,
-      receivableOpenAmount: available.AGING
-        ? (agingHit?.openAmount ?? 0)
-        : null,
-      receivableOverdueAmount: available.OVERDUE
-        ? (overdueHit?.overdueAmount ?? 0)
-        : null,
-      overdueCount: available.OVERDUE ? (overdueHit?.count ?? 0) : null,
-      pendingSettlementAmount: available.SETTLEMENT
-        ? (settlementHit?.unsettledAmount ?? 0)
-        : null,
-      payableUnpaidAmount: available.PAYABLE
-        ? (payableHit?.unpaidAmount ?? 0)
-        : null,
-      inTransitMoneyAmount: available.DEFERRED
-        ? (transitHit?.inTransitAmount ?? 0)
-        : null,
-    };
-  });
+      return {
+        currency,
+        receivableOpenAmount: available.AGING ? (agingHit?.openAmount ?? 0) : null,
+        receivableOverdueAmount: available.OVERDUE ? (overdueHit?.overdueAmount ?? 0) : null,
+        overdueCount: available.OVERDUE ? (overdueHit?.count ?? 0) : null,
+        pendingSettlementAmount: available.SETTLEMENT
+          ? (settlementHit?.unsettledAmount ?? 0)
+          : null,
+        payableUnpaidAmount: available.PAYABLE ? (payableHit?.unpaidAmount ?? 0) : null,
+        inTransitMoneyAmount: available.DEFERRED ? (transitHit?.inTransitAmount ?? 0) : null,
+      };
+    });
 }
 
 // ================================================================ 明细文案

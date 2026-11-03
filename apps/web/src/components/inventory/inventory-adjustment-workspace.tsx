@@ -436,8 +436,11 @@ export function InventoryAdjustmentWorkspace({ focus }: { focus?: AdjustmentFocu
       </div>
 
       {capabilities && (
-        <SectionCard title="边界说明" description="这些是本模块**不**做或**尚未接入**的部分，先讲清楚免得误以为有入口。">
-          <div className="space-y-3 text-copy-13">
+        <SectionCard
+          title="边界说明"
+          description="这些是本模块**不**做或**尚未接入**的部分，先讲清楚免得误以为有入口。"
+        >
+          <div className="text-copy-13 space-y-3">
             <div>
               <div className="text-foreground font-medium">审批归属</div>
               <div className="text-muted-foreground">{capabilities.approvalNote}</div>
@@ -680,7 +683,7 @@ export function InventoryAdjustmentWorkspace({ focus }: { focus?: AdjustmentFocu
               </Button>
             </div>
             {attachments.length > 0 && (
-              <ul className="text-muted-foreground mt-2 list-disc pl-5 text-copy-13">
+              <ul className="text-muted-foreground text-copy-13 mt-2 list-disc pl-5">
                 {attachments.map((a) => (
                   <li key={a.key}>
                     {a.fileName}（{a.mediaId}）
@@ -720,7 +723,7 @@ export function InventoryAdjustmentWorkspace({ focus }: { focus?: AdjustmentFocu
             ) : (
               <div className="max-h-72 overflow-auto">
                 <table className="w-full text-sm">
-                  <thead className="text-muted-foreground sticky top-0 bg-card text-left text-xs">
+                  <thead className="text-muted-foreground bg-card sticky top-0 text-left text-xs">
                     <tr>
                       <th className="py-2">商品 / 库位</th>
                       <th className="py-2 text-right">在手</th>
@@ -816,9 +819,7 @@ export function InventoryAdjustmentWorkspace({ focus }: { focus?: AdjustmentFocu
             icon={<ScrollText className="h-5 w-5" />}
             title={loading ? '加载中' : '还没有调整单'}
             description={
-              loading
-                ? '正在读取调整单。'
-                : '调整必须走单据：从上面的「发起调整」建第一张草稿单。'
+              loading ? '正在读取调整单。' : '调整必须走单据：从上面的「发起调整」建第一张草稿单。'
             }
           />
         ) : (
@@ -998,9 +999,7 @@ export function InventoryAdjustmentWorkspace({ focus }: { focus?: AdjustmentFocu
                       <td className="py-2">{line.reasonLabel || line.reasonCode}</td>
                       <td className="text-muted-foreground py-2 text-xs">
                         {lineStateText(line)}
-                        {line.postedAt && (
-                          <div>{formatMoment(line.postedAt)}</div>
-                        )}
+                        {line.postedAt && <div>{formatMoment(line.postedAt)}</div>}
                       </td>
                       <td className="py-2 text-right">
                         {open.order.status === 'DRAFT' && (
@@ -1012,9 +1011,7 @@ export function InventoryAdjustmentWorkspace({ focus }: { focus?: AdjustmentFocu
                               setSaving(true);
                               setError('');
                               try {
-                                setOpen(
-                                  await removeAdjustmentLine(open.order.id, line.id),
-                                );
+                                setOpen(await removeAdjustmentLine(open.order.id, line.id));
                                 setNotice('已删行（只有草稿能删行 —— 已提交的行是证据）。');
                               } catch (e) {
                                 setError(errorText(e));
@@ -1036,7 +1033,7 @@ export function InventoryAdjustmentWorkspace({ focus }: { focus?: AdjustmentFocu
             {open.attachments.length > 0 && (
               <div>
                 <div className="text-label-13 text-foreground mb-2">凭证</div>
-                <ul className="space-y-1 text-copy-13">
+                <ul className="text-copy-13 space-y-1">
                   {open.attachments.map((attachment) => (
                     <li key={attachment.id} className="flex items-center gap-2">
                       <span>{attachmentSummary(attachment)}</span>
@@ -1051,9 +1048,7 @@ export function InventoryAdjustmentWorkspace({ focus }: { focus?: AdjustmentFocu
                             setSaving(true);
                             setError('');
                             try {
-                              setOpen(
-                                await removeAdjustmentEvidence(open.order.id, attachment.id),
-                              );
+                              setOpen(await removeAdjustmentEvidence(open.order.id, attachment.id));
                               setNotice('已摘凭证。');
                             } catch (e) {
                               setError(errorText(e));
@@ -1151,7 +1146,7 @@ export function InventoryAdjustmentWorkspace({ focus }: { focus?: AdjustmentFocu
 
             <div>
               <div className="text-label-13 text-foreground mb-2">审计时间线</div>
-              <ul className="space-y-2 text-copy-13">
+              <ul className="text-copy-13 space-y-2">
                 {open.auditTrail.map((entry) => (
                   <li key={entry.id} className="border-control-border border-t pt-2">
                     <div className="font-medium">

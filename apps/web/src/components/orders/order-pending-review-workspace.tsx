@@ -1,7 +1,15 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { AlertTriangle, CheckCheck, ClipboardList, Clock, RefreshCw, ShieldCheck, X } from 'lucide-react';
+import {
+  AlertTriangle,
+  CheckCheck,
+  ClipboardList,
+  Clock,
+  RefreshCw,
+  ShieldCheck,
+  X,
+} from 'lucide-react';
 import {
   Badge,
   Button,
@@ -225,7 +233,7 @@ export function OrderPendingReviewWorkspace() {
         result.replayed
           ? '这次是幂等回放：上一次用同一个幂等键的请求已经处理过，没有再次改任何状态。'
           : `本批实际通过 ${result.approvedCount} 单、驳回 ${result.rejectedCount} 单、` +
-            `挂起 ${result.suspendedCount} 单、跳过 ${result.skippedCount} 单。`,
+              `挂起 ${result.suspendedCount} 单、跳过 ${result.skippedCount} 单。`,
       );
       setSelected([]);
       await reload();
@@ -277,10 +285,7 @@ export function OrderPendingReviewWorkspace() {
             </Notice>
             <div className="grid gap-2 sm:grid-cols-3">
               <Cell label="生效中的规则" value={`${capabilities.activeRuleCount} 条`} />
-              <Cell
-                label="其中可作为通过依据"
-                value={`${capabilities.autoApproveRuleCount} 条`}
-              />
+              <Cell label="其中可作为通过依据" value={`${capabilities.autoApproveRuleCount} 条`} />
               <Cell label="强制转人工" value={`${capabilities.forcedManualRuleCount} 条`} />
             </div>
             {approvableRules.length === 0 ? (
@@ -329,7 +334,11 @@ export function OrderPendingReviewWorkspace() {
           <StatCard label="待审" value={summary.pending} icon={<ClipboardList aria-hidden />} />
           <StatCard label="已挂起" value={summary.suspended} icon={<Clock aria-hidden />} />
           <StatCard label="已超时" value={summary.overdue} icon={<AlertTriangle aria-hidden />} />
-          <StatCard label="未评估风险分" value={summary.unevaluated} icon={<ShieldCheck aria-hidden />} />
+          <StatCard
+            label="未评估风险分"
+            value={summary.unevaluated}
+            icon={<ShieldCheck aria-hidden />}
+          />
         </div>
       )}
 
@@ -337,7 +346,11 @@ export function OrderPendingReviewWorkspace() {
       <SectionCard
         title="待审队列"
         description="顺序由后端按「风险分 → 时效分 → 提交时刻」给出；界面不再二次排序。"
-        extra={<span className="text-copy-13 text-muted">{pageText(meta.page, meta.size, meta.total)}</span>}
+        extra={
+          <span className="text-copy-13 text-muted">
+            {pageText(meta.page, meta.size, meta.total)}
+          </span>
+        }
       >
         <div className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -495,7 +508,11 @@ export function OrderPendingReviewWorkspace() {
                         </Badge>
                       </td>
                       <td className="py-2 align-top">
-                        <Button size="sm" variant="secondary" onClick={() => void openDetail(row.orderId)}>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => void openDetail(row.orderId)}
+                        >
                           详情
                         </Button>
                       </td>
@@ -582,7 +599,11 @@ export function OrderPendingReviewWorkspace() {
             <Input
               id="pending-reason"
               value={reason}
-              placeholder={batchAction === 'APPROVE' ? '例如：本批小额单，按自动通过规则放行' : '例如：地址不可达，等买家补充'}
+              placeholder={
+                batchAction === 'APPROVE'
+                  ? '例如：本批小额单，按自动通过规则放行'
+                  : '例如：地址不可达，等买家补充'
+              }
               onChange={(e) => setReason(e.target.value)}
             />
           </FormField>
@@ -590,7 +611,9 @@ export function OrderPendingReviewWorkspace() {
           <div className="flex flex-wrap items-center gap-3">
             <Button
               onClick={() => void submitBatch()}
-              disabled={busy || selected.length === 0 || Boolean(approveBlocker) || Boolean(reasonBlocker)}
+              disabled={
+                busy || selected.length === 0 || Boolean(approveBlocker) || Boolean(reasonBlocker)
+              }
             >
               <CheckCheck aria-hidden />
               提交批量审单
@@ -617,7 +640,8 @@ export function OrderPendingReviewWorkspace() {
               </div>
               <div className="text-copy-13 text-muted-foreground">
                 请求 {receipt.requestedCount} 单 —— 实际通过 {receipt.approvedCount}、驳回{' '}
-                {receipt.rejectedCount}、挂起 {receipt.suspendedCount}、跳过 {receipt.skippedCount}。
+                {receipt.rejectedCount}、挂起 {receipt.suspendedCount}、跳过 {receipt.skippedCount}
+                。
               </div>
               <table className="text-copy-13 w-full border-collapse text-left">
                 <thead>
@@ -765,7 +789,9 @@ export function OrderPendingReviewWorkspace() {
                           {hit.matched ? '命中' : '未命中'}
                         </Badge>
                         {hit.forcedManual && <Badge tone="danger">强制转人工</Badge>}
-                        <span className="text-copy-12 text-muted-foreground">次序 {hit.evalRank}</span>
+                        <span className="text-copy-12 text-muted-foreground">
+                          次序 {hit.evalRank}
+                        </span>
                       </div>
                       <div className="text-copy-13 text-muted-foreground">{hit.reason}</div>
                       {hit.conditions.length > 0 && (
@@ -784,7 +810,9 @@ export function OrderPendingReviewWorkspace() {
                               <tr key={condition.seqNo} className="border-border border-t">
                                 <td className="py-1 align-top">{condition.dimensionLabel}</td>
                                 <td className="py-1 align-top">{condition.expected || '—'}</td>
-                                <td className="py-1 align-top font-mono">{condition.actualField || '—'}</td>
+                                <td className="py-1 align-top font-mono">
+                                  {condition.actualField || '—'}
+                                </td>
                                 <td className="py-1 align-top font-mono">
                                   {condition.actualValue || '—'}
                                 </td>

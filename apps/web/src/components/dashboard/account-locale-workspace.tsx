@@ -110,10 +110,7 @@ export function AccountLocaleWorkspace() {
     [platformSites, selected, locale.timezone, locale.defaultTimezone, now],
   );
 
-  const visible = useMemo(
-    () => filterTimezoneCandidates(candidates, query),
-    [candidates, query],
-  );
+  const visible = useMemo(() => filterTimezoneCandidates(candidates, query), [candidates, query]);
 
   const siteCandidates = candidates.filter((candidate) => candidate.source === 'platform-site');
   const dirtySelection = selected !== locale.timezone;
@@ -267,8 +264,8 @@ export function AccountLocaleWorkspace() {
               </ul>
             )}
             <p className="text-muted-foreground text-xs">
-              平台站点时区来自 channel 服务的站点参数（只读）；其余候选来自浏览器的 IANA
-              时区表 —— <b>后者不是</b>「平台站点时区清单」，只是全部可选时区。
+              平台站点时区来自 channel 服务的站点参数（只读）；其余候选来自浏览器的 IANA 时区表 ——{' '}
+              <b>后者不是</b>「平台站点时区清单」，只是全部可选时区。
             </p>
           </div>
         </div>
@@ -289,8 +286,8 @@ export function AccountLocaleWorkspace() {
             本仓还没有 i18n 运行时与英文语言包，全站文案是硬编码中文。
             现在放一个「English」下拉，点了页面文案一点都不会变 —— 那是假开关，所以不做。
             <br />
-            缺的是：① i18n 运行时（语言上下文 + 缺键回落）；② 语言包（zh-CN / en-US）；
-            ③ 全站文案的 t() 化。归属：蓝图里没有这一格，属未立项能力（建议挂在 1.4.2
+            缺的是：① i18n 运行时（语言上下文 + 缺键回落）；② 语言包（zh-CN / en-US）； ③ 全站文案的
+            t() 化。归属：蓝图里没有这一格，属未立项能力（建议挂在 1.4.2
             账号偏好下或作为平台级基础能力单独立项）。
           </Notice>
         </div>
@@ -303,7 +300,9 @@ export function AccountLocaleWorkspace() {
         <div className="space-y-2">
           <p className="text-copy-13">
             <span className="font-mono">{selected || locale.timezone}</span>：{' '}
-            <span className="font-medium">{formatDateTime(now, selected || locale.timezone, convention)}</span>
+            <span className="font-medium">
+              {formatDateTime(now, selected || locale.timezone, convention)}
+            </span>
           </p>
           <ul className="text-copy-13 text-muted-foreground space-y-0.5">
             {REFERENCE_TIMEZONES.map((zone) => (
@@ -335,7 +334,9 @@ export function AccountLocaleWorkspace() {
                     <Badge tone="warning">当前不可用</Badge>
                   )}
                   {dimension.ownerModule ? (
-                    <span className="text-muted-foreground text-xs">归属：{dimension.ownerModule}</span>
+                    <span className="text-muted-foreground text-xs">
+                      归属：{dimension.ownerModule}
+                    </span>
                   ) : null}
                 </div>
                 <p className="text-copy-13">{dimension.summary}</p>

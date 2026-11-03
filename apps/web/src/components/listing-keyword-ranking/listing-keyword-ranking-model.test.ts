@@ -95,7 +95,9 @@ const detail = (hasData: boolean, emptyReason: string): ListingKeywordRankingDet
   lastCrawledAt: null,
 });
 
-const point = (over: Partial<ListingKeywordRankingTrendPoint> = {}): ListingKeywordRankingTrendPoint => ({
+const point = (
+  over: Partial<ListingKeywordRankingTrendPoint> = {},
+): ListingKeywordRankingTrendPoint => ({
   bucket: '2026-10-01',
   lastNaturalRank: 5,
   lastAdRank: null,

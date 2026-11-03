@@ -102,11 +102,20 @@ describe('9.4.1.2 发货记录 · 呈现口径', () => {
   });
 
   it('没登记时限时不给「准时」标签', () => {
-    expect(slaVerdict(undefined, false)).toEqual({ label: '未登记时限 · 无从判定', severity: 'muted' });
+    expect(slaVerdict(undefined, false)).toEqual({
+      label: '未登记时限 · 无从判定',
+      severity: 'muted',
+    });
     // 关键：有时限且未迟发才算准时；没时限永远不是准时
     expect(slaVerdict(undefined, true).label).toContain('无从判定');
-    expect(slaVerdict('2030-01-01T00:00:00+08:00', false)).toEqual({ label: '准时', severity: 'normal' });
-    expect(slaVerdict('2030-01-01T00:00:00+08:00', true)).toEqual({ label: '迟发', severity: 'danger' });
+    expect(slaVerdict('2030-01-01T00:00:00+08:00', false)).toEqual({
+      label: '准时',
+      severity: 'normal',
+    });
+    expect(slaVerdict('2030-01-01T00:00:00+08:00', true)).toEqual({
+      label: '迟发',
+      severity: 'danger',
+    });
   });
 
   it('绩效比例如实呈现两位小数，分母为 0 时不显示占位符', () => {

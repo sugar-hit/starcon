@@ -24,7 +24,9 @@ import { GET, POST, PUT } from './[...path]/route';
 
 // 相对**本文件**定位：vitest 从仓库根或 apps/web 跑时 cwd 都不同，用 cwd 会静默读空。
 const SOURCE = readFileSync(
-  fileURLToPath(new URL('../../../components/aftersales/rma-authorization-model.ts', import.meta.url)),
+  fileURLToPath(
+    new URL('../../../components/aftersales/rma-authorization-model.ts', import.meta.url),
+  ),
   'utf8',
 );
 
@@ -94,9 +96,13 @@ it('写形状（POST / PUT）被放行，且真的转发到 8085', async () => {
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
   vi.stubGlobal('fetch', fetcher);
 
-  for (const path of ['trade/rma-authorizations', `trade/rma-authorizations/${ID}/decide`,
-    `trade/rma-authorizations/${ID}/return-logistics`, `trade/rma-authorizations/${ID}/cancel`,
-    'trade/rma-authorizations/expire-overdue']) {
+  for (const path of [
+    'trade/rma-authorizations',
+    `trade/rma-authorizations/${ID}/decide`,
+    `trade/rma-authorizations/${ID}/return-logistics`,
+    `trade/rma-authorizations/${ID}/cancel`,
+    'trade/rma-authorizations/expire-overdue',
+  ]) {
     const response = await POST(request(path, 'POST'), {
       params: Promise.resolve({ path: path.split('/') }),
     });

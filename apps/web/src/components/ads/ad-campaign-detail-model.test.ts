@@ -84,7 +84,11 @@ describe('14.1.1.2 状态与类型标签', () => {
 
 describe('14.1.1.2 🔴 平台侧修改历史：拿不到 ≠ 没有修改过', () => {
   it('不可用时文案必须说清「拿不到」与「当前展示的是本地审计」', () => {
-    const text = changeHistoryText(false, '平台广告 API 同步未交付。', '当前展示的是本地操作审计。');
+    const text = changeHistoryText(
+      false,
+      '平台广告 API 同步未交付。',
+      '当前展示的是本地操作审计。',
+    );
     expect(text).toContain('平台广告 API 同步未交付');
     expect(text).toContain('本地操作审计');
     // 🔴 不许出现「暂无修改」这种把「拿不到」说成「没有过」的措辞

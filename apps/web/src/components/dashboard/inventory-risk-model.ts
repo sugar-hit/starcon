@@ -237,8 +237,12 @@ export function classifyRisks(row: StockProjectionRow): RiskType[] {
   // 超卖：活跃预占未了结量已经超过可发货的量 —— 结构性判定，无阈值。
   if (row.activeReservedQuantity > row.available) risks.push('OVERSELL');
   // 呆滞：库龄达到呆滞线。后端未配置时已回落 7.6.1.1 的兜底默认值（obsoleteDays 恒有值）。
-  if (Number.isFinite(row.agingDays) && Number.isFinite(row.obsoleteDays)
-    && row.agingDays >= row.obsoleteDays) risks.push('SLOW_MOVING');
+  if (
+    Number.isFinite(row.agingDays) &&
+    Number.isFinite(row.obsoleteDays) &&
+    row.agingDays >= row.obsoleteDays
+  )
+    risks.push('SLOW_MOVING');
   // 超储：在手量高于最高保有量。未配置阈值 → 不判定。
   if (row.maxOnHand !== null && row.onHand > row.maxOnHand) risks.push('OVERSTOCK');
   return risks;
@@ -265,13 +269,13 @@ export function suggestAction(
     const arriving = row.inTransitPurchaseQuantity + row.inTransitFirstMileQuantity;
     if (arriving > 0) {
       parts.push('催在途到货');
-      basis.push(`在途 ${formatQuantity(arriving)}（采购 ${formatQuantity(row.inTransitPurchaseQuantity)} + 头程 ${formatQuantity(row.inTransitFirstMileQuantity)}）`);
+      basis.push(
+        `在途 ${formatQuantity(arriving)}（采购 ${formatQuantity(row.inTransitPurchaseQuantity)} + 头程 ${formatQuantity(row.inTransitFirstMileQuantity)}）`,
+      );
     } else {
       parts.push('生成采购单');
       basis.push(
-        row.reorderPoint !== null
-          ? `补货点 ${formatQuantity(row.reorderPoint)}`
-          : '未配置补货点',
+        row.reorderPoint !== null ? `补货点 ${formatQuantity(row.reorderPoint)}` : '未配置补货点',
       );
     }
   }
@@ -283,16 +287,12 @@ export function suggestAction(
   }
   if (risks.includes('SLOW_MOVING')) {
     parts.push('清仓 / 降价促销');
-    basis.push(
-      `库龄 ${row.agingDays ?? '—'} 天 ≥ 呆滞线 ${row.obsoleteDays ?? '—'} 天`,
-    );
+    basis.push(`库龄 ${row.agingDays ?? '—'} 天 ≥ 呆滞线 ${row.obsoleteDays ?? '—'} 天`);
   }
   if (risks.includes('OVERSTOCK')) {
     const donor = siblings.find(
       (other) =>
-        other.skuId === row.skuId &&
-        other.warehouseId !== row.warehouseId &&
-        other.available > 0,
+        other.skuId === row.skuId && other.warehouseId !== row.warehouseId && other.available > 0,
     );
     if (donor) {
       parts.push(`调拨到 ${donor.warehouseCode}`);
@@ -367,9 +367,7 @@ export function buildInventoryRiskList(
       thresholdScopeType: projection.thresholdScopeType,
       thresholdScopeKey: projection.thresholdScopeKey,
       dailySales,
-      dailySalesWindow: velocity
-        ? `${velocity.windowStart} ~ ${velocity.windowEnd}`
-        : null,
+      dailySalesWindow: velocity ? `${velocity.windowStart} ~ ${velocity.windowEnd}` : null,
       coverageDays,
       coverageStatus,
       risks,
@@ -389,7 +387,10 @@ export function summarizeRiskList(rows: InventoryRiskRow[]): InventoryRiskSummar
     SLOW_MOVING: 0,
     OVERSTOCK: 0,
   };
-  const kinds = new Map<string, { kind: string; label: string; rowCount: number; riskRowCount: number }>();
+  const kinds = new Map<
+    string,
+    { kind: string; label: string; rowCount: number; riskRowCount: number }
+  >();
   let riskRowCount = 0;
   let noThresholdCount = 0;
   let noVelocityCount = 0;

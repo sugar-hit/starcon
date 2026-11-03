@@ -131,12 +131,15 @@ describe('打样与样品展示口径', () => {
   });
 
   it('目标状态只给后端说的合法去向，页面不自己维护状态机', () => {
-    expect(
-      allowedOrderTargetOptions(options, 'REQUESTED').map((item) => item.value),
-    ).toEqual(['IN_PROGRESS', 'CANCELLED']);
-    expect(
-      allowedSampleTargetOptions(options, 'RECEIVED').map((item) => item.value),
-    ).toEqual(['CONFIRMED', 'REVISING', 'ABANDONED']);
+    expect(allowedOrderTargetOptions(options, 'REQUESTED').map((item) => item.value)).toEqual([
+      'IN_PROGRESS',
+      'CANCELLED',
+    ]);
+    expect(allowedSampleTargetOptions(options, 'RECEIVED').map((item) => item.value)).toEqual([
+      'CONFIRMED',
+      'REVISING',
+      'ABANDONED',
+    ]);
     // 终态没有出边。
     expect(allowedOrderTargetOptions(options, 'CLOSED')).toEqual([]);
     expect(allowedOrderTargetOptions(options, 'CANCELLED')).toEqual([]);

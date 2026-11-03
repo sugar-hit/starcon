@@ -29,7 +29,9 @@ import { DELETE, GET, POST, PUT } from './[...path]/route';
 
 // 相对**本文件**定位：vitest 从仓库根或 apps/web 跑时 cwd 都不同，用 cwd 会静默读空。
 const SOURCE = readFileSync(
-  fileURLToPath(new URL('../../../components/purchase/development-project-model.ts', import.meta.url)),
+  fileURLToPath(
+    new URL('../../../components/purchase/development-project-model.ts', import.meta.url),
+  ),
   'utf8',
 );
 
@@ -157,7 +159,11 @@ it('更新与删除子资源的形状被放行', async () => {
 
   const putMilestone = await PUT(
     request(`trade/development-projects/${ID}/milestones/${ID}`, 'PUT'),
-    { params: Promise.resolve({ path: `trade/development-projects/${ID}/milestones/${ID}`.split('/') }) },
+    {
+      params: Promise.resolve({
+        path: `trade/development-projects/${ID}/milestones/${ID}`.split('/'),
+      }),
+    },
   );
   expect(putMilestone.status, `PUT milestones/${ID} 未被放行`).toBe(200);
 

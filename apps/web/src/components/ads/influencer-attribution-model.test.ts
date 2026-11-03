@@ -82,9 +82,30 @@ describe('14.5.2.1 带货归因 · 前端模型', () => {
   it('能力声明里 available=false 的维度要被单独列出来（页面必须让人看见缺口）', () => {
     const capabilities = {
       dimensions: [
-        { dimension: 'attribution_rule', description: '归因规则', available: true, source: '', ownerModule: '', impact: '' },
-        { dimension: 'platform_sync', description: '平台带货数据同步', available: false, source: '', ownerModule: '适配层', impact: '只来自本地合作记录' },
-        { dimension: 'profit_integration', description: '佣金进利润表', available: false, source: '', ownerModule: '13.4', impact: '没有进利润表' },
+        {
+          dimension: 'attribution_rule',
+          description: '归因规则',
+          available: true,
+          source: '',
+          ownerModule: '',
+          impact: '',
+        },
+        {
+          dimension: 'platform_sync',
+          description: '平台带货数据同步',
+          available: false,
+          source: '',
+          ownerModule: '适配层',
+          impact: '只来自本地合作记录',
+        },
+        {
+          dimension: 'profit_integration',
+          description: '佣金进利润表',
+          available: false,
+          source: '',
+          ownerModule: '13.4',
+          impact: '没有进利润表',
+        },
       ],
     } as unknown as AttributionCapabilities;
     const unavailable = unavailableDimensions(capabilities);

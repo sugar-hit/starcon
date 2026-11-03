@@ -382,7 +382,11 @@ describe('归属对象与周期', () => {
     expect(timezoneText(period)).toContain('Asia/Shanghai');
     expect(timezoneText(period)).not.toContain('暂按 UTC');
 
-    const fallback: TargetCurrentPeriod = { ...period, timezone: 'UTC', timezoneSource: 'FALLBACK_UTC' };
+    const fallback: TargetCurrentPeriod = {
+      ...period,
+      timezone: 'UTC',
+      timezoneSource: 'FALLBACK_UTC',
+    };
     expect(timezoneText(fallback)).toContain('暂按 UTC');
   });
 
@@ -425,9 +429,9 @@ describe('写入前的本地校验（不代替服务端校验）', () => {
   });
 
   it('周期起点必须晚于终点时报错', () => {
-    expect(validateTargetInput({ ...base, periodStart: '2026-03-01', periodEnd: '2026-01-01' }).join()).toContain(
-      '不能晚于',
-    );
+    expect(
+      validateTargetInput({ ...base, periodStart: '2026-03-01', periodEnd: '2026-01-01' }).join(),
+    ).toContain('不能晚于');
   });
 
   it('按月分解时起点必须是 1 日、终点必须是月末日', () => {
@@ -455,6 +459,8 @@ describe('写入前的本地校验（不代替服务端校验）', () => {
   });
 
   it('按权重分解必须给权重', () => {
-    expect(validateTargetInput({ ...base, decompositionMethod: 'WEIGHTED' }).join()).toContain('权重');
+    expect(validateTargetInput({ ...base, decompositionMethod: 'WEIGHTED' }).join()).toContain(
+      '权重',
+    );
   });
 });

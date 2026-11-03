@@ -312,15 +312,29 @@ class NotificationInboxIntegrationTest extends IdentityIntegrationTestBase {
     assertThat(types.get("types").get(0).asText()).as("按词表顺序").isEqualTo("STOCKOUT");
     assertThat(types.get("types").get(1).asText()).isEqualTo("MESSAGE");
 
+    // 🔴 按**成员**过滤，不按租户：同一个默认租户里还住着别的测试用例的成员
+    // （租户隔离用例会在这个租户里订阅 TIMELINESS_OVERDUE），按租户查会把
+    // 别人的行算进来 —— 那不是「我的订阅落库了」的证据。
+    // 按租户查会让本用例的结论依赖 surefire 的类执行顺序，属于顺序依赖的假红。
+    UUID membership = identity.resolve("Bearer " + token).membershipId();
     assertThat(
-            rowsIn(tenant, "select notification_type from notification_type_subscription"))
+            rowsIn(
+                tenant,
+                "select notification_type from notification_type_subscription"
+                    + " where membership_id = ?::uuid",
+                membership))
         .as("订阅真的落库")
         .hasSize(2);
 
     // 再设一次：整体替换，不是叠加。
     setSubscriptions(token, List.of("SYNC_FAILURE"));
     assertThat(subscriptions(token).get("types")).hasSize(1);
-    assertThat(rowsIn(tenant, "select notification_type from notification_type_subscription"))
+    assertThat(
+            rowsIn(
+                tenant,
+                "select notification_type from notification_type_subscription"
+                    + " where membership_id = ?::uuid",
+                membership))
         .as("整体替换：旧的两行应当没了")
         .hasSize(1);
   }

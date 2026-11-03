@@ -44,7 +44,11 @@ export const STATUSES = ['ACTIVE', 'RETIRED'] as const;
 export const TERM_KINDS = ['GENERAL', 'BRAND', 'CATEGORY', 'SPELLING'] as const;
 
 /** 🔴 带词条集合的规则类型：违禁词 / 极限词 / 侵权词。 */
-export const WORD_RULE_TYPES = ['PROHIBITED_WORD', 'SUPERLATIVE_WORD', 'INFRINGEMENT_WORD'] as const;
+export const WORD_RULE_TYPES = [
+  'PROHIBITED_WORD',
+  'SUPERLATIVE_WORD',
+  'INFRINGEMENT_WORD',
+] as const;
 
 /** 规则类型筛选的可选项。 */
 export const RULE_TYPE_OPTIONS = [
@@ -608,10 +612,7 @@ export function isWordRuleType(code: string | null | undefined): boolean {
  * <p>没有结束时刻 ⇒ 显示「一直有效（直到下一版接替）」，**不是**空白 ——
  * 空白会被读成「这个版本没定」。
  */
-export function windowText(
-  from: string | null | undefined,
-  to: string | null | undefined,
-): string {
+export function windowText(from: string | null | undefined, to: string | null | undefined): string {
   const start = from ? new Date(from).toLocaleString('zh-CN') : '未声明';
   if (!to) return `${start} 起 · 一直有效（直到下一版接替）`;
   return `${start} 起 · ${new Date(to).toLocaleString('zh-CN')} 止`;

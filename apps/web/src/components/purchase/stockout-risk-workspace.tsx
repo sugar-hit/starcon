@@ -204,9 +204,7 @@ export function StockoutRiskWorkspace() {
         </div>
       )}
 
-      {data?.note && (
-        <p className="text-muted-foreground text-xs">{data.note}</p>
-      )}
+      {data?.note && <p className="text-muted-foreground text-xs">{data.note}</p>}
 
       <SectionCard title="筛选">
         <div className="flex flex-wrap items-end gap-3">
@@ -523,11 +521,7 @@ function VelocitySection({
         </label>
         <label className="flex flex-col gap-1 text-sm">
           <span className="text-muted-foreground">SKU 编码</span>
-          <Input
-            value={skuCode}
-            onChange={(e) => setSkuCode(e.target.value)}
-            className="w-40"
-          />
+          <Input value={skuCode} onChange={(e) => setSkuCode(e.target.value)} className="w-40" />
         </label>
         <label className="flex flex-col gap-1 text-sm">
           <span className="text-muted-foreground">日均销量</span>

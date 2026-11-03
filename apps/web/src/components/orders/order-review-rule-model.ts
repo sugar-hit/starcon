@@ -267,7 +267,8 @@ export function effectiveText(rule: {
 }): string {
   if (rule.status === 'DRAFT') return '草稿（不参与判定）';
   if (rule.status === 'DISABLED') return '已停用（不参与判定）';
-  if (rule.effectiveNow) return rule.effectiveTo ? `生效中，至 ${rule.effectiveTo}` : '生效中，长期有效';
+  if (rule.effectiveNow)
+    return rule.effectiveTo ? `生效中，至 ${rule.effectiveTo}` : '生效中，长期有效';
   return `已生效但不在生效期内（${rule.effectiveFrom} 起${rule.effectiveTo ? ` 至 ${rule.effectiveTo}` : ''}）`;
 }
 
@@ -316,11 +317,12 @@ export function ruleConditionSummary(condition: {
 }): string {
   const op = OPERATOR_LABELS[condition.operator] ?? condition.operator;
   const dim = DIMENSION_LABELS[condition.dimension] ?? condition.dimension;
-  const value = condition.operator === 'IN' || condition.operator === 'NOT_IN'
-    ? (condition.valueSet ?? []).filter((v): v is string => !!v).join(' / ')
-    : condition.valueNumeric === null || condition.valueNumeric === undefined
-      ? '（未填阈值）'
-      : String(condition.valueNumeric);
+  const value =
+    condition.operator === 'IN' || condition.operator === 'NOT_IN'
+      ? (condition.valueSet ?? []).filter((v): v is string => !!v).join(' / ')
+      : condition.valueNumeric === null || condition.valueNumeric === undefined
+        ? '（未填阈值）'
+        : String(condition.valueNumeric);
   return `${dim} ${op} ${value}`;
 }
 
@@ -333,7 +335,10 @@ export function ruleConditionSummary(condition: {
  */
 export function hitConditionLines(condition: HitCondition): { field: string; value: string }[] {
   return [
-    { field: condition.actualField || '（未取到字段）', value: condition.actualValue || '（无值）' },
+    {
+      field: condition.actualField || '（未取到字段）',
+      value: condition.actualValue || '（无值）',
+    },
   ];
 }
 
@@ -362,7 +367,10 @@ export function decisionHeadline(decision: ReviewDecision): string {
 
 /** 判定汇总行：几条参与、几条命中、几条强制。 */
 export function decisionCounts(decision: ReviewDecision): string {
-  const parts = [`参与判定 ${decision.consideredRuleCount} 条`, `命中 ${decision.matchedRuleCount} 条`];
+  const parts = [
+    `参与判定 ${decision.consideredRuleCount} 条`,
+    `命中 ${decision.matchedRuleCount} 条`,
+  ];
   if (decision.forcedRuleCount > 0) parts.push(`强制转人工 ${decision.forcedRuleCount} 条`);
   if (decision.winningRuleCode) parts.push(`决定规则 ${decision.winningRuleCode}`);
   return parts.join(' · ');
@@ -374,7 +382,9 @@ export function decisionCounts(decision: ReviewDecision): string {
  * <p>零条件的规则不能启用（后端延迟约束触发器也会挡）：零条件的 ANY 规则会放行
  * 每一张单，ALL 规则则永不命中 —— 两者都不是可用的规则。
  */
-export function canActivate(rule: ReviewRuleRow | { status: string; conditionCount: number }): boolean {
+export function canActivate(
+  rule: ReviewRuleRow | { status: string; conditionCount: number },
+): boolean {
   return rule.status !== 'ACTIVE' && rule.conditionCount > 0;
 }
 

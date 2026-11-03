@@ -78,7 +78,9 @@ export function PlatformOpsWorkspace() {
   const [thresholds, setThresholds] = useState<PlatformOpsThresholdView[]>([]);
   const [capabilities, setCapabilities] = useState<PlatformOpsCapabilities | null>(null);
 
-  const [editing, setEditing] = useState<{ metricCode: string; draft: ThresholdDraft } | null>(null);
+  const [editing, setEditing] = useState<{ metricCode: string; draft: ThresholdDraft } | null>(
+    null,
+  );
 
   const readable = session.permissions.includes('identity.platform_ops.read');
   const canAlert = session.permissions.includes('identity.platform_ops.alert');
@@ -110,7 +112,8 @@ export function PlatformOpsWorkspace() {
 
     const problems: string[] = [];
     if (head[0].status === 'rejected') problems.push(`健康看板汇总（${message(head[0].reason)}）`);
-    if (head[1].status === 'rejected') problems.push(`逐租户健康数据（${message(head[1].reason)}）`);
+    if (head[1].status === 'rejected')
+      problems.push(`逐租户健康数据（${message(head[1].reason)}）`);
 
     const rest = await Promise.allSettled([
       api<PlatformOpsAlertPage>('identity/platform-ops/alerts?limit=100&offset=0'),
@@ -205,8 +208,8 @@ export function PlatformOpsWorkspace() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-copy-13 text-muted-foreground">
           跨租户运维视图<b>只看技术指标</b>：在线状态、错误率、任务积压、队列深度、容量占用、
-          响应延迟与可用性。<b>不展示任何租户的客户、订单或金额单据</b>；
-          成本是容量 / 调用量口径的<b>估算数量</b>，不是金额。
+          响应延迟与可用性。<b>不展示任何租户的客户、订单或金额单据</b>； 成本是容量 / 调用量口径的
+          <b>估算数量</b>，不是金额。
         </p>
         <Button variant="ghost" size="sm" onClick={() => void load()}>
           <RefreshCw className="h-4 w-4" />
@@ -296,13 +299,13 @@ export function PlatformOpsWorkspace() {
                       <p className="text-copy-12 text-muted-foreground mt-1">
                         <span className="font-mono">{row.tenantCode}</span>
                       </p>
-                      <p className="text-copy-12 text-muted-foreground mt-1">{describeHealth(row)}</p>
+                      <p className="text-copy-12 text-muted-foreground mt-1">
+                        {describeHealth(row)}
+                      </p>
                     </div>
                     <div className="text-right">
                       <p className="text-copy-12 text-muted-foreground">成本估算</p>
-                      <p className="text-copy-14 font-medium">
-                        {formatQuantity(row.costEstimate)}
-                      </p>
+                      <p className="text-copy-14 font-medium">{formatQuantity(row.costEstimate)}</p>
                       <p className="text-copy-12 text-muted-foreground">
                         最近采样 {formatTimestamp(row.lastSampleAt)}
                       </p>
@@ -350,7 +353,8 @@ export function PlatformOpsWorkspace() {
                       </Badge>
                     </p>
                     <p className="text-copy-12 text-muted-foreground mt-1">
-                      {describeAlert(row)} · 采集方 {SERVICE_LABELS[row.serviceCode] ?? row.serviceCode}
+                      {describeAlert(row)} · 采集方{' '}
+                      {SERVICE_LABELS[row.serviceCode] ?? row.serviceCode}
                     </p>
                     <p className="text-copy-12 text-muted-foreground mt-1">
                       触发于 {formatTimestamp(row.raisedAt)}
@@ -409,8 +413,9 @@ export function PlatformOpsWorkspace() {
                   </p>
                   <p className="text-copy-12 text-muted-foreground mt-1">{describeMetric(row)}</p>
                   <p className="text-copy-12 text-muted-foreground mt-1">
-                    单位 {UNIT_LABELS[row.unit] ?? row.unit} · 采集窗口 {formatTimestamp(row.windowStart)}{' '}
-                    ~ {formatTimestamp(row.windowEnd)} · 来源 {row.source}
+                    单位 {UNIT_LABELS[row.unit] ?? row.unit} · 采集窗口{' '}
+                    {formatTimestamp(row.windowStart)} ~ {formatTimestamp(row.windowEnd)} · 来源{' '}
+                    {row.source}
                   </p>
                 </li>
               ))}
@@ -425,7 +430,8 @@ export function PlatformOpsWorkspace() {
                 上一页
               </Button>
               <span className="text-copy-12 text-muted-foreground">
-                第 {Math.floor(metricOffset / PAGE_SIZE) + 1} / {Math.max(Math.ceil(metricTotal / PAGE_SIZE), 1)} 页
+                第 {Math.floor(metricOffset / PAGE_SIZE) + 1} /{' '}
+                {Math.max(Math.ceil(metricTotal / PAGE_SIZE), 1)} 页
               </span>
               <Button
                 size="sm"
@@ -462,7 +468,7 @@ export function PlatformOpsWorkspace() {
                 <div>
                   <p className="text-copy-14 font-medium">
                     {METRIC_LABELS[row.metricCode] ?? row.metricCode}
-                    <span className="text-muted-foreground ml-2 font-mono text-copy-12">
+                    <span className="text-muted-foreground text-copy-12 ml-2 font-mono">
                       {row.metricCode}
                     </span>
                   </p>
@@ -503,7 +509,10 @@ export function PlatformOpsWorkspace() {
           <p className="text-copy-14 font-medium">能力声明</p>
           <ul className="space-y-1">
             {capabilities.dimensions.map((dimension) => (
-              <li key={dimension.dimension} className="text-copy-12 flex flex-wrap items-center gap-2">
+              <li
+                key={dimension.dimension}
+                className="text-copy-12 flex flex-wrap items-center gap-2"
+              >
                 <Badge tone={dimension.available ? 'success' : 'warning'}>
                   {dimension.available ? '已交付' : '未交付'}
                 </Badge>
@@ -531,7 +540,10 @@ export function PlatformOpsWorkspace() {
               <input
                 value={editing.draft.warnThreshold}
                 onChange={(e) =>
-                  setEditing({ ...editing, draft: { ...editing.draft, warnThreshold: e.target.value } })
+                  setEditing({
+                    ...editing,
+                    draft: { ...editing.draft, warnThreshold: e.target.value },
+                  })
                 }
                 className="border-border bg-card mt-1 h-8 w-28 rounded-md border px-2 outline-none"
               />
@@ -554,7 +566,10 @@ export function PlatformOpsWorkspace() {
               <select
                 value={editing.draft.comparison}
                 onChange={(e) =>
-                  setEditing({ ...editing, draft: { ...editing.draft, comparison: e.target.value } })
+                  setEditing({
+                    ...editing,
+                    draft: { ...editing.draft, comparison: e.target.value },
+                  })
                 }
                 className="border-border bg-card mt-1 h-8 w-28 rounded-md border px-2 outline-none"
               >

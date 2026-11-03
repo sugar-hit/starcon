@@ -202,9 +202,7 @@ export function mergeServiceResults(outcomes: ServiceSearchOutcome[]): {
     }
   }
 
-  const groups = [...byDomain.values()].sort(
-    (a, b) => domainRank(a.domain) - domainRank(b.domain),
-  );
+  const groups = [...byDomain.values()].sort((a, b) => domainRank(a.domain) - domainRank(b.domain));
   return {
     groups,
     unavailableDomains: [...unavailable].sort(),

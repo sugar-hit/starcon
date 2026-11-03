@@ -82,10 +82,7 @@ export function AdBulkOperationsWorkspace() {
     let alive = true;
     void (async () => {
       try {
-        const [caps, opts] = await Promise.all([
-          fetchBulkCapabilities(),
-          fetchBulkOptions(),
-        ]);
+        const [caps, opts] = await Promise.all([fetchBulkCapabilities(), fetchBulkOptions()]);
         if (!alive) return;
         setCapabilities(caps);
         setOptions(opts);
@@ -214,8 +211,8 @@ export function AdBulkOperationsWorkspace() {
         <p className="text-muted-foreground max-w-4xl text-sm">
           跨活动批量调整：预算增减、竞价调整、状态切换、结束时间设置。
           <strong>「按筛选结果全选」在服务端完成</strong> —— 页面只递筛选条件，
-          拿回一页目标与一个命中计数，不把整张表拉回浏览器再循环。
-          提交后是一个<strong>异步任务</strong>，逐条结果回头查。
+          拿回一页目标与一个命中计数，不把整张表拉回浏览器再循环。 提交后是一个
+          <strong>异步任务</strong>，逐条结果回头查。
         </p>
       </header>
 
@@ -230,7 +227,8 @@ export function AdBulkOperationsWorkspace() {
           <p className="text-muted-foreground text-sm">正在加载护栏上限…</p>
         )}
         <p className="text-muted-foreground text-xs">
-          🔴 超上限时<strong>整批拒绝</strong>（一条都不执行），不是逐条拒绝、也不是跳过超限的那几条。
+          🔴 超上限时<strong>整批拒绝</strong>
+          （一条都不执行），不是逐条拒绝、也不是跳过超限的那几条。
         </p>
       </Section>
 
@@ -352,7 +350,10 @@ export function AdBulkOperationsWorkspace() {
                 </thead>
                 <tbody>
                   {page.map((row) => (
-                    <tr key={`${row.targetType}-${row.groupId ?? row.campaignId}`} className="border-t">
+                    <tr
+                      key={`${row.targetType}-${row.groupId ?? row.campaignId}`}
+                      className="border-t"
+                    >
                       <td className="py-1">{bulkTargetLabel(row.targetType)}</td>
                       <td className="py-1">{row.campaignName}</td>
                       <td className="py-1">{row.status}</td>
@@ -510,12 +511,12 @@ export function AdBulkOperationsWorkspace() {
               )}
             </p>
             <p className="text-sm">
-              总预算净增量 <strong>{preview.totalBudgetDelta}</strong>，
-              绝对敞口 <strong>{preview.totalBudgetDeltaAbs}</strong>
+              总预算净增量 <strong>{preview.totalBudgetDelta}</strong>， 绝对敞口{' '}
+              <strong>{preview.totalBudgetDeltaAbs}</strong>
               {preview.totalBidDelta !== 0 || preview.totalBidDeltaAbs !== 0 ? (
                 <>
-                  ；总竞价净增量 <strong>{preview.totalBidDelta}</strong>，
-                  绝对敞口 <strong>{preview.totalBidDeltaAbs}</strong>
+                  ；总竞价净增量 <strong>{preview.totalBidDelta}</strong>， 绝对敞口{' '}
+                  <strong>{preview.totalBidDeltaAbs}</strong>
                 </>
               ) : null}
             </p>
@@ -585,8 +586,8 @@ export function AdBulkOperationsWorkspace() {
       <Section title="批量任务（异步）">
         {submission ? (
           <p className="text-sm">
-            已受理任务 <strong>{submission.task.id}</strong>，
-            状态 <strong className={bulkTaskStatusTone(submission.task.status)}>
+            已受理任务 <strong>{submission.task.id}</strong>， 状态{' '}
+            <strong className={bulkTaskStatusTone(submission.task.status)}>
               {bulkTaskStatusLabel(submission.task.status)}
             </strong>
             。{submission.note}
@@ -716,7 +717,9 @@ export function AdBulkOperationsWorkspace() {
                 <tr key={dim.dimension} className="border-t">
                   <td className="py-1">{dim.dimension}</td>
                   <td className="py-1 text-xs">{dim.description}</td>
-                  <td className={`py-1 ${dim.available ? 'text-emerald-600' : 'text-muted-foreground'}`}>
+                  <td
+                    className={`py-1 ${dim.available ? 'text-emerald-600' : 'text-muted-foreground'}`}
+                  >
                     {dim.available ? '已交付' : '未交付'}
                   </td>
                   <td className="text-muted-foreground py-1 text-xs">

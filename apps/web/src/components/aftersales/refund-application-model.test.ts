@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import type { RefundBalance, RefundDetail, RefundPolicyView } from '../../../../../packages/api-contracts/src/index';
+import type {
+  RefundBalance,
+  RefundDetail,
+  RefundPolicyView,
+} from '../../../../../packages/api-contracts/src/index';
 import {
   actionButton,
   amount,
@@ -50,7 +54,10 @@ function balance(over: Partial<RefundBalance> = {}): RefundBalance {
 
 describe('可退余额那一格', () => {
   it('可退 0 与可退为负必须分开显示 —— 前者还能退，后者已经超了', () => {
-    expect(availableText(balance({ availableAmount: 60 }))).toEqual({ value: '60.00', tone: 'success' });
+    expect(availableText(balance({ availableAmount: 60 }))).toEqual({
+      value: '60.00',
+      tone: 'success',
+    });
     expect(availableText(balance({ availableAmount: 0 }))).toEqual({
       value: '额度已退光',
       tone: 'warning',
@@ -114,10 +121,12 @@ describe('审批规则 fail-closed', () => {
   });
 
   it('配了阈值后按阈值说话', () => {
-    expect(policyText(policy({ policySource: 'CONFIGURED', dualApprovalThreshold: 100 })).label)
-      .toBe('金额 ≥ 100.00 USD 需两人签字，低于则单签');
-    expect(policyText(policy({ policySource: 'CONFIGURED', dualApprovalThreshold: 0 })).label)
-      .toBe('任何金额都要两人签字');
+    expect(
+      policyText(policy({ policySource: 'CONFIGURED', dualApprovalThreshold: 100 })).label,
+    ).toBe('金额 ≥ 100.00 USD 需两人签字，低于则单签');
+    expect(policyText(policy({ policySource: 'CONFIGURED', dualApprovalThreshold: 0 })).label).toBe(
+      '任何金额都要两人签字',
+    );
   });
 });
 
@@ -179,10 +188,22 @@ describe('其它展示口径', () => {
   });
 
   it('动作按钮不可用时把理由带出来（按钮变灰而不给理由会让人以为系统坏了）', () => {
-    expect(actionButton({ label: '交财务执行', allowed: false, blockingReason: '只有已批可派发', unavailableReason: null }))
-      .toEqual({ label: '交财务执行', disabled: true, reason: '只有已批可派发' });
-    expect(actionButton({ label: '真实付款执行', allowed: false, blockingReason: null, unavailableReason: '12 财务未交付' }))
-      .toEqual({ label: '真实付款执行', disabled: true, reason: '12 财务未交付' });
+    expect(
+      actionButton({
+        label: '交财务执行',
+        allowed: false,
+        blockingReason: '只有已批可派发',
+        unavailableReason: null,
+      }),
+    ).toEqual({ label: '交财务执行', disabled: true, reason: '只有已批可派发' });
+    expect(
+      actionButton({
+        label: '真实付款执行',
+        allowed: false,
+        blockingReason: null,
+        unavailableReason: '12 财务未交付',
+      }),
+    ).toEqual({ label: '真实付款执行', disabled: true, reason: '12 财务未交付' });
     expect(actionButton(null).disabled).toBe(true);
   });
 
@@ -216,7 +237,11 @@ describe('其它展示口径', () => {
       executionNote: '',
     });
     expect(rows).toEqual([
-      { scope: '真实付款执行与原收款关联', owner: '12.2.2.2 付款执行', reason: '12 财务整卷未交付。' },
+      {
+        scope: '真实付款执行与原收款关联',
+        owner: '12.2.2.2 付款执行',
+        reason: '12 财务整卷未交付。',
+      },
     ]);
   });
 });

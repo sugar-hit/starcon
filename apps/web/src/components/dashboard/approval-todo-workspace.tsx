@@ -188,8 +188,8 @@ export function ApprovalTodoWorkspace() {
         <section className="space-y-2">
           <h2 className="text-copy-15 font-medium">能力声明</h2>
           <p className="text-copy-12 text-muted-foreground">
-            数据来源 {capabilities.dataSource} · 写入归属 {capabilities.ownerModule} ·
-            本模块 {capabilities.module}
+            数据来源 {capabilities.dataSource} · 写入归属 {capabilities.ownerModule} · 本模块{' '}
+            {capabilities.module}
           </p>
           <ul className="space-y-1">
             {capabilities.filters.map((filter) => (
@@ -227,7 +227,7 @@ export function ApprovalTodoWorkspace() {
             {blockedActions(capabilities).map((action) => (
               <li
                 key={action.code}
-                className="border-warning/40 bg-warning/5 rounded-md border p-2 text-copy-12"
+                className="border-warning/40 bg-warning/5 text-copy-12 rounded-md border p-2"
               >
                 <Badge tone="warning">不可用</Badge>
                 <span className="ml-2">
@@ -245,19 +245,19 @@ export function ApprovalTodoWorkspace() {
         <section className="space-y-2">
           <h2 className="text-copy-15 font-medium">审批概览</h2>
           <div className="flex flex-wrap gap-2">
-            <span className="rounded-md border px-3 py-2 text-copy-12">
+            <span className="text-copy-12 rounded-md border px-3 py-2">
               待我审批 <b className="ml-1">{summary.pendingTotal}</b> 条
             </span>
-            <span className="rounded-md border px-3 py-2 text-copy-12">
+            <span className="text-copy-12 rounded-md border px-3 py-2">
               当前筛选命中 <b className="ml-1">{summary.filteredTotal}</b> 条
             </span>
-            <span className="rounded-md border px-3 py-2 text-copy-12">
+            <span className="text-copy-12 rounded-md border px-3 py-2">
               最久停留 <b className="ml-1">{formatDwell(summary.longestDwellSeconds)}</b>
             </span>
-            <span className="rounded-md border px-3 py-2 text-copy-12">
+            <span className="text-copy-12 rounded-md border px-3 py-2">
               已超时 <b className="ml-1">{summary.overdueTotal}</b> 条
             </span>
-            <span className="border-warning/40 bg-warning/5 rounded-md border px-3 py-2 text-copy-12">
+            <span className="border-warning/40 bg-warning/5 text-copy-12 rounded-md border px-3 py-2">
               判不了超时 <b className="ml-1">{summary.unconfiguredTimeoutTotal}</b> 条
               <span className="text-muted-foreground ml-2">
                 （这些单据的节点没配时限，既不算超时也不算没超时）
@@ -311,10 +311,10 @@ export function ApprovalTodoWorkspace() {
 
       {/* ---------------- 筛选 ---------------- */}
       <section className="flex flex-wrap items-end gap-3">
-        <label className="flex flex-col gap-1 text-copy-12">
+        <label className="text-copy-12 flex flex-col gap-1">
           <span className="text-muted-foreground">金额下限</span>
           <input
-            className="border rounded px-2 py-1 text-copy-12"
+            className="text-copy-12 rounded border px-2 py-1"
             value={minAmount}
             inputMode="decimal"
             onChange={(e) => {
@@ -324,10 +324,10 @@ export function ApprovalTodoWorkspace() {
             placeholder="不限"
           />
         </label>
-        <label className="flex flex-col gap-1 text-copy-12">
+        <label className="text-copy-12 flex flex-col gap-1">
           <span className="text-muted-foreground">金额上限</span>
           <input
-            className="border rounded px-2 py-1 text-copy-12"
+            className="text-copy-12 rounded border px-2 py-1"
             value={maxAmount}
             inputMode="decimal"
             onChange={(e) => {
@@ -337,10 +337,10 @@ export function ApprovalTodoWorkspace() {
             placeholder="不限"
           />
         </label>
-        <label className="flex flex-col gap-1 text-copy-12">
+        <label className="text-copy-12 flex flex-col gap-1">
           <span className="text-muted-foreground">停留时长</span>
           <select
-            className="border rounded px-2 py-1 text-copy-12"
+            className="text-copy-12 rounded border px-2 py-1"
             value={dwell}
             onChange={(e) => {
               setDwell(e.target.value);
@@ -354,7 +354,7 @@ export function ApprovalTodoWorkspace() {
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-copy-12">
+        <label className="text-copy-12 flex flex-col gap-1">
           <span className="text-muted-foreground">只看已超时</span>
           <span className="flex items-center gap-1">
             <input
@@ -373,10 +373,10 @@ export function ApprovalTodoWorkspace() {
             )}
           </span>
         </label>
-        <label className="flex flex-col gap-1 text-copy-12">
+        <label className="text-copy-12 flex flex-col gap-1">
           <span className="text-muted-foreground">排序</span>
           <select
-            className="border rounded px-2 py-1 text-copy-12"
+            className="text-copy-12 rounded border px-2 py-1"
             value={sort}
             onChange={(e) => {
               setSort(e.target.value);
@@ -424,7 +424,7 @@ export function ApprovalTodoWorkspace() {
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="w-full text-copy-12">
+              <table className="text-copy-12 w-full">
                 <thead className="text-muted-foreground text-left">
                   <tr>
                     <th className="p-2">单据号</th>
@@ -477,7 +477,11 @@ export function ApprovalTodoWorkspace() {
                         <td className="p-2">
                           <Badge
                             tone={
-                              state === 'OVERDUE' ? 'danger' : state === 'WITHIN' ? 'neutral' : 'warning'
+                              state === 'OVERDUE'
+                                ? 'danger'
+                                : state === 'WITHIN'
+                                  ? 'neutral'
+                                  : 'warning'
                             }
                           >
                             {timeoutLabel(item)}
@@ -509,7 +513,7 @@ export function ApprovalTodoWorkspace() {
                 </tbody>
               </table>
             </div>
-            <div className="flex items-center justify-between text-copy-12">
+            <div className="text-copy-12 flex items-center justify-between">
               <span className="text-muted-foreground">
                 第 {current + 1} / {pageCount} 页 · 共 {total} 条待审批
               </span>
@@ -573,7 +577,7 @@ function BucketGroup({
               key={bucket.code}
               type="button"
               onClick={() => onPick(active === bucket.code ? '' : bucket.code)}
-              className={`rounded-md border px-3 py-2 text-left text-copy-12 ${
+              className={`text-copy-12 rounded-md border px-3 py-2 text-left ${
                 active === bucket.code ? 'border-primary bg-primary/5' : ''
               }`}
             >

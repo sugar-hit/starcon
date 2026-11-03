@@ -151,10 +151,7 @@ it('写动作的 POST / PUT 形状被放行，且真的转发到 8087', async ()
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
   vi.stubGlobal('fetch', fetcher);
 
-  for (const path of [
-    'finance/reconciliation-tasks',
-    `finance/reconciliation-tasks/${ID}/match`,
-  ]) {
+  for (const path of ['finance/reconciliation-tasks', `finance/reconciliation-tasks/${ID}/match`]) {
     const response = await POST(request(path, 'POST'), {
       params: Promise.resolve({ path: path.split('/') }),
     });

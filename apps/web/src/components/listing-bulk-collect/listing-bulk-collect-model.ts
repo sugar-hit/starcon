@@ -96,11 +96,15 @@ export async function fetchBulkResults(
 ): Promise<BulkCollectResultPage> {
   const query = new URLSearchParams({ page: String(page), size: String(size) });
   if (state) query.set('state', state);
-  return api<BulkCollectResultPage>(`channel/listing-bulk-collects/${taskId}/results?${query.toString()}`);
+  return api<BulkCollectResultPage>(
+    `channel/listing-bulk-collects/${taskId}/results?${query.toString()}`,
+  );
 }
 
 /** 发起一次批量采集（只建任务；执行是另一个动作）。 */
-export async function startBulkCollect(payload: StartBulkCollectRequest): Promise<BulkCollectTaskRow> {
+export async function startBulkCollect(
+  payload: StartBulkCollectRequest,
+): Promise<BulkCollectTaskRow> {
   return api<BulkCollectTaskRow>('channel/listing-bulk-collects', 'POST', payload);
 }
 
@@ -179,7 +183,9 @@ export function bulkStateLabel(state: string): string {
   }
 }
 
-export function bulkStateTone(state: string): 'success' | 'warning' | 'danger' | 'info' | 'neutral' {
+export function bulkStateTone(
+  state: string,
+): 'success' | 'warning' | 'danger' | 'info' | 'neutral' {
   switch (state) {
     case 'SUCCEEDED':
       return 'success';
@@ -335,8 +341,10 @@ export function unavailableDimensions(
 
 /** 空态文案：还没有批量采集任务时显示什么。 */
 export function emptyTasksMessage(): string {
-  return '还没有批量采集任务。选一个平台，填分类页 URL 或关键词 + 页数范围，'
-    + '点「开始采集」就会真的去翻那些页面、把商品抓成采集草稿。';
+  return (
+    '还没有批量采集任务。选一个平台，填分类页 URL 或关键词 + 页数范围，' +
+    '点「开始采集」就会真的去翻那些页面、把商品抓成采集草稿。'
+  );
 }
 
 /** 空态文案：白名单为空时显示什么（运维没配白名单也是一种状态）。 */

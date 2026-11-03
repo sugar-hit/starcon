@@ -1,23 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  Badge,
-  Button,
-  EmptyState,
-  Input,
-  PageHeader,
-  SectionCard,
-} from '@starcon/ui';
-import {
-  History,
-  Loader2,
-  RefreshCw,
-  RotateCcw,
-  Send,
-  Square,
-  TriangleAlert,
-} from 'lucide-react';
+import { Badge, Button, EmptyState, Input, PageHeader, SectionCard } from '@starcon/ui';
+import { History, Loader2, RefreshCw, RotateCcw, Send, Square, TriangleAlert } from 'lucide-react';
 import {
   afterSourceLabel,
   actionSummary,
@@ -177,7 +162,7 @@ export function ContentWritebackWorkspace() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center gap-2 py-16 text-muted-foreground">
+      <div className="text-muted-foreground flex items-center justify-center gap-2 py-16">
         <Loader2 className="size-4 animate-spin" />
         <span className="text-label-13">正在加载内容回写…</span>
       </div>
@@ -188,7 +173,7 @@ export function ContentWritebackWorkspace() {
     return (
       <SectionCard title="内容回写">
         <EmptyState
-          icon={<TriangleAlert className="size-8 text-destructive" />}
+          icon={<TriangleAlert className="text-destructive size-8" />}
           title="内容回写加载失败"
           description={error}
           action={
@@ -219,10 +204,8 @@ export function ContentWritebackWorkspace() {
       {/* ---- 🔴 通道归属：内容 / 价格 / 库存是三条独立通道 ---- */}
       {caps && foreignChannels(caps).length > 0 && (
         <div className="border-warning/40 bg-warning/5 rounded-lg border px-4 py-3">
-          <p className="text-warning mb-1 text-label-13 font-medium">
-            内容回写不触碰价格与库存
-          </p>
-          <ul className="text-muted-foreground space-y-1 text-label-12">
+          <p className="text-warning text-label-13 mb-1 font-medium">内容回写不触碰价格与库存</p>
+          <ul className="text-muted-foreground text-label-12 space-y-1">
             {foreignChannels(caps).map((c) => (
               <li key={c.channel}>
                 <span className="text-foreground">{c.label}</span>：归 {c.ownerModule} —— {c.note}
@@ -235,8 +218,8 @@ export function ContentWritebackWorkspace() {
 
       {caps && unavailableDimensions(caps).length > 0 && (
         <div className="border-warning/40 bg-warning/5 rounded-lg border px-4 py-3">
-          <p className="text-warning mb-1 text-label-13 font-medium">部分能力未接入</p>
-          <ul className="text-muted-foreground space-y-1 text-label-12">
+          <p className="text-warning text-label-13 mb-1 font-medium">部分能力未接入</p>
+          <ul className="text-muted-foreground text-label-12 space-y-1">
             {unavailableDimensions(caps).map((d) => (
               <li key={d.dimension}>
                 <span className="text-foreground">{d.description}</span>
@@ -260,7 +243,7 @@ export function ContentWritebackWorkspace() {
       >
         <div className="space-y-4 px-4 py-4">
           <div>
-            <p className="text-foreground mb-2 text-label-13 font-medium">
+            <p className="text-foreground text-label-13 mb-2 font-medium">
               变更类型
               <span className="text-muted-foreground font-normal">
                 （只有内容通道的字段；价格与库存不在此列）
@@ -276,8 +259,8 @@ export function ContentWritebackWorkspace() {
                   disabled={busy}
                   className={
                     changeTypes.includes(opt.value)
-                      ? 'border-brand bg-brand-soft text-brand rounded-md border px-3 py-1.5 text-label-13'
-                      : 'border-border text-muted-foreground hover:border-foreground/40 hover:text-foreground rounded-md border px-3 py-1.5 text-label-13'
+                      ? 'border-brand bg-brand-soft text-brand text-label-13 rounded-md border px-3 py-1.5'
+                      : 'border-border text-muted-foreground hover:border-foreground/40 hover:text-foreground text-label-13 rounded-md border px-3 py-1.5'
                   }
                 >
                   {opt.label}
@@ -312,10 +295,8 @@ export function ContentWritebackWorkspace() {
 
           {needsOverride && (
             <div className="border-border bg-muted/30 rounded-lg border px-3 py-3">
-              <p className="text-foreground mb-2 text-label-13 font-medium">
-                描述 / A+ 的显式值
-              </p>
-              <p className="text-muted-foreground mb-2 text-label-12">
+              <p className="text-foreground text-label-13 mb-2 font-medium">描述 / A+ 的显式值</p>
+              <p className="text-muted-foreground text-label-12 mb-2">
                 内部内容草稿（4.2.1.2）只有标题 / 卖点 / 图片，<strong>没有描述与 A+</strong>
                 （属 4.2.1.1 刊登编辑器，尚未交付）。所以这两段的改后值只能在这里给；
                 不给值的那条会判「内部无可推送内容」并**不编一个假值**。
@@ -330,15 +311,16 @@ export function ContentWritebackWorkspace() {
                 )}
                 {changeTypes.includes('A_PLUS') && (
                   <Input
-                    placeholder='新的 A+ 模块（JSON 数组文本）'
+                    placeholder="新的 A+ 模块（JSON 数组文本）"
                     value={aPlus}
                     onChange={(e) => setAPlus(e.target.value)}
                   />
                 )}
               </div>
               {missingOverride.length > 0 && (
-                <p className="text-warning mt-2 text-label-12">
-                  还差显式值：{missingOverride.join('、')}。不填也能提交 —— 那些字段会判「内部无可推送内容」。
+                <p className="text-warning text-label-12 mt-2">
+                  还差显式值：{missingOverride.join('、')}。不填也能提交 ——
+                  那些字段会判「内部无可推送内容」。
                 </p>
               )}
             </div>
@@ -375,19 +357,16 @@ export function ContentWritebackWorkspace() {
       </SectionCard>
 
       {/* ---- 一次触发列表 ---- */}
-      <SectionCard
-        title="回写记录"
-        description="每一次触发的总体进度；跳过与成功分开计数。"
-      >
+      <SectionCard title="回写记录" description="每一次触发的总体进度；跳过与成功分开计数。">
         {writebacks.length === 0 ? (
           <EmptyState
-            icon={<TriangleAlert className="size-8 text-muted-foreground" />}
+            icon={<TriangleAlert className="text-muted-foreground size-8" />}
             title="还没有内容回写记录"
             description={emptyWritebacksMessage()}
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-label-13">
+            <table className="text-label-13 w-full text-left">
               <thead className="text-muted-foreground border-border border-b">
                 <tr>
                   <th className="px-4 py-2 font-medium">字段</th>
@@ -410,12 +389,12 @@ export function ContentWritebackWorkspace() {
                     }}
                     className={
                       w.writebackId === activeId
-                        ? 'bg-brand-soft/40 cursor-pointer border-border border-b'
-                        : 'hover:bg-muted/40 cursor-pointer border-border border-b last:border-0'
+                        ? 'bg-brand-soft/40 border-border cursor-pointer border-b'
+                        : 'hover:bg-muted/40 border-border cursor-pointer border-b last:border-0'
                     }
                   >
                     <td className="text-foreground px-4 py-2">{w.changeTypes.join(' / ')}</td>
-                    <td className="text-muted-foreground px-4 py-2 text-label-12">
+                    <td className="text-muted-foreground text-label-12 px-4 py-2">
                       {progressSummary(w)}
                     </td>
                     <td className="px-4 py-2">
@@ -431,7 +410,7 @@ export function ContentWritebackWorkspace() {
                         {triggerStateLabel(w.state)}
                       </Badge>
                     </td>
-                    <td className="text-muted-foreground px-4 py-2 text-label-12">
+                    <td className="text-muted-foreground text-label-12 px-4 py-2">
                       {new Date(w.createdAt).toLocaleString('zh-CN')}
                     </td>
                   </tr>
@@ -510,7 +489,7 @@ export function ContentWritebackWorkspace() {
         >
           <div className="space-y-3 px-4 py-4">
             {(dispatchLines ?? []).length > 0 && (
-              <ul className="text-muted-foreground space-y-1 text-label-12">
+              <ul className="text-muted-foreground text-label-12 space-y-1">
                 {dispatchLines!.map((line, i) => (
                   <li key={i} className="text-foreground">
                     {line}
@@ -518,19 +497,17 @@ export function ContentWritebackWorkspace() {
                 ))}
               </ul>
             )}
-            {lastAction && (
-              <p className="text-muted-foreground text-label-12">{lastAction}</p>
-            )}
+            {lastAction && <p className="text-muted-foreground text-label-12">{lastAction}</p>}
 
             {tasks.length === 0 ? (
               <EmptyState
-                icon={<TriangleAlert className="size-8 text-muted-foreground" />}
+                icon={<TriangleAlert className="text-muted-foreground size-8" />}
                 title="这次回写还没有任务"
                 description="任务在创建回写时按目标 listing 逐条生成；没有任何目标时服务端会直接拒绝，不会建一条空回写。"
               />
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-label-13">
+                <table className="text-label-13 w-full text-left">
                   <thead className="text-muted-foreground border-border border-b">
                     <tr>
                       <th className="px-4 py-2 font-medium">商品</th>
@@ -546,7 +523,7 @@ export function ContentWritebackWorkspace() {
                       <tr key={t.taskId} className="border-border border-b last:border-0">
                         <td className="text-foreground px-4 py-2">
                           {t.title}
-                          <span className="text-muted-foreground block text-label-12">
+                          <span className="text-muted-foreground text-label-12 block">
                             {t.externalItemId}
                           </span>
                         </td>
@@ -556,19 +533,15 @@ export function ContentWritebackWorkspace() {
                         <td className="px-4 py-2">
                           <Badge tone={taskStateTone(t.state)}>{taskStateLabel(t.state)}</Badge>
                           {t.attempts > 0 && (
-                            <span className="text-muted-foreground ml-2 text-label-12">
+                            <span className="text-muted-foreground text-label-12 ml-2">
                               第 {t.attempts} 次
                             </span>
                           )}
                         </td>
-                        <td className="text-muted-foreground px-4 py-2 text-label-12">
-                          {t.operationId ? (
-                            <span title={t.operationId}>已入队列</span>
-                          ) : (
-                            '—'
-                          )}
+                        <td className="text-muted-foreground text-label-12 px-4 py-2">
+                          {t.operationId ? <span title={t.operationId}>已入队列</span> : '—'}
                         </td>
-                        <td className="text-muted-foreground px-4 py-2 text-label-12">
+                        <td className="text-muted-foreground text-label-12 px-4 py-2">
                           {t.failureReason || '—'}
                         </td>
                         <td className="px-4 py-2">
@@ -608,13 +581,13 @@ export function ContentWritebackWorkspace() {
         >
           {changes.length === 0 ? (
             <EmptyState
-              icon={<TriangleAlert className="size-8 text-muted-foreground" />}
+              icon={<TriangleAlert className="text-muted-foreground size-8" />}
               title="这条任务没有字段变更记录"
               description="这不应该发生：任务与它的字段变更是同一次写入落库的。若确实为空，说明数据被绕过了服务层写入。"
             />
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-label-13">
+              <table className="text-label-13 w-full text-left">
                 <thead className="text-muted-foreground border-border border-b">
                   <tr>
                     <th className="px-4 py-2 font-medium">字段</th>
@@ -637,7 +610,7 @@ export function ContentWritebackWorkspace() {
                           >
                             {before.text}
                           </span>
-                          <span className="text-muted-foreground block text-label-12">
+                          <span className="text-muted-foreground text-label-12 block">
                             来源：{c.beforeSource === 'MISSING' ? '无' : '平台侧快照'}
                           </span>
                         </td>
@@ -645,7 +618,7 @@ export function ContentWritebackWorkspace() {
                           <span className="text-foreground break-all">
                             {c.afterValue === '' ? '（空）' : c.afterValue}
                           </span>
-                          <span className="text-muted-foreground block text-label-12">
+                          <span className="text-muted-foreground text-label-12 block">
                             来源：{afterSourceLabel(c.afterSource)}
                           </span>
                         </td>
@@ -662,7 +635,7 @@ export function ContentWritebackWorkspace() {
                             {outcomeLabel(c.outcome)}
                           </Badge>
                           {c.reason && (
-                            <span className="text-muted-foreground mt-1 block text-label-12">
+                            <span className="text-muted-foreground text-label-12 mt-1 block">
                               {c.reason}
                             </span>
                           )}
@@ -677,11 +650,7 @@ export function ContentWritebackWorkspace() {
         </SectionCard>
       )}
 
-      {caps && (
-        <p className="text-muted-foreground text-label-12">
-          {caps.relationNote}
-        </p>
-      )}
+      {caps && <p className="text-muted-foreground text-label-12">{caps.relationNote}</p>}
     </div>
   );
 }

@@ -187,8 +187,7 @@ export function WaybillRedirectWorkspace() {
               {gaps.map((d) => (
                 <Notice key={d.dimension} tone="warning" title={d.description}>
                   {d.source}
-                  <br />
-                  归 <code>{d.ownerModule}</code>；{d.impact}
+                  <br />归 <code>{d.ownerModule}</code>；{d.impact}
                 </Notice>
               ))}
               {gaps.length === 0 && <p className="text-sm">当前没有缺口。</p>}
@@ -364,7 +363,7 @@ export function WaybillRedirectWorkspace() {
                 </thead>
                 <tbody>
                   {page.items.map((row) => (
-                    <tr key={row.id} className="border-b last:border-0 align-top">
+                    <tr key={row.id} className="border-b align-top last:border-0">
                       <td className="p-2 font-medium">{row.redirectNo}</td>
                       <td className="p-2">
                         <div>{row.waybillNo}</div>
@@ -446,8 +445,7 @@ export function WaybillRedirectWorkspace() {
         <Notice tone="info" title="这里没有「发送 / 标记已送达」按钮">
           <BellRing className="mr-1 inline h-4 w-4" />
           买家通知由 15 客户与客服发送与回写状态（跨服务，不直连对方库）。
-          在这里给一个假的「已送达」，客服会以为买家已经收到而不再跟进 ——
-          那比没有通知任务更糟。
+          在这里给一个假的「已送达」，客服会以为买家已经收到而不再跟进 —— 那比没有通知任务更糟。
         </Notice>
 
         {notifications && notifications.items.length > 0 ? (
@@ -464,7 +462,7 @@ export function WaybillRedirectWorkspace() {
               </thead>
               <tbody>
                 {notifications.items.map((t) => (
-                  <tr key={t.id} className="border-b last:border-0 align-top">
+                  <tr key={t.id} className="border-b align-top last:border-0">
                     <td className="p-2 font-medium">{t.notificationNo}</td>
                     <td className="p-2">{t.notificationKindLabel}</td>
                     <td className="p-2">

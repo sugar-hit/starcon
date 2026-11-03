@@ -447,7 +447,11 @@ export function PricingTemplateWorkspace() {
               />
             </FormField>
             <FormField id="pt-name" label="模板名称" required>
-              <Input id="pt-name" value={form.name} onChange={(e) => patch({ name: e.target.value })} />
+              <Input
+                id="pt-name"
+                value={form.name}
+                onChange={(e) => patch({ name: e.target.value })}
+              />
             </FormField>
             <FormField id="pt-stage-field" label="商品阶段" hint="新品与老品用不同模板">
               <Input
@@ -466,7 +470,10 @@ export function PricingTemplateWorkspace() {
                 id="pt-method-field"
                 value={form.baseMethod}
                 onChange={(e) =>
-                  patch({ baseMethod: e.target.value.toUpperCase() as 'COST_PLUS' | 'FIXED_MARGIN' | 'COMPETITOR_FOLLOW' })
+                  patch({
+                    baseMethod: e.target.value.toUpperCase() as
+                      'COST_PLUS' | 'FIXED_MARGIN' | 'COMPETITOR_FOLLOW',
+                  })
                 }
               />
             </FormField>
@@ -499,8 +506,7 @@ export function PricingTemplateWorkspace() {
                 value={form.competitorReferencePrice ?? ''}
                 onChange={(e) =>
                   patch({
-                    competitorReferencePrice:
-                      e.target.value === '' ? null : Number(e.target.value),
+                    competitorReferencePrice: e.target.value === '' ? null : Number(e.target.value),
                   })
                 }
               />
@@ -517,8 +523,8 @@ export function PricingTemplateWorkspace() {
           <div className="border-border mt-4 rounded-md border p-3">
             <p className="text-label-13 font-semibold">口径假设（5.3.1.1 的手工假设机制）</p>
             <p className="text-copy-12 text-muted-foreground mt-1">
-              平台费率 / 物流单价 / 汇率在上游规则模块接管前只能由人填；
-              留空 = 「取不到」，**不是 0**。
+              平台费率 / 物流单价 / 汇率在上游规则模块接管前只能由人填； 留空 = 「取不到」，**不是
+              0**。
             </p>
             <div className="mt-3 grid gap-3 md:grid-cols-5">
               <FormField id="pt-fee-rate" label="平台费率（0.15 = 15%）" hint="5.2.3.1">
@@ -528,7 +534,9 @@ export function PricingTemplateWorkspace() {
                   step="0.01"
                   value={form.platformFeeRate ?? ''}
                   onChange={(e) =>
-                    patch({ platformFeeRate: e.target.value === '' ? null : Number(e.target.value) })
+                    patch({
+                      platformFeeRate: e.target.value === '' ? null : Number(e.target.value),
+                    })
                   }
                 />
               </FormField>
@@ -539,7 +547,9 @@ export function PricingTemplateWorkspace() {
                   step="0.01"
                   value={form.platformFeeFixed ?? ''}
                   onChange={(e) =>
-                    patch({ platformFeeFixed: e.target.value === '' ? null : Number(e.target.value) })
+                    patch({
+                      platformFeeFixed: e.target.value === '' ? null : Number(e.target.value),
+                    })
                   }
                 />
               </FormField>
@@ -576,7 +586,9 @@ export function PricingTemplateWorkspace() {
                   type="number"
                   step="0.0001"
                   value={form.fxRate ?? ''}
-                  onChange={(e) => patch({ fxRate: e.target.value === '' ? null : Number(e.target.value) })}
+                  onChange={(e) =>
+                    patch({ fxRate: e.target.value === '' ? null : Number(e.target.value) })
+                  }
                 />
               </FormField>
             </div>
@@ -650,7 +662,10 @@ export function PricingTemplateWorkspace() {
                             value={adjustment.siteCode ?? ''}
                             onChange={(e) => {
                               const next = [...form.adjustments];
-                              next[index] = { ...adjustment, siteCode: e.target.value.toUpperCase() };
+                              next[index] = {
+                                ...adjustment,
+                                siteCode: e.target.value.toUpperCase(),
+                              };
                               patch({ adjustments: next });
                             }}
                           />
@@ -772,7 +787,10 @@ export function PricingTemplateWorkspace() {
                         }}
                       />
                     </FormField>
-                    <FormField id={`pt-scope-ref-${index}`} label="取值（分类码 / 品牌码 / 站点码）">
+                    <FormField
+                      id={`pt-scope-ref-${index}`}
+                      label="取值（分类码 / 品牌码 / 站点码）"
+                    >
                       <Input
                         id={`pt-scope-ref-${index}`}
                         value={scope.ref}
@@ -786,9 +804,7 @@ export function PricingTemplateWorkspace() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() =>
-                        patch({ scopes: form.scopes.filter((_, i) => i !== index) })
-                      }
+                      onClick={() => patch({ scopes: form.scopes.filter((_, i) => i !== index) })}
                     >
                       移除
                     </Button>
@@ -837,7 +853,12 @@ export function PricingTemplateWorkspace() {
         ) : (
           <div className="space-y-4">
             <div className="grid gap-3 md:grid-cols-4">
-              <FormField id="pt-apply-sku" label="SKU" required error={problem?.field === 'skuId' ? problem.message : undefined}>
+              <FormField
+                id="pt-apply-sku"
+                label="SKU"
+                required
+                error={problem?.field === 'skuId' ? problem.message : undefined}
+              >
                 <Input
                   id="pt-apply-sku"
                   value={applyForm.skuId}
@@ -874,7 +895,9 @@ export function PricingTemplateWorkspace() {
                   step="1"
                   value={applyForm.daysOfCover ?? ''}
                   onChange={(e) =>
-                    patchApply({ daysOfCover: e.target.value === '' ? null : Number(e.target.value) })
+                    patchApply({
+                      daysOfCover: e.target.value === '' ? null : Number(e.target.value),
+                    })
                   }
                 />
               </FormField>
@@ -908,7 +931,9 @@ export function PricingTemplateWorkspace() {
                 </div>
                 <Notice
                   tone={decisionTone(result.decisionReady)}
-                  title={result.decisionReady ? '建议价可用（仍需 5.4.1.1 走调价单）' : '成本不完整'}
+                  title={
+                    result.decisionReady ? '建议价可用（仍需 5.4.1.1 走调价单）' : '成本不完整'
+                  }
                 >
                   {result.decisionReady
                     ? '建议价与毛利率都来自 5.3.1.1 的测算；改价走 5.4.1.1 调价单（含审批与平台回写）。'
@@ -922,7 +947,9 @@ export function PricingTemplateWorkspace() {
                         <Badge tone={adjustmentTone(adjustment.applied)}>
                           {adjustment.applied ? '命中' : '未命中'} · {adjustment.typeLabel}
                         </Badge>
-                        <span className="text-copy-12 text-muted-foreground">{adjustment.reason}</span>
+                        <span className="text-copy-12 text-muted-foreground">
+                          {adjustment.reason}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -951,7 +978,9 @@ export function PricingTemplateWorkspace() {
                 ) : null}
                 {result.calculation ? (
                   <div>
-                    <p className="text-label-13 font-semibold">建议价的依据（5.3.1.1 的利润拆解）</p>
+                    <p className="text-label-13 font-semibold">
+                      建议价的依据（5.3.1.1 的利润拆解）
+                    </p>
                     <div className="mt-2 space-y-1">
                       {result.calculation.waterfall.map((line) => (
                         <div key={line.code} className="flex flex-wrap items-center gap-2">
@@ -974,13 +1003,19 @@ export function PricingTemplateWorkspace() {
       </SectionCard>
 
       {/* ---------------- 应用留痕 ---------------- */}
-      <SectionCard title="应用留痕" description="每次「一键应用」都留一条：哪个模板、算出多少建议价。">
+      <SectionCard
+        title="应用留痕"
+        description="每次「一键应用」都留一条：哪个模板、算出多少建议价。"
+      >
         {applications.length === 0 ? (
           <EmptyState title="还没有应用记录" description="应用一次模板就会在这里留下痕迹。" />
         ) : (
           <div className="space-y-2">
             {applications.map((item) => (
-              <div key={item.id} className="border-border flex flex-wrap items-center gap-2 rounded-md border p-3">
+              <div
+                key={item.id}
+                className="border-border flex flex-wrap items-center gap-2 rounded-md border p-3"
+              >
                 <Badge tone="brand">{item.templateCode}</Badge>
                 <span className="text-copy-12">{item.skuCode ?? item.skuId}</span>
                 <span className="text-copy-12 text-muted-foreground">

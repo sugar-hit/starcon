@@ -75,8 +75,7 @@ function trackingSiblingSites(): string[] {
   return Object.keys(SPEC.paths)
     .filter(
       (path) =>
-        path.startsWith('/channel/logistics-tracking') &&
-        !MODULES.some((m) => path.startsWith(m)),
+        path.startsWith('/channel/logistics-tracking') && !MODULES.some((m) => path.startsWith(m)),
     )
     .map((path) => path.replace(/^\//, '').replace('{id}', ID))
     .filter((path) => !path.includes('{'));
@@ -188,9 +187,10 @@ it('🔴 兄弟车道的白名单条目未被本车道挤掉或污染', async ()
 
   // 10.3.1.1 轨迹查询：与本模块**共用前缀**，最容易被本车道的新条目吃掉
   const trackingSites = trackingSiblingSites();
-  expect(trackingSites.length, '兄弟模块 10.3.1.1 的 path 抽不到 —— 断言本身失效了').toBeGreaterThan(
-    0,
-  );
+  expect(
+    trackingSites.length,
+    '兄弟模块 10.3.1.1 的 path 抽不到 —— 断言本身失效了',
+  ).toBeGreaterThan(0);
   for (const path of trackingSites) {
     const response = await callProxy(path, {
       headers: { cookie: 'starcon_session=private-session' },
@@ -204,9 +204,10 @@ it('🔴 兄弟车道的白名单条目未被本车道挤掉或污染', async ()
       .filter((path) => path.startsWith(prefix))
       .map((path) => path.replace(/^\//, '').replace('{id}', ID))
       .filter((path) => !path.includes('{'));
-    expect(siblingSites.length, `兄弟模块 ${prefix} 的 path 抽不到 —— 断言本身失效了`).toBeGreaterThan(
-      0,
-    );
+    expect(
+      siblingSites.length,
+      `兄弟模块 ${prefix} 的 path 抽不到 —— 断言本身失效了`,
+    ).toBeGreaterThan(0);
     for (const path of siblingSites) {
       const response = await callProxy(path, {
         headers: { cookie: 'starcon_session=private-session' },

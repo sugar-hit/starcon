@@ -90,17 +90,25 @@ export function AdRulesWorkspace() {
 
   const loadAll = useCallback(async () => {
     try {
-      const [caps, rulePage, metricPage, runPage, hitPage, executionPage, dispatchPage, effectPage] =
-        await Promise.all([
-          fetchAdRuleCapabilities(),
-          fetchRules({ size: 20 }),
-          fetchMetrics({ size: 20 }),
-          fetchRuns({ size: 10 }),
-          fetchHits({ size: 20 }),
-          fetchExecutions({ size: 20 }),
-          fetchDispatches({ size: 20 }),
-          fetchEffects({ size: 20 }),
-        ]);
+      const [
+        caps,
+        rulePage,
+        metricPage,
+        runPage,
+        hitPage,
+        executionPage,
+        dispatchPage,
+        effectPage,
+      ] = await Promise.all([
+        fetchAdRuleCapabilities(),
+        fetchRules({ size: 20 }),
+        fetchMetrics({ size: 20 }),
+        fetchRuns({ size: 10 }),
+        fetchHits({ size: 20 }),
+        fetchExecutions({ size: 20 }),
+        fetchDispatches({ size: 20 }),
+        fetchEffects({ size: 20 }),
+      ]);
       setCapabilities(caps);
       setRules(rulePage);
       setMetrics(metricPage);
@@ -232,14 +240,17 @@ export function AdRulesWorkspace() {
     <main className="flex flex-col gap-6 p-6">
       <header className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold">自动规则</h1>
-        <p className="text-sm text-muted-foreground max-w-4xl">
-          按条件自动调整预算 / 竞价 / 启停：ACOS 超标降价、ROAS 达标加预算、消耗完毕暂停、花费无转化停投。
+        <p className="text-muted-foreground max-w-4xl text-sm">
+          按条件自动调整预算 / 竞价 / 启停：ACOS 超标降价、ROAS
+          达标加预算、消耗完毕暂停、花费无转化停投。
           <strong>上限与试运行是必填项</strong> —— 没有上限的自动调价一次异常就能烧掉大量预算。
         </p>
       </header>
 
       {error ? <p className="text-destructive text-sm">{error}</p> : null}
-      {loading ? <p className="text-sm text-muted-foreground">正在加载规则、指标与执行记录…</p> : null}
+      {loading ? (
+        <p className="text-muted-foreground text-sm">正在加载规则、指标与执行记录…</p>
+      ) : null}
 
       {/* ================= 能力声明 ================= */}
       {capabilities ? (
@@ -251,18 +262,18 @@ export function AdRulesWorkspace() {
                   {dimension.available ? '✅' : '⛔'} {dimension.description}
                 </span>
                 {!dimension.available ? (
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-muted-foreground text-xs">
                     责任模块：{dimension.ownerModule} —— {dimension.impact}
                   </span>
                 ) : null}
               </li>
             ))}
           </ul>
-          <p className="text-xs text-muted-foreground">{capabilities.guardNote}</p>
-          <p className="text-xs text-muted-foreground">{capabilities.dryRunNote}</p>
-          <p className="text-xs text-muted-foreground">{capabilities.priorityNote}</p>
-          <p className="text-xs text-muted-foreground">{capabilities.dispatchNote}</p>
-          <p className="text-xs text-muted-foreground">{capabilities.upstreamNote}</p>
+          <p className="text-muted-foreground text-xs">{capabilities.guardNote}</p>
+          <p className="text-muted-foreground text-xs">{capabilities.dryRunNote}</p>
+          <p className="text-muted-foreground text-xs">{capabilities.priorityNote}</p>
+          <p className="text-muted-foreground text-xs">{capabilities.dispatchNote}</p>
+          <p className="text-muted-foreground text-xs">{capabilities.upstreamNote}</p>
         </Section>
       ) : null}
 
@@ -285,22 +296,22 @@ export function AdRulesWorkspace() {
           >
             跑一次（真实执行）
           </button>
-          <span className="text-xs text-muted-foreground">
+          <span className="text-muted-foreground text-xs">
             真实执行也**不会**把开着试运行的规则推成真执行 —— 取更严的那个。
           </span>
         </div>
 
         {!loading && (rules?.items.length ?? 0) === 0 ? (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             还没有规则。先在下面登记一条 —— 上限与试运行是必填的。
           </p>
         ) : null}
 
         {(rules?.items ?? []).map((rule) => (
-          <article key={rule.id} className="rounded border p-3 flex flex-col gap-2">
+          <article key={rule.id} className="flex flex-col gap-2 rounded border p-3">
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="font-medium">{rule.ruleName}</h3>
-              <code className="text-xs text-muted-foreground">{rule.ruleCode}</code>
+              <code className="text-muted-foreground text-xs">{rule.ruleCode}</code>
               {/* 🔴 试运行与真实执行必须一眼分得开 */}
               <span className="rounded border px-2 py-0.5 text-xs">
                 {rule.dryRun ? '🔬 试运行中' : '⚡ 真实执行'}
@@ -308,7 +319,7 @@ export function AdRulesWorkspace() {
               <span className="rounded border px-2 py-0.5 text-xs">{rule.status}</span>
               <span className="rounded border px-2 py-0.5 text-xs">优先级 {rule.priority}</span>
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               {rule.platformCode} · {rule.shopCode} · {rule.targetType} · 外部活动{' '}
               <code>{rule.externalCampaignId || '（全部）'}</code>
               {rule.externalKeywordId ? (
@@ -318,7 +329,7 @@ export function AdRulesWorkspace() {
                 </>
               ) : null}
             </p>
-            <dl className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+            <dl className="grid grid-cols-2 gap-2 text-sm md:grid-cols-4">
               <Stat label="动作" value={actionLabel(rule.actionType)} />
               <Stat label="调整幅度口径" value={rule.adjustmentMode} />
               <Stat label="调整幅度" value={money(rule.adjustmentValue)} />
@@ -336,7 +347,7 @@ export function AdRulesWorkspace() {
               <Stat label="出价上限" value={money(rule.maxBid)} />
             </dl>
             {/* 🔴 「没有数据」与「没同步到」在界面上分开显示 */}
-            <p className="text-xs text-muted-foreground">{freshnessText(rule)}</p>
+            <p className="text-muted-foreground text-xs">{freshnessText(rule)}</p>
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
@@ -362,9 +373,9 @@ export function AdRulesWorkspace() {
       {/* ================= 规则详情 ================= */}
       {ruleDetail ? (
         <Section title={`规则详情：${ruleDetail.rule.ruleName}`}>
-          <h3 className="font-medium text-sm">条件（AND 语义：全部成立才算命中）</h3>
+          <h3 className="text-sm font-medium">条件（AND 语义：全部成立才算命中）</h3>
           {(ruleDetail.conditions.length ?? 0) === 0 ? (
-            <p className="text-sm text-muted-foreground">这条规则还没有条件。</p>
+            <p className="text-muted-foreground text-sm">这条规则还没有条件。</p>
           ) : (
             <ul className="flex flex-col gap-1 text-sm">
               {ruleDetail.conditions.map((condition) => (
@@ -377,9 +388,9 @@ export function AdRulesWorkspace() {
               ))}
             </ul>
           )}
-          <h3 className="font-medium text-sm">最近一次评估</h3>
+          <h3 className="text-sm font-medium">最近一次评估</h3>
           {ruleDetail.lastRun ? (
-            <dl className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+            <dl className="grid grid-cols-2 gap-2 text-sm md:grid-cols-4">
               <Stat label="运行口径" value={ruleDetail.lastRun.runMode} />
               <Stat label="命中" value={String(ruleDetail.lastRun.hitCount)} />
               <Stat label="被选中执行" value={String(ruleDetail.lastRun.selectedCount)} />
@@ -388,7 +399,7 @@ export function AdRulesWorkspace() {
               <Stat label="被闸门拒绝" value={String(ruleDetail.lastRun.rejectedCount)} />
             </dl>
           ) : (
-            <p className="text-sm text-muted-foreground">这条规则还没有被评估过。</p>
+            <p className="text-muted-foreground text-sm">这条规则还没有被评估过。</p>
           )}
         </Section>
       ) : null}
@@ -396,31 +407,34 @@ export function AdRulesWorkspace() {
       {/* ================= 命中记录 ================= */}
       <Section title="规则命中记录（未命中的也留痕，写清差在哪）">
         {!loading && (hits?.items.length ?? 0) === 0 ? (
-          <p className="text-sm text-muted-foreground">还没有命中记录 —— 先跑一次评估。</p>
+          <p className="text-muted-foreground text-sm">还没有命中记录 —— 先跑一次评估。</p>
         ) : null}
         {(hits?.items ?? []).map((hit) => (
-          <article key={hit.id} className="rounded border p-3 flex flex-col gap-1 text-sm">
+          <article key={hit.id} className="flex flex-col gap-1 rounded border p-3 text-sm">
             <div className="flex flex-wrap items-center gap-2">
               <span className="font-medium">{hit.ruleName}</span>
               {hit.matched ? (
                 <span className="rounded border px-2 py-0.5 text-xs">命中</span>
               ) : (
-                <span className="rounded border px-2 py-0.5 text-xs text-muted-foreground">未命中</span>
+                <span className="text-muted-foreground rounded border px-2 py-0.5 text-xs">
+                  未命中
+                </span>
               )}
               {hit.selected ? (
                 <span className="rounded border px-2 py-0.5 text-xs">被选中执行</span>
               ) : null}
-              <span className="text-xs text-muted-foreground">
+              <span className="text-muted-foreground text-xs">
                 {hit.platformCode} · {hit.shopCode} · 外部活动 <code>{hit.externalCampaignId}</code>
               </span>
             </div>
-            <p className="text-xs text-muted-foreground">{hit.hitReason}</p>
+            <p className="text-muted-foreground text-xs">{hit.hitReason}</p>
             {hit.selectionNote ? (
-              <p className="text-xs text-muted-foreground">{hit.selectionNote}</p>
+              <p className="text-muted-foreground text-xs">{hit.selectionNote}</p>
             ) : null}
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               当时指标：花费 {money(hit.spendSnapshot)} · 销售额 {money(hit.revenueSnapshot)} · ACOS{' '}
-              {ratio(hit.acosSnapshot)} · ROAS {ratio(hit.roasSnapshot)} · 数据截至 {hit.metricsAsOf}
+              {ratio(hit.acosSnapshot)} · ROAS {ratio(hit.roasSnapshot)} · 数据截至{' '}
+              {hit.metricsAsOf}
             </p>
           </article>
         ))}
@@ -429,22 +443,22 @@ export function AdRulesWorkspace() {
       {/* ================= 调整执行记录 ================= */}
       <Section title="调整执行记录（试运行 / 已执行 / 被闸门拒绝）">
         {!loading && (executions?.items.length ?? 0) === 0 ? (
-          <p className="text-sm text-muted-foreground">还没有执行记录 —— 先跑一次评估。</p>
+          <p className="text-muted-foreground text-sm">还没有执行记录 —— 先跑一次评估。</p>
         ) : null}
         {(executions?.items ?? []).map((execution) => (
-          <article key={execution.id} className="rounded border p-3 flex flex-col gap-1 text-sm">
+          <article key={execution.id} className="flex flex-col gap-1 rounded border p-3 text-sm">
             <div className="flex flex-wrap items-center gap-2">
               <span className="font-medium">{execution.ruleName}</span>
               <span className="rounded border px-2 py-0.5 text-xs">
                 {outcomeLabel(execution.outcome)}
               </span>
               {execution.rejectReason ? (
-                <span className="rounded border px-2 py-0.5 text-xs text-destructive">
+                <span className="text-destructive rounded border px-2 py-0.5 text-xs">
                   {rejectReasonLabel(execution.rejectReason)}
                 </span>
               ) : null}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               {actionLabel(execution.actionType)} ·{' '}
               {execution.beforeStatus || execution.afterStatus ? (
                 <>
@@ -460,12 +474,12 @@ export function AdRulesWorkspace() {
               )}
             </p>
             {/* 🔴 逐项闸门结论：被哪一道闸拦下来的要看得见 */}
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               上限闸门：{execution.capCheck} · 上下限闸门：{execution.boundCheck} · 窗口内已用{' '}
               {money(execution.windowUsedAmount)} / {execution.windowUsedCount} 次
             </p>
             {execution.rejectDetail ? (
-              <p className="text-xs text-destructive">{execution.rejectDetail}</p>
+              <p className="text-destructive text-xs">{execution.rejectDetail}</p>
             ) : null}
           </article>
         ))}
@@ -474,32 +488,32 @@ export function AdRulesWorkspace() {
       {/* ================= 待下发动作 ================= */}
       <Section title="待下发动作（下游 = 平台广告 API；本模块不实现真实下发）">
         {!loading && (dispatches?.items.length ?? 0) === 0 ? (
-          <p className="text-sm text-muted-foreground">队列是空的 —— 没有待下发的调整。</p>
+          <p className="text-muted-foreground text-sm">队列是空的 —— 没有待下发的调整。</p>
         ) : null}
         {(dispatches?.items ?? []).map((dispatch) => (
-          <article key={dispatch.id} className="rounded border p-3 flex flex-col gap-1 text-sm">
+          <article key={dispatch.id} className="flex flex-col gap-1 rounded border p-3 text-sm">
             <div className="flex flex-wrap items-center gap-2">
               <span className="font-medium">{dispatch.ruleName}</span>
               {/* 🔴 「待下发」不是「已生效」 */}
               <span className="rounded border px-2 py-0.5 text-xs">{dispatch.dispatchStatus}</span>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-muted-foreground text-xs">
                 {dispatch.platformCode} · {dispatch.shopCode} · 外部活动{' '}
                 <code>{dispatch.externalCampaignId}</code>
               </span>
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               动作：{actionLabel(dispatch.actionType)}
             </p>
             <details>
-              <summary className="text-xs cursor-pointer">下发载荷</summary>
-              <pre className="text-xs bg-muted/40 rounded p-2 overflow-auto">
+              <summary className="cursor-pointer text-xs">下发载荷</summary>
+              <pre className="bg-muted/40 overflow-auto rounded p-2 text-xs">
                 {JSON.stringify(dispatch.actionPayload, null, 2)}
               </pre>
             </details>
             {dispatch.dispatchStatus === 'PENDING' ? (
               <button
                 type="button"
-                className="rounded border px-2 py-1 text-xs self-start"
+                className="self-start rounded border px-2 py-1 text-xs"
                 disabled={busy}
                 onClick={() => void onCancelDispatch(dispatch.id)}
               >
@@ -521,37 +535,41 @@ export function AdRulesWorkspace() {
           >
             回溯一次
           </button>
-          <span className="text-xs text-muted-foreground">
+          <span className="text-muted-foreground text-xs">
             「数据不足」是**合法结论**：执行后还没有更新的指标时，先等数据到齐再回溯一次。
           </span>
         </div>
         {!loading && (effects?.items.length ?? 0) === 0 ? (
-          <p className="text-sm text-muted-foreground">还没有回溯记录 —— 先跑一次真实执行再回溯。</p>
+          <p className="text-muted-foreground text-sm">
+            还没有回溯记录 —— 先跑一次真实执行再回溯。
+          </p>
         ) : null}
         {(effects?.items ?? []).map((effect) => (
-          <article key={effect.id} className="rounded border p-3 flex flex-col gap-1 text-sm">
+          <article key={effect.id} className="flex flex-col gap-1 rounded border p-3 text-sm">
             <div className="flex flex-wrap items-center gap-2">
               <span className="font-medium">{effect.ruleName}</span>
               <span className="rounded border px-2 py-0.5 text-xs">
                 {verdictLabel(effect.verdict)}
               </span>
             </div>
-            <p className="text-xs text-muted-foreground">
-              ACOS {ratio(effect.beforeAcos)} → {ratio(effect.afterAcos)} · ROAS {ratio(effect.beforeRoas)} →{' '}
-              {ratio(effect.afterRoas)} · 花费 {money(effect.beforeSpend)} → {money(effect.afterSpend)} · 销售额{' '}
+            <p className="text-muted-foreground text-xs">
+              ACOS {ratio(effect.beforeAcos)} → {ratio(effect.afterAcos)} · ROAS{' '}
+              {ratio(effect.beforeRoas)} → {ratio(effect.afterRoas)} · 花费{' '}
+              {money(effect.beforeSpend)} → {money(effect.afterSpend)} · 销售额{' '}
               {money(effect.beforeRevenue)} → {money(effect.afterRevenue)}
             </p>
-            <p className="text-xs text-muted-foreground">{effect.verdictNote}</p>
+            <p className="text-muted-foreground text-xs">{effect.verdictNote}</p>
           </article>
         ))}
       </Section>
 
       {/* ================= 指标登记 ================= */}
       <Section title="登记广告表现指标（上游 14.3 报表未开发，数据从这里进来）">
-        <p className="text-xs text-muted-foreground">
-          规则靠**外部引用**定位广告对象，指标由本模块自持。数据截至时间必填 —— 没有它就分不清「没有数据」与「没同步到」。
+        <p className="text-muted-foreground text-xs">
+          规则靠**外部引用**定位广告对象，指标由本模块自持。数据截至时间必填 ——
+          没有它就分不清「没有数据」与「没同步到」。
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
           <Field label="平台 id">
             <input
               className="rounded border px-2 py-1"
@@ -658,7 +676,9 @@ export function AdRulesWorkspace() {
             <input
               className="rounded border px-2 py-1"
               value={metricInput.attributedRevenue}
-              onChange={(e) => setMetricInput({ ...metricInput, attributedRevenue: e.target.value })}
+              onChange={(e) =>
+                setMetricInput({ ...metricInput, attributedRevenue: e.target.value })
+              }
             />
           </Field>
           <Field label="数据截至时间（必填）">
@@ -687,7 +707,7 @@ export function AdRulesWorkspace() {
           </Field>
         </div>
         {metricErrors.length > 0 ? (
-          <ul className="text-destructive text-sm flex flex-col gap-1">
+          <ul className="text-destructive flex flex-col gap-1 text-sm">
             {metricErrors.map((message) => (
               <li key={message}>{message}</li>
             ))}
@@ -695,28 +715,28 @@ export function AdRulesWorkspace() {
         ) : null}
         <button
           type="button"
-          className="rounded border px-3 py-1 text-sm self-start"
+          className="self-start rounded border px-3 py-1 text-sm"
           disabled={busy}
           onClick={() => void onSaveMetric()}
         >
           登记指标
         </button>
         {!loading && (metrics?.items.length ?? 0) === 0 ? (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             还没有指标数据 —— 规则现在没有可判定的数据，跑起来只会「没有数据」，不会误判。
           </p>
         ) : null}
         {(metrics?.items ?? []).map((metric) => (
-          <article key={metric.id} className="rounded border p-3 flex flex-col gap-1 text-sm">
+          <article key={metric.id} className="flex flex-col gap-1 rounded border p-3 text-sm">
             <div className="flex flex-wrap items-center gap-2">
               <span className="font-medium">{metric.platformCode}</span>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-muted-foreground text-xs">
                 {metric.shopCode} · {metric.metricScope} · 外部活动{' '}
                 <code>{metric.externalCampaignId}</code>
               </span>
               <span className="rounded border px-2 py-0.5 text-xs">{metric.deliveryStatus}</span>
             </div>
-            <dl className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+            <dl className="grid grid-cols-2 gap-2 text-sm md:grid-cols-4">
               <Stat label="花费" value={money(metric.spend)} />
               <Stat label="归因销售额" value={money(metric.attributedRevenue)} />
               <Stat label="ACOS" value={ratio(metric.acos)} />
@@ -732,7 +752,7 @@ export function AdRulesWorkspace() {
 
       {/* ================= 规则登记 ================= */}
       <Section title="登记自动规则（上限与试运行是必填项）">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
           <Field label="规则编码（租户内唯一）">
             <input
               className="rounded border px-2 py-1"
@@ -775,18 +795,14 @@ export function AdRulesWorkspace() {
             <input
               className="rounded border px-2 py-1"
               value={ruleInput.externalCampaignId}
-              onChange={(e) =>
-                setRuleInput({ ...ruleInput, externalCampaignId: e.target.value })
-              }
+              onChange={(e) => setRuleInput({ ...ruleInput, externalCampaignId: e.target.value })}
             />
           </Field>
           <Field label="外部关键词 id（关键词级必填）">
             <input
               className="rounded border px-2 py-1"
               value={ruleInput.externalKeywordId}
-              onChange={(e) =>
-                setRuleInput({ ...ruleInput, externalKeywordId: e.target.value })
-              }
+              onChange={(e) => setRuleInput({ ...ruleInput, externalKeywordId: e.target.value })}
             />
           </Field>
           <Field label="动作">
@@ -898,7 +914,9 @@ export function AdRulesWorkspace() {
             <input
               className="rounded border px-2 py-1"
               value={ruleInput.evaluationWindowHours}
-              onChange={(e) => setRuleInput({ ...ruleInput, evaluationWindowHours: e.target.value })}
+              onChange={(e) =>
+                setRuleInput({ ...ruleInput, evaluationWindowHours: e.target.value })
+              }
             />
           </Field>
           <Field label="状态">
@@ -914,7 +932,7 @@ export function AdRulesWorkspace() {
           </Field>
         </div>
 
-        <h3 className="font-medium text-sm mt-2">条件（AND 语义：全部成立才算命中）</h3>
+        <h3 className="mt-2 text-sm font-medium">条件（AND 语义：全部成立才算命中）</h3>
         {ruleInput.conditions.map((condition, index) => (
           <div key={index} className="flex flex-wrap items-end gap-2">
             <Field label="指标口径">
@@ -975,7 +993,12 @@ export function AdRulesWorkspace() {
               type="button"
               className="rounded border px-2 py-1 text-xs"
               disabled={ruleInput.conditions.length <= 1}
-              onClick={() => setRuleInput({ ...ruleInput, conditions: ruleInput.conditions.filter((_, i) => i !== index) })}
+              onClick={() =>
+                setRuleInput({
+                  ...ruleInput,
+                  conditions: ruleInput.conditions.filter((_, i) => i !== index),
+                })
+              }
             >
               删除这条条件
             </button>
@@ -983,7 +1006,7 @@ export function AdRulesWorkspace() {
         ))}
         <button
           type="button"
-          className="rounded border px-2 py-1 text-xs self-start"
+          className="self-start rounded border px-2 py-1 text-xs"
           onClick={() =>
             setRuleInput({
               ...ruleInput,
@@ -1001,13 +1024,11 @@ export function AdRulesWorkspace() {
             checked={ruleInput.dryRun}
             onChange={(e) => setRuleInput({ ...ruleInput, dryRun: e.target.checked })}
           />
-          <span>
-            试运行（勾上 = 只匹配、只算出「本来会变成多少」，**不产生实际调整**）
-          </span>
+          <span>试运行（勾上 = 只匹配、只算出「本来会变成多少」，**不产生实际调整**）</span>
         </label>
 
         {ruleErrors.length > 0 ? (
-          <ul className="text-destructive text-sm flex flex-col gap-1">
+          <ul className="text-destructive flex flex-col gap-1 text-sm">
             {ruleErrors.map((message) => (
               <li key={message}>{message}</li>
             ))}
@@ -1015,7 +1036,7 @@ export function AdRulesWorkspace() {
         ) : null}
         <button
           type="button"
-          className="rounded border px-3 py-1 text-sm self-start"
+          className="self-start rounded border px-3 py-1 text-sm"
           disabled={busy}
           onClick={() => void onSaveRule()}
         >
@@ -1040,7 +1061,7 @@ function updateCondition(
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded border p-4 flex flex-col gap-3">
+    <section className="flex flex-col gap-3 rounded border p-4">
       <h2 className="font-medium">{title}</h2>
       {children}
     </section>
@@ -1050,7 +1071,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-xs text-muted-foreground">{label}</dt>
+      <dt className="text-muted-foreground text-xs">{label}</dt>
       <dd>{value}</dd>
     </div>
   );

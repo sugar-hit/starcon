@@ -372,7 +372,9 @@ export function diffChangeLabel(change: DiffChange | string | null | undefined):
 }
 
 /** 差异类型的色标。 */
-export function diffTone(change: DiffChange | string | null | undefined): 'success' | 'warning' | 'info' | 'neutral' {
+export function diffTone(
+  change: DiffChange | string | null | undefined,
+): 'success' | 'warning' | 'info' | 'neutral' {
   switch (change) {
     case 'ADDED':
       return 'info';
@@ -506,7 +508,9 @@ export function fetchAllocationRevision(
   allocationId: string,
   revisionNo: number,
 ): Promise<PricingCostAllocationRevisionDetail> {
-  return api<PricingCostAllocationRevisionDetail>(`${BASE}/${allocationId}/revisions/${revisionNo}`);
+  return api<PricingCostAllocationRevisionDetail>(
+    `${BASE}/${allocationId}/revisions/${revisionNo}`,
+  );
 }
 
 export function fetchAllocationDiff(
@@ -518,7 +522,9 @@ export function fetchAllocationDiff(
   if (from !== null && from !== undefined) query.set('from', String(from));
   if (to !== null && to !== undefined) query.set('to', String(to));
   const suffix = query.toString();
-  return api<PricingCostAllocationDiff>(`${BASE}/${allocationId}/diffs${suffix ? `?${suffix}` : ''}`);
+  return api<PricingCostAllocationDiff>(
+    `${BASE}/${allocationId}/diffs${suffix ? `?${suffix}` : ''}`,
+  );
 }
 
 /** 新建分摊单（落第一个版本）。 */

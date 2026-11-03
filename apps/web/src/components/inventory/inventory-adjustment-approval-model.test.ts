@@ -78,7 +78,9 @@ describe('7.4.1.2 调整审批 · 前端模型', () => {
     });
 
     it('金额区间必须 下限 < 上限（留空 = 无上限）', () => {
-      expect(ruleProblem({ ...base, minAmount: '1000', maxAmount: '1000' })).toContain('下限 < 上限');
+      expect(ruleProblem({ ...base, minAmount: '1000', maxAmount: '1000' })).toContain(
+        '下限 < 上限',
+      );
       expect(ruleProblem({ ...base, maxAmount: '' })).toBeNull();
     });
 
@@ -100,9 +102,16 @@ describe('7.4.1.2 调整审批 · 前端模型', () => {
 
   describe('审批人授权的校验', () => {
     it('必须指定审批人', () => {
-      expect(approverProblem({ userId: '', approvalTier: 'L1', currency: 'ANY', minAmount: '0', maxAmount: '', maxQty: '' })).toContain(
-        '必须指定审批人',
-      );
+      expect(
+        approverProblem({
+          userId: '',
+          approvalTier: 'L1',
+          currency: 'ANY',
+          minAmount: '0',
+          maxAmount: '',
+          maxQty: '',
+        }),
+      ).toContain('必须指定审批人');
     });
 
     it('金额授权区间必须 下限 < 上限', () => {
@@ -215,9 +224,9 @@ describe('7.4.1.2 调整审批 · 前端模型', () => {
 
   describe('批量结果', () => {
     it('成功与失败都要逐条说清', () => {
-      expect(batchItemText({ orderId: 'o1', orderCode: 'ADJ-1', success: true, message: '已处理' })).toBe(
-        'ADJ-1：已处理',
-      );
+      expect(
+        batchItemText({ orderId: 'o1', orderCode: 'ADJ-1', success: true, message: '已处理' }),
+      ).toBe('ADJ-1：已处理');
       expect(
         batchItemText({ orderId: 'o2', orderCode: '', success: false, message: '找不到该对象' }),
       ).toContain('找不到该对象');

@@ -221,13 +221,30 @@ export const BATCH_SECTION: BatchSectionDescriptor = {
   description:
     '对一批 SKU 批量跑利润测算：按当前成本与规则输出利润表，标记亏损品与低毛利品，支持筛选与导出。亏损品要么涨价要么清仓 —— 人工逐个测算不可行。',
   fields: [
-    { id: 'platformCode', label: '平台', hint: '来自 2.1.1.1 平台目录', kind: 'select', required: true },
-    { id: 'siteCode', label: '店铺（站点）', hint: '决定取价与币种', kind: 'select', required: true },
+    {
+      id: 'platformCode',
+      label: '平台',
+      hint: '来自 2.1.1.1 平台目录',
+      kind: 'select',
+      required: true,
+    },
+    {
+      id: 'siteCode',
+      label: '店铺（站点）',
+      hint: '决定取价与币种',
+      kind: 'select',
+      required: true,
+    },
     { id: 'category', label: '分类', hint: 'spu 分类精确匹配，空 = 不限定', kind: 'text' },
     { id: 'brand', label: '品牌', hint: 'spu 品牌精确匹配，空 = 不限定', kind: 'text' },
     { id: 'quantity', label: '数量', hint: '用于阶梯与运费', kind: 'number' },
     { id: 'platformFeeRate', label: '平台费率（手工假设）', hint: '0.15 = 15%', kind: 'number' },
-    { id: 'logisticsCostPerUnit', label: '物流每单位运费（手工假设）', hint: '每单位尾程运费', kind: 'number' },
+    {
+      id: 'logisticsCostPerUnit',
+      label: '物流每单位运费（手工假设）',
+      hint: '每单位尾程运费',
+      kind: 'number',
+    },
     { id: 'lowMarginThreshold', label: '低毛利阈值', hint: '0.15 = 15%，小数口径', kind: 'number' },
   ],
 };
@@ -393,7 +410,10 @@ export function summaryStats(summary: BatchSummary | null): BatchSummaryStat[] {
     {
       label: '平均毛利率',
       value: percentText(summary.avgGrossMarginRate, '—'),
-      hint: summary.notReady > 0 ? `其中 ${summary.notReady} 行成本不完整，未参与平均` : '按有毛利率的行取平均',
+      hint:
+        summary.notReady > 0
+          ? `其中 ${summary.notReady} 行成本不完整，未参与平均`
+          : '按有毛利率的行取平均',
       tone: summary.notReady > 0 ? 'warning' : 'success',
     },
   ];
@@ -494,7 +514,11 @@ export function validateRequest(request: BatchCalculationRequest): BatchValidati
  *
  * <p>🔴 列表与导出**共用**这一段 —— 导出的就是查到的那些行。
  */
-export function buildResultQuery(filters: BatchResultFilters, page?: number, size?: number): string {
+export function buildResultQuery(
+  filters: BatchResultFilters,
+  page?: number,
+  size?: number,
+): string {
   const params = new URLSearchParams();
   if (filters.marginBelow !== null && filters.marginBelow !== undefined) {
     params.set('marginBelow', String(filters.marginBelow));

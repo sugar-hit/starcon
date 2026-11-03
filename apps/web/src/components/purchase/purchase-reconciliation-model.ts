@@ -62,8 +62,7 @@ export function reconciliationQuery(params: ReconciliationParams): string {
   if (params.page !== undefined) parts.push(`page=${params.page}`);
   if (params.size !== undefined) parts.push(`size=${params.size}`);
   if (params.status) parts.push(`status=${encodeURIComponent(params.status)}`);
-  if (params.supplierRefId)
-    parts.push(`supplierRefId=${encodeURIComponent(params.supplierRefId)}`);
+  if (params.supplierRefId) parts.push(`supplierRefId=${encodeURIComponent(params.supplierRefId)}`);
   if (params.periodType) parts.push(`periodType=${encodeURIComponent(params.periodType)}`);
   if (params.currency) parts.push(`currency=${encodeURIComponent(params.currency)}`);
   if (params.keyword?.trim()) parts.push(`keyword=${encodeURIComponent(params.keyword.trim())}`);
@@ -96,9 +95,7 @@ export function fetchReconciliationLines(
   if (params.page !== undefined) parts.push(`page=${params.page}`);
   if (params.size !== undefined) parts.push(`size=${params.size}`);
   const query = parts.length ? `?${parts.join('&')}` : '';
-  return api<ReconciliationLinePage>(
-    `${base}/${encodeURIComponent(id)}/lines${query}`,
-  );
+  return api<ReconciliationLinePage>(`${base}/${encodeURIComponent(id)}/lines${query}`);
 }
 
 export function fetchReconciliationDiscrepancies(
@@ -123,11 +120,7 @@ export function addReconciliationDeduction(
   id: string,
   input: PurchaseReconciliationDeductionCreate,
 ) {
-  return api<ReconciliationDetail>(
-    `${base}/${encodeURIComponent(id)}/deductions`,
-    'POST',
-    input,
-  );
+  return api<ReconciliationDetail>(`${base}/${encodeURIComponent(id)}/deductions`, 'POST', input);
 }
 
 export function sendReconciliation(id: string) {
@@ -252,9 +245,10 @@ export function discrepancyStatusTone(
  * <p>⚠️ 「上游未接线」不是 0，也不是「不适用」—— 它意味着
  * 「这批的应收数量**尚未扣除**质检不合格量」，页面必须把它说清楚。
  */
-export function qualityDeductionText(
-  status: string | null | undefined,
-): { label: string; tone: 'primary' | 'success' | 'warning' | 'danger' | 'neutral' } {
+export function qualityDeductionText(status: string | null | undefined): {
+  label: string;
+  tone: 'primary' | 'success' | 'warning' | 'danger' | 'neutral';
+} {
   switch (status) {
     case 'UNAVAILABLE':
       return { label: '上游未接线（未扣量）', tone: 'warning' };
@@ -310,10 +304,7 @@ export function unavailableModules(basis: ReconciliationBasis | null | undefined
 }
 
 /** 可执行动作：能不能点由后端给，前端只读。 */
-export function actionAllowed(
-  actions: ReconciliationAction[] | undefined,
-  code: string,
-): boolean {
+export function actionAllowed(actions: ReconciliationAction[] | undefined, code: string): boolean {
   return (actions ?? []).some((a) => a.code === code && a.allowed);
 }
 

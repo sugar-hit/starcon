@@ -343,8 +343,7 @@ export function AccountSubjectWorkspace() {
   }
 
   const totalPages = page ? Math.max(1, Math.ceil(page.total / Math.max(1, page.size))) : 1;
-  const detailCount =
-    page?.summaryByCategory.reduce((sum, s) => sum + s.detailCount, 0) ?? 0;
+  const detailCount = page?.summaryByCategory.reduce((sum, s) => sum + s.detailCount, 0) ?? 0;
   const groupCount = page?.summaryByCategory.reduce((sum, s) => sum + s.groupCount, 0) ?? 0;
   const mappingCount = mappings?.total ?? 0;
 
@@ -658,24 +657,17 @@ export function AccountSubjectWorkspace() {
                           <td className="py-2">{s.taxTreatmentLabel}</td>
                           <td className="py-2">{formatAccountTaxRate(s.taxRate)}</td>
                           <td className="py-2">
-                            <Badge tone={accountSubjectStatusTone(s.status)}>
-                              {s.statusLabel}
-                            </Badge>
+                            <Badge tone={accountSubjectStatusTone(s.status)}>{s.statusLabel}</Badge>
                           </td>
                           <td className="py-2">{s.mappingReferenceCount}</td>
                           <td className="py-2">
                             <div className="flex flex-wrap items-center gap-2">
-                              <Button
-                                variant="secondary"
-                                onClick={() => void runShowDetail(s.id)}
-                              >
+                              <Button variant="secondary" onClick={() => void runShowDetail(s.id)}>
                                 详情
                               </Button>
                               <Button
                                 variant="secondary"
-                                onClick={() =>
-                                  void runToggleStatus(s.id, s.subjectCode, s.status)
-                                }
+                                onClick={() => void runToggleStatus(s.id, s.subjectCode, s.status)}
                               >
                                 {s.status === 'ACTIVE' ? '停用' : '启用'}
                               </Button>
@@ -777,7 +769,10 @@ export function AccountSubjectWorkspace() {
                 </thead>
                 <tbody>
                   {templates.subjects.map((t) => (
-                    <tr key={`${t.templateKey}-${t.subjectCode}`} className="border-border border-t">
+                    <tr
+                      key={`${t.templateKey}-${t.subjectCode}`}
+                      className="border-border border-t"
+                    >
                       <td className="py-2 font-medium">{t.subjectCode}</td>
                       <td className="py-2">{t.subjectName}</td>
                       <td className="py-2">{t.categoryLabel}</td>
@@ -908,10 +903,7 @@ export function AccountSubjectWorkspace() {
                           </Badge>
                         </td>
                         <td className="py-2">
-                          <Button
-                            variant="secondary"
-                            onClick={() => void runToggleMapping(m)}
-                          >
+                          <Button variant="secondary" onClick={() => void runToggleMapping(m)}>
                             {m.status === 'ACTIVE' ? '停用' : '启用'}
                           </Button>
                         </td>
@@ -944,7 +936,9 @@ export function AccountSubjectWorkspace() {
                   <span>税务属性：{detail.subject.taxTreatmentLabel}</span>
                   <span>税率：{formatAccountTaxRate(detail.subject.taxRate)}</span>
                   <span>状态：{detail.subject.statusLabel}</span>
-                  <span>来源：{detail.subject.source === 'TEMPLATE' ? '模板导入' : '用户自定义'}</span>
+                  <span>
+                    来源：{detail.subject.source === 'TEMPLATE' ? '模板导入' : '用户自定义'}
+                  </span>
                 </div>
                 <h4 className="text-h-14">变更留痕</h4>
                 {detail.events.length === 0 ? (

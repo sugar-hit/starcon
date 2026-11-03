@@ -73,7 +73,9 @@ export function fetchReasonTree(params: AftersalesReasonTreeParams = {}) {
 }
 
 export function fetchReasonAttribution(caseId: string) {
-  return api<AftersalesReasonAttributionView>(`${base}/attributions?caseId=${encodeURIComponent(caseId)}`);
+  return api<AftersalesReasonAttributionView>(
+    `${base}/attributions?caseId=${encodeURIComponent(caseId)}`,
+  );
 }
 
 export function fetchReasonReport() {
@@ -94,7 +96,9 @@ export function fetchReasonMappings(params: AftersalesReasonMappingParams = {}) 
   put('platformSource', params.platformSource);
   put('categoryId', params.categoryId);
   put('mappingStatus', params.mappingStatus);
-  return api<AftersalesReasonMappingList>(`${base}/mappings${parts.length ? `?${parts.join('&')}` : ''}`);
+  return api<AftersalesReasonMappingList>(
+    `${base}/mappings${parts.length ? `?${parts.join('&')}` : ''}`,
+  );
 }
 
 // ================================================================ 写入
@@ -212,7 +216,15 @@ export function toggleSecondary(
   const exists = draft.secondaries.some((s) => s.categoryId === node.id);
   const secondaries = exists
     ? draft.secondaries.filter((s) => s.categoryId !== node.id)
-    : [...draft.secondaries, { categoryId: node.id, categoryCode: node.categoryCode, categoryName: node.categoryName, weight }];
+    : [
+        ...draft.secondaries,
+        {
+          categoryId: node.id,
+          categoryCode: node.categoryCode,
+          categoryName: node.categoryName,
+          weight,
+        },
+      ];
   return { ...draft, secondaries };
 }
 
@@ -289,7 +301,11 @@ export function validateAttributionDraft(draft: AftersalesReasonDraft): Aftersal
     seen.add(s.categoryId);
     const w = Number(s.weight);
     if (!Number.isFinite(w) || w <= 0) {
-      return { ok: false, severity: 'error', message: `「${s.categoryName}」必须给权重（0 < weight ≤ 1）` };
+      return {
+        ok: false,
+        severity: 'error',
+        message: `「${s.categoryName}」必须给权重（0 < weight ≤ 1）`,
+      };
     }
     if (w > 1) {
       return { ok: false, severity: 'error', message: `「${s.categoryName}」权重不能大于 1` };
@@ -299,7 +315,9 @@ export function validateAttributionDraft(draft: AftersalesReasonDraft): Aftersal
 }
 
 /** 把草稿转成后端入参（校验通过之后才调用）。 */
-export function toAttributionCreate(draft: AftersalesReasonDraft): AftersalesReasonAttributionCreate {
+export function toAttributionCreate(
+  draft: AftersalesReasonDraft,
+): AftersalesReasonAttributionCreate {
   const items: AftersalesReasonAttributionItem[] = [];
   if (draft.primary) {
     items.push({

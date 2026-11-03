@@ -176,15 +176,11 @@ describe('冻结快照的本地校验', () => {
       validateSnapshotInput({ ...base, baseCurrency: '', quoteCurrency: '' }).join(),
     ).toContain('必须指明要冻结的汇率');
     // 给了 rateId 就不报这条。
-    expect(validateSnapshotInput({ ...base, rateId: 'r1' })).not.toContain(
-      '必须指明要冻结的汇率',
-    );
+    expect(validateSnapshotInput({ ...base, rateId: 'r1' })).not.toContain('必须指明要冻结的汇率');
   });
 
   it('原价币种必须是三位字母码', () => {
-    expect(validateSnapshotInput({ ...base, sourceCurrency: 'US' }).join()).toContain(
-      '三位字母码',
-    );
+    expect(validateSnapshotInput({ ...base, sourceCurrency: 'US' }).join()).toContain('三位字母码');
   });
 
   it('原价最多 6 位小数、必须是数字', () => {

@@ -68,9 +68,10 @@ export function MappingGapWorkspace() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
-  const [active, setActive] = useState<{ row: MappingGapRow; action: 'map' | 'sku' | 'ignore' } | null>(
-    null,
-  );
+  const [active, setActive] = useState<{
+    row: MappingGapRow;
+    action: 'map' | 'sku' | 'ignore';
+  } | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -144,7 +145,10 @@ export function MappingGapWorkspace() {
       />
 
       {error && (
-        <div role="alert" className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800">
+        <div
+          role="alert"
+          className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800"
+        >
           {error}
         </div>
       )}
@@ -180,7 +184,9 @@ export function MappingGapWorkspace() {
                 <Badge tone="neutral">未交付</Badge>
                 <span>
                   {d.description}
-                  {d.ownerModule && <span className="ml-1 text-slate-500">（归属模块 {d.ownerModule}）</span>}
+                  {d.ownerModule && (
+                    <span className="ml-1 text-slate-500">（归属模块 {d.ownerModule}）</span>
+                  )}
                   {d.impact && <span className="block text-xs text-slate-500">{d.impact}</span>}
                 </span>
               </li>
@@ -361,9 +367,12 @@ export function MappingGapWorkspace() {
                         )}
                       </td>
                       <td className="py-2 pr-3 text-xs">
-                        <div>{SOURCE_LABELS[row.source as keyof typeof SOURCE_LABELS] ?? row.source}</div>
+                        <div>
+                          {SOURCE_LABELS[row.source as keyof typeof SOURCE_LABELS] ?? row.source}
+                        </div>
                         <div className="text-slate-500">
-                          {REASON_LABELS[row.gapReason as keyof typeof REASON_LABELS] ?? row.gapReason}
+                          {REASON_LABELS[row.gapReason as keyof typeof REASON_LABELS] ??
+                            row.gapReason}
                         </div>
                         {row.orderRef && <div className="text-slate-500">订单 {row.orderRef}</div>}
                       </td>
@@ -372,7 +381,8 @@ export function MappingGapWorkspace() {
                           {STATUS_LABELS[row.status as keyof typeof STATUS_LABELS] ?? row.status}
                         </Badge>
                         <div className="mt-1 text-slate-500">
-                          {DECISION_LABELS[row.decision as keyof typeof DECISION_LABELS] ?? row.decision}
+                          {DECISION_LABELS[row.decision as keyof typeof DECISION_LABELS] ??
+                            row.decision}
                         </div>
                         {row.mappingVersionId && (
                           <div className="mt-1 text-slate-500">
@@ -472,11 +482,13 @@ function ActionPanel({
   const skuError = validateCreateSkuForm(skuForm);
   const ignoreError = validateIgnoreForm(ignoreForm);
 
-  const title =
-    action === 'map' ? '映射到已有 SKU' : action === 'sku' ? '新建 SKU' : '标记忽略';
+  const title = action === 'map' ? '映射到已有 SKU' : action === 'sku' ? '新建 SKU' : '标记忽略';
 
   return (
-    <SectionCard title={title} description={`平台变体 ${row.externalVariantId || row.listingVariantId} · ${row.titleSnapshot}`}>
+    <SectionCard
+      title={title}
+      description={`平台变体 ${row.externalVariantId || row.listingVariantId} · ${row.titleSnapshot}`}
+    >
       {action === 'map' && (
         <div className="space-y-4">
           <div
@@ -485,8 +497,8 @@ function ActionPanel({
           >
             <TriangleAlert className="mt-0.5 shrink-0" aria-hidden />
             <p>
-              只能填写<strong>明确的内部 SKU id</strong>（03 商品主数据的逻辑 id）。
-              本模块<strong>不按名称或标题相似度猜 SKU</strong> —— 候选与相似度在
+              只能填写<strong>明确的内部 SKU id</strong>（03 商品主数据的逻辑 id）。 本模块
+              <strong>不按名称或标题相似度猜 SKU</strong> —— 候选与相似度在
               <code className="mx-1">/listings/mappings</code>，且恒需人工确认。
             </p>
           </div>
@@ -505,7 +517,10 @@ function ActionPanel({
                 className="w-full rounded-md border border-slate-300 px-2 py-1.5"
                 value={mapForm.relationType}
                 onChange={(e) =>
-                  setMapForm((f) => ({ ...f, relationType: e.target.value as MapForm['relationType'] }))
+                  setMapForm((f) => ({
+                    ...f,
+                    relationType: e.target.value as MapForm['relationType'],
+                  }))
                 }
               >
                 {Object.entries(RELATION_LABELS).map(([code, label]) => (
@@ -523,9 +538,7 @@ function ActionPanel({
                   step="0.000001"
                   min="0"
                   value={mapForm.componentQuantity}
-                  onChange={(e) =>
-                    setMapForm((f) => ({ ...f, componentQuantity: e.target.value }))
-                  }
+                  onChange={(e) => setMapForm((f) => ({ ...f, componentQuantity: e.target.value }))}
                 />
               </label>
             )}
@@ -565,7 +578,8 @@ function ActionPanel({
             <p>
               <strong>03 商品主数据侧目前没有接线。</strong>
               本操作只<strong>登记建档请求</strong>（落库、可查、可撤），请求会停在「待派发」，
-              <strong>不会真的创建 SKU</strong>，也不会自动把变体映射上去 —— 那一步仍要人工建立映射。
+              <strong>不会真的创建 SKU</strong>，也不会自动把变体映射上去 ——
+              那一步仍要人工建立映射。
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-2">

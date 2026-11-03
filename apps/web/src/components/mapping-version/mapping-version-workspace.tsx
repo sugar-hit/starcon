@@ -164,7 +164,9 @@ export function MappingVersionWorkspace() {
           <Field label="映射 ID">
             <Input
               value={filters.mappingId}
-              onChange={(e) => setFilters(applyFilterChange(filters, { mappingId: e.target.value }))}
+              onChange={(e) =>
+                setFilters(applyFilterChange(filters, { mappingId: e.target.value }))
+              }
               placeholder="listing_mapping 的 UUID"
             />
           </Field>
@@ -180,7 +182,9 @@ export function MappingVersionWorkspace() {
           <Field label="平台商品 ID">
             <Input
               value={filters.listingId}
-              onChange={(e) => setFilters(applyFilterChange(filters, { listingId: e.target.value }))}
+              onChange={(e) =>
+                setFilters(applyFilterChange(filters, { listingId: e.target.value }))
+              }
               placeholder="listing 的 UUID"
             />
           </Field>
@@ -219,7 +223,9 @@ export function MappingVersionWorkspace() {
             <Input
               type="datetime-local"
               value={filters.windowFrom}
-              onChange={(e) => setFilters(applyFilterChange(filters, { windowFrom: e.target.value }))}
+              onChange={(e) =>
+                setFilters(applyFilterChange(filters, { windowFrom: e.target.value }))
+              }
               placeholder="窗口起点"
             />
           </Field>
@@ -252,8 +258,8 @@ export function MappingVersionWorkspace() {
           </Field>
         </div>
         <p className="text-copy-13 text-muted-foreground mt-3">
-          生效区间按<b>重叠</b>筛选：一版只要在窗口内曾经生效过就会被列出来。
-          已启用 {activeFilterCount(filters)} 个筛选条件。
+          生效区间按<b>重叠</b>筛选：一版只要在窗口内曾经生效过就会被列出来。 已启用{' '}
+          {activeFilterCount(filters)} 个筛选条件。
           <button
             type="button"
             className="ml-3 underline underline-offset-2"
@@ -282,7 +288,7 @@ export function MappingVersionWorkspace() {
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-copy-13">
+            <table className="text-copy-13 w-full text-left">
               <thead className="text-muted-foreground border-b">
                 <tr>
                   <th className="px-3 py-2">版本</th>
@@ -306,9 +312,7 @@ export function MappingVersionWorkspace() {
                         </Badge>
                       )}
                     </td>
-                    <td className="px-3 py-2 text-muted-foreground">
-                      {effectiveWindow(v)}
-                    </td>
+                    <td className="text-muted-foreground px-3 py-2">{effectiveWindow(v)}</td>
                     <td className="px-3 py-2">
                       <div>{v.titleSnapshot}</div>
                       <div className="text-muted-foreground">
@@ -316,9 +320,11 @@ export function MappingVersionWorkspace() {
                       </div>
                     </td>
                     <td className="px-3 py-2">{relationLabel(v.relationType)}</td>
-                    <td className="px-3 py-2 font-mono text-xs break-all">{v.internalSkuId ?? '—'}</td>
+                    <td className="break-all px-3 py-2 font-mono text-xs">
+                      {v.internalSkuId ?? '—'}
+                    </td>
                     <td className="px-3 py-2">{v.changeReason}</td>
-                    <td className="px-3 py-2 text-muted-foreground">
+                    <td className="text-muted-foreground px-3 py-2">
                       {changeSourceLabel(v.changeSource)}
                     </td>
                     <td className="px-3 py-2 text-right">
@@ -374,7 +380,10 @@ export function MappingVersionWorkspace() {
             <Fact label="版本号">
               v{detail.version.versionNo}
               {detail.previousVersionNo !== null && (
-                <span className="text-muted-foreground"> （上一版 v{detail.previousVersionNo}）</span>
+                <span className="text-muted-foreground">
+                  {' '}
+                  （上一版 v{detail.previousVersionNo}）
+                </span>
               )}
               {detail.nextVersionNo !== null && (
                 <span className="text-muted-foreground"> （下一版 v{detail.nextVersionNo}）</span>
@@ -383,18 +392,22 @@ export function MappingVersionWorkspace() {
             <Fact label="生效时间点">{effectiveWindow(detail.version)}</Fact>
             <Fact label="映射基数">{relationLabel(detail.version.relationType)}</Fact>
             <Fact label="内部 SKU">
-              <span className="font-mono text-xs break-all">{detail.version.internalSkuId ?? '—'}</span>
+              <span className="break-all font-mono text-xs">
+                {detail.version.internalSkuId ?? '—'}
+              </span>
             </Fact>
             <Fact label="变更原因">{detail.version.changeReason}</Fact>
             <Fact label="变更来源">{changeSourceLabel(detail.version.changeSource)}</Fact>
             <Fact label="落库时刻">{formatMoment(detail.version.createdAt)}</Fact>
             <Fact label="操作者">
-              <span className="font-mono text-xs break-all">{detail.version.actorId ?? '—'}</span>
+              <span className="break-all font-mono text-xs">{detail.version.actorId ?? '—'}</span>
             </Fact>
             <Fact label="相对上一版改了什么">
               {detail.changedFields.length === 0 ? (
                 <span className="text-muted-foreground">
-                  {detail.previousVersionNo === null ? '首版，没有可比对的上一版' : '与上一版逐字段一致'}
+                  {detail.previousVersionNo === null
+                    ? '首版，没有可比对的上一版'
+                    : '与上一版逐字段一致'}
                 </span>
               ) : (
                 <div className="flex flex-wrap gap-1">
@@ -495,7 +508,7 @@ function Select({
 }) {
   return (
     <select
-      className="border-input bg-background h-9 rounded-md border px-2 text-copy-13"
+      className="border-input bg-background text-copy-13 h-9 rounded-md border px-2"
       value={value}
       onChange={(e) => onChange(e.target.value)}
     >

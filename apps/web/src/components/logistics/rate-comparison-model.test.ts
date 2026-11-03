@@ -220,7 +220,11 @@ describe('🔴 空态：「没有候选渠道」与「一条都不合格」是�
 
   it('有渠道但都没过闸：说「不给推荐」，并指向逐条原因', () => {
     const text = emptyResultText(
-      result({ selectionBasis: 'NO_ELIGIBLE_CHANNEL', selectedChannelCode: '', selectedChannelId: null }),
+      result({
+        selectionBasis: 'NO_ELIGIBLE_CHANNEL',
+        selectedChannelCode: '',
+        selectedChannelId: null,
+      }),
     );
     expect(text).toContain('不给推荐');
     expect(text).toContain('落选原因');

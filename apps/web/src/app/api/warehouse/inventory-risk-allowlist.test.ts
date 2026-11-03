@@ -41,10 +41,7 @@ it('本模块真实调用的每个路径都被放行', async () => {
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
   vi.stubGlobal('fetch', fetcher);
 
-  const paths = [
-    'warehouse/inventory-risk/capabilities',
-    'warehouse/inventory-risk/projection',
-  ];
+  const paths = ['warehouse/inventory-risk/capabilities', 'warehouse/inventory-risk/projection'];
   for (const path of paths) {
     const response = await GET(request(path), {
       params: Promise.resolve({ path: path.split('/') }),

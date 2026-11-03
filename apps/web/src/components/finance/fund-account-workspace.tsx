@@ -156,10 +156,7 @@ export function FundAccountWorkspace() {
   const openDetail = useCallback(async (id: string) => {
     setActionError('');
     try {
-      const [d, b] = await Promise.all([
-        fetchFundAccount(id),
-        fetchFundAccountBalances(id, 0, 50),
-      ]);
+      const [d, b] = await Promise.all([fetchFundAccount(id), fetchFundAccountBalances(id, 0, 50)]);
       setDetail({ ...d, recentBalances: b.items, balanceTotal: b.total });
     } catch (err) {
       setActionError(err instanceof Error ? err.message : '账户详情加载失败');
@@ -266,16 +263,17 @@ export function FundAccountWorkspace() {
     }
   }
 
-  const unavailable = (options?.legalEntitiesAvailable ?? true)
-    ? []
-    : [
-        {
-          module: '17 法人',
-          name: '法人档案',
-          ownerModule: 'identity',
-          detail: options?.legalEntityNote || '法人清单读不到',
-        },
-      ];
+  const unavailable =
+    (options?.legalEntitiesAvailable ?? true)
+      ? []
+      : [
+          {
+            module: '17 法人',
+            name: '法人档案',
+            ownerModule: 'identity',
+            detail: options?.legalEntityNote || '法人清单读不到',
+          },
+        ];
   const total = page?.total ?? 0;
   const activeCount = page?.items.filter((a) => a.status === 'ACTIVE').length ?? 0;
 
@@ -580,7 +578,11 @@ export function FundAccountWorkspace() {
               <FormField id="fa-holder" label="户名">
                 <Input value={draftHolder} onChange={(e) => setDraftHolder(e.target.value)} />
               </FormField>
-              <FormField id="fa-initial" label="建档初始余额" hint="会写成第一条余额历史（建档初始）">
+              <FormField
+                id="fa-initial"
+                label="建档初始余额"
+                hint="会写成第一条余额历史（建档初始）"
+              >
                 <Input
                   value={draftInitialBalance}
                   inputMode="decimal"
@@ -627,7 +629,9 @@ export function FundAccountWorkspace() {
                         <td className="py-2 font-medium">{t.currency}</td>
                         <td className="py-2">{t.accountCount}</td>
                         <td className="py-2">{t.activeAccountCount}</td>
-                        <td className="py-2">{formatFundAccountMoney(t.totalBalance, t.currency)}</td>
+                        <td className="py-2">
+                          {formatFundAccountMoney(t.totalBalance, t.currency)}
+                        </td>
                         <td className="py-2">
                           {t.byLegalEntity.map((e) => (
                             <div key={e.legalEntityId}>
@@ -663,7 +667,10 @@ export function FundAccountWorkspace() {
                   <div>
                     <div className="text-muted-foreground">账户类型</div>
                     <div>
-                      {fundAccountTypeLabel(detail.account.accountType, detail.account.accountTypeLabel)}
+                      {fundAccountTypeLabel(
+                        detail.account.accountType,
+                        detail.account.accountTypeLabel,
+                      )}
                     </div>
                   </div>
                   <div>
@@ -693,8 +700,8 @@ export function FundAccountWorkspace() {
                 </div>
 
                 <Notice tone="info" title="余额历史是追加式的（append-only）">
-                  每次同步 / 手工更新都<b>追加</b>一条记录，历史记录不可改写；
-                  「当前余额」= 最新一条历史推导出来的值。手工更新必须写理由，
+                  每次同步 / 手工更新都<b>追加</b>一条记录，历史记录不可改写； 「当前余额」=
+                  最新一条历史推导出来的值。手工更新必须写理由，
                   同步必须带来源系统与来源流水号（重复同步不重复入账）。
                 </Notice>
 
@@ -734,7 +741,11 @@ export function FundAccountWorkspace() {
                       onChange={(e) => setBalanceReason(e.target.value)}
                     />
                   </FormField>
-                  <FormField id="fb-at" label="事实时刻（UTC）" hint="补录更早的余额不会倒推当前余额">
+                  <FormField
+                    id="fb-at"
+                    label="事实时刻（UTC）"
+                    hint="补录更早的余额不会倒推当前余额"
+                  >
                     <Input
                       type="datetime-local"
                       value={balanceRecordedAt}

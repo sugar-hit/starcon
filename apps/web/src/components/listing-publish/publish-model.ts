@@ -156,16 +156,14 @@ export async function fetchRateLimits(): Promise<PublishRateLimitRow[]> {
   return api<PublishRateLimitRow[]>('channel/listing-publish/rate-limits');
 }
 
-export async function saveRateLimit(
-  body: {
-    platformId: string;
-    shopId?: string | null;
-    maxInFlight?: number;
-    requestsPerWindow?: number;
-    windowSeconds?: number;
-    enabled?: boolean;
-  },
-): Promise<PublishRateLimitRow> {
+export async function saveRateLimit(body: {
+  platformId: string;
+  shopId?: string | null;
+  maxInFlight?: number;
+  requestsPerWindow?: number;
+  windowSeconds?: number;
+  enabled?: boolean;
+}): Promise<PublishRateLimitRow> {
   return api<PublishRateLimitRow>('channel/listing-publish/rate-limits', 'POST', body);
 }
 
@@ -173,9 +171,7 @@ export async function fetchBatches(): Promise<PublishBatchRow[]> {
   return api<PublishBatchRow[]>('channel/listing-publish/batches');
 }
 
-export async function createBatch(
-  body: CreatePublishBatchRequest,
-): Promise<PublishBatchRow> {
+export async function createBatch(body: CreatePublishBatchRequest): Promise<PublishBatchRow> {
   return api<PublishBatchRow>('channel/listing-publish/batches', 'POST', body);
 }
 
@@ -183,10 +179,7 @@ export async function fetchBatch(batchId: string): Promise<PublishBatchRow> {
   return api<PublishBatchRow>(`channel/listing-publish/batches/${batchId}`);
 }
 
-export async function fetchTasks(
-  batchId: string,
-  state?: string,
-): Promise<PublishTaskRow[]> {
+export async function fetchTasks(batchId: string, state?: string): Promise<PublishTaskRow[]> {
   const query = state ? `?state=${encodeURIComponent(state)}` : '';
   return api<PublishTaskRow[]>(`channel/listing-publish/batches/${batchId}/tasks${query}`);
 }
@@ -351,7 +344,9 @@ export function dispatchSummary(dispatch: DispatchResponse): string[] {
       : ['本轮没有可派发的任务'];
   }
   return dispatch.lanes.map((lane) => {
-    const scope = lane.shopCode ? `${lane.platformCode} / ${lane.shopCode}` : `${lane.platformCode}（平台级）`;
+    const scope = lane.shopCode
+      ? `${lane.platformCode} / ${lane.shopCode}`
+      : `${lane.platformCode}（平台级）`;
     if (!lane.rateLimitId) {
       return `${scope}：未配置限流，本轮不派发（${lane.skippedByRateLimit} 条待派）`;
     }

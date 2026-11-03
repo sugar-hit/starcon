@@ -395,8 +395,8 @@ export function LabelTemplateWorkspace() {
             <ul className="space-y-1">
               {blocked.map((dimension) => (
                 <li key={dimension.dimension} className="text-copy-13 text-muted-foreground">
-                  <Badge tone="warning">缺 {dimension.ownerModule}</Badge>{' '}
-                  {dimension.description} —— {dimension.impact}
+                  <Badge tone="warning">缺 {dimension.ownerModule}</Badge> {dimension.description}{' '}
+                  —— {dimension.impact}
                 </li>
               ))}
             </ul>
@@ -440,7 +440,7 @@ export function LabelTemplateWorkspace() {
                   ['containsMagnet', '带磁'],
                 ] as const
               ).map(([key, label]) => (
-                <label key={key} className="flex items-center gap-1 text-copy-13">
+                <label key={key} className="text-copy-13 flex items-center gap-1">
                   <input
                     type="checkbox"
                     checked={bindingInput[key]}
@@ -480,7 +480,7 @@ export function LabelTemplateWorkspace() {
                   <Badge tone={verdictMeta(verdict.verdict).variant as Tone}>
                     {verdictMeta(verdict.verdict).label}
                   </Badge>
-                  <span className="font-mono text-copy-13">{verdict.templateCode}</span>
+                  <span className="text-copy-13 font-mono">{verdict.templateCode}</span>
                   <span className="text-copy-13 text-muted-foreground">{verdict.templateName}</span>
                 </div>
                 {verdict.missingDeclarations.length > 0 && (
@@ -584,9 +584,9 @@ export function LabelTemplateWorkspace() {
                 value={filters.readiness}
                 options={[
                   { value: '', label: '全部' },
-                  ...(['READY', 'NO_LAYOUT', 'NO_BARCODE', 'DECLARATION_GAP', 'NO_CHANNEL'] as const).map(
-                    (code) => ({ value: code, label: readinessMeta(code).label }),
-                  ),
+                  ...(
+                    ['READY', 'NO_LAYOUT', 'NO_BARCODE', 'DECLARATION_GAP', 'NO_CHANNEL'] as const
+                  ).map((code) => ({ value: code, label: readinessMeta(code).label })),
                 ]}
                 onChange={(value) => setFilters({ ...filters, readiness: value, page: 0 })}
               />
@@ -613,7 +613,7 @@ export function LabelTemplateWorkspace() {
                   {page?.summary.noChannel}
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-copy-13">
+                  <table className="text-copy-13 w-full">
                     <thead>
                       <tr className="border-b text-left">
                         <th className="p-2">模板</th>
@@ -632,16 +632,20 @@ export function LabelTemplateWorkspace() {
                           <tr key={row.id} className="border-b">
                             <td className="p-2">
                               <div className="font-mono">{row.templateCode}</div>
-                              <div className="text-copy-12 text-muted-foreground">{row.templateName}</div>
+                              <div className="text-copy-12 text-muted-foreground">
+                                {row.templateName}
+                              </div>
                             </td>
                             <td className="p-2">
-                              <div className="font-mono text-copy-12">{row.channelCode}</div>
-                              <div className="text-copy-12 text-muted-foreground">{row.carrierName}</div>
+                              <div className="text-copy-12 font-mono">{row.channelCode}</div>
+                              <div className="text-copy-12 text-muted-foreground">
+                                {row.carrierName}
+                              </div>
                             </td>
-                            <td className="p-2 text-copy-12">
+                            <td className="text-copy-12 p-2">
                               {row.countryCode} / {row.languageCode}
                             </td>
-                            <td className="p-2 text-copy-12">
+                            <td className="text-copy-12 p-2">
                               {row.paperWidthMm} × {row.paperHeightMm} mm @ {row.dpi}dpi
                               <div className="text-muted-foreground">
                                 {symbologyLabel(row.primaryBarcodeSymbology)}
@@ -744,10 +748,10 @@ export function LabelTemplateWorkspace() {
                   }
                 />
               </FormField>
-                <EnumField
+              <EnumField
                 id="tpl-lang"
-              label="语言版本"
-              value={form.languageCode}
+                label="语言版本"
+                value={form.languageCode}
                 options={languageCodes.map((code) => ({ value: code, label: code }))}
                 onChange={(value) => patch('languageCode', value)}
               />
@@ -821,7 +825,9 @@ export function LabelTemplateWorkspace() {
               <FormField id="tpl-note" label="备注">
                 <Input
                   value={form.note}
-                  onChange={(event: ChangeEvent<HTMLInputElement>) => patch('note', event.target.value)}
+                  onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                    patch('note', event.target.value)
+                  }
                 />
               </FormField>
             </div>
@@ -829,9 +835,7 @@ export function LabelTemplateWorkspace() {
             {/* 打印元素 */}
             <div className="mt-6">
               <div className="mb-2 flex items-center justify-between">
-                <h3 className="text-label-13 font-medium">
-                  打印元素（位置与尺寸，单位 mm）
-                </h3>
+                <h3 className="text-label-13 font-medium">打印元素（位置与尺寸，单位 mm）</h3>
                 <Button
                   size="sm"
                   variant="secondary"
@@ -859,11 +863,14 @@ export function LabelTemplateWorkspace() {
                         }
                       />
                     </FormField>
-                      <EnumField
+                    <EnumField
                       id={`el-${index}-kind`}
                       label="类型"
                       value={element.elementKind}
-                      options={elementKinds.map((code) => ({ value: code, label: elementKindLabel(code) }))}
+                      options={elementKinds.map((code) => ({
+                        value: code,
+                        label: elementKindLabel(code),
+                      }))}
                       onChange={(value) => patchElement(index, 'elementKind', value)}
                     />
                     <FormField id={`el-${index}-sym`} label="条码类型（非条码位留空）">
@@ -952,11 +959,14 @@ export function LabelTemplateWorkspace() {
               {form.declarations.map((declaration, index) => (
                 <div key={index} className="mb-2 rounded border p-3">
                   <div className="grid gap-2 md:grid-cols-3">
-                      <EnumField
+                    <EnumField
                       id={`dec-${index}-kind`}
                       label="种类"
                       value={declaration.declarationKind}
-                      options={declarationKinds.map((code) => ({ value: code, label: declarationKindLabel(code) }))}
+                      options={declarationKinds.map((code) => ({
+                        value: code,
+                        label: declarationKindLabel(code),
+                      }))}
                       onChange={(value) => patchDeclaration(index, 'declarationKind', value)}
                     />
                     <FormField id={`dec-${index}-code`} label="声明代码（如 UN3481）">
@@ -975,18 +985,20 @@ export function LabelTemplateWorkspace() {
                         }
                       />
                     </FormField>
-                      <EnumField
+                    <EnumField
                       id={`dec-${index}-anchor`}
                       label="印在哪个打印位"
                       value={declaration.elementKey}
                       options={elementKeys.map((key) => ({ value: key, label: key }))}
                       onChange={(value) => patchDeclaration(index, 'elementKey', value)}
                     />
-                      <EnumField
+                    <EnumField
                       id={`dec-${index}-mandatory`}
                       label="强制（缺了不许启用）"
                       value={declaration.mandatory ? 'Y' : 'N'}
-                      options={yesNo((value) => (value === 'Y' ? '强制（缺了不许启用）' : '非强制'))}
+                      options={yesNo((value) =>
+                        value === 'Y' ? '强制（缺了不许启用）' : '非强制',
+                      )}
                       onChange={(value) => patchDeclaration(index, 'mandatory', value === 'Y')}
                     />
                     <div className="flex items-end">
@@ -1018,9 +1030,7 @@ export function LabelTemplateWorkspace() {
                 <Button
                   size="sm"
                   variant="secondary"
-                  onClick={() =>
-                    patch('batteryMarks', [...form.batteryMarks, blankBatteryMark()])
-                  }
+                  onClick={() => patch('batteryMarks', [...form.batteryMarks, blankBatteryMark()])}
                 >
                   加一条电池标识
                 </Button>
@@ -1033,11 +1043,14 @@ export function LabelTemplateWorkspace() {
               {form.batteryMarks.map((mark, index) => (
                 <div key={index} className="mb-2 rounded border p-3">
                   <div className="grid gap-2 md:grid-cols-3">
-                      <EnumField
+                    <EnumField
                       id={`bat-${index}-type`}
                       label="电池类型"
                       value={mark.batteryType}
-                      options={batteryTypes.map((code) => ({ value: code, label: batteryTypeLabel(code) }))}
+                      options={batteryTypes.map((code) => ({
+                        value: code,
+                        label: batteryTypeLabel(code),
+                      }))}
                       onChange={(value) => patchBattery(index, 'batteryType', value)}
                     />
                     <FormField id={`bat-${index}-wh`} label="瓦时 Wh">
@@ -1064,14 +1077,14 @@ export function LabelTemplateWorkspace() {
                         }
                       />
                     </FormField>
-                      <EnumField
+                    <EnumField
                       id={`bat-${index}-un38`}
                       label="UN38.3 测试摘要"
                       value={mark.un38_3Attested ? 'Y' : 'N'}
                       options={yesNo((value) => (value === 'Y' ? '已提供' : '未提供'))}
                       onChange={(value) => patchBattery(index, 'un38_3Attested', value === 'Y')}
                     />
-                      <EnumField
+                    <EnumField
                       id={`bat-${index}-anchor`}
                       label="印在哪个打印位"
                       value={mark.elementKey}
@@ -1189,7 +1202,7 @@ export function LabelTemplateWorkspace() {
                       <Badge tone={findingTone(finding.severity).variant as Tone}>
                         {findingTone(finding.severity).label}
                       </Badge>{' '}
-                      <span className="font-mono text-copy-12 text-muted-foreground">
+                      <span className="text-copy-12 text-muted-foreground font-mono">
                         {finding.code}
                       </span>{' '}
                       {finding.message}
@@ -1197,7 +1210,7 @@ export function LabelTemplateWorkspace() {
                   ))}
                 </ul>
               )}
-              <dl className="grid gap-1 text-copy-13 text-muted-foreground md:grid-cols-2">
+              <dl className="text-copy-13 text-muted-foreground grid gap-1 md:grid-cols-2">
                 <div>
                   条码类型：{symbologyLabel(preview.symbology)} · 编码值：
                   <span className="font-mono">{preview.encodedValue || '（未编码）'}</span>
@@ -1209,7 +1222,7 @@ export function LabelTemplateWorkspace() {
                   内容校验和（sha256）：<span className="font-mono">{preview.contentSha256}</span>
                 </div>
               </dl>
-              <pre className="max-h-72 overflow-auto rounded bg-muted p-3 text-copy-12">
+              <pre className="bg-muted text-copy-12 max-h-72 overflow-auto rounded p-3">
                 {preview.zplContent}
               </pre>
               <p className="text-copy-13 text-muted-foreground">{preview.previewNote}</p>
@@ -1222,7 +1235,7 @@ export function LabelTemplateWorkspace() {
                 <AlertTriangle className="h-4 w-4" />
                 渲染历史（启用前的证据链）
               </h3>
-              <table className="w-full text-copy-13">
+              <table className="text-copy-13 w-full">
                 <thead>
                   <tr className="border-b text-left">
                     <th className="p-2">触发</th>
@@ -1242,8 +1255,8 @@ export function LabelTemplateWorkspace() {
                         </Badge>
                       </td>
                       <td className="p-2">{symbologyLabel(item.symbology)}</td>
-                      <td className="p-2 text-copy-12">{item.renderedAt}</td>
-                      <td className="truncate font-mono text-copy-12">{item.contentSha256}</td>
+                      <td className="text-copy-12 p-2">{item.renderedAt}</td>
+                      <td className="text-copy-12 truncate font-mono">{item.contentSha256}</td>
                     </tr>
                   ))}
                 </tbody>

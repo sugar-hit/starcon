@@ -76,9 +76,12 @@ import { errorText } from '../inventory/inventory-model';
  */
 export function PurchaseRequestWorkspace() {
   const [params, setParams] = useState<PurchaseRequestParams>({ page: 0, size: 20 });
-  const [page, setPage] = useState<{ items: PurchaseRequestRow[]; total: number; page: number; size: number } | null>(
-    null,
-  );
+  const [page, setPage] = useState<{
+    items: PurchaseRequestRow[];
+    total: number;
+    page: number;
+    size: number;
+  } | null>(null);
   const [capabilities, setCapabilities] = useState<PurchaseRequestCapabilities | null>(null);
   const [options, setOptions] = useState<PurchaseRequestOptions | null>(null);
   const [detail, setDetail] = useState<PurchaseRequestDetail | null>(null);
@@ -112,20 +115,17 @@ export function PurchaseRequestWorkspace() {
     void load();
   }, [load]);
 
-  const run = useCallback(
-    async (work: () => Promise<void>) => {
-      setBusy(true);
-      setError('');
-      try {
-        await work();
-      } catch (e) {
-        setError(errorText(e));
-      } finally {
-        setBusy(false);
-      }
-    },
-    [],
-  );
+  const run = useCallback(async (work: () => Promise<void>) => {
+    setBusy(true);
+    setError('');
+    try {
+      await work();
+    } catch (e) {
+      setError(errorText(e));
+    } finally {
+      setBusy(false);
+    }
+  }, []);
 
   const openDetail = useCallback(
     async (id: string, refresh = false) => {
@@ -281,8 +281,8 @@ export function PurchaseRequestWorkspace() {
                   </div>
                   <p className="text-muted-foreground text-xs">
                     目标仓 {row.targetWarehouseName || row.targetWarehouseCode || '—'} · 法人{' '}
-                    {row.legalEntityName || row.legalEntityCode || '—'} · {row.lineCount} 行 · 申请量{' '}
-                    {fmt(row.totalQuantity)} · 预估金额{' '}
+                    {row.legalEntityName || row.legalEntityCode || '—'} · {row.lineCount} 行 ·
+                    申请量 {fmt(row.totalQuantity)} · 预估金额{' '}
                     {row.currencyCode ? fmtAmount(row.estimatedAmount) : '无数据（未填币种与单价）'}
                     {row.supplierCount > 0 ? ` · ${row.supplierCount} 个供应商` : ' · 未选供应商'}
                   </p>
@@ -359,8 +359,12 @@ export function PurchaseRequestWorkspace() {
               <p className="text-muted-foreground text-xs">
                 判定结论 {approvalDecisionLabel(detail.request.approvalDecision)} · 判定来源{' '}
                 {approvalSourceLabel(detail.request.approvalSource)}
-                {detail.request.approvalRuleName ? ` · 命中规则 ${detail.request.approvalRuleName}` : ''}
-                {detail.request.approvalFlowName ? ` · 审批流 ${detail.request.approvalFlowName}` : ''}
+                {detail.request.approvalRuleName
+                  ? ` · 命中规则 ${detail.request.approvalRuleName}`
+                  : ''}
+                {detail.request.approvalFlowName
+                  ? ` · 审批流 ${detail.request.approvalFlowName}`
+                  : ''}
               </p>
               {detail.request.approvalReason && (
                 <p className="text-muted-foreground text-xs">{detail.request.approvalReason}</p>
@@ -370,7 +374,9 @@ export function PurchaseRequestWorkspace() {
                 {detail.request.approvalSubmittedAt
                   ? ` · 提交于 ${detail.request.approvalSubmittedAt}`
                   : ''}
-                {detail.request.approvalDecidedAt ? ` · 结论同步于 ${detail.request.approvalDecidedAt}` : ''}
+                {detail.request.approvalDecidedAt
+                  ? ` · 结论同步于 ${detail.request.approvalDecidedAt}`
+                  : ''}
               </p>
             </div>
 
@@ -475,7 +481,7 @@ export function PurchaseRequestWorkspace() {
 
             {detail.adjustments.length > 0 && (
               <div className="rounded-md border p-3">
-                <p className="font-medium text-sm">调整留痕</p>
+                <p className="text-sm font-medium">调整留痕</p>
                 <div className="mt-2 flex flex-col gap-1">
                   {detail.adjustments.map((item) => (
                     <p key={item.id} className="text-muted-foreground text-xs">
@@ -489,7 +495,7 @@ export function PurchaseRequestWorkspace() {
 
             {detail.conversions.length > 0 && (
               <div className="rounded-md border p-3">
-                <p className="font-medium text-sm">转单事实</p>
+                <p className="text-sm font-medium">转单事实</p>
                 <p className="text-muted-foreground text-xs">
                   这是「转成采购单时的参数」。6.3.1.2 采购单尚未交付 ⇒ 本模块**不产出采购单**，
                   只把转单参数如实记下来，等采购单交付后由它去建真正的采购单。
@@ -498,8 +504,8 @@ export function PurchaseRequestWorkspace() {
                   {detail.conversions.map((item) => (
                     <p key={item.id} className="text-muted-foreground text-xs">
                       {item.skuCode} · 供应商 {item.supplierName || item.supplierCode} · 数量{' '}
-                      {fmt(item.convertedQuantity)} · 交期 {fmtDate(item.convertedArrivalDate)} · 目标仓{' '}
-                      {item.targetWarehouseName || item.targetWarehouseCode}
+                      {fmt(item.convertedQuantity)} · 交期 {fmtDate(item.convertedArrivalDate)} ·
+                      目标仓 {item.targetWarehouseName || item.targetWarehouseCode}
                       {item.sourcePlanLineId ? ' · 可追溯到源计划行' : ''}
                       {item.sourceSuggestionId ? ' · 可追溯到源补货建议' : ''}
                     </p>
@@ -754,9 +760,7 @@ function AdjustLineModal({
 }) {
   const [quantity, setQuantity] = useState(String(line.requestedQuantity ?? ''));
   const [arrivalDate, setArrivalDate] = useState(line.requestedArrivalDate ?? '');
-  const [unitPrice, setUnitPrice] = useState(
-    line.unitPrice === null ? '' : String(line.unitPrice),
-  );
+  const [unitPrice, setUnitPrice] = useState(line.unitPrice === null ? '' : String(line.unitPrice));
   const [reason, setReason] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');

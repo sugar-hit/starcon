@@ -137,24 +137,22 @@ export function ListingLifecycleWorkspace() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const loadSelected = useCallback(async (listingId: string) => {
-    setError(null);
-    try {
-      const [detailResult, timelineResult] = await Promise.all([
-        fetchListingDetail(listingId),
-        fetchTimeline(
-          listingId,
-          ...(timelineSource ? [timelineSource] : []),
-          0,
-          50,
-        ),
-      ]);
-      setDetail(detailResult);
-      setTimeline(timelineResult);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : '加载失败，请重试');
-    }
-  }, [timelineSource]);
+  const loadSelected = useCallback(
+    async (listingId: string) => {
+      setError(null);
+      try {
+        const [detailResult, timelineResult] = await Promise.all([
+          fetchListingDetail(listingId),
+          fetchTimeline(listingId, ...(timelineSource ? [timelineSource] : []), 0, 50),
+        ]);
+        setDetail(detailResult);
+        setTimeline(timelineResult);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : '加载失败，请重试');
+      }
+    },
+    [timelineSource],
+  );
 
   const run = useCallback(async (work: () => Promise<void>) => {
     setBusy(true);
@@ -241,7 +239,7 @@ export function ListingLifecycleWorkspace() {
       />
 
       {error && (
-        <div className="border-destructive/40 bg-destructive/5 text-destructive flex items-center gap-2 rounded-lg border px-4 py-3 text-label-13">
+        <div className="border-destructive/40 bg-destructive/5 text-destructive text-label-13 flex items-center gap-2 rounded-lg border px-4 py-3">
           <TriangleAlert className="size-4 shrink-0" />
           <span className="flex-1">{error}</span>
           <Button size="sm" variant="secondary" onClick={() => void load()}>
@@ -252,14 +250,14 @@ export function ListingLifecycleWorkspace() {
       )}
 
       {lastAction && (
-        <div className="border-brand/40 bg-brand/5 text-brand flex items-center gap-2 rounded-lg border px-4 py-3 text-label-13">
+        <div className="border-brand/40 bg-brand/5 text-brand text-label-13 flex items-center gap-2 rounded-lg border px-4 py-3">
           <CheckCheck className="size-4 shrink-0" />
           <span className="flex-1">{lastAction}</span>
         </div>
       )}
 
       {loading && !rows ? (
-        <div className="text-muted-foreground flex items-center gap-2 px-1 py-8 text-label-13">
+        <div className="text-muted-foreground text-label-13 flex items-center gap-2 px-1 py-8">
           <Loader2 className="size-4 animate-spin" />
           正在加载生命周期数据…
         </div>
@@ -277,13 +275,13 @@ export function ListingLifecycleWorkspace() {
           >
             {!divergences || divergences.items.length === 0 ? (
               <EmptyState
-                icon={<CheckCheck className="size-8 text-muted-foreground" />}
+                icon={<CheckCheck className="text-muted-foreground size-8" />}
                 title="当前没有差异"
                 description={emptyDivergenceMessage()}
               />
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-label-13">
+                <table className="text-label-13 w-full text-left">
                   <thead className="text-muted-foreground border-border border-b">
                     <tr>
                       <th className="px-4 py-2 font-medium">商品</th>
@@ -310,7 +308,8 @@ export function ListingLifecycleWorkspace() {
                         <td className="text-foreground px-4 py-2">
                           {row.divergenceNote}
                           <div className="text-muted-foreground text-label-12">
-                            内部 {row.internalStatus} · 平台 {row.platformStatus || row.platformEventType || '（无平台事实）'}
+                            内部 {row.internalStatus} · 平台{' '}
+                            {row.platformStatus || row.platformEventType || '（无平台事实）'}
                           </div>
                         </td>
                         <td className="px-4 py-2">
@@ -333,7 +332,9 @@ export function ListingLifecycleWorkspace() {
                                     note: '差异区联动：内部状态跟随平台',
                                   });
                                   setReceiptLines(receiptSummary(receipt));
-                                  setLastAction(`已跟随平台状态：${row.title || row.externalItemId}`);
+                                  setLastAction(
+                                    `已跟随平台状态：${row.title || row.externalItemId}`,
+                                  );
                                   await load();
                                 })
                               }
@@ -364,7 +365,7 @@ export function ListingLifecycleWorkspace() {
           {/* ---- 人工动作回执 ---- */}
           {receiptLines && (
             <SectionCard title="动作回执" description="逐条说明这次动作真的做了什么。">
-              <ul className="text-foreground space-y-1 text-label-13">
+              <ul className="text-foreground text-label-13 space-y-1">
                 {receiptLines.map((line, index) => (
                   <li key={index} className="flex gap-2">
                     <span className="text-muted-foreground">·</span>
@@ -380,7 +381,7 @@ export function ListingLifecycleWorkspace() {
               title="平台状态同步回执"
               description="真的联动了几条、哪些没联动以及为什么 —— 静默跳过会让运营以为全同步了。"
             >
-              <ul className="text-foreground space-y-1 text-label-13">
+              <ul className="text-foreground text-label-13 space-y-1">
                 {syncLines.map((line, index) => (
                   <li key={index} className="flex gap-2">
                     <span className="text-muted-foreground">·</span>
@@ -399,7 +400,7 @@ export function ListingLifecycleWorkspace() {
             >
               <div className="space-y-3">
                 <div>
-                  <label className="text-muted-foreground mb-1 block text-label-12">
+                  <label className="text-muted-foreground text-label-12 mb-1 block">
                     动因（为什么做这个动作，会进留痕）
                   </label>
                   <Input
@@ -410,7 +411,7 @@ export function ListingLifecycleWorkspace() {
                   />
                 </div>
                 {pending.action === 'DELIST' && (
-                  <label className="flex items-start gap-2 text-label-13">
+                  <label className="text-label-13 flex items-start gap-2">
                     <input
                       type="checkbox"
                       className="mt-1"
@@ -418,8 +419,10 @@ export function ListingLifecycleWorkspace() {
                       onChange={(e) => setWriteback(e.target.checked)}
                     />
                     <span>
-                      <span className="text-foreground">同时回写平台（把平台上正在卖的商品也下架）</span>
-                      <span className="text-muted-foreground mt-0.5 block text-label-12">
+                      <span className="text-foreground">
+                        同时回写平台（把平台上正在卖的商品也下架）
+                      </span>
+                      <span className="text-muted-foreground text-label-12 mt-0.5 block">
                         不勾选 = 只改内部状态，平台侧不知情（平台可能还在卖）。
                         回写会产生一个平台操作任务，由 02 回写队列派发 —— 有资损风险，默认不勾。
                       </span>
@@ -455,9 +458,11 @@ export function ListingLifecycleWorkspace() {
           >
             <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
               <div>
-                <label className="text-muted-foreground mb-1 block text-label-12">生命周期状态</label>
+                <label className="text-muted-foreground text-label-12 mb-1 block">
+                  生命周期状态
+                </label>
                 <select
-                  className="border-control-border bg-card text-foreground h-9 w-full rounded-md border px-3 text-label-13"
+                  className="border-control-border bg-card text-foreground text-label-13 h-9 w-full rounded-md border px-3"
                   value={status}
                   onChange={(e) => {
                     setStatus(e.target.value);
@@ -473,11 +478,11 @@ export function ListingLifecycleWorkspace() {
                 </select>
               </div>
               <div>
-                <label className="text-muted-foreground mb-1 block text-label-12">
+                <label className="text-muted-foreground text-label-12 mb-1 block">
                   最近变更来源
                 </label>
                 <select
-                  className="border-control-border bg-card text-foreground h-9 w-full rounded-md border px-3 text-label-13"
+                  className="border-control-border bg-card text-foreground text-label-13 h-9 w-full rounded-md border px-3"
                   value={source}
                   onChange={(e) => {
                     setSource(e.target.value);
@@ -493,7 +498,7 @@ export function ListingLifecycleWorkspace() {
                 </select>
               </div>
               <div>
-                <label className="text-muted-foreground mb-1 block text-label-12">店铺编码</label>
+                <label className="text-muted-foreground text-label-12 mb-1 block">店铺编码</label>
                 <Input
                   value={shopCode}
                   onChange={(e) => {
@@ -503,7 +508,7 @@ export function ListingLifecycleWorkspace() {
                 />
               </div>
               <div>
-                <label className="text-muted-foreground mb-1 block text-label-12">平台编码</label>
+                <label className="text-muted-foreground text-label-12 mb-1 block">平台编码</label>
                 <Input
                   value={platformCode}
                   onChange={(e) => {
@@ -513,7 +518,7 @@ export function ListingLifecycleWorkspace() {
                 />
               </div>
               <div>
-                <label className="text-muted-foreground mb-1 block text-label-12">关键词</label>
+                <label className="text-muted-foreground text-label-12 mb-1 block">关键词</label>
                 <Input
                   value={keyword}
                   placeholder="标题或平台商品 ID"
@@ -526,7 +531,7 @@ export function ListingLifecycleWorkspace() {
             </div>
 
             <div className="mb-4 flex flex-wrap items-center gap-4">
-              <label className="flex items-center gap-2 text-label-13">
+              <label className="text-label-13 flex items-center gap-2">
                 <input
                   type="checkbox"
                   checked={onlyDivergence}
@@ -562,13 +567,13 @@ export function ListingLifecycleWorkspace() {
 
             {!rows || rows.items.length === 0 ? (
               <EmptyState
-                icon={<ShieldAlert className="size-8 text-muted-foreground" />}
+                icon={<ShieldAlert className="text-muted-foreground size-8" />}
                 title={filtered ? '没有符合条件的商品' : '还没有登记任何商品'}
                 description={emptyListMessage(filtered)}
               />
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-label-13">
+                <table className="text-label-13 w-full text-left">
                   <thead className="text-muted-foreground border-border border-b">
                     <tr>
                       <th className="px-4 py-2 font-medium">商品</th>
@@ -597,7 +602,7 @@ export function ListingLifecycleWorkspace() {
                               <Badge tone={sourceTone(row.lastChangeSource)}>
                                 {sourceLabel(row.lastChangeSource)}
                               </Badge>
-                              <div className="text-muted-foreground mt-0.5 text-label-12">
+                              <div className="text-muted-foreground text-label-12 mt-0.5">
                                 {row.lastChangeFrom || '—'} → {row.lastChangeTo || '—'}
                               </div>
                               <div className="text-muted-foreground text-label-12">
@@ -605,13 +610,17 @@ export function ListingLifecycleWorkspace() {
                               </div>
                             </>
                           ) : (
-                            <span className="text-muted-foreground text-label-12">暂无变更记录</span>
+                            <span className="text-muted-foreground text-label-12">
+                              暂无变更记录
+                            </span>
                           )}
                         </td>
                         <td className="px-4 py-2">
                           {row.platformEventType ? (
                             <>
-                              <div className="text-foreground">{row.platformStatus || row.platformEventType}</div>
+                              <div className="text-foreground">
+                                {row.platformStatus || row.platformEventType}
+                              </div>
                               <div className="text-muted-foreground text-label-12">
                                 {formatTime(row.platformEventAt)}
                               </div>
@@ -673,7 +682,7 @@ export function ListingLifecycleWorkspace() {
               extra={
                 <div className="flex items-center gap-2">
                   <select
-                    className="border-control-border bg-card text-foreground h-8 rounded-md border px-2 text-label-12"
+                    className="border-control-border bg-card text-foreground text-label-12 h-8 rounded-md border px-2"
                     value={timelineSource}
                     onChange={(e) => {
                       setTimelineSource(e.target.value);
@@ -697,7 +706,7 @@ export function ListingLifecycleWorkspace() {
             >
               {!timeline || timeline.items.length === 0 ? (
                 <EmptyState
-                  icon={<ArrowDownUp className="size-8 text-muted-foreground" />}
+                  icon={<ArrowDownUp className="text-muted-foreground size-8" />}
                   title="没有状态变更记录"
                   description={emptyTimelineMessage(timelineSource)}
                 />
@@ -738,14 +747,17 @@ export function ListingLifecycleWorkspace() {
             >
               {detail.actions.length === 0 ? (
                 <EmptyState
-                  icon={<ShieldAlert className="size-8 text-muted-foreground" />}
+                  icon={<ShieldAlert className="text-muted-foreground size-8" />}
                   title="还没有动作留痕"
                   description="在这个商品上做一次人工动作（主动下架 / 重新上架 / 提交平台审核 / 标记被封禁）后，动因与回写选择会出现在这里。"
                 />
               ) : (
                 <ul className="space-y-2">
                   {detail.actions.map((action) => (
-                    <li key={action.actionId} className="border-border border-b pb-2 last:border-0 last:pb-0">
+                    <li
+                      key={action.actionId}
+                      className="border-border border-b pb-2 last:border-0 last:pb-0"
+                    >
                       <div className="text-foreground text-label-13">{actionSummary(action)}</div>
                       <div className="text-muted-foreground text-label-12">
                         {formatTime(action.createdAt)}
@@ -767,7 +779,7 @@ export function ListingLifecycleWorkspace() {
             >
               {unavailableDimensions(caps).length === 0 ? (
                 <EmptyState
-                  icon={<CheckCheck className="size-8 text-muted-foreground" />}
+                  icon={<CheckCheck className="text-muted-foreground size-8" />}
                   title="本模块声明的能力全部已交付"
                   description={caps.stateMachineRule}
                 />
@@ -776,8 +788,7 @@ export function ListingLifecycleWorkspace() {
                   {unavailableDimensions(caps).map((dimension) => (
                     <li key={dimension.dimension}>
                       <div className="text-foreground text-label-13">
-                        <Badge tone="warning">未交付</Badge>{' '}
-                        {dimension.description}
+                        <Badge tone="warning">未交付</Badge> {dimension.description}
                       </div>
                       <div className="text-muted-foreground text-label-12">
                         责任模块：{dimension.ownerModule} —— {dimension.impact}
@@ -786,7 +797,7 @@ export function ListingLifecycleWorkspace() {
                   ))}
                 </ul>
               )}
-              <div className="text-muted-foreground mt-4 space-y-1 text-label-12">
+              <div className="text-muted-foreground text-label-12 mt-4 space-y-1">
                 <div>状态机规则：{caps.stateMachineRule}</div>
                 <div>差异判定口径：{caps.divergenceRule}</div>
                 <div>上下游：{caps.relationNote}</div>

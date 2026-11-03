@@ -267,8 +267,8 @@ export function ServiceTicketWorkspace() {
       />
 
       {error ? (
-        <div className="flex items-start gap-2 rounded border border-destructive/40 bg-destructive/5 p-3 text-sm">
-          <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+        <div className="border-destructive/40 bg-destructive/5 flex items-start gap-2 rounded border p-3 text-sm">
+          <TriangleAlert className="text-destructive mt-0.5 h-4 w-4 shrink-0" />
           <span className="text-destructive">{error}</span>
         </div>
       ) : null}
@@ -400,8 +400,8 @@ export function ServiceTicketWorkspace() {
             创建工单
           </Button>
           <span className="text-muted-foreground text-xs">
-            一张售后单**只转一次工单**：重复转会明确报错并附上已有工单号。
-            SLA 时限从租户 SLA 策略解析，**没配就报错**（本服务不编一个默认小时数）。
+            一张售后单**只转一次工单**：重复转会明确报错并附上已有工单号。 SLA 时限从租户 SLA
+            策略解析，**没配就报错**（本服务不编一个默认小时数）。
           </span>
         </div>
       </SectionCard>
@@ -511,10 +511,7 @@ export function ServiceTicketWorkspace() {
         {loading ? (
           <div className="text-muted-foreground py-6 text-center text-sm">加载中…</div>
         ) : data && data.rows.length === 0 ? (
-          <EmptyState
-            title="没有工单"
-            description="从上面的表单建一张工单，或者调整筛选条件。"
-          />
+          <EmptyState title="没有工单" description="从上面的表单建一张工单，或者调整筛选条件。" />
         ) : data ? (
           <table className="w-full text-sm">
             <thead>
@@ -890,16 +887,14 @@ export function ServiceTicketWorkspace() {
                           escalateTarget === 'COMPLAINT' && escalateAmount
                             ? Number(escalateAmount)
                             : null,
-                        targetCurrency:
-                          escalateTarget === 'COMPLAINT' ? escalateCurrency : null,
+                        targetCurrency: escalateTarget === 'COMPLAINT' ? escalateCurrency : null,
                         targetQuantity:
                           escalateTarget === 'COMPLAINT' && escalateQuantity
                             ? Number(escalateQuantity)
                             : null,
                         platformCode: escalateTarget === 'DISPUTE' ? escalatePlatformCode : null,
                         platformName: escalateTarget === 'DISPUTE' ? escalatePlatformName : null,
-                        platformDisputeNo:
-                          escalateTarget === 'DISPUTE' ? escalateDisputeNo : null,
+                        platformDisputeNo: escalateTarget === 'DISPUTE' ? escalateDisputeNo : null,
                         platformOrderNo: escalateTarget === 'DISPUTE' ? escalateOrderNo : null,
                         disputeType: escalateTarget === 'DISPUTE' ? escalateDisputeType : null,
                         disputeAmount:
@@ -1043,9 +1038,9 @@ export function ServiceTicketWorkspace() {
                 </div>
               )}
               <div className="text-muted-foreground mt-1 text-xs">
-                升级**不是**换个标签：咨询 → 投诉会在原售后单**之外**真的建出一张售后单，
-                投诉 → 纠纷会真的建出一条平台纠纷（11.4.1.1），
-                两边都把工单号 / 售后单号 / 主题 / 诉求原文带过去，并把新单号记回工单。
+                升级**不是**换个标签：咨询 → 投诉会在原售后单**之外**真的建出一张售后单， 投诉 →
+                纠纷会真的建出一条平台纠纷（11.4.1.1）， 两边都把工单号 / 售后单号 / 主题 /
+                诉求原文带过去，并把新单号记回工单。
                 {escalateIncomplete ? ` 当前还差：${escalateIncomplete}` : ''}
               </div>
             </div>
@@ -1143,7 +1138,9 @@ export function ServiceTicketWorkspace() {
 
             {/* ---- 转派历史（append-only）---- */}
             <div>
-              <div className="mb-1 text-sm font-medium">转派历史（{detail.assignments.length}）</div>
+              <div className="mb-1 text-sm font-medium">
+                转派历史（{detail.assignments.length}）
+              </div>
               {detail.assignments.length === 0 ? (
                 <div className="text-muted-foreground text-xs">还没有派单记录。</div>
               ) : (

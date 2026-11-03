@@ -567,7 +567,9 @@ export function validateRuleForm(input: SaveTransitRuleInput): string[] {
     );
   }
   if (input.weightMaxKg !== null && input.weightMaxKg === input.weightMinKg) {
-    problems.push('重量段是半开区间 [下限, 上限)：留空上限表示「大于下限」，不要填一个等于下限的值');
+    problems.push(
+      '重量段是半开区间 [下限, 上限)：留空上限表示「大于下限」，不要填一个等于下限的值',
+    );
   }
   if (input.transitDaysMin < 1) {
     problems.push('时效天数至少 1 天：为 0 时承诺不出送达天数（可用性会停在「缺时效」）');
@@ -600,7 +602,13 @@ export function validateSizeForm(input: SaveSizeLimitInput): string[] {
   if (input.countryCode.trim() && !/^[A-Za-z]{2}$/.test(input.countryCode.trim())) {
     problems.push('国家必须是两位字母（如 DE / US）；留空表示渠道级');
   }
-  const dims = [input.maxLengthCm, input.maxWidthCm, input.maxHeightCm, input.maxGirthCm, input.maxWeightKg];
+  const dims = [
+    input.maxLengthCm,
+    input.maxWidthCm,
+    input.maxHeightCm,
+    input.maxGirthCm,
+    input.maxWeightKg,
+  ];
   if (dims.every((d) => d === null)) {
     problems.push('至少要给一项上限：否则这是一行「没写限制」');
   }
@@ -717,7 +725,9 @@ export function fetchMarkings(filters: TransitFilters): Promise<MarkingRequireme
   if (filters.channelId) query.set('channelId', filters.channelId);
   query.set('page', String(filters.page));
   query.set('size', String(filters.size));
-  return api<MarkingRequirementPage>(`channel/logistics-transit-limits/markings?${query.toString()}`);
+  return api<MarkingRequirementPage>(
+    `channel/logistics-transit-limits/markings?${query.toString()}`,
+  );
 }
 
 export function saveTransitRule(input: SaveTransitRuleInput): Promise<TransitRuleRow> {

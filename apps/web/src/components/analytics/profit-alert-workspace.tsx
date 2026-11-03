@@ -104,7 +104,9 @@ export function AnalyticsProfitAlertWorkspace() {
         api<ProfitAlertPage>(`reporting/profit-alert/alerts?${query}`),
         api<ProfitAlertCapabilities>('reporting/profit-alert/capabilities'),
         api<ProfitAlertRule[]>('reporting/profit-alert/rules'),
-        api<ProfitAlertNotificationPage>('reporting/profit-alert/notifications?from=' + from + '&to=' + to),
+        api<ProfitAlertNotificationPage>(
+          'reporting/profit-alert/notifications?from=' + from + '&to=' + to,
+        ),
       ]);
       setData(alerts);
       setCapabilities(caps);
@@ -143,10 +145,12 @@ export function AnalyticsProfitAlertWorkspace() {
   const registerNotifications = useCallback(
     () =>
       run(async () => {
-        const result = await api<{ matched: number; created: number; skipped: number; note: string }>(
-          'reporting/profit-alert/notifications?from=' + from + '&to=' + to,
-          'POST',
-        );
+        const result = await api<{
+          matched: number;
+          created: number;
+          skipped: number;
+          note: string;
+        }>('reporting/profit-alert/notifications?from=' + from + '&to=' + to, 'POST');
         return `命中 ${result.matched} 条：新登记 ${result.created} 条，已登记过 ${result.skipped} 条。`;
       }),
     [run, from, to],
@@ -339,7 +343,12 @@ export function AnalyticsProfitAlertWorkspace() {
               unit="条"
               polarity="negative"
             />
-            <StatCard label="警告" value={data.summary.warningCount} unit="条" polarity="negative" />
+            <StatCard
+              label="警告"
+              value={data.summary.warningCount}
+              unit="条"
+              polarity="negative"
+            />
             <StatCard
               label="判不出来"
               value={data.summary.undecidedCount}
@@ -372,9 +381,7 @@ export function AnalyticsProfitAlertWorkspace() {
                       <Badge tone={severityTone(alert.severity)}>
                         {severityLabel(alert.severity, alert.severityLabel)}
                       </Badge>
-                      <span className="text-copy-13 text-muted-foreground">
-                        {alert.scopeLabel}
-                      </span>
+                      <span className="text-copy-13 text-muted-foreground">{alert.scopeLabel}</span>
                       <span className="text-copy-13 text-muted-foreground">{alert.currency}</span>
                     </div>
                     <dl className="text-copy-13 mt-3 grid grid-cols-1 gap-x-6 gap-y-1 sm:grid-cols-2 lg:grid-cols-4">
@@ -397,7 +404,9 @@ export function AnalyticsProfitAlertWorkspace() {
                       <div>
                         <dt className="text-muted-foreground">收入</dt>
                         <dd className="text-foreground tabular-nums">
-                          {alert.revenue === null ? '—' : alert.revenue.toFixed(2) + ' ' + alert.currency}
+                          {alert.revenue === null
+                            ? '—'
+                            : alert.revenue.toFixed(2) + ' ' + alert.currency}
                         </dd>
                       </div>
                       <div>
@@ -409,7 +418,8 @@ export function AnalyticsProfitAlertWorkspace() {
                       <div>
                         <dt className="text-muted-foreground">阈值口径</dt>
                         <dd className="text-foreground">
-                          {thresholdModeLabel(alert.thresholdMode)} · {baselineModeLabel(alert.baselineMode)}
+                          {thresholdModeLabel(alert.thresholdMode)} ·{' '}
+                          {baselineModeLabel(alert.baselineMode)}
                         </dd>
                       </div>
                     </dl>
@@ -504,10 +514,7 @@ export function AnalyticsProfitAlertWorkspace() {
             ) : (
               <div className="space-y-2">
                 {notifications.notifications.map((item: ProfitAlertNotification) => (
-                  <div
-                    key={item.id}
-                    className="border-border rounded-lg border px-4 py-2"
-                  >
+                  <div key={item.id} className="border-border rounded-lg border px-4 py-2">
                     <div className="flex flex-wrap items-center gap-2">
                       <Badge tone={notificationStatusTone(item.status)}>
                         {notificationStatusLabel(item.status)}

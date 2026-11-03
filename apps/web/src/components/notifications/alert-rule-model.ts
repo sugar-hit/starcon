@@ -200,11 +200,10 @@ export function validateDraft(
 }
 
 /** 度量名（找不到就退回码本身，不假装知道）。 */
-export function metricName(
-  vocabulary: AlertRuleVocabulary | null,
-  metricCode: string,
-): string {
-  return vocabulary?.metrics.find((metric) => metric.code === metricCode)?.displayName ?? metricCode;
+export function metricName(vocabulary: AlertRuleVocabulary | null, metricCode: string): string {
+  return (
+    vocabulary?.metrics.find((metric) => metric.code === metricCode)?.displayName ?? metricCode
+  );
 }
 
 /** 度量是否已被上游接通（未接通的指标建出来的规则，求值时会判「不可判定」）。 */

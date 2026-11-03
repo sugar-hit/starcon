@@ -16,11 +16,7 @@ import { ListingDetailWorkspace } from '@/components/listing-detail/listing-deta
  * <p>🔴 这一层是纯展示壳：加载 / 失败 / 未找到三态与全部数据取数都在 {@link ListingDetailWorkspace} 里，
  * 本文件不引入任何 mock 数据。
  */
-export default function ListingDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function ListingDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   return (
     <div className="space-y-4">

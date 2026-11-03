@@ -161,7 +161,10 @@ describe('时间线说话方', () => {
   it('四档语气互不相同', () => {
     const tones = (['BUYER', 'US', 'PLATFORM', 'SYSTEM'] as const).map((s) => timelineTone(s).tone);
     expect(new Set(tones).size).toBe(4);
-    expect(new Set((['BUYER', 'US', 'PLATFORM', 'SYSTEM'] as const).map((s) => timelineTone(s).badge)).size).toBe(4);
+    expect(
+      new Set((['BUYER', 'US', 'PLATFORM', 'SYSTEM'] as const).map((s) => timelineTone(s).badge))
+        .size,
+    ).toBe(4);
   });
 
   it('未知说话方回落到 SYSTEM 而不是任何一侧', () => {

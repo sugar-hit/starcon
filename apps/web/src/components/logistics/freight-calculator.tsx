@@ -160,7 +160,7 @@ export function FreightCalculatorWorkspace() {
               <label className="flex flex-col gap-1 text-sm">
                 <span>收货国家（两位代码）</span>
                 <input
-                  className="border rounded px-2 py-1"
+                  className="rounded border px-2 py-1"
                   value={input.destCountry}
                   onChange={(e) => update('destCountry', e.target.value)}
                   placeholder="DE"
@@ -169,7 +169,7 @@ export function FreightCalculatorWorkspace() {
               <label className="flex flex-col gap-1 text-sm">
                 <span>适用店铺编码（可空）</span>
                 <input
-                  className="border rounded px-2 py-1"
+                  className="rounded border px-2 py-1"
                   value={input.shopCode}
                   onChange={(e) => update('shopCode', e.target.value)}
                   placeholder="SHOP-DE-1"
@@ -178,7 +178,7 @@ export function FreightCalculatorWorkspace() {
               <label className="flex flex-col gap-1 text-sm">
                 <span>计费重量（kg）</span>
                 <input
-                  className="border rounded px-2 py-1"
+                  className="rounded border px-2 py-1"
                   value={input.weightKg}
                   onChange={(e) => update('weightKg', e.target.value)}
                 />
@@ -186,7 +186,7 @@ export function FreightCalculatorWorkspace() {
               <label className="flex flex-col gap-1 text-sm">
                 <span>件数</span>
                 <input
-                  className="border rounded px-2 py-1"
+                  className="rounded border px-2 py-1"
                   value={input.pieces}
                   onChange={(e) => update('pieces', e.target.value)}
                 />
@@ -194,7 +194,7 @@ export function FreightCalculatorWorkspace() {
               <label className="flex flex-col gap-1 text-sm">
                 <span>长（cm）</span>
                 <input
-                  className="border rounded px-2 py-1"
+                  className="rounded border px-2 py-1"
                   value={input.lengthCm}
                   onChange={(e) => update('lengthCm', e.target.value)}
                   placeholder="按体积重 / 按体积计费才需要"
@@ -203,7 +203,7 @@ export function FreightCalculatorWorkspace() {
               <label className="flex flex-col gap-1 text-sm">
                 <span>宽（cm）</span>
                 <input
-                  className="border rounded px-2 py-1"
+                  className="rounded border px-2 py-1"
                   value={input.widthCm}
                   onChange={(e) => update('widthCm', e.target.value)}
                 />
@@ -211,7 +211,7 @@ export function FreightCalculatorWorkspace() {
               <label className="flex flex-col gap-1 text-sm">
                 <span>高（cm）</span>
                 <input
-                  className="border rounded px-2 py-1"
+                  className="rounded border px-2 py-1"
                   value={input.heightCm}
                   onChange={(e) => update('heightCm', e.target.value)}
                 />
@@ -219,7 +219,7 @@ export function FreightCalculatorWorkspace() {
               <label className="flex flex-col gap-1 text-sm">
                 <span>申报价值（可空）</span>
                 <input
-                  className="border rounded px-2 py-1"
+                  className="rounded border px-2 py-1"
                   value={input.declaredValue}
                   onChange={(e) => update('declaredValue', e.target.value)}
                   placeholder="影响按申报价值投保的保费"
@@ -228,7 +228,7 @@ export function FreightCalculatorWorkspace() {
               <label className="flex flex-col gap-1 text-sm">
                 <span>申报币种（可空）</span>
                 <input
-                  className="border rounded px-2 py-1"
+                  className="rounded border px-2 py-1"
                   value={input.declaredCurrency}
                   onChange={(e) => update('declaredCurrency', e.target.value)}
                   placeholder="USD"
@@ -237,7 +237,7 @@ export function FreightCalculatorWorkspace() {
               <label className="flex flex-col gap-1 text-sm md:col-span-3">
                 <span>品类编码（逗号或空格分隔，可空）</span>
                 <input
-                  className="border rounded px-2 py-1"
+                  className="rounded border px-2 py-1"
                   value={input.categoryCodes}
                   onChange={(e) => update('categoryCodes', e.target.value)}
                   placeholder="HOME_GOODS, 3C"
@@ -283,7 +283,7 @@ export function FreightCalculatorWorkspace() {
             <div className="flex gap-2">
               <button
                 type="button"
-                className="border rounded px-3 py-1 text-sm disabled:opacity-50"
+                className="rounded border px-3 py-1 text-sm disabled:opacity-50"
                 disabled={estimating}
                 onClick={onEstimate}
               >
@@ -299,8 +299,8 @@ export function FreightCalculatorWorkspace() {
               </button>
             </div>
             <p className="text-muted-foreground text-xs">
-              限制判定（禁限品类 / 电池液体磁力 / 保价上限 / 申报上下限）由上游 10.1.1.2 的服务端判定端点给出，
-              页面只展示结论与逐条理由，不自己比对限制字段。
+              限制判定（禁限品类 / 电池液体磁力 / 保价上限 / 申报上下限）由上游 10.1.1.2
+              的服务端判定端点给出， 页面只展示结论与逐条理由，不自己比对限制字段。
             </p>
           </section>
 
@@ -370,11 +370,15 @@ export function FreightCalculatorWorkspace() {
                         <td className="p-2">{moneyText(line.remoteFee)}</td>
                         <td className="p-2">{moneyText(line.peakFee)}</td>
                         <td className="p-2">{moneyText(line.insuranceFee)}</td>
-                        <td className="font-medium p-2">{totalText(line)}</td>
-                        <td className="p-2">{transitText(line.transitMinDays, line.transitMaxDays)}</td>
+                        <td className="p-2 font-medium">{totalText(line)}</td>
+                        <td className="p-2">
+                          {transitText(line.transitMinDays, line.transitMaxDays)}
+                        </td>
                         <td className="p-2">
                           {rateSourceLabel(line.rateSource)}
-                          <div className="text-muted-foreground text-xs">{basisLabel(line.basis)}</div>
+                          <div className="text-muted-foreground text-xs">
+                            {basisLabel(line.basis)}
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -385,16 +389,19 @@ export function FreightCalculatorWorkspace() {
               {result.lines.some((line) => line.notes.length > 0) ? (
                 <ul className="text-muted-foreground list-disc pl-5 text-xs">
                   {result.lines.flatMap((line) =>
-                    line.notes.map((note) => <li key={`${line.channelId}-${note}`}>{`${line.channelCode}：${note}`}</li>),
+                    line.notes.map((note) => (
+                      <li key={`${line.channelId}-${note}`}>{`${line.channelCode}：${note}`}</li>
+                    )),
                   )}
                 </ul>
               ) : null}
               <p className="text-muted-foreground text-xs">{result.note}</p>
 
               {quoteDetail ? (
-                <details className="border rounded p-3 text-sm">
+                <details className="rounded border p-3 text-sm">
                   <summary className="cursor-pointer">
-                    试算单 #{quoteDetail.quote.id.slice(0, 8)} 的计算轨迹（口径 {quoteDetail.quote.costBasis}）
+                    试算单 #{quoteDetail.quote.id.slice(0, 8)} 的计算轨迹（口径{' '}
+                    {quoteDetail.quote.costBasis}）
                   </summary>
                   <ul className="mt-2 flex list-disc flex-col gap-1 pl-5 text-xs">
                     {quoteDetail.lines.map((line) => (
@@ -425,8 +432,8 @@ export function FreightCalculatorWorkspace() {
             )}
             {rules && rules.countryRules.length > 0 ? (
               <p className="text-muted-foreground text-xs">
-                分国家规则 {rules.countryRules.length} 条（偏远标记 + 试算时效区间）；未登记时效的渠道试算时不给
-                时效，不编天数。
+                分国家规则 {rules.countryRules.length} 条（偏远标记 +
+                试算时效区间）；未登记时效的渠道试算时不给 时效，不编天数。
               </p>
             ) : null}
           </section>
@@ -482,7 +489,8 @@ export function FreightCalculatorWorkspace() {
                   .filter((dimension) => !dimension.available)
                   .map((dimension) => (
                     <li key={dimension.dimension}>
-                      {dimension.description}：未交付（归属 {dimension.ownerModule}）—— {dimension.impact}
+                      {dimension.description}：未交付（归属 {dimension.ownerModule}）——{' '}
+                      {dimension.impact}
                     </li>
                   ))}
               </ul>

@@ -308,10 +308,15 @@ export function platformLabel(platformCode: string, platformName: string): strin
 }
 
 /** 平台下拉项（**空串 = 全部平台**，不是「不筛」以外的第三种含义）。 */
-export function platformFilterOptions(platforms: StorePlatformOption[]): { value: string; label: string }[] {
+export function platformFilterOptions(
+  platforms: StorePlatformOption[],
+): { value: string; label: string }[] {
   return [
     { value: '', label: '全部平台' },
-    ...platforms.map((p) => ({ value: p.platformCode, label: platformLabel(p.platformCode, p.platformName) })),
+    ...platforms.map((p) => ({
+      value: p.platformCode,
+      label: platformLabel(p.platformCode, p.platformName),
+    })),
   ];
 }
 
@@ -333,11 +338,26 @@ export interface MatrixColumn {
 }
 
 export const MATRIX_COLUMNS: readonly MatrixColumn[] = [
-  { metricCode: 'STORE_GMV_PLATFORM', label: '平台侧成交金额', unit: 'CURRENCY', currencyAware: true },
-  { metricCode: 'STORE_GMV_RESTORED', label: '还原口径成交金额', unit: 'CURRENCY', currencyAware: true },
+  {
+    metricCode: 'STORE_GMV_PLATFORM',
+    label: '平台侧成交金额',
+    unit: 'CURRENCY',
+    currencyAware: true,
+  },
+  {
+    metricCode: 'STORE_GMV_RESTORED',
+    label: '还原口径成交金额',
+    unit: 'CURRENCY',
+    currencyAware: true,
+  },
   { metricCode: 'STORE_CALIBER_GAP', label: '口径差异额', unit: 'CURRENCY', currencyAware: true },
   { metricCode: 'STORE_ORDER_COUNT', label: '成交订单量', unit: 'COUNT', currencyAware: false },
-  { metricCode: 'STORE_GMV_GROWTH', label: '成交金额环比增长率', unit: 'PERCENT', currencyAware: false },
+  {
+    metricCode: 'STORE_GMV_GROWTH',
+    label: '成交金额环比增长率',
+    unit: 'PERCENT',
+    currencyAware: false,
+  },
   { metricCode: 'STORE_GMV_PER_ORDER', label: '客单价', unit: 'CURRENCY', currencyAware: true },
   { metricCode: 'STORE_RETURN_RATE', label: '退货率', unit: 'PERCENT', currencyAware: false },
   { metricCode: 'STORE_AD_ROAS', label: '广告产出比', unit: 'RATIO', currencyAware: false },
@@ -452,7 +472,9 @@ export function groupCaliberNote(group: PlatformGroup): string {
  * <p>⚠️ **排名在币种内做**：同一个指标下不同币种的条目**不能混在一张榜里**比较 ——
  * 它们的 rank 是各自币种内的位次。
  */
-export function rankingEntries(ranking: MetricRanking): { entries: MetricRanking['entries']; currency: string }[] {
+export function rankingEntries(
+  ranking: MetricRanking,
+): { entries: MetricRanking['entries']; currency: string }[] {
   const byCurrency = new Map<string, MetricRanking['entries']>();
   for (const entry of ranking.entries) {
     const bucket = byCurrency.get(entry.currency) ?? [];

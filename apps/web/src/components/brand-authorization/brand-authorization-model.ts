@@ -383,7 +383,9 @@ export async function fetchChecks(
   return api<BrandAuthorizationCheckPage>(`${BASE}/checks?${query.toString()}`);
 }
 
-export async function fetchBrandCandidates(keyword?: string): Promise<BrandAuthorizationCandidatePage> {
+export async function fetchBrandCandidates(
+  keyword?: string,
+): Promise<BrandAuthorizationCandidatePage> {
   const query = keyword ? `?keyword=${encodeURIComponent(keyword)}` : '';
   return api<BrandAuthorizationCandidatePage>(`${BASE}/candidates/brands${query}`);
 }

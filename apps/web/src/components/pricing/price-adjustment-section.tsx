@@ -133,7 +133,9 @@ export function PriceAdjustmentSection() {
       } else {
         // 🔴 把你看到的旧价**自动填上** —— 这样建单时服务端能校验它有没有过期。
         patch({ oldPrice: found.price });
-        setNotice(`当前价 ${priceText(found.price)} ${found.currency}（${priceSourceLabel(found.source)}）。`);
+        setNotice(
+          `当前价 ${priceText(found.price)} ${found.currency}（${priceSourceLabel(found.source)}）。`,
+        );
       }
     } catch (e) {
       setCurrentPrice(null);
@@ -183,7 +185,9 @@ export function PriceAdjustmentSection() {
       const detail = await work(selected);
       setSelected(detail);
       await reloadList();
-      setNotice(`${what}完成：当前状态「${statusLabel(detail.status)}」（版本 ${detail.version}）。`);
+      setNotice(
+        `${what}完成：当前状态「${statusLabel(detail.status)}」（版本 ${detail.version}）。`,
+      );
     } catch (e) {
       setError(e instanceof Error ? e.message : `${what}失败，请稍后重试`);
     } finally {
@@ -197,9 +201,8 @@ export function PriceAdjustmentSection() {
       { label: '调价单', value: orders.total, hint: '当前筛选下共多少张', tone: 'info' as const },
       {
         label: '本页已批 / 已执行',
-        value: orders.items.filter(
-          (o) => o.status === 'APPROVED' || o.status === 'EXECUTED',
-        ).length,
+        value: orders.items.filter((o) => o.status === 'APPROVED' || o.status === 'EXECUTED')
+          .length,
         hint: '可执行 / 已生效',
         tone: 'success' as const,
       },
@@ -394,7 +397,9 @@ export function PriceAdjustmentSection() {
               type="number"
               step="0.01"
               value={request.newPrice || ''}
-              onChange={(e) => patch({ newPrice: e.target.value === '' ? 0 : Number(e.target.value) })}
+              onChange={(e) =>
+                patch({ newPrice: e.target.value === '' ? 0 : Number(e.target.value) })
+              }
             />
           </FormField>
           <FormField
@@ -441,7 +446,9 @@ export function PriceAdjustmentSection() {
               step="0.01"
               value={request.logisticsCostPerUnit ?? ''}
               onChange={(e) =>
-                patch({ logisticsCostPerUnit: e.target.value === '' ? null : Number(e.target.value) })
+                patch({
+                  logisticsCostPerUnit: e.target.value === '' ? null : Number(e.target.value),
+                })
               }
             />
           </FormField>
@@ -470,7 +477,11 @@ export function PriceAdjustmentSection() {
             />
           </FormField>
           <FormField id="pa-note" label="备注" hint="补充说明">
-            <Input id="pa-note" value={request.note} onChange={(e) => patch({ note: e.target.value })} />
+            <Input
+              id="pa-note"
+              value={request.note}
+              onChange={(e) => patch({ note: e.target.value })}
+            />
           </FormField>
         </div>
 
@@ -571,14 +582,14 @@ export function PriceAdjustmentSection() {
                   setNotice('');
                   void fetchPriceAdjustment(order.id)
                     .then((detail) => setSelected(detail))
-                    .catch((e) =>
-                      setError(e instanceof Error ? e.message : '调价单详情读不到'),
-                    );
+                    .catch((e) => setError(e instanceof Error ? e.message : '调价单详情读不到'));
                 }}
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge tone={statusTone(order.status)}>{statusLabel(order.status)}</Badge>
-                  <span className="text-copy-13 text-foreground">{priceAdjustmentSummary(order)}</span>
+                  <span className="text-copy-13 text-foreground">
+                    {priceAdjustmentSummary(order)}
+                  </span>
                   <span className="text-muted-foreground text-copy-12">版本 {order.version}</span>
                 </div>
                 <div className="text-muted-foreground text-copy-12 mt-1">
@@ -615,10 +626,7 @@ export function PriceAdjustmentSection() {
             </div>
           </div>
         ) : orders ? (
-          <EmptyState
-            title="没有匹配的调价单"
-            description="换个筛选条件，或在上方发起一次调价。"
-          />
+          <EmptyState title="没有匹配的调价单" description="换个筛选条件，或在上方发起一次调价。" />
         ) : (
           <p className="text-muted-foreground text-copy-13">正在读调价单台账……</p>
         )}
@@ -631,7 +639,11 @@ export function PriceAdjustmentSection() {
           description={`版本 ${selected.version} —— 每次状态流转都要把这个版本号带回去（对不上就是 409）。`}
         >
           <div className="grid gap-2 md:grid-cols-4">
-            <StatCard label="状态" value={statusLabel(selected.status)} comparisonLabel={`版本 ${selected.version}`} />
+            <StatCard
+              label="状态"
+              value={statusLabel(selected.status)}
+              comparisonLabel={`版本 ${selected.version}`}
+            />
             <StatCard
               label="变更前后"
               value={`${priceText(selected.oldPrice)} → ${priceText(selected.newPrice)}`}
@@ -742,8 +754,8 @@ export function PriceAdjustmentSection() {
                   <div className="text-muted-foreground text-copy-12 mt-1">
                     毛利 {moneyText(item.grossProfitBefore)} → {moneyText(item.grossProfitAfter)} ·
                     毛利率 {percentText(item.grossMarginBefore, '不可信')} →{' '}
-                    {percentText(item.grossMarginAfter, '不可信')} · 亏损 {lossText(item.lossBefore)} →{' '}
-                    {lossText(item.lossAfter)}
+                    {percentText(item.grossMarginAfter, '不可信')} · 亏损{' '}
+                    {lossText(item.lossBefore)} → {lossText(item.lossAfter)}
                   </div>
                 </div>
               ))}

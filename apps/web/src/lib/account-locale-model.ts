@@ -180,9 +180,10 @@ export function isRenderableTimeZone(id: string): boolean {
 /** 当前偏移标签（照抄 {@code packages/ui/src/lib/world-clock.ts} 的 {@code shortOffset} 写法）。 */
 export function formatOffset(instant: Date, timeZone: string): string {
   try {
-    const parts = new Intl.DateTimeFormat('en', { timeZone, timeZoneName: 'shortOffset' }).formatToParts(
-      instant,
-    );
+    const parts = new Intl.DateTimeFormat('en', {
+      timeZone,
+      timeZoneName: 'shortOffset',
+    }).formatToParts(instant);
     return parts.find((part) => part.type === 'timeZoneName')?.value ?? '';
   } catch {
     return '';
@@ -225,7 +226,8 @@ export function buildTimezoneCandidates(options: {
     });
   };
 
-  for (const site of platformSites) put(site.timezone, 'platform-site', `${site.platformName} ${site.name}`);
+  for (const site of platformSites)
+    put(site.timezone, 'platform-site', `${site.platformName} ${site.name}`);
   for (const id of [...supportedTimeZoneIds()].sort()) put(id, 'iana');
   put(defaultTimezone, 'iana');
   if (current) put(current, 'current');
@@ -277,10 +279,7 @@ export function formatDateTime(
 }
 
 /** 把服务端声明的口径转成本地类型（契约里它是一个开放对象）。 */
-export function toDisplayConvention(raw: {
-  locale: string;
-  options: unknown;
-}): DisplayConvention {
+export function toDisplayConvention(raw: { locale: string; options: unknown }): DisplayConvention {
   return {
     locale: raw.locale || DEFAULT_LOCALE,
     options: (raw.options ?? {}) as Intl.DateTimeFormatOptions,

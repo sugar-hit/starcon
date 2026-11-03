@@ -76,7 +76,8 @@ export function AdGroupsWorkspace() {
   const [createErrors, setCreateErrors] = useState<string[]>([]);
   const [createResult, setCreateResult] = useState<AdGroupCreateResult | null>(null);
 
-  const [settingsInput, setSettingsInput] = useState<AdGroupSettingsInput>(emptyAdGroupSettingsInput);
+  const [settingsInput, setSettingsInput] =
+    useState<AdGroupSettingsInput>(emptyAdGroupSettingsInput);
   const [settingsErrors, setSettingsErrors] = useState<string[]>([]);
 
   const [candidates, setCandidates] = useState<AdGroupProductCandidateRow[]>([]);
@@ -207,7 +208,9 @@ export function AdGroupsWorkspace() {
       await updateAdGroupSettings(detail.group.id, {
         groupName: settingsInput.groupName,
         status: settingsInput.status || undefined,
-        dailyBudget: settingsInput.dailyBudget.trim() ? Number(settingsInput.dailyBudget) : undefined,
+        dailyBudget: settingsInput.dailyBudget.trim()
+          ? Number(settingsInput.dailyBudget)
+          : undefined,
         clearDailyBudget: settingsInput.clearDailyBudget ? true : undefined,
         targetingType: settingsInput.targetingType,
         matchType: settingsInput.matchType,
@@ -252,8 +255,8 @@ export function AdGroupsWorkspace() {
           14.1.2.1 · 关联投放商品、匹配类型、定向设置、默认竞价；组级报表入口指向 14.3.1.2。
         </p>
         <p className="text-muted-foreground text-xs">
-          🔴 组级表现指标当前**不可得**（没有组级指标事实表），页面不会拿活动级指标冒充；
-          🔴 本地写只落本地并标「待回写平台」，平台回写队列未交付。
+          🔴 组级表现指标当前**不可得**（没有组级指标事实表），页面不会拿活动级指标冒充； 🔴
+          本地写只落本地并标「待回写平台」，平台回写队列未交付。
         </p>
       </header>
 
@@ -279,7 +282,7 @@ export function AdGroupsWorkspace() {
                   <td className="p-2">{d.description}</td>
                   <td className="p-2">{d.available ? '已交付' : '未交付'}</td>
                   <td className="p-2">{d.available ? d.source : d.ownerModule}</td>
-                  <td className="p-2 text-muted-foreground text-xs">{d.impact}</td>
+                  <td className="text-muted-foreground p-2 text-xs">{d.impact}</td>
                 </tr>
               ))}
             </tbody>
@@ -287,9 +290,9 @@ export function AdGroupsWorkspace() {
           <p className="text-muted-foreground text-xs">{capabilities.targetingNote}</p>
           <p className="text-muted-foreground text-xs">{capabilities.platformWritebackNote}</p>
           <p className="text-muted-foreground text-xs">
-            护栏：组级日预算上限 {money(capabilities.guardrails.maxGroupDailyBudget)}，
-            默认竞价上限 {money(capabilities.guardrails.maxDefaultBid)}，
-            单组最多关联 {capabilities.guardrails.maxProductsPerGroup} 个投放商品。
+            护栏：组级日预算上限 {money(capabilities.guardrails.maxGroupDailyBudget)}， 默认竞价上限{' '}
+            {money(capabilities.guardrails.maxDefaultBid)}， 单组最多关联{' '}
+            {capabilities.guardrails.maxProductsPerGroup} 个投放商品。
             {capabilities.guardrails.note}
           </p>
         </Section>
@@ -420,7 +423,7 @@ export function AdGroupsWorkspace() {
                   <td className="p-2">{g.productCount}</td>
                   <td className="p-2">
                     {g.pendingPlatformWriteback ? (
-                      <span className="text-amber-600 text-xs">待回写平台</span>
+                      <span className="text-xs text-amber-600">待回写平台</span>
                     ) : (
                       <span className="text-muted-foreground text-xs">—</span>
                     )}
@@ -461,9 +464,7 @@ export function AdGroupsWorkspace() {
             <input
               className="rounded border px-2 py-1 text-sm"
               value={createInput.campaignId}
-              onChange={(e) =>
-                setCreateInput({ ...createInput, campaignId: e.target.value })
-              }
+              onChange={(e) => setCreateInput({ ...createInput, campaignId: e.target.value })}
               placeholder="所属活动"
             />
           </Field>
@@ -541,8 +542,8 @@ export function AdGroupsWorkspace() {
         {createResult ? (
           <div className="space-y-1 text-sm">
             <p>
-              广告组「{createResult.groupName}」已本地落库，状态 {groupStatusLabel(createResult.status)}，
-              平台侧 id {createResult.externalGroupId}。
+              广告组「{createResult.groupName}」已本地落库，状态{' '}
+              {groupStatusLabel(createResult.status)}， 平台侧 id {createResult.externalGroupId}。
             </p>
             <p className="text-muted-foreground text-xs">{createResult.note}</p>
           </div>
@@ -567,7 +568,10 @@ export function AdGroupsWorkspace() {
             <Stat label="匹配类型（原文）" value={detail.group.matchType || '—'} />
             <Stat label="定向设置（原文）" value={detail.group.targetingSettings || '—'} />
             <Stat label="组内创意" value={String(detail.creativeCount)} />
-            <Stat label="回写状态" value={pendingWritebackText(detail.group.pendingPlatformWriteback)} />
+            <Stat
+              label="回写状态"
+              value={pendingWritebackText(detail.group.pendingPlatformWriteback)}
+            />
             <Stat label="本地改动时刻" value={timestampText(detail.group.localChangedAt)} />
             <Stat label="结构截至" value={timestampText(detail.group.dataAsOf)} />
             <Stat label="平台侧 id" value={detail.group.externalGroupId} />
@@ -575,23 +579,23 @@ export function AdGroupsWorkspace() {
 
           {/* 🔴 组级表现：拿不到就写拿不到 */}
           <div className="space-y-1">
-            <h3 className="font-medium text-sm">组级表现</h3>
-            <p className="text-muted-foreground text-xs whitespace-pre-line">
+            <h3 className="text-sm font-medium">组级表现</h3>
+            <p className="text-muted-foreground whitespace-pre-line text-xs">
               {groupPerformanceText(detail.performance)}
             </p>
           </div>
 
           {/* 🔴 组级报表入口 */}
           <div className="space-y-1">
-            <h3 className="font-medium text-sm">组级报表入口</h3>
-            <p className="text-muted-foreground text-xs whitespace-pre-line">
+            <h3 className="text-sm font-medium">组级报表入口</h3>
+            <p className="text-muted-foreground whitespace-pre-line text-xs">
               {groupReportEntryText(detail.reportEntry)}
             </p>
           </div>
 
           {/* 下游入口 */}
           <div className="space-y-1">
-            <h3 className="font-medium text-sm">下游入口</h3>
+            <h3 className="text-sm font-medium">下游入口</h3>
             <ul className="space-y-1 text-xs">
               {detail.entries.map((e) => (
                 <li key={e.entry}>
@@ -599,7 +603,10 @@ export function AdGroupsWorkspace() {
                     {e.label}：{e.available ? '可用' : '不可用'}
                   </span>
                   {e.available ? (
-                    <span className="text-muted-foreground"> （{e.source}）{e.note}</span>
+                    <span className="text-muted-foreground">
+                      {' '}
+                      （{e.source}）{e.note}
+                    </span>
                   ) : (
                     <span className="text-muted-foreground">
                       {' '}
@@ -613,11 +620,9 @@ export function AdGroupsWorkspace() {
 
           {/* 投放商品 */}
           <div className="space-y-1">
-            <h3 className="font-medium text-sm">投放商品（{detail.products.length}）</h3>
+            <h3 className="text-sm font-medium">投放商品（{detail.products.length}）</h3>
             {detail.products.length === 0 ? (
-              <p className="text-muted-foreground text-xs">
-                这个组还没有关联投放商品。
-              </p>
+              <p className="text-muted-foreground text-xs">这个组还没有关联投放商品。</p>
             ) : (
               <table className="w-full text-sm">
                 <thead>
@@ -647,7 +652,7 @@ export function AdGroupsWorkspace() {
 
           {/* 改组设置 */}
           <div className="space-y-2">
-            <h3 className="font-medium text-sm">改组设置</h3>
+            <h3 className="text-sm font-medium">改组设置</h3>
             <div className="flex flex-wrap items-end gap-2">
               <Field label="组名">
                 <input
@@ -662,9 +667,7 @@ export function AdGroupsWorkspace() {
                 <select
                   className="rounded border px-2 py-1 text-sm"
                   value={settingsInput.status}
-                  onChange={(e) =>
-                    setSettingsInput({ ...settingsInput, status: e.target.value })
-                  }
+                  onChange={(e) => setSettingsInput({ ...settingsInput, status: e.target.value })}
                 >
                   {(options?.statuses ?? []).map((s) => (
                     <option key={s.value} value={s.value}>
@@ -754,7 +757,7 @@ export function AdGroupsWorkspace() {
 
           {/* 关联投放商品 */}
           <div className="space-y-2">
-            <h3 className="font-medium text-sm">关联投放商品</h3>
+            <h3 className="text-sm font-medium">关联投放商品</h3>
             <div className="flex flex-wrap items-end gap-2">
               <Field label="候选商品关键词">
                 <input
@@ -821,7 +824,9 @@ export function AdGroupsWorkspace() {
 
           {/* 操作审计 */}
           <div className="space-y-1">
-            <h3 className="font-medium text-sm">组级操作审计（最近 {detail.recentOperations.length} 条）</h3>
+            <h3 className="text-sm font-medium">
+              组级操作审计（最近 {detail.recentOperations.length} 条）
+            </h3>
             {detail.recentOperations.length === 0 ? (
               <p className="text-muted-foreground text-xs">这个组还没有本地改动记录。</p>
             ) : (

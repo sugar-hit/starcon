@@ -239,11 +239,16 @@ describe('推送草稿校验与入参', () => {
     expect(validatePushDraft({ ...base, sourceKind: 'ALERT_HIT', alertHitId: '' })).toContain(
       '候选清单',
     );
-    expect(validatePushDraft({ ...base, sourceKind: 'NOTIFICATION', notificationRef: '' })).toContain(
-      '上游主键',
-    );
     expect(
-      validatePushDraft({ ...base, sourceKind: 'NOTIFICATION', notificationRef: 'SKU-1', title: '' }),
+      validatePushDraft({ ...base, sourceKind: 'NOTIFICATION', notificationRef: '' }),
+    ).toContain('上游主键');
+    expect(
+      validatePushDraft({
+        ...base,
+        sourceKind: 'NOTIFICATION',
+        notificationRef: 'SKU-1',
+        title: '',
+      }),
     ).toContain('标题');
     expect(validatePushDraft({ ...base, channelIds: [] })).toContain('目标渠道');
     expect(validatePushDraft({ ...base, recipientMembershipId: '' })).toContain('收件人');
@@ -273,7 +278,9 @@ describe('推送草稿校验与入参', () => {
   });
 
   it('跳转目标空着就不带这个字段', () => {
-    expect(buildPushInput({ ...base, sourceKind: 'ALERT_HIT', alertHitId: 'hit-1' }).linkUrl).toBeNull();
+    expect(
+      buildPushInput({ ...base, sourceKind: 'ALERT_HIT', alertHitId: 'hit-1' }).linkUrl,
+    ).toBeNull();
     expect(
       buildPushInput({
         ...base,
@@ -292,7 +299,12 @@ describe('推送草稿校验与入参', () => {
 describe('投递清单的汇总与分桶', () => {
   const list: ExternalDeliveryList = {
     deliveries: [
-      delivery({ status: 'DELIVERED', deliveredAt: '2026-10-26T09:01:00Z', failureCode: null, failureMessage: null }),
+      delivery({
+        status: 'DELIVERED',
+        deliveredAt: '2026-10-26T09:01:00Z',
+        failureCode: null,
+        failureMessage: null,
+      }),
       delivery({ status: 'FAILED' }),
       delivery({ status: 'DEFERRED', nextAttemptAt: '2026-10-26T23:00:00Z' }),
       delivery({

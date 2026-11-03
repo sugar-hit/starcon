@@ -87,9 +87,7 @@ describe('16.3.1.2 紧迫度：逾期与临近截止必须刺眼', () => {
   });
 
   it('判不了天数（null）时落在「在计划内」，不假装知道', () => {
-    expect(urgencyOf({ status: 'NOT_STARTED', overdue: false, daysToDue: null })).toBe(
-      'SCHEDULED',
-    );
+    expect(urgencyOf({ status: 'NOT_STARTED', overdue: false, daysToDue: null })).toBe('SCHEDULED');
   });
 });
 

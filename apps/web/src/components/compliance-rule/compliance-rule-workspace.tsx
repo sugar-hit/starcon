@@ -232,9 +232,7 @@ export function ComplianceRuleWorkspace() {
           description: versionFor.version.description,
           effectiveFrom: null,
           changeNote: changeNote.trim(),
-          terms: isWordRuleType(versionFor.rule?.ruleType)
-            ? parseTermsText(termsText)
-            : [],
+          terms: isWordRuleType(versionFor.rule?.ruleType) ? parseTermsText(termsText) : [],
           scopes,
         });
         setVersionOpen(false);
@@ -369,7 +367,7 @@ export function ComplianceRuleWorkspace() {
       </div>
 
       {error && (
-        <div className="border-destructive-soft bg-destructive-soft text-destructive rounded-md border px-4 py-3 text-copy-13">
+        <div className="border-destructive-soft bg-destructive-soft text-destructive text-copy-13 rounded-md border px-4 py-3">
           {error}
         </div>
       )}
@@ -443,7 +441,7 @@ export function ComplianceRuleWorkspace() {
             }}
           />
           <select
-            className="border-input bg-background h-9 rounded-md border px-2 text-copy-13"
+            className="border-input bg-background text-copy-13 h-9 rounded-md border px-2"
             value={ruleType}
             onChange={(e) => {
               setRuleType(e.target.value);
@@ -457,7 +455,7 @@ export function ComplianceRuleWorkspace() {
             ))}
           </select>
           <select
-            className="border-input bg-background h-9 rounded-md border px-2 text-copy-13"
+            className="border-input bg-background text-copy-13 h-9 rounded-md border px-2"
             value={status}
             onChange={(e) => {
               setStatus(e.target.value);
@@ -492,9 +490,7 @@ export function ComplianceRuleWorkspace() {
                   <Badge tone="neutral">{ruleTypeLabel(rule.ruleType)}</Badge>
                   {/* 🔴 严重度是**当前生效那一版**的严重度，页面不重算。 */}
                   {rule.severity ? (
-                    <Badge tone={severityTone(rule.severity)}>
-                      {severityLabel(rule.severity)}
-                    </Badge>
+                    <Badge tone={severityTone(rule.severity)}>{severityLabel(rule.severity)}</Badge>
                   ) : (
                     <Badge tone="neutral">无生效版本</Badge>
                   )}
@@ -502,7 +498,8 @@ export function ComplianceRuleWorkspace() {
                     {statusLabel(rule.status)}
                   </Badge>
                   <span className="text-copy-12 text-muted-foreground">
-                    {rule.versionCount} 个版本 · {rule.termCount} 个词条 · {rule.scopeCount} 条适用范围
+                    {rule.versionCount} 个版本 · {rule.termCount} 个词条 · {rule.scopeCount}{' '}
+                    条适用范围
                   </span>
                 </div>
                 <div className="text-copy-12 text-muted-foreground mt-1">
@@ -569,7 +566,9 @@ export function ComplianceRuleWorkspace() {
               size="sm"
               onClick={() =>
                 void run(async () => {
-                  setEffective(await fetchEffectiveSet(0, PAGE_SIZE, resolvedAt ? { at: resolvedAt } : {}));
+                  setEffective(
+                    await fetchEffectiveSet(0, PAGE_SIZE, resolvedAt ? { at: resolvedAt } : {}),
+                  );
                 })
               }
               disabled={busy}
@@ -602,9 +601,11 @@ export function ComplianceRuleWorkspace() {
                   </span>
                 </div>
                 <div className="text-copy-12 text-muted-foreground mt-1">
-                  生效窗口 {windowText(entry.version.effectiveFrom, entry.version.effectiveTo)} · 适用{' '}
-                  {entry.platformCodes.join(' / ') || '（未配适用范围）'}
-                  {entry.marketplaceCodes.length > 0 ? ` · 站点 ${entry.marketplaceCodes.join(' / ')}` : ''}
+                  生效窗口 {windowText(entry.version.effectiveFrom, entry.version.effectiveTo)} ·
+                  适用 {entry.platformCodes.join(' / ') || '（未配适用范围）'}
+                  {entry.marketplaceCodes.length > 0
+                    ? ` · 站点 ${entry.marketplaceCodes.join(' / ')}`
+                    : ''}
                   {entry.shopCodes.length > 0 ? ` · 店铺 ${entry.shopCodes.join(' / ')}` : ''}
                 </div>
               </div>
@@ -637,7 +638,8 @@ export function ComplianceRuleWorkspace() {
                   {shop.shopCode} · {shop.shopName}
                 </div>
                 <div className="text-copy-12 text-muted-foreground">
-                  {shop.platformName} · 适用规则 {shop.ruleCount} 条（此刻生效 {shop.effectiveRuleCount} 条）
+                  {shop.platformName} · 适用规则 {shop.ruleCount} 条（此刻生效{' '}
+                  {shop.effectiveRuleCount} 条）
                 </div>
               </div>
             ))}
@@ -662,7 +664,7 @@ export function ComplianceRuleWorkspace() {
               onChange={(e) => setNewCode(e.target.value)}
             />
             <select
-              className="border-input bg-background h-9 w-full rounded-md border px-2 text-copy-13"
+              className="border-input bg-background text-copy-13 h-9 w-full rounded-md border px-2"
               value={newType}
               onChange={(e) => setNewType(e.target.value)}
             >
@@ -704,7 +706,10 @@ export function ComplianceRuleWorkspace() {
             ) : (
               <div className="space-y-2">
                 {detail?.versions.map((version) => (
-                  <div key={version.versionId} className="border-border rounded-md border px-3 py-2">
+                  <div
+                    key={version.versionId}
+                    className="border-border rounded-md border px-3 py-2"
+                  >
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="text-copy-13 text-foreground font-medium">
                         v{version.versionNo}
@@ -817,7 +822,7 @@ export function ComplianceRuleWorkspace() {
           </ModalHeader>
           <div className="space-y-3">
             <select
-              className="border-input bg-background h-9 w-full rounded-md border px-2 text-copy-13"
+              className="border-input bg-background text-copy-13 h-9 w-full rounded-md border px-2"
               value={severity}
               onChange={(e) => setSeverity(e.target.value)}
             >
@@ -839,7 +844,7 @@ export function ComplianceRuleWorkspace() {
             />
             {isWordRuleType(versionFor?.rule?.ruleType) ? (
               <textarea
-                className="border-input bg-background min-h-24 w-full rounded-md border px-2 py-1 text-copy-13"
+                className="border-input bg-background text-copy-13 min-h-24 w-full rounded-md border px-2 py-1"
                 placeholder={'词库（每行一个词，空行与 # 注释行忽略）\n例：\n违禁词一\n违禁词二'}
                 value={termsText}
                 onChange={(e) => setTermsText(e.target.value)}
@@ -851,7 +856,7 @@ export function ComplianceRuleWorkspace() {
             )}
             <div className="flex flex-wrap items-center gap-2">
               <select
-                className="border-input bg-background h-9 rounded-md border px-2 text-copy-13"
+                className="border-input bg-background text-copy-13 h-9 rounded-md border px-2"
                 value={scopePlatform}
                 onChange={(e) => setScopePlatform(e.target.value)}
               >
@@ -863,7 +868,7 @@ export function ComplianceRuleWorkspace() {
                 ))}
               </select>
               <select
-                className="border-input bg-background h-9 rounded-md border px-2 text-copy-13"
+                className="border-input bg-background text-copy-13 h-9 rounded-md border px-2"
                 value={scopeShop}
                 onChange={(e) => setScopeShop(e.target.value)}
               >
@@ -906,8 +911,11 @@ export function ComplianceRuleWorkspace() {
               {versionDetail ? (
                 <>
                   {severityLabel(versionDetail.version.severity)} ·{' '}
-                  {windowText(versionDetail.version.effectiveFrom, versionDetail.version.effectiveTo)} ·{' '}
-                  {versionDetail.note}
+                  {windowText(
+                    versionDetail.version.effectiveFrom,
+                    versionDetail.version.effectiveTo,
+                  )}{' '}
+                  · {versionDetail.note}
                 </>
               ) : (
                 ''
@@ -1002,7 +1010,8 @@ export function ComplianceRuleWorkspace() {
                 {windowText(historical.version.effectiveFrom, historical.version.effectiveTo)}
               </div>
               <div className="text-copy-12 text-muted-foreground">
-                词条（{historical.terms.length} 条）：{historical.terms.map((t) => t.term).join('、') || '（无）'}
+                词条（{historical.terms.length} 条）：
+                {historical.terms.map((t) => t.term).join('、') || '（无）'}
               </div>
               <ul className="text-copy-12 text-muted-foreground space-y-1">
                 {historical.scopes.map((scope) => (
@@ -1070,7 +1079,7 @@ function VersionAdder({
             onChange={(e) => setTerm(e.target.value)}
           />
           <select
-            className="border-input bg-background h-9 rounded-md border px-2 text-copy-13"
+            className="border-input bg-background text-copy-13 h-9 rounded-md border px-2"
             value={kind}
             onChange={(e) => setKind(e.target.value)}
           >
@@ -1096,7 +1105,7 @@ function VersionAdder({
       )}
       <div className="flex flex-wrap items-center gap-2">
         <select
-          className="border-input bg-background h-9 rounded-md border px-2 text-copy-13"
+          className="border-input bg-background text-copy-13 h-9 rounded-md border px-2"
           value={platform}
           onChange={(e) => setPlatform(e.target.value)}
         >
@@ -1108,7 +1117,7 @@ function VersionAdder({
           ))}
         </select>
         <select
-          className="border-input bg-background h-9 rounded-md border px-2 text-copy-13"
+          className="border-input bg-background text-copy-13 h-9 rounded-md border px-2"
           value={shop}
           onChange={(e) => setShop(e.target.value)}
         >

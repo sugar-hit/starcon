@@ -116,9 +116,9 @@ export function InfluencerOutreachWorkspace() {
   const [capabilities, setCapabilities] = useState<InfluencerOutreachCapabilities | null>(null);
   const [options, setOptions] = useState<InfluencerOutreachOptions | null>(null);
   const [summary, setSummary] = useState<InfluencerOutreachSummary | null>(null);
-  const [tab, setTab] = useState<
-    'outreach' | 'segments' | 'templates' | 'samples' | 'commission'
-  >('outreach');
+  const [tab, setTab] = useState<'outreach' | 'segments' | 'templates' | 'samples' | 'commission'>(
+    'outreach',
+  );
   const [error, setError] = useState('');
 
   const loadSummary = useCallback(async () => {
@@ -285,9 +285,9 @@ function OutreachTab({
   const [receipt, setReceipt] = useState({ platformMessageId: '', platformReceipt: '' });
   const [batch, setBatch] = useState({ segmentId: '', templateId: '', batchKey: '' });
   const [batchResult, setBatchResult] = useState<InfluencerOutreachBatchResult | null>(null);
-  const [availability, setAvailability] = useState<
-    Awaited<ReturnType<typeof fetchInfluencerOutreachAvailability>> | null
-  >(null);
+  const [availability, setAvailability] = useState<Awaited<
+    ReturnType<typeof fetchInfluencerOutreachAvailability>
+  > | null>(null);
 
   const load = useCallback(async (next: InfluencerOutreachQuery) => {
     setLoading(true);
@@ -503,9 +503,7 @@ function OutreachTab({
           </Field>
           <button
             className="rounded border px-3 py-1 text-sm"
-            onClick={() =>
-              setForm(emptyInfluencerOutreachInput())
-            }
+            onClick={() => setForm(emptyInfluencerOutreachInput())}
           >
             新建建联记录
           </button>
@@ -517,9 +515,7 @@ function OutreachTab({
             hasFilter={Boolean(
               query.status || query.platformCode || query.shopCode || query.keyword,
             )}
-            onReset={() =>
-              setQuery({ sort: 'CREATED_DESC', page: 0, size: 20 })
-            }
+            onReset={() => setQuery({ sort: 'CREATED_DESC', page: 0, size: 20 })}
           />
         ) : null}
         {page && page.items.length > 0 ? (
@@ -541,7 +537,9 @@ function OutreachTab({
                   <tr key={row.id} className="border-t">
                     <td className="py-1">
                       {row.influencerName}
-                      <span className="text-muted-foreground text-xs">（{row.influencerCategory}）</span>
+                      <span className="text-muted-foreground text-xs">
+                        （{row.influencerCategory}）
+                      </span>
                     </td>
                     <td className="py-1">
                       {row.segmentName} / {row.templateName}
@@ -550,12 +548,17 @@ function OutreachTab({
                       {row.platformCode} / {row.shopCode}
                     </td>
                     <td className="py-1">{outreachStatusLabel(row.status)}</td>
-                    <td className="py-1">{row.sentAt ? new Date(row.sentAt).toLocaleString('zh-CN') : '—'}</td>
+                    <td className="py-1">
+                      {row.sentAt ? new Date(row.sentAt).toLocaleString('zh-CN') : '—'}
+                    </td>
                     <td className="py-1">
                       {row.followupCount} / {row.sampleOrderCount} / {row.accrualCount}
                     </td>
                     <td className="flex gap-2 py-1">
-                      <button className="rounded border px-2 py-1 text-xs" onClick={() => void openDetail(row.id)}>
+                      <button
+                        className="rounded border px-2 py-1 text-xs"
+                        onClick={() => void openDetail(row.id)}
+                      >
                         详情
                       </button>
                       {row.status === 'DRAFT' ? (
@@ -688,8 +691,8 @@ function OutreachTab({
           </button>
         </div>
         <p className="text-muted-foreground text-xs">
-          🔴 批量只做到「生成草稿」：每一条仍要**逐条**登记平台回执才会真正发出，
-          登记时过幂等键 + 每日发送上限 + 最小间隔三道闸 —— 批量私信是平台风控重点。
+          🔴 批量只做到「生成草稿」：每一条仍要**逐条**登记平台回执才会真正发出， 登记时过幂等键 +
+          每日发送上限 + 最小间隔三道闸 —— 批量私信是平台风控重点。
         </p>
         {batchResult ? (
           <>
@@ -768,11 +771,11 @@ function OutreachTab({
             <span className="text-muted-foreground text-xs">标题（渲染快照）</span>
             <p className="text-sm">{detail.outreach.subject || '—'}</p>
             <span className="text-muted-foreground text-xs">正文（渲染快照）</span>
-            <pre className="text-sm whitespace-pre-wrap">{detail.outreach.messageBody}</pre>
+            <pre className="whitespace-pre-wrap text-sm">{detail.outreach.messageBody}</pre>
             {detail.outreach.platformReceipt ? (
               <>
                 <span className="text-muted-foreground text-xs">平台回执</span>
-                <p className="text-sm whitespace-pre-wrap">{detail.outreach.platformReceipt}</p>
+                <p className="whitespace-pre-wrap text-sm">{detail.outreach.platformReceipt}</p>
               </>
             ) : null}
           </div>
@@ -794,10 +797,16 @@ function OutreachTab({
                     onChange={(e) => setReceipt({ ...receipt, platformReceipt: e.target.value })}
                   />
                 </Field>
-                <button className="rounded border px-3 py-1 text-sm" onClick={() => void submitReceipt()}>
+                <button
+                  className="rounded border px-3 py-1 text-sm"
+                  onClick={() => void submitReceipt()}
+                >
                   登记已发送 + 平台回执
                 </button>
-                <button className="rounded border px-3 py-1 text-sm" onClick={() => void sendViaPlatform()}>
+                <button
+                  className="rounded border px-3 py-1 text-sm"
+                  onClick={() => void sendViaPlatform()}
+                >
                   走官方接口发送
                 </button>
                 <button
@@ -816,21 +825,30 @@ function OutreachTab({
 
           {detail.outreach.status !== 'DRAFT' ? (
             <div className="flex flex-wrap items-end gap-2">
-              {['REPLIED', 'ACCEPTED', 'REJECTED', 'NO_REPLY', 'COOPERATING', 'COMPLETED', 'CANCELLED'].map(
-                (status) => (
-                  <button
-                    key={status}
-                    className="rounded border px-2 py-1 text-xs"
-                    onClick={() => void transition(status)}
-                  >
-                    推进到 {outreachStatusLabel(status)}
-                  </button>
-                ),
-              )}
+              {[
+                'REPLIED',
+                'ACCEPTED',
+                'REJECTED',
+                'NO_REPLY',
+                'COOPERATING',
+                'COMPLETED',
+                'CANCELLED',
+              ].map((status) => (
+                <button
+                  key={status}
+                  className="rounded border px-2 py-1 text-xs"
+                  onClick={() => void transition(status)}
+                >
+                  推进到 {outreachStatusLabel(status)}
+                </button>
+              ))}
             </div>
           ) : null}
 
-          <FollowupPanel outreachId={detail.outreach.id} onChanged={() => void openDetail(detail.outreach.id)} />
+          <FollowupPanel
+            outreachId={detail.outreach.id}
+            onChanged={() => void openDetail(detail.outreach.id)}
+          />
 
           <div className="flex flex-col gap-2">
             <h3 className="text-sm font-medium">样品单</h3>
@@ -856,7 +874,9 @@ function OutreachTab({
                           {sample.skuName ? ` · ${sample.skuName}` : ''}
                         </td>
                         <td className="py-1">{outreachCount(sample.quantity)}</td>
-                        <td className="py-1">{outreachMoney(sample.sampleValue, sample.sampleCurrency)}</td>
+                        <td className="py-1">
+                          {outreachMoney(sample.sampleValue, sample.sampleCurrency)}
+                        </td>
                         <td className="py-1">
                           {sampleOrderStatusLabel(sample.status)}
                           {sample.statusDerived ? '（由包裹推导）' : ''}
@@ -864,7 +884,9 @@ function OutreachTab({
                         <td className="text-muted-foreground py-1 text-xs">
                           {outboundText(sample)}
                           <br />
-                          {sample.trackingAvailable ? '轨迹可查' : `轨迹不可查（归 ${sample.trackingOwnerModule} 管）`}
+                          {sample.trackingAvailable
+                            ? '轨迹可查'
+                            : `轨迹不可查（归 ${sample.trackingOwnerModule} 管）`}
                         </td>
                       </tr>
                     ))}
@@ -901,7 +923,9 @@ function OutreachTab({
                             ? outreachRatio(accrual.commissionRate)
                             : outreachMoney(accrual.fixedAmount)}
                         </td>
-                        <td className="py-1">{outreachMoney(accrual.baseAmount, accrual.baseCurrency)}</td>
+                        <td className="py-1">
+                          {outreachMoney(accrual.baseAmount, accrual.baseCurrency)}
+                        </td>
                         <td className="py-1">
                           {outreachMoney(accrual.accruedAmount, accrual.accruedCurrency)}
                         </td>
@@ -923,16 +947,10 @@ function OutreachTab({
   );
 }
 
-function FollowupPanel({
-  outreachId,
-  onChanged,
-}: {
-  outreachId: string;
-  onChanged: () => void;
-}) {
-  const [items, setItems] = useState<
-    Awaited<ReturnType<typeof fetchInfluencerOutreachFollowups>> | null
-  >(null);
+function FollowupPanel({ outreachId, onChanged }: { outreachId: string; onChanged: () => void }) {
+  const [items, setItems] = useState<Awaited<
+    ReturnType<typeof fetchInfluencerOutreachFollowups>
+  > | null>(null);
   const [form, setForm] = useState({ followupType: 'CALL', content: '', nextFollowupAt: '' });
   const [error, setError] = useState('');
 
@@ -1012,8 +1030,11 @@ function FollowupPanel({
           {items.items.map((f) => (
             <li key={f.id} className="border-t pt-1">
               <span className="text-muted-foreground text-xs">
-                {followupTypeLabel(f.followupType)} · {new Date(f.occurredAt).toLocaleString('zh-CN')}
-                {f.nextFollowupAt ? ` · 下次 ${new Date(f.nextFollowupAt).toLocaleString('zh-CN')}` : ''}
+                {followupTypeLabel(f.followupType)} ·{' '}
+                {new Date(f.occurredAt).toLocaleString('zh-CN')}
+                {f.nextFollowupAt
+                  ? ` · 下次 ${new Date(f.nextFollowupAt).toLocaleString('zh-CN')}`
+                  : ''}
               </span>
               <p>{f.content}</p>
             </li>
@@ -1097,8 +1118,8 @@ function SegmentsTab({ options }: { options: InfluencerOutreachOptions | null })
           </button>
         </div>
         <p className="text-muted-foreground text-xs">
-          🔴 条件之间是 <strong>AND（交集）</strong>，标签编码之间是 <strong>OR（池子的并集）</strong>；
-          黑名单里的达人默认排除（要给他们建联得显式打开开关）。
+          🔴 条件之间是 <strong>AND（交集）</strong>，标签编码之间是{' '}
+          <strong>OR（池子的并集）</strong>； 黑名单里的达人默认排除（要给他们建联得显式打开开关）。
         </p>
         {loading ? <p className="text-muted-foreground text-sm">加载中…</p> : null}
         {!loading && page && page.items.length === 0 ? (
@@ -1125,14 +1146,19 @@ function SegmentsTab({ options }: { options: InfluencerOutreachOptions | null })
                     <td className="text-muted-foreground py-1 text-xs">
                       类目 {row.category || '不限'} · 层级 {row.followerTier || '不限'} · 粉丝 ≥{' '}
                       {row.minFollowerCount ?? '不限'} · 互动率 ≥{' '}
-                      {row.minEngagementRate === null ? '不限' : outreachRatio(row.minEngagementRate)}{' '}
+                      {row.minEngagementRate === null
+                        ? '不限'
+                        : outreachRatio(row.minEngagementRate)}{' '}
                       · GMV ≥ {row.minGmv === null ? '不限' : outreachMoney(row.minGmv)} · 标签{' '}
                       {row.tagCodes || '不限'}
                     </td>
                     <td className="py-1">{row.excludeBlacklisted ? '排除' : '包含'}</td>
                     <td className="py-1">{configStatusLabel(row.status)}</td>
                     <td className="flex gap-2 py-1">
-                      <button className="rounded border px-2 py-1 text-xs" onClick={() => void preview(row.id)}>
+                      <button
+                        className="rounded border px-2 py-1 text-xs"
+                        onClick={() => void preview(row.id)}
+                      >
                         看候选
                       </button>
                       <button
@@ -1454,10 +1480,15 @@ function TemplatesTab({ options }: { options: InfluencerOutreachOptions | null }
                       {row.templateCode} · {row.templateName}
                     </td>
                     <td className="py-1">{row.platformCode}</td>
-                    <td className="text-muted-foreground max-w-md truncate py-1 text-xs">{row.body}</td>
+                    <td className="text-muted-foreground max-w-md truncate py-1 text-xs">
+                      {row.body}
+                    </td>
                     <td className="py-1">{configStatusLabel(row.status)}</td>
                     <td className="flex gap-2 py-1">
-                      <button className="rounded border px-2 py-1 text-xs" onClick={() => void doPreview(row.id)}>
+                      <button
+                        className="rounded border px-2 py-1 text-xs"
+                        onClick={() => void doPreview(row.id)}
+                      >
                         预览
                       </button>
                       <button
@@ -1495,9 +1526,12 @@ function TemplatesTab({ options }: { options: InfluencerOutreachOptions | null }
       {preview ? (
         <Section title="模板预览（真渲染）">
           <p className="text-sm">{preview.subject}</p>
-          <pre className="text-sm whitespace-pre-wrap">{preview.messageBody}</pre>
+          <pre className="whitespace-pre-wrap text-sm">{preview.messageBody}</pre>
           <p className="text-muted-foreground text-xs">
-            渲染取值：{Object.entries(preview.values).map(([k, v]) => `${k}=${v}`).join(' · ')}
+            渲染取值：
+            {Object.entries(preview.values)
+              .map(([k, v]) => `${k}=${v}`)
+              .join(' · ')}
           </p>
         </Section>
       ) : null}
@@ -1815,7 +1849,10 @@ function SamplesTab({
               onChange={(e) => setShipmentForm({ ...shipmentForm, packageCount: e.target.value })}
             />
           </Field>
-          <button className="rounded border px-3 py-1 text-sm" onClick={() => void submitShipment()}>
+          <button
+            className="rounded border px-3 py-1 text-sm"
+            onClick={() => void submitShipment()}
+          >
             登记包裹（发货）
           </button>
         </div>
@@ -1846,7 +1883,9 @@ function SamplesTab({
                     <td className="py-1">{shipmentStatusLabel(row.status)}</td>
                     <td className="text-muted-foreground py-1 text-xs">
                       {new Date(row.shippedAt).toLocaleString('zh-CN')}
-                      {row.signedAt ? ` · 签收 ${new Date(row.signedAt).toLocaleString('zh-CN')}` : ''}
+                      {row.signedAt
+                        ? ` · 签收 ${new Date(row.signedAt).toLocaleString('zh-CN')}`
+                        : ''}
                       <br />
                       {row.trackingAvailable
                         ? '轨迹可查'
@@ -2123,8 +2162,8 @@ function CommissionTab({
           </button>
         </div>
         <p className="text-muted-foreground text-xs">
-          🔴 佣金只有两种形态（按比例 / 固定额），<strong>混合形态被拒</strong> ——
-          「先给 5% 再减 20 美元」在计提时算不清。
+          🔴 佣金只有两种形态（按比例 / 固定额），<strong>混合形态被拒</strong> —— 「先给 5% 再减 20
+          美元」在计提时算不清。
         </p>
         {loading ? <p className="text-muted-foreground text-sm">加载中…</p> : null}
         {!loading && rules && rules.items.length === 0 ? (
@@ -2268,7 +2307,9 @@ function CommissionTab({
                         : outreachMoney(row.fixedAmount)}
                     </td>
                     <td className="py-1">{outreachMoney(row.baseAmount, row.baseCurrency)}</td>
-                    <td className="py-1">{outreachMoney(row.accruedAmount, row.accruedCurrency)}</td>
+                    <td className="py-1">
+                      {outreachMoney(row.accruedAmount, row.accruedCurrency)}
+                    </td>
                     <td className="text-muted-foreground py-1 text-xs">{financeText(row)}</td>
                   </tr>
                 ))}

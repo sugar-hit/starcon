@@ -210,11 +210,7 @@ export function RefundApplicationWorkspace() {
         <div className="flex flex-wrap items-end gap-3">
           <label className="text-sm">
             <span className="mb-1 block">售后单 ID</span>
-            <Input
-              value={caseId}
-              placeholder="uuid"
-              onChange={(e) => setCaseId(e.target.value)}
-            />
+            <Input value={caseId} placeholder="uuid" onChange={(e) => setCaseId(e.target.value)} />
           </label>
           <label className="text-sm">
             <span className="mb-1 block">退款方式</span>
@@ -265,7 +261,7 @@ export function RefundApplicationWorkspace() {
             建草稿
           </Button>
         </div>
-        <p className="mt-2 text-xs text-muted">
+        <p className="text-muted mt-2 text-xs">
           建草稿 ≠ 提交审批。提交在详情页做，且**提交那一刻会再校验一次**可退余额 ——
           页面打开到提交之间，额度可能已经被别的单占走。
         </p>
@@ -318,7 +314,7 @@ export function RefundApplicationWorkspace() {
 
       {error && (
         <SectionCard>
-          <p className="text-sm text-danger" role="alert">
+          <p className="text-danger text-sm" role="alert">
             {error}
           </p>
         </SectionCard>
@@ -326,7 +322,7 @@ export function RefundApplicationWorkspace() {
 
       {loading && !data ? (
         <SectionCard>
-          <p className="text-sm text-muted">加载中…</p>
+          <p className="text-muted text-sm">加载中…</p>
         </SectionCard>
       ) : !data || data.rows.length === 0 ? (
         <EmptyState
@@ -365,7 +361,13 @@ export function RefundApplicationWorkspace() {
                   <td className="p-2">{methodText(row.head.refundMethod)}</td>
                   <td className="p-2">
                     {row.head.executionId ? (
-                      <Badge tone={executionTone(row.timelinessState === 'NOT_APPLICABLE' ? 'IN_FLIGHT' : row.timelinessState)}>
+                      <Badge
+                        tone={executionTone(
+                          row.timelinessState === 'NOT_APPLICABLE'
+                            ? 'IN_FLIGHT'
+                            : row.timelinessState,
+                        )}
+                      >
                         已派发
                       </Badge>
                     ) : (
@@ -389,7 +391,7 @@ export function RefundApplicationWorkspace() {
             >
               上一页
             </Button>
-            <span className="text-xs text-muted">
+            <span className="text-muted text-xs">
               第 {data.page + 1} / {Math.max(1, Math.ceil(data.total / data.size))} 页
             </span>
             <Button
@@ -400,7 +402,7 @@ export function RefundApplicationWorkspace() {
               下一页
             </Button>
           </div>
-          <p className="mt-2 text-xs text-muted">{data.balanceNote}</p>
+          <p className="text-muted mt-2 text-xs">{data.balanceNote}</p>
         </SectionCard>
       )}
 
@@ -419,8 +421,8 @@ export function RefundApplicationWorkspace() {
             </div>
 
             <p className="text-muted">
-              金额 {amount(detail.head.refundAmount)} {detail.head.currency} ·
-              售后单 {detail.head.caseNo ?? '—'} · 订单 {detail.head.orderNo ?? '—'}
+              金额 {amount(detail.head.refundAmount)} {detail.head.currency} · 售后单{' '}
+              {detail.head.caseNo ?? '—'} · 订单 {detail.head.orderNo ?? '—'}
               {detail.head.rmaNo ? ` · 退货授权 ${detail.head.rmaNo}` : ''}
             </p>
 
@@ -433,7 +435,7 @@ export function RefundApplicationWorkspace() {
                     <tr key={r.label} className="border-b">
                       <td className="p-1">{r.label}</td>
                       <td className="p-1 text-right font-mono">{r.value}</td>
-                      <td className="p-1 text-muted">{r.hint ?? ''}</td>
+                      <td className="text-muted p-1">{r.hint ?? ''}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -445,7 +447,7 @@ export function RefundApplicationWorkspace() {
                 </Badge>
               </p>
               {detail.balance.blockingReasons.length > 0 && (
-                <ul className="mt-1 list-disc text-xs text-danger pl-4">
+                <ul className="text-danger mt-1 list-disc pl-4 text-xs">
                   {detail.balance.blockingReasons.map((r) => (
                     <li key={r}>{r}</li>
                   ))}
@@ -457,10 +459,8 @@ export function RefundApplicationWorkspace() {
             <div>
               <h4 className="mb-1 font-medium">审批规则</h4>
               <Badge tone={policyText(detail.policy).tone}>{policyText(detail.policy).label}</Badge>
-              <p className="mt-1 text-xs text-muted">{detail.balance.balanceSource}</p>
-              {detail.policy.note && (
-                <p className="text-xs text-muted">{detail.policy.note}</p>
-              )}
+              <p className="text-muted mt-1 text-xs">{detail.balance.balanceSource}</p>
+              {detail.policy.note && <p className="text-muted text-xs">{detail.policy.note}</p>}
             </div>
 
             {/* 执行状态：UNKNOWN 这一格是最重要的提示 */}
@@ -468,7 +468,7 @@ export function RefundApplicationWorkspace() {
               <h4 className="mb-1 font-medium">执行状态</h4>
               <p className="text-xs">{executionText(detail)}</p>
               {detail.financeExecution.available === false && (
-                <p className="mt-1 text-xs text-muted">
+                <p className="text-muted mt-1 text-xs">
                   真实付款执行：未交付（归属 {detail.financeExecution.ownerModule}）。
                   这里的「执行中」只说明**已派发**，不代表钱已经退了。
                 </p>
@@ -497,13 +497,20 @@ export function RefundApplicationWorkspace() {
                           if (note === null) return;
                           const approve = window.confirm(`同意？（说明：${note}）`);
                           void act(() =>
-                            decideRefundApplication(id, { approve, note, expectedVersion: version }),
+                            decideRefundApplication(id, {
+                              approve,
+                              note,
+                              expectedVersion: version,
+                            }),
                           );
                         } else if (a.action === 'CANCEL') {
                           const reason2 = window.prompt('撤销理由（必填）', '');
                           if (!reason2) return;
                           void act(() =>
-                            cancelRefundApplication(id, { reason: reason2, expectedVersion: version }),
+                            cancelRefundApplication(id, {
+                              reason: reason2,
+                              expectedVersion: version,
+                            }),
                           );
                         } else if (a.action === 'DISPATCH') {
                           const executionId = window.prompt(
@@ -519,8 +526,12 @@ export function RefundApplicationWorkspace() {
                           );
                         } else if (a.action === 'RECORD_OUTCOME') {
                           const succeeded = window.confirm('结果：成功？（取消 = 失败）');
-                          const failureReason = succeeded ? '' : window.prompt('失败原因（必填）', '') ?? '';
-                          const ref = succeeded ? window.prompt('外部交易号（成功必填）', '') ?? '' : '';
+                          const failureReason = succeeded
+                            ? ''
+                            : (window.prompt('失败原因（必填）', '') ?? '');
+                          const ref = succeeded
+                            ? (window.prompt('外部交易号（成功必填）', '') ?? '')
+                            : '';
                           void act(() =>
                             recordRefundOutcome(id, {
                               result: succeeded ? 'SUCCEEDED' : 'FAILED',
@@ -531,7 +542,10 @@ export function RefundApplicationWorkspace() {
                             }),
                           );
                         } else if (a.action === 'UPDATE_DRAFT') {
-                          const next = window.prompt('新的退款金额', String(detail.head.refundAmount));
+                          const next = window.prompt(
+                            '新的退款金额',
+                            String(detail.head.refundAmount),
+                          );
                           if (!next) return;
                           void act(() =>
                             updateRefundApplication(id, {
@@ -557,7 +571,7 @@ export function RefundApplicationWorkspace() {
             {/* 未交付的动作照实列出，不渲染成按钮 */}
             <div>
               <h4 className="mb-1 font-medium">本模块刻意不做的事</h4>
-              <ul className="list-disc text-xs text-muted pl-4">
+              <ul className="text-muted list-disc pl-4 text-xs">
                 {detail.actions
                   .filter((a) => a.method === null)
                   .map((a) => (
@@ -633,7 +647,7 @@ function PolicyEditor({
       >
         保存规则
       </Button>
-      <p className="w-full text-xs text-muted">
+      <p className="text-muted w-full text-xs">
         金额 **≥** 阈值必须两人签字（复审人 ≠ 初审人、初审人 ≠ 提交人）。
         阈值取**提交那一刻**的口径，之后改规则不会让已待审的单凭空多出或少掉一次审批。
         不配置时一律两人签（fail-closed）。

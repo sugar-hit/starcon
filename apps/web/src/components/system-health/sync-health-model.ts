@@ -268,7 +268,8 @@ export function pendingHref(item: SyncHealthPendingItem): string | null {
 export function sortPendingItems(items: SyncHealthPendingItem[]): SyncHealthPendingItem[] {
   return [...items].sort(
     (left, right) =>
-      severityRank(left.severity) - severityRank(right.severity) || left.title.localeCompare(right.title),
+      severityRank(left.severity) - severityRank(right.severity) ||
+      left.title.localeCompare(right.title),
   );
 }
 

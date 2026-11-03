@@ -153,9 +153,10 @@ it('🔴 兄弟车道的白名单条目未被本车道挤掉或污染', async ()
       .filter((path) => path.startsWith(sibling))
       .map((path) => path.replace(/^\//, '').replace('{id}', ID))
       .filter((path) => !path.includes('{'));
-    expect(siblingSites.length, `兄弟模块 ${sibling} 的 path 抽不到 —— 断言本身失效了`).toBeGreaterThan(
-      0,
-    );
+    expect(
+      siblingSites.length,
+      `兄弟模块 ${sibling} 的 path 抽不到 —— 断言本身失效了`,
+    ).toBeGreaterThan(0);
     for (const path of siblingSites) {
       const response = await callProxy(path, {
         headers: { cookie: 'starcon_session=private-session' },
@@ -180,7 +181,9 @@ it('本模块的字面量子路径不会被自己的 uuid 分支提前吃掉', a
     });
     expect(response.status, `${path} 未被放行`).not.toBe(404);
     expect(fetcher).toHaveBeenCalledWith(
-      expect.stringContaining(`:8083/channel/logistics-cost-analysis${path.replace('channel/logistics-cost-analysis', '')}`),
+      expect.stringContaining(
+        `:8083/channel/logistics-cost-analysis${path.replace('channel/logistics-cost-analysis', '')}`,
+      ),
       expect.anything(),
     );
   }

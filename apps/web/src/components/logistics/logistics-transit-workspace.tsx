@@ -301,9 +301,7 @@ export function LogisticsTransitWorkspace() {
                   id="trCountry"
                   value={filters.countryCode}
                   placeholder="DE / US"
-                  onChange={(e) =>
-                    setFilters({ ...filters, countryCode: e.target.value, page: 0 })
-                  }
+                  onChange={(e) => setFilters({ ...filters, countryCode: e.target.value, page: 0 })}
                 />
               </FormField>
               <FormField id="trLevel" label="服务等级">
@@ -326,7 +324,8 @@ export function LogisticsTransitWorkspace() {
               </FormField>
             </div>
             <p className="text-muted-foreground mt-2 text-xs">
-              统计覆盖当前筛选结果且不受分页影响。按渠道过滤用渠道 ID（每行的渠道名已显示在卡片上）。
+              统计覆盖当前筛选结果且不受分页影响。按渠道过滤用渠道
+              ID（每行的渠道名已显示在卡片上）。
             </p>
           </SectionCard>
 
@@ -459,7 +458,13 @@ export function LogisticsTransitWorkspace() {
                       </Button>
                     </div>
                     <p className="text-copy-12 text-muted-foreground mt-1">
-                      {sizeText(row.maxLengthCm, row.maxWidthCm, row.maxHeightCm, row.maxGirthCm, row.maxWeightKg)}
+                      {sizeText(
+                        row.maxLengthCm,
+                        row.maxWidthCm,
+                        row.maxHeightCm,
+                        row.maxGirthCm,
+                        row.maxWeightKg,
+                      )}
                     </p>
                   </div>
                 ))}
@@ -535,9 +540,7 @@ export function LogisticsTransitWorkspace() {
                       <Badge tone={row.requirementMode === 'BLOCK' ? 'danger' : 'info'}>
                         {requirementModeLabel(row.requirementMode)}
                       </Badge>
-                      {!row.consistentWithUpstream && (
-                        <Badge tone="danger">与上游判定不一致</Badge>
-                      )}
+                      {!row.consistentWithUpstream && <Badge tone="danger">与上游判定不一致</Badge>}
                       <Button
                         size="sm"
                         variant="outline"
@@ -644,9 +647,7 @@ export function LogisticsTransitWorkspace() {
                 <Input
                   id="pcWeight"
                   value={probe.weightKg === null ? '' : String(probe.weightKg)}
-                  onChange={(e) =>
-                    setProbe({ ...probe, weightKg: optionalNumber(e.target.value) })
-                  }
+                  onChange={(e) => setProbe({ ...probe, weightKg: optionalNumber(e.target.value) })}
                 />
               </FormField>
               <FormField id="pcLength" label="长 cm">
@@ -680,7 +681,7 @@ export function LogisticsTransitWorkspace() {
                   ['containsDangerousGoods', '含危险品'],
                 ] as const
               ).map(([key, label]) => (
-                <label key={key} className="flex items-center gap-2 text-copy-13">
+                <label key={key} className="text-copy-13 flex items-center gap-2">
                   <input
                     type="checkbox"
                     checked={probe[key]}
@@ -769,7 +770,9 @@ export function LogisticsTransitWorkspace() {
 
           <SectionCard title="估算结果" className="mt-4">
             {estimateResult === null ? (
-              <p className="text-muted-foreground text-sm">还没有结果。上面填重量后点「估算时效」。</p>
+              <p className="text-muted-foreground text-sm">
+                还没有结果。上面填重量后点「估算时效」。
+              </p>
             ) : estimateResult.items.length === 0 ? (
               <Notice tone="warning" title="这个重量段没有时效承诺">
                 {estimateResult.note}
@@ -777,7 +780,10 @@ export function LogisticsTransitWorkspace() {
             ) : (
               <div className="space-y-3">
                 {estimateResult.items.map((item) => (
-                  <div key={`${item.channelId}-${item.serviceLevel}`} className="border-border rounded-md border p-3">
+                  <div
+                    key={`${item.channelId}-${item.serviceLevel}`}
+                    className="border-border rounded-md border p-3"
+                  >
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="text-copy-13 font-medium">{item.channelCode}</span>
                       <Badge tone="info">{serviceLevelLabel(item.serviceLevel)}</Badge>
@@ -785,7 +791,8 @@ export function LogisticsTransitWorkspace() {
                     </div>
                     <p className="text-copy-12 text-muted-foreground mt-1">
                       {transitDaysText(item.transitDaysMin, item.transitDaysMax)} · 截单{' '}
-                      {item.cutoffTime} · 预计到达 {new Date(item.earliestArrival).toISOString().slice(0, 10)} ~
+                      {item.cutoffTime} · 预计到达{' '}
+                      {new Date(item.earliestArrival).toISOString().slice(0, 10)} ~
                       {new Date(item.latestArrival).toISOString().slice(0, 10)}
                     </p>
                   </div>
@@ -851,7 +858,10 @@ function VerdictCard({ verdict }: { verdict: LimitPrecheckResult['verdicts'][num
         <Badge tone={meta.tone === 'danger' ? 'danger' : 'info'}>{meta.label}</Badge>
         {verdict.transitDaysMin !== null && (
           <Badge tone="neutral">
-            {transitDaysText(verdict.transitDaysMin, verdict.transitDaysMax ?? verdict.transitDaysMin)}
+            {transitDaysText(
+              verdict.transitDaysMin,
+              verdict.transitDaysMax ?? verdict.transitDaysMin,
+            )}
           </Badge>
         )}
       </div>
@@ -860,7 +870,10 @@ function VerdictCard({ verdict }: { verdict: LimitPrecheckResult['verdicts'][num
       ) : (
         <ul className="mt-2 space-y-1">
           {verdict.hits.map((h, i) => (
-            <li key={`${h.hitKind}-${i}`} className="text-copy-12 flex flex-wrap items-center gap-2">
+            <li
+              key={`${h.hitKind}-${i}`}
+              className="text-copy-12 flex flex-wrap items-center gap-2"
+            >
               <Badge tone={severityMeta(h.severity).tone === 'danger' ? 'danger' : 'warning'}>
                 {severityMeta(h.severity).label}
               </Badge>
@@ -946,12 +959,7 @@ function RuleForm({
             onChange={(e) => onChange({ ...value, status: e.target.value })}
           />
         </FormField>
-        <FormField
-          id="rfMin"
-          label="重量段下限 kg"
-          required
-          hint="半开区间下限，含"
-        >
+        <FormField id="rfMin" label="重量段下限 kg" required hint="半开区间下限，含">
           <Input
             id="rfMin"
             value={String(value.weightMinKg)}
@@ -1087,7 +1095,11 @@ function SizeForm({
             onChange={(e) => onChange({ ...value, maxGirthCm: optionalNumber(e.target.value) })}
           />
         </FormField>
-        <FormField id="sfWeight" label="重量 kg" hint="与重量段是两件事：段是时效承诺，重量上限是能不能发">
+        <FormField
+          id="sfWeight"
+          label="重量 kg"
+          hint="与重量段是两件事：段是时效承诺，重量上限是能不能发"
+        >
           <Input
             id="sfWeight"
             value={value.maxWeightKg === null ? '' : String(value.maxWeightKg)}
@@ -1156,11 +1168,7 @@ function MarkingForm({
             onChange={(e) => onChange({ ...value, requirementMode: e.target.value })}
           />
         </FormField>
-        <FormField
-          id="mfCode"
-          label="标识代码"
-          hint="要求贴标识时必填（如 UN38.3）"
-        >
+        <FormField id="mfCode" label="标识代码" hint="要求贴标识时必填（如 UN38.3）">
           <Input
             id="mfCode"
             value={value.markingCode}

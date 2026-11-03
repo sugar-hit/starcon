@@ -23,7 +23,8 @@ const base = 'channel/backfills';
 export type BackfillResourceType = 'ORDER' | 'LISTING' | 'INVENTORY' | 'SETTLEMENT' | 'PRODUCT';
 export type BackfillTrigger = 'WEBHOOK_GAP' | 'CURSOR_REWIND' | 'MANUAL' | 'PLATFORM_RECOVERY';
 export type PaginationMode = 'TIME_INCREMENTAL' | 'RECENT_N_SCAN';
-export type BackfillStatus = 'PENDING' | 'RUNNING' | 'SUCCEEDED' | 'PARTIAL' | 'FAILED' | 'CANCELLED';
+export type BackfillStatus =
+  'PENDING' | 'RUNNING' | 'SUCCEEDED' | 'PARTIAL' | 'FAILED' | 'CANCELLED';
 
 export class ApiError extends Error {
   constructor(
@@ -67,7 +68,10 @@ export const createTask = (input: BackfillTaskInput) =>
 export const fetchTask = (id: string) => call<BackfillTaskView>(`${base}/${id}`);
 
 export const submitRecords = (id: string, input: BackfillSubmitInput) =>
-  call<BackfillSubmitResult>(`${base}/${id}/records`, { method: 'POST', body: JSON.stringify(input) });
+  call<BackfillSubmitResult>(`${base}/${id}/records`, {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
 
 export const completeTask = (id: string, input: BackfillCompleteInput) =>
   call<void>(`${base}/${id}/complete`, { method: 'POST', body: JSON.stringify(input) });
@@ -146,7 +150,8 @@ export interface BackfillForm {
 export function emptyBackfillForm(): BackfillForm {
   const end = new Date(Date.now() - 5 * 60_000);
   const start = new Date(end.getTime() - 2 * 60 * 60_000);
-  const local = (d: Date) => new Date(d.getTime() - d.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
+  const local = (d: Date) =>
+    new Date(d.getTime() - d.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
   return {
     connectionId: '',
     resourceType: 'ORDER',

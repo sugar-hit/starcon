@@ -186,7 +186,10 @@ export function mustRefundBadgeClass(
  * <p>必须区分「平台声明」与「原因分类命中」—— 两者的可推翻性不同：
  * 前者只能改平台侧，后者随政策词表变化。
  */
-export function mustRefundBasisText(basis: string | null | undefined, situation?: string | null): string {
+export function mustRefundBasisText(
+  basis: string | null | undefined,
+  situation?: string | null,
+): string {
   switch (basis) {
     case 'PLATFORM_DECLARED':
       return '平台声明必退（不可在本地降级）';
@@ -214,7 +217,8 @@ const ELIGIBILITY = {
   REJECTED_OUT_OF_WINDOW: { tone: 'rejected', label: '超窗不受理', rank: 3 },
 } satisfies Record<string, EligibilityPresentation>;
 
-export const ELIGIBILITY_PRESENTATION: Readonly<Record<string, EligibilityPresentation>> = ELIGIBILITY;
+export const ELIGIBILITY_PRESENTATION: Readonly<Record<string, EligibilityPresentation>> =
+  ELIGIBILITY;
 
 /**
  * 受理结论语气。

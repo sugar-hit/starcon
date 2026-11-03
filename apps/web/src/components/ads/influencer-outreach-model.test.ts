@@ -68,7 +68,9 @@ describe('14.5.1.2 建联与样品 · 前端模型', () => {
       expect(trackingText({ trackingAvailable: false, trackingOwnerModule: '10 物流' })).toBe(
         '轨迹不可查（归 10 物流 管）',
       );
-      expect(trackingText({ trackingAvailable: true, trackingOwnerModule: '10 物流' })).toBe('轨迹可查');
+      expect(trackingText({ trackingAvailable: true, trackingOwnerModule: '10 物流' })).toBe(
+        '轨迹可查',
+      );
     });
 
     it('财务恒为「未进费用归集」并标出责任模块', () => {

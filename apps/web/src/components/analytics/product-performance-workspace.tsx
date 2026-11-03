@@ -102,7 +102,9 @@ export function AnalyticsProductPerformanceWorkspace() {
   const [data, setData] = useState<ProductPerformanceResponse | null>(null);
   const [capabilities, setCapabilities] = useState<ProductPerformanceCapabilities | null>(null);
   const [definitions, setDefinitions] = useState<PerformanceMetricDefinitionView[]>([]);
-  const [refreshResults, setRefreshResults] = useState<ProductPerformanceRefreshResult[] | null>(null);
+  const [refreshResults, setRefreshResults] = useState<ProductPerformanceRefreshResult[] | null>(
+    null,
+  );
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -296,7 +298,10 @@ export function AnalyticsProductPerformanceWorkspace() {
 
       {/* ── 错误态 ─────────────────────────────────────────────────────── */}
       {state === 'error' && (
-        <SectionCard title="读取失败" description="上游读不到就是读不到，不会返回空集合冒充「没有数据」。">
+        <SectionCard
+          title="读取失败"
+          description="上游读不到就是读不到，不会返回空集合冒充「没有数据」。"
+        >
           <div className="text-destructive flex items-start gap-2">
             <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" />
             <p className="text-copy-13">{error}</p>
@@ -395,7 +400,8 @@ export function AnalyticsProductPerformanceWorkspace() {
                   <ul className="text-copy-13 text-muted-foreground mt-1 list-disc space-y-1 pl-5">
                     {ruleNotes(capabilities).map((rule) => (
                       <li key={rule.ruleCode}>
-                        <span className="text-foreground font-medium">{rule.ruleCode}</span>：{rule.description}
+                        <span className="text-foreground font-medium">{rule.ruleCode}</span>：
+                        {rule.description}
                       </li>
                     ))}
                   </ul>
@@ -454,7 +460,11 @@ function SectionPanel({
             </thead>
             <tbody>
               {metrics.map((metric) => (
-                <MetricRow key={metric.metricCode} metric={metric} unit={unitOf(metric.metricCode)} />
+                <MetricRow
+                  key={metric.metricCode}
+                  metric={metric}
+                  unit={unitOf(metric.metricCode)}
+                />
               ))}
             </tbody>
           </table>
@@ -476,7 +486,10 @@ function SectionPanel({
             </thead>
             <tbody>
               {competitors.map((row) => (
-                <tr key={`${row.sellerId}-${row.observedAt ?? ''}`} className="border-border border-b">
+                <tr
+                  key={`${row.sellerId}-${row.observedAt ?? ''}`}
+                  className="border-border border-b"
+                >
                   <td className="py-2 pr-3">
                     <div className="text-foreground">{row.sellerName || row.sellerId}</div>
                     {row.note && (
@@ -484,13 +497,19 @@ function SectionPanel({
                     )}
                   </td>
                   <td className="py-2 pr-3">
-                    <Badge tone={sellerKindTone(row.sellerKind)}>{sellerKindLabel(row.sellerKind)}</Badge>
+                    <Badge tone={sellerKindTone(row.sellerKind)}>
+                      {sellerKindLabel(row.sellerKind)}
+                    </Badge>
                   </td>
                   <td className="py-2 pr-3 text-right">
-                    {row.hijackerPrice === null ? '—' : `${row.hijackerPrice} ${currencyLabel(row.currency)}`}
+                    {row.hijackerPrice === null
+                      ? '—'
+                      : `${row.hijackerPrice} ${currencyLabel(row.currency)}`}
                   </td>
                   <td className="py-2 pr-3 text-right">
-                    {row.referencePrice === null ? '—' : `${row.referencePrice} ${currencyLabel(row.currency)}`}
+                    {row.referencePrice === null
+                      ? '—'
+                      : `${row.referencePrice} ${currencyLabel(row.currency)}`}
                   </td>
                   <td className="py-2 pr-3 text-right">
                     {row.priceGap === null ? '—' : `${row.priceGap} ${currencyLabel(row.currency)}`}
@@ -528,7 +547,7 @@ function SectionPanel({
                       <div className="text-copy-13 text-muted-foreground">{row.note}</div>
                     )}
                   </td>
-                  <td className="py-2 pr-3 text-muted-foreground">
+                  <td className="text-muted-foreground py-2 pr-3">
                     {[row.platformName, row.shopName].filter(Boolean).join(' / ') || '—'}
                   </td>
                   <td className="py-2 pr-3 text-right">
@@ -563,7 +582,7 @@ function MetricRow({ metric, unit }: { metric: PerformanceMetric; unit: string }
         </div>
       </td>
       <td className="py-2 pr-3 text-right font-medium">{metricValueText(metric, unit)}</td>
-      <td className="py-2 pr-3 text-right text-muted-foreground">
+      <td className="text-muted-foreground py-2 pr-3 text-right">
         {metric.baselineValue === null
           ? '—'
           : unit === 'PERCENT'
@@ -583,9 +602,7 @@ function MetricRow({ metric, unit }: { metric: PerformanceMetric; unit: string }
           {availabilityLabel(metric.availability)}
         </Badge>
         {metric.availabilityNote && (
-          <div className="text-copy-13 text-muted-foreground mt-0.5">
-            {metric.availabilityNote}
-          </div>
+          <div className="text-copy-13 text-muted-foreground mt-0.5">{metric.availabilityNote}</div>
         )}
         {metric.sourceNote && (
           <div className="text-copy-13 text-muted-foreground">{metric.sourceNote}</div>
@@ -703,11 +720,11 @@ function DefinitionPanel({ definitions }: { definitions: PerformanceMetricDefini
                 <div className="text-foreground">{definition.displayName}</div>
                 <div className="text-copy-13 text-muted-foreground">{definition.metricCode}</div>
               </td>
-              <td className="py-2 pr-3 text-muted-foreground">
+              <td className="text-muted-foreground py-2 pr-3">
                 {metricUnitLabel(definition.unit)}
               </td>
-              <td className="py-2 pr-3 text-muted-foreground">{definition.aggregation}</td>
-              <td className="py-2 pr-3 text-muted-foreground">
+              <td className="text-muted-foreground py-2 pr-3">{definition.aggregation}</td>
+              <td className="text-muted-foreground py-2 pr-3">
                 {definition.numeratorMetricCode && definition.denominatorMetricCode
                   ? `${definition.numeratorMetricCode} ${definition.aggregation === 'DERIVED_DIFF' ? '−' : '÷'} ${definition.denominatorMetricCode}`
                   : '—'}
@@ -722,7 +739,7 @@ function DefinitionPanel({ definitions }: { definitions: PerformanceMetricDefini
                   </div>
                 )}
               </td>
-              <td className="py-2 pr-3 text-muted-foreground">
+              <td className="text-muted-foreground py-2 pr-3">
                 {definition.description}
                 {definition.availabilityNote && (
                   <div className="text-copy-13 text-muted-foreground">

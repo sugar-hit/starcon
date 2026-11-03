@@ -380,7 +380,13 @@ export function fetchAdBudgetOptions(): Promise<AdBudgetOptions> {
 }
 
 export function fetchAdBudgetRules(
-  query: { status?: string; currency?: string; keyword?: string; page?: number; size?: number } = {},
+  query: {
+    status?: string;
+    currency?: string;
+    keyword?: string;
+    page?: number;
+    size?: number;
+  } = {},
 ): Promise<AdBudgetRulePage> {
   return api<AdBudgetRulePage>(`channel/ad-budgets/rules${queryString(query)}`);
 }

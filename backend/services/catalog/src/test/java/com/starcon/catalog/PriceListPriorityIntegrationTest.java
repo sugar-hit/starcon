@@ -528,7 +528,11 @@ class PriceListPriorityIntegrationTest {
     // 重叠区间 = 两张表区间的交集 ⇒ 逐字相等（不被静默偏成别的瞬间）。
     assertThat(detail.overlapFrom().toInstant()).isEqualTo(from.toInstant());
     assertThat(detail.overlapTo().toInstant()).isEqualTo(to.toInstant());
-    assertThat(detail.overlapFrom().getOffset()).isEqualTo(from.getOffset());
+    // timestamptz 只保时刻、不保偏移量：重叠区间的偏移量取决于读取时的会话/JVM
+    // 时区（本地 +08:00、CI 的 UTC runner 上是 Z），不属于可断言的性质。
+    // 要证的是「重叠区间没被静默偏掉」——换算回 +08:00 后墙钟必须一致。
+    assertThat(detail.overlapFrom().withOffsetSameInstant(ZoneOffset.ofHours(8)).toLocalDateTime())
+        .isEqualTo(from.toLocalDateTime());
   }
 
   @Test

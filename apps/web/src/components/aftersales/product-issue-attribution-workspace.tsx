@@ -328,9 +328,7 @@ export function ProductIssueAttributionWorkspace() {
                 ? STAGE_LABELS[selected.row.attributedStage]
                 : '尚未归因'}
             </Badge>
-            <span className="text-muted-foreground">
-              批次 {selected.row.lotCode || '未挂批次'}
-            </span>
+            <span className="text-muted-foreground">批次 {selected.row.lotCode || '未挂批次'}</span>
             <span className="text-muted-foreground">数量 {selected.row.attributedQty}</span>
           </div>
 

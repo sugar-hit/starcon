@@ -368,9 +368,9 @@ describe('1.1.1.1 「判不了」不被当成「没有」', () => {
   it('风险分 null ⇒ 判不了严重度，而不是零风险（LOW）', () => {
     const row = pendingReviewRow({ riskScore: null, riskManualReviewRequired: false });
     expect(pendingReviewSeverity(row)).toBe('UNKNOWN');
-    expect(pendingReviewSeverity(pendingReviewRow({ riskScore: 0, riskManualReviewRequired: false }))).toBe(
-      'LOW',
-    );
+    expect(
+      pendingReviewSeverity(pendingReviewRow({ riskScore: 0, riskManualReviewRequired: false })),
+    ).toBe('LOW');
   });
 
   it('风控明确要求人工复核 ⇒ 直接定到「高」（它比风险分更权威）', () => {
@@ -453,9 +453,7 @@ describe('1.1.1.1 读不到与没有是两件不同的事', () => {
       orderOverdue: ok([overdueRow()]),
     });
     expect(merged.todos).toHaveLength(1);
-    expect(merged.unreadable).toEqual([
-      { type: 'SYNC_FAILED', reason: '服务暂时不可用' },
-    ]);
+    expect(merged.unreadable).toEqual([{ type: 'SYNC_FAILED', reason: '服务暂时不可用' }]);
   });
 
   it('汇总把「判不了严重度」的条数单独报出来', () => {
@@ -482,7 +480,13 @@ describe('1.1.1.1 按紧急度排序', () => {
     detail: '',
     scopeLabel: '',
   };
-  const high: MyTodo = { ...critical, key: 'b', reference: 'B', severity: 'HIGH', dwellSeconds: 999999 };
+  const high: MyTodo = {
+    ...critical,
+    key: 'b',
+    reference: 'B',
+    severity: 'HIGH',
+    dwellSeconds: 999999,
+  };
   const unknown: MyTodo = { ...critical, key: 'c', reference: 'C', severity: 'UNKNOWN' };
 
   it('严重度降序', () => {
@@ -646,8 +650,12 @@ describe('1.1.1.1 数据范围（法人/店铺/仓库/部门）', () => {
   }
 
   it('ALL 授权 ⇒ 租户内全部；SELF 授权 ⇒ 仅本人', () => {
-    expect(scopeModeOf([grant('ALL', ['trade.orders.read'])], 'trade.orders.read', false)).toBe('ALL');
-    expect(scopeModeOf([grant('SELF', ['trade.orders.read'])], 'trade.orders.read', false)).toBe('SELF');
+    expect(scopeModeOf([grant('ALL', ['trade.orders.read'])], 'trade.orders.read', false)).toBe(
+      'ALL',
+    );
+    expect(scopeModeOf([grant('SELF', ['trade.orders.read'])], 'trade.orders.read', false)).toBe(
+      'SELF',
+    );
   });
 
   it('DEPARTMENT 授权且会话带部门 ⇒ 本部门；不带部门 ⇒ 退化为仅本人', () => {
@@ -659,7 +667,10 @@ describe('1.1.1.1 数据范围（法人/店铺/仓库/部门）', () => {
   it('取**最宽**的一条授权（ALL > DEPARTMENT > SELF）—— 与后端 GrantPermissions 同式', () => {
     const grants = [grant('SELF', ['trade.orders.read']), grant('ALL', ['trade.orders.read'])];
     expect(scopeModeOf(grants, 'trade.orders.read', false)).toBe('ALL');
-    const mixed = [grant('SELF', ['trade.orders.read']), grant('DEPARTMENT', ['trade.orders.read'])];
+    const mixed = [
+      grant('SELF', ['trade.orders.read']),
+      grant('DEPARTMENT', ['trade.orders.read']),
+    ];
     expect(scopeModeOf(mixed, 'trade.orders.read', true)).toBe('DEPARTMENT');
   });
 
@@ -673,9 +684,9 @@ describe('1.1.1.1 数据范围（法人/店铺/仓库/部门）', () => {
     // 只有 .read 而没有动作权限 ⇒ 不成立。
     expect(canRead([grant('ALL', ['trade.orders'])], 'trade.orders.read', false)).toBe(false);
     // 动作权限与同页 .read 都在 ⇒ 成立。
-    expect(canRead([grant('ALL', ['trade.orders', 'trade.orders.read'])], 'trade.orders.read', false)).toBe(
-      true,
-    );
+    expect(
+      canRead([grant('ALL', ['trade.orders', 'trade.orders.read'])], 'trade.orders.read', false),
+    ).toBe(true);
   });
 
   it('DEPARTMENT 授权但会话无部门 ⇒ 没有读权限', () => {

@@ -112,16 +112,26 @@ export function ReturnAnalysisWorkspace() {
   const [basisCurrency, setBasisCurrency] = useState('');
   const [includeRefundOnly, setIncludeRefundOnly] = useState(false);
   const [effectiveFrom, setEffectiveFrom] = useState('');
-  const [rateMultiplier, setRateMultiplier] = useState(String(DEFAULT_THRESHOLDS.rateAlertMultiplier));
-  const [minSalesShare, setMinSalesShare] = useState(String(DEFAULT_THRESHOLDS.rateAlertMinSalesShare));
-  const [rejectionGapPp, setRejectionGapPp] = useState(String(DEFAULT_THRESHOLDS.rejectionAlertGapPp));
+  const [rateMultiplier, setRateMultiplier] = useState(
+    String(DEFAULT_THRESHOLDS.rateAlertMultiplier),
+  );
+  const [minSalesShare, setMinSalesShare] = useState(
+    String(DEFAULT_THRESHOLDS.rateAlertMinSalesShare),
+  );
+  const [rejectionGapPp, setRejectionGapPp] = useState(
+    String(DEFAULT_THRESHOLDS.rejectionAlertGapPp),
+  );
   const [rejectionMinCases, setRejectionMinCases] = useState(
     String(DEFAULT_THRESHOLDS.rejectionAlertMinCases),
   );
-  const [batchMultiplier, setBatchMultiplier] = useState(String(DEFAULT_THRESHOLDS.batchAlertMultiplier));
+  const [batchMultiplier, setBatchMultiplier] = useState(
+    String(DEFAULT_THRESHOLDS.batchAlertMultiplier),
+  );
   const [batchMinQty, setBatchMinQty] = useState(String(DEFAULT_THRESHOLDS.batchAlertMinQty));
   const [reasonShare, setReasonShare] = useState(String(DEFAULT_THRESHOLDS.reasonAlertShare));
-  const [reasonMinCases, setReasonMinCases] = useState(String(DEFAULT_THRESHOLDS.reasonAlertMinCases));
+  const [reasonMinCases, setReasonMinCases] = useState(
+    String(DEFAULT_THRESHOLDS.reasonAlertMinCases),
+  );
   const [trendGapPp, setTrendGapPp] = useState(String(DEFAULT_THRESHOLDS.trendAlertGapPp));
   const [basisNote, setBasisNote] = useState('');
 
@@ -347,7 +357,10 @@ export function ReturnAnalysisWorkspace() {
               aria-label="趋势粒度"
               value={granularity}
               onChange={setGranularity}
-              options={GRANULARITY_VALUES.map((g) => ({ value: g, label: GRANULARITY_LABELS[g] ?? g }))}
+              options={GRANULARITY_VALUES.map((g) => ({
+                value: g,
+                label: GRANULARITY_LABELS[g] ?? g,
+              }))}
             />
           </div>
         </div>
@@ -360,7 +373,7 @@ export function ReturnAnalysisWorkspace() {
         </div>
       )}
 
-      {loading && <p className="text-sm text-muted-foreground">加载中…</p>}
+      {loading && <p className="text-muted-foreground text-sm">加载中…</p>}
 
       {!loading && !error && overview && (
         <>
@@ -375,7 +388,11 @@ export function ReturnAnalysisWorkspace() {
             <StatCard
               label="拒退率"
               value={formatRatio(overview.rejection.rejectionRate)}
-              polarity={rejectionTone(overview.rejection.rejectionRate) === 'danger' ? 'negative' : 'positive'}
+              polarity={
+                rejectionTone(overview.rejection.rejectionRate) === 'danger'
+                  ? 'negative'
+                  : 'positive'
+              }
               comparisonLabel={`已决定 ${overview.rejection.decidedCount} 单 / 拒绝 ${overview.rejection.rejectedCount} 单`}
             />
             <StatCard
@@ -387,7 +404,9 @@ export function ReturnAnalysisWorkspace() {
             <StatCard
               label="原因归因覆盖率"
               value={
-                overview.attributionCoverage === null ? '—' : `${overview.attributionCoverage.toFixed(2)}%`
+                overview.attributionCoverage === null
+                  ? '—'
+                  : `${overview.attributionCoverage.toFixed(2)}%`
               }
               polarity="neutral"
               comparisonLabel={`已归因 ${overview.attributedCaseCount} 单`}
@@ -396,7 +415,7 @@ export function ReturnAnalysisWorkspace() {
 
           {/* ---------- 按币种的退货率（加粗句所在）---------- */}
           <SectionCard title="按币种的退货率">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               分子（退货金额）与分母（销售额）**必须同币种同窗口**才允许相除 ——
               本页不提供跨币种的合计金额与合计退货率。
             </p>
@@ -408,7 +427,7 @@ export function ReturnAnalysisWorkspace() {
             ) : (
               <table className="mt-3 w-full text-sm">
                 <thead>
-                  <tr className="text-left text-muted-foreground">
+                  <tr className="text-muted-foreground text-left">
                     <th className="py-1">币种</th>
                     <th className="py-1">口径</th>
                     <th className="py-1 text-right">退货单</th>
@@ -436,7 +455,7 @@ export function ReturnAnalysisWorkspace() {
                             {caliberSourceLabel(c.caliberSource)}
                           </Badge>
                           {c.includeRefundOnly ? (
-                            <span className="ml-1 text-xs text-muted-foreground">含仅退款</span>
+                            <span className="text-muted-foreground ml-1 text-xs">含仅退款</span>
                           ) : null}
                         </td>
                         <td className="py-2 text-right">{c.caseCount}</td>
@@ -444,7 +463,9 @@ export function ReturnAnalysisWorkspace() {
                         <td className="py-2 text-right">{formatMoney(c.returnAmount)}</td>
                         <td className="py-2 text-right">{formatMoney(c.salesAmount)}</td>
                         <td className="py-2 text-right">
-                          <Badge tone={rateTone(c.returnRate) as Tone}>{formatRate(c.returnRate)}</Badge>
+                          <Badge tone={rateTone(c.returnRate) as Tone}>
+                            {formatRate(c.returnRate)}
+                          </Badge>
                         </td>
                         <td className="py-2 text-right">{formatMoney(c.avgRefundAmount)}</td>
                         <td className="py-2 text-right">
@@ -458,21 +479,23 @@ export function ReturnAnalysisWorkspace() {
                 </tbody>
               </table>
             )}
-            <p className="mt-2 text-xs text-muted-foreground">{overview.note}</p>
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className="text-muted-foreground mt-2 text-xs">{overview.note}</p>
+            <p className="text-muted-foreground mt-1 text-xs">
               参考时刻：{overview.generatedAt} · {overview.windowNote}
             </p>
           </SectionCard>
 
           {/* ---------- 拒退率 ---------- */}
           <SectionCard title="拒退率">
-            <p className="text-sm text-muted-foreground">{overview.rejection.note}</p>
+            <p className="text-muted-foreground text-sm">{overview.rejection.note}</p>
             <div className="mt-3 grid gap-3 md:grid-cols-4">
               <StatCard
                 label="拒退率"
                 value={formatRatio(overview.rejection.rejectionRate)}
                 polarity={
-                  rejectionTone(overview.rejection.rejectionRate) === 'danger' ? 'negative' : 'positive'
+                  rejectionTone(overview.rejection.rejectionRate) === 'danger'
+                    ? 'negative'
+                    : 'positive'
                 }
                 comparisonLabel={`分母 = 已决定 ${overview.rejection.decidedCount} 单`}
               />
@@ -499,7 +522,7 @@ export function ReturnAnalysisWorkspace() {
 
           {/* ---------- 处理时效 ---------- */}
           <SectionCard title="处理时效">
-            <p className="text-sm text-muted-foreground">{overview.processing.note}</p>
+            <p className="text-muted-foreground text-sm">{overview.processing.note}</p>
             <div className="mt-3 grid gap-3 md:grid-cols-4">
               <StatCard
                 label="售后单结案"
@@ -526,19 +549,24 @@ export function ReturnAnalysisWorkspace() {
                 comparisonLabel={`样本 ${overview.processing.refundSampleCount} 单`}
               />
             </div>
-            <p className="mt-2 text-xs text-muted-foreground">
+            <p className="text-muted-foreground mt-2 text-xs">
               四个时长来自四份不同的单据，**互不混算**；没有样本时显示「无样本」而不是 0 小时。
             </p>
           </SectionCard>
 
           {/* ---------- 维度下钻 ---------- */}
           {breakdown && (
-            <SectionCard title={`维度下钻：${DIMENSION_LABELS[breakdown.dimension] ?? breakdown.dimension}`}>
-              <p className="text-sm text-muted-foreground">{breakdown.note}</p>
+            <SectionCard
+              title={`维度下钻：${DIMENSION_LABELS[breakdown.dimension] ?? breakdown.dimension}`}
+            >
+              <p className="text-muted-foreground text-sm">{breakdown.note}</p>
               <p className="mt-1 text-sm">
-                口径：<Badge tone="info">{CALIBER_LABELS[breakdown.caliber] ?? breakdown.caliber}</Badge>
+                口径：
+                <Badge tone="info">{CALIBER_LABELS[breakdown.caliber] ?? breakdown.caliber}</Badge>
                 {breakdown.currency ? (
-                  <span className="ml-2 text-xs text-muted-foreground">币种 {breakdown.currency}</span>
+                  <span className="text-muted-foreground ml-2 text-xs">
+                    币种 {breakdown.currency}
+                  </span>
                 ) : null}
               </p>
               {breakdown.rows.length === 0 ? (
@@ -549,7 +577,7 @@ export function ReturnAnalysisWorkspace() {
               ) : (
                 <table className="mt-3 w-full text-sm">
                   <thead>
-                    <tr className="text-left text-muted-foreground">
+                    <tr className="text-muted-foreground text-left">
                       <th className="py-1">维度值</th>
                       <th className="py-1">币种</th>
                       <th className="py-1 text-right">退货单</th>
@@ -571,7 +599,7 @@ export function ReturnAnalysisWorkspace() {
                         <td className="py-2">
                           {row.dimensionLabel}
                           {row.dimension === 'BATCH' ? (
-                            <span className="ml-1 text-xs text-muted-foreground">
+                            <span className="text-muted-foreground ml-1 text-xs">
                               关联 {row.linkedSkuCount} 个 SKU
                             </span>
                           ) : null}
@@ -590,7 +618,9 @@ export function ReturnAnalysisWorkspace() {
                           </>
                         )}
                         <td className="py-2 text-right">
-                          <Badge tone={rateTone(row.returnRate) as Tone}>{formatRate(row.returnRate)}</Badge>
+                          <Badge tone={rateTone(row.returnRate) as Tone}>
+                            {formatRate(row.returnRate)}
+                          </Badge>
                         </td>
                       </tr>
                     ))}
@@ -600,7 +630,9 @@ export function ReturnAnalysisWorkspace() {
               <p className="mt-3 text-sm">
                 合计：
                 {noAmountCaliber ? (
-                  <span className="text-muted-foreground">批次维度没有金额口径，不报金额合计。</span>
+                  <span className="text-muted-foreground">
+                    批次维度没有金额口径，不报金额合计。
+                  </span>
                 ) : crossCurrency ? (
                   <span className="text-amber-600">
                     本期出现 {breakdownCurrencies.join(' / ')} 多个币种 —— **不提供跨币种合计**
@@ -615,7 +647,7 @@ export function ReturnAnalysisWorkspace() {
                 )}
               </p>
               {breakdown.lineAmountCoverage !== null && (
-                <p className="mt-1 text-xs text-muted-foreground">
+                <p className="text-muted-foreground mt-1 text-xs">
                   行级金额覆盖率 {breakdown.lineAmountCoverage.toFixed(2)}% —— 没有行级金额的售后单
                   不进入 SKU 与类目下钻。
                 </p>
@@ -626,13 +658,13 @@ export function ReturnAnalysisWorkspace() {
           {/* ---------- 趋势 ---------- */}
           {trend && (
             <SectionCard title="退货金额与退货率趋势">
-              <p className="text-sm text-muted-foreground">{trend.note}</p>
+              <p className="text-muted-foreground text-sm">{trend.note}</p>
               {trend.points.length === 0 ? (
                 <EmptyState title="期间内没有可分桶的数据" description="换一个期间或粒度试试。" />
               ) : (
                 <table className="mt-3 w-full text-sm">
                   <thead>
-                    <tr className="text-left text-muted-foreground">
+                    <tr className="text-muted-foreground text-left">
                       <th className="py-1">时间桶</th>
                       <th className="py-1">币种</th>
                       <th className="py-1 text-right">退货单</th>
@@ -652,7 +684,9 @@ export function ReturnAnalysisWorkspace() {
                         <td className="py-2 text-right">{formatMoney(p.returnAmount)}</td>
                         <td className="py-2 text-right">{formatMoney(p.salesAmount)}</td>
                         <td className="py-2 text-right">
-                          <Badge tone={rateTone(p.returnRate) as Tone}>{formatRate(p.returnRate)}</Badge>
+                          <Badge tone={rateTone(p.returnRate) as Tone}>
+                            {formatRate(p.returnRate)}
+                          </Badge>
                         </td>
                       </tr>
                     ))}
@@ -665,16 +699,16 @@ export function ReturnAnalysisWorkspace() {
           {/* ---------- 异常识别 ---------- */}
           {anomalies && (
             <SectionCard title="异常识别">
-              <p className="text-sm text-muted-foreground">{anomalies.note}</p>
+              <p className="text-muted-foreground text-sm">{anomalies.note}</p>
               {anomalies.thresholds ? (
-                <p className="mt-1 text-xs text-muted-foreground">
+                <p className="text-muted-foreground mt-1 text-xs">
                   阈值（{caliberSourceLabel(anomalies.thresholds.source)}）：退货率 ×
                   {anomalies.thresholds.rateMultiplier}（且该维度销售额 ≥ 总体的{' '}
                   {(anomalies.thresholds.rateMinSalesShare * 100).toFixed(2)}%）· 拒退率差{' '}
                   {anomalies.thresholds.rejectionGapPp} 个百分点（且已决定 ≥{' '}
                   {anomalies.thresholds.rejectionMinCases} 单）· 批次件数 ×
-                  {anomalies.thresholds.batchMultiplier}（且 ≥ {anomalies.thresholds.batchMinQty} 件）·
-                  原因占比 {(anomalies.thresholds.reasonShare * 100).toFixed(2)}%（且 ≥{' '}
+                  {anomalies.thresholds.batchMultiplier}（且 ≥ {anomalies.thresholds.batchMinQty}{' '}
+                  件）· 原因占比 {(anomalies.thresholds.reasonShare * 100).toFixed(2)}%（且 ≥{' '}
                   {anomalies.thresholds.reasonMinCases} 单）· 趋势恶化{' '}
                   {anomalies.thresholds.trendGapPp} 个百分点
                 </p>
@@ -687,7 +721,7 @@ export function ReturnAnalysisWorkspace() {
               ) : (
                 <table className="mt-3 w-full text-sm">
                   <thead>
-                    <tr className="text-left text-muted-foreground">
+                    <tr className="text-muted-foreground text-left">
                       <th className="py-1">规则</th>
                       <th className="py-1">维度值</th>
                       <th className="py-1">币种</th>
@@ -700,7 +734,10 @@ export function ReturnAnalysisWorkspace() {
                   </thead>
                   <tbody>
                     {anomalies.rows.map((row, i) => (
-                      <tr key={`${row.code}-${row.currency}-${row.dimensionKey}-${i}`} className="border-t">
+                      <tr
+                        key={`${row.code}-${row.currency}-${row.dimensionKey}-${i}`}
+                        className="border-t"
+                      >
                         <td className="py-2">{ANOMALY_LABELS[row.code] ?? row.title}</td>
                         <td className="py-2">{row.dimensionLabel}</td>
                         <td className="py-2">{row.currency}</td>
@@ -710,7 +747,7 @@ export function ReturnAnalysisWorkspace() {
                         <td className="py-2 text-right">{row.metricValue}</td>
                         <td className="py-2 text-right">{row.baselineValue}</td>
                         <td className="py-2 text-right">{row.delta}</td>
-                        <td className="py-2 text-xs text-muted-foreground">{row.note}</td>
+                        <td className="text-muted-foreground py-2 text-xs">{row.note}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -721,7 +758,7 @@ export function ReturnAnalysisWorkspace() {
 
           {/* ---------- 原因分布 ---------- */}
           <SectionCard title="原因分布">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               下面两张表是**两个不同的轴**：左边是售后单上的七类内联词表（每单必填，口径完整），
               右边是 11.1.2.1 的归因分类树（可能没归因，**必须和覆盖率一起读**）。
             </p>
@@ -729,11 +766,11 @@ export function ReturnAnalysisWorkspace() {
               <div>
                 <h4 className="mb-1 text-sm font-medium">七类原因词表</h4>
                 {overview.reasonDistribution.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">期间内没有退货售后单。</p>
+                  <p className="text-muted-foreground text-sm">期间内没有退货售后单。</p>
                 ) : (
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="text-left text-muted-foreground">
+                      <tr className="text-muted-foreground text-left">
                         <th className="py-1">原因</th>
                         <th className="py-1">币种</th>
                         <th className="py-1 text-right">单数</th>
@@ -766,13 +803,13 @@ export function ReturnAnalysisWorkspace() {
                   ，已归因 {overview.attributedCaseCount} 单）
                 </h4>
                 {overview.attributionDistribution.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     期间内没有归因记录 —— 这一列空着不代表没有退货，只代表还没归因。
                   </p>
                 ) : (
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="text-left text-muted-foreground">
+                      <tr className="text-muted-foreground text-left">
                         <th className="py-1">分类</th>
                         <th className="py-1">币种</th>
                         <th className="py-1 text-right">命中单数</th>
@@ -793,8 +830,9 @@ export function ReturnAnalysisWorkspace() {
                     </tbody>
                   </table>
                 )}
-                <p className="mt-1 text-xs text-muted-foreground">
-                  一单可以归多个原因（多选），所以各分类的命中单数之和**大于**归因单数 —— 这是多选归因的定义。
+                <p className="text-muted-foreground mt-1 text-xs">
+                  一单可以归多个原因（多选），所以各分类的命中单数之和**大于**归因单数 ——
+                  这是多选归因的定义。
                 </p>
               </div>
             </div>
@@ -803,7 +841,7 @@ export function ReturnAnalysisWorkspace() {
           {/* ---------- 快照 ---------- */}
           {snapshots && (
             <SectionCard title="报表快照">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 快照是**追加式**的：算出来的每个维度值原样落库，三个月后「上个月那张报表是多少」才答得出来。
                 算错了重存一份即可，老的那份留着。
               </p>
@@ -811,7 +849,7 @@ export function ReturnAnalysisWorkspace() {
                 <Button variant="secondary" onClick={() => void saveSnapshot()}>
                   按当前筛选保存快照
                 </Button>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-muted-foreground text-xs">
                   当前：{dimension} · {currency || '（未选币种）'}
                   {from ? ` · ${from}` : ''}
                   {to ? ` → ${to}` : ''}
@@ -820,11 +858,14 @@ export function ReturnAnalysisWorkspace() {
               {actionError && <p className="mt-2 text-sm text-red-600">{actionError}</p>}
               {notice && <p className="mt-2 text-sm text-emerald-600">{notice}</p>}
               {snapshots.rows.length === 0 ? (
-                <EmptyState title="还没有保存过快照" description="保存后这份报表的数就固定下来了。" />
+                <EmptyState
+                  title="还没有保存过快照"
+                  description="保存后这份报表的数就固定下来了。"
+                />
               ) : (
                 <table className="mt-3 w-full text-sm">
                   <thead>
-                    <tr className="text-left text-muted-foreground">
+                    <tr className="text-muted-foreground text-left">
                       <th className="py-1">单号</th>
                       <th className="py-1">维度</th>
                       <th className="py-1">币种</th>
@@ -841,7 +882,7 @@ export function ReturnAnalysisWorkspace() {
                       <tr key={row.id} className="border-t">
                         <td className="py-2">
                           {row.snapshotNo}
-                          <span className="ml-1 text-xs text-muted-foreground">
+                          <span className="text-muted-foreground ml-1 text-xs">
                             {snapshotDimensionLabel(row.dimension)}
                           </span>
                         </td>
@@ -852,7 +893,7 @@ export function ReturnAnalysisWorkspace() {
                         <td className="py-2 text-right">{formatMoney(row.salesAmount)}</td>
                         <td className="py-2 text-right">{formatRate(row.returnRate)}</td>
                         <td className="py-2 text-right">{formatRatio(row.rejectionRate)}</td>
-                        <td className="py-2 text-xs text-muted-foreground">{row.computedAt}</td>
+                        <td className="text-muted-foreground py-2 text-xs">{row.computedAt}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -864,18 +905,18 @@ export function ReturnAnalysisWorkspace() {
           {/* ---------- 口径与阈值 ---------- */}
           {basis && (
             <SectionCard title="口径与异常阈值">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 每个币种一份生效口径；换版必须留痕（老版本保留为「已换版」）。
                 没有登记时用文档化的默认口径，报表里会标 caliberSource=DEFAULT。
               </p>
               {basis.rows.length === 0 ? (
-                <p className="mt-2 text-sm text-muted-foreground">
+                <p className="text-muted-foreground mt-2 text-sm">
                   这个租户还没有登记任何口径 —— 现在的异常判定用的是默认口径。
                 </p>
               ) : (
                 <table className="mt-3 w-full text-sm">
                   <thead>
-                    <tr className="text-left text-muted-foreground">
+                    <tr className="text-muted-foreground text-left">
                       <th className="py-1">口径号</th>
                       <th className="py-1">名称</th>
                       <th className="py-1">币种</th>
@@ -935,7 +976,9 @@ export function ReturnAnalysisWorkspace() {
 
               <div className="mt-4 border-t pt-4">
                 <h4 className="mb-2 text-sm font-medium">
-                  {supersedeTarget ? `换版 ${supersedeTarget.basisNo}（${supersedeTarget.currency}）` : '登记新口径'}
+                  {supersedeTarget
+                    ? `换版 ${supersedeTarget.basisNo}（${supersedeTarget.currency}）`
+                    : '登记新口径'}
                 </h4>
                 <div className="flex flex-wrap items-end gap-3">
                   <div className="flex flex-col gap-1">
@@ -951,7 +994,10 @@ export function ReturnAnalysisWorkspace() {
                     />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <label className="text-muted-foreground text-label-12" htmlFor="ra-basis-currency">
+                    <label
+                      className="text-muted-foreground text-label-12"
+                      htmlFor="ra-basis-currency"
+                    >
                       币种
                     </label>
                     <Input
@@ -1102,7 +1148,10 @@ export function ReturnAnalysisWorkspace() {
                 {supersedeTarget ? (
                   <div className="mt-3 flex flex-wrap items-end gap-3">
                     <div className="flex flex-col gap-1">
-                      <label className="text-muted-foreground text-label-12" htmlFor="ra-supersede-reason">
+                      <label
+                        className="text-muted-foreground text-label-12"
+                        htmlFor="ra-supersede-reason"
+                      >
                         换版理由（必填）
                       </label>
                       <Input
@@ -1137,8 +1186,12 @@ export function ReturnAnalysisWorkspace() {
                   <li key={b}>{b.replaceAll('**', '')}</li>
                 ))}
               </ul>
-              <p className="mt-3 text-xs text-muted-foreground">{caps.caliberNote.replaceAll('**', '')}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{caps.currencyNote.replaceAll('**', '')}</p>
+              <p className="text-muted-foreground mt-3 text-xs">
+                {caps.caliberNote.replaceAll('**', '')}
+              </p>
+              <p className="text-muted-foreground mt-1 text-xs">
+                {caps.currencyNote.replaceAll('**', '')}
+              </p>
             </SectionCard>
           )}
         </>

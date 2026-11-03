@@ -151,7 +151,9 @@ export function QualityAnalysisWorkspace() {
     setNotice('');
     const row = observations?.rows.find((r) => r.id === obsCheckResultId);
     if (!row) {
-      setActionError('请先从下面的观察列表里选一条已登记的观察（本页只演示作废；登记需要 11.2.3.1 的检项 id）');
+      setActionError(
+        '请先从下面的观察列表里选一条已登记的观察（本页只演示作废；登记需要 11.2.3.1 的检项 id）',
+      );
       return;
     }
     try {
@@ -185,7 +187,7 @@ export function QualityAnalysisWorkspace() {
         </div>
       )}
 
-      {loading && <p className="text-sm text-muted-foreground">加载中…</p>}
+      {loading && <p className="text-muted-foreground text-sm">加载中…</p>}
 
       {!loading && !error && overview && (
         <>
@@ -208,7 +210,9 @@ export function QualityAnalysisWorkspace() {
               label="质量成本合计"
               value={
                 overview.costTotals.length
-                  ? overview.costTotals.map((t) => `${t.currency} ${formatMoney(t.amount)}`).join(' / ')
+                  ? overview.costTotals
+                      .map((t) => `${t.currency} ${formatMoney(t.amount)}`)
+                      .join(' / ')
                   : '暂无'
               }
               polarity={
@@ -223,17 +227,20 @@ export function QualityAnalysisWorkspace() {
           </div>
 
           <SectionCard title="总览口径">
-            <p className="text-sm text-muted-foreground">{overview.windowNote}</p>
+            <p className="text-muted-foreground text-sm">{overview.windowNote}</p>
             <p className="mt-2 text-sm">{overview.basisNote}</p>
-            <p className="mt-2 text-xs text-muted-foreground">参考时刻：{overview.generatedAt}</p>
+            <p className="text-muted-foreground mt-2 text-xs">参考时刻：{overview.generatedAt}</p>
           </SectionCard>
 
           {/* ---------- 质量成本（加粗句所在）---------- */}
           {cost && (
             <SectionCard title="质量成本估算">
-              <p className="text-sm text-muted-foreground">{cost.basisNote}</p>
+              <p className="text-muted-foreground text-sm">{cost.basisNote}</p>
               {cost.currencies.length === 0 ? (
-                <EmptyState title="还没有已判定质检单" description="质检判定之后才会有损耗金额可算。" />
+                <EmptyState
+                  title="还没有已判定质检单"
+                  description="质检判定之后才会有损耗金额可算。"
+                />
               ) : (
                 <div className="mt-4 space-y-4">
                   {cost.currencies.map((c) => {
@@ -243,12 +250,13 @@ export function QualityAnalysisWorkspace() {
                         <div className="mb-2 flex items-center justify-between">
                           <h4 className="font-medium">{c.currency}</h4>
                           <span className="text-sm">
-                            合计 <strong>{formatMoney(total)}</strong> · {excludedCostNote(excluded)}
+                            合计 <strong>{formatMoney(total)}</strong> ·{' '}
+                            {excludedCostNote(excluded)}
                           </span>
                         </div>
                         <table className="w-full text-sm">
                           <thead>
-                            <tr className="text-left text-muted-foreground">
+                            <tr className="text-muted-foreground text-left">
                               <th className="py-1">分项</th>
                               <th className="py-1">依据</th>
                               <th className="py-1 text-right">金额</th>
@@ -260,7 +268,9 @@ export function QualityAnalysisWorkspace() {
                               <tr key={item.key} className="border-t">
                                 <td className="py-2">{item.label}</td>
                                 <td className="py-2">
-                                  <Badge tone={costBasisTone(item.basis)}>{costBasisLabel(item.basis)}</Badge>
+                                  <Badge tone={costBasisTone(item.basis)}>
+                                    {costBasisLabel(item.basis)}
+                                  </Badge>
                                 </td>
                                 <td className="py-2 text-right">
                                   {item.basis === 'NOT_REGISTERED' ? (
@@ -269,7 +279,9 @@ export function QualityAnalysisWorkspace() {
                                     formatMoney(item.amount)
                                   )}
                                 </td>
-                                <td className="py-2 text-xs text-muted-foreground">{item.formula}</td>
+                                <td className="text-muted-foreground py-2 text-xs">
+                                  {item.formula}
+                                </td>
                               </tr>
                             ))}
                           </tbody>
@@ -277,13 +289,14 @@ export function QualityAnalysisWorkspace() {
                       </div>
                     );
                   })}
-                  <p className="text-xs text-muted-foreground">{cost.reviewNote}</p>
+                  <p className="text-muted-foreground text-xs">{cost.reviewNote}</p>
                   <div>
                     <h4 className="mb-1 text-sm font-medium">成本参数</h4>
                     {cost.parameters.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">
-                        <Badge tone="danger">{COST_BASIS.NOT_REGISTERED?.label}</Badge> 还没有登记任何币种的参数 ——
-                        退货物流与差评影响这两项因此算不出来，也<b>不在合计里</b>。
+                      <p className="text-muted-foreground text-sm">
+                        <Badge tone="danger">{COST_BASIS.NOT_REGISTERED?.label}</Badge>{' '}
+                        还没有登记任何币种的参数 —— 退货物流与差评影响这两项因此算不出来，也
+                        <b>不在合计里</b>。
                       </p>
                     ) : (
                       <ul className="space-y-1 text-sm">
@@ -291,7 +304,9 @@ export function QualityAnalysisWorkspace() {
                           <li key={p.id}>
                             {p.currency}：退货物流 {formatMoney(p.returnLogisticsPerCase)} / 件 ·
                             差评影响 {formatMoney(p.reviewImpactPerDefect)} / 件
-                            {p.sourceNote ? <span className="text-muted-foreground">（{p.sourceNote}）</span> : null}
+                            {p.sourceNote ? (
+                              <span className="text-muted-foreground">（{p.sourceNote}）</span>
+                            ) : null}
                           </li>
                         ))}
                       </ul>
@@ -305,14 +320,22 @@ export function QualityAnalysisWorkspace() {
           {/* ---------- 开箱率 ---------- */}
           {openBox && (
             <SectionCard title="开箱率（到手即损）">
-              <p className={`text-sm ${openBoxRead.tone === 'warning' ? 'text-amber-600' : ''}`}>{openBoxRead.text}</p>
-              <p className="mt-2 text-sm text-muted-foreground">{openBox.basisNote}</p>
+              <p className={`text-sm ${openBoxRead.tone === 'warning' ? 'text-amber-600' : ''}`}>
+                {openBoxRead.text}
+              </p>
+              <p className="text-muted-foreground mt-2 text-sm">{openBox.basisNote}</p>
               {openBox.stages.length === 0 ? (
-                <EmptyState title="还没有登记缺陷观察" description="开箱率的唯一数据来源是「缺陷观察」，一条都没有时任何开箱率都只是「没数据」。" />
+                <EmptyState
+                  title="还没有登记缺陷观察"
+                  description="开箱率的唯一数据来源是「缺陷观察」，一条都没有时任何开箱率都只是「没数据」。"
+                />
               ) : (
                 <div className="mt-3 flex flex-wrap gap-2">
                   {openBox.stages.map((s) => (
-                    <Badge key={s.discoveryStage} tone={s.discoveryStage === 'BUYER_UNBOXING' ? 'danger' : 'neutral'}>
+                    <Badge
+                      key={s.discoveryStage}
+                      tone={s.discoveryStage === 'BUYER_UNBOXING' ? 'danger' : 'neutral'}
+                    >
                       {s.stageLabel} {s.affectedQty} 件（{formatPercent(s.share)}）
                     </Badge>
                   ))}
@@ -321,7 +344,7 @@ export function QualityAnalysisWorkspace() {
               {openBox.bySku.length > 0 && (
                 <table className="mt-4 w-full text-sm">
                   <thead>
-                    <tr className="text-left text-muted-foreground">
+                    <tr className="text-muted-foreground text-left">
                       <th className="py-1">SKU</th>
                       <th className="py-1 text-right">已登记件数</th>
                       <th className="py-1 text-right">开箱发现</th>
@@ -336,7 +359,9 @@ export function QualityAnalysisWorkspace() {
                         <td className="py-2 text-right">{row.observedQty}</td>
                         <td className="py-2 text-right">{row.openBoxQty}</td>
                         <td className="py-2 text-right">{formatPercent(row.openBoxRate)}</td>
-                        <td className="py-2 text-right">{formatPercent(row.observationCoverage)}</td>
+                        <td className="py-2 text-right">
+                          {formatPercent(row.observationCoverage)}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -348,13 +373,16 @@ export function QualityAnalysisWorkspace() {
           {/* ---------- 缺陷类型分布 ---------- */}
           {distribution && (
             <SectionCard title="缺陷类型分布">
-              <p className="text-sm text-muted-foreground">{distribution.basisNote}</p>
+              <p className="text-muted-foreground text-sm">{distribution.basisNote}</p>
               {distribution.types.length === 0 ? (
-                <EmptyState title="没有失败检项" description="全部检项都判了 PASS —— 这一档没有缺陷可统计。" />
+                <EmptyState
+                  title="没有失败检项"
+                  description="全部检项都判了 PASS —— 这一档没有缺陷可统计。"
+                />
               ) : (
                 <table className="mt-3 w-full text-sm">
                   <thead>
-                    <tr className="text-left text-muted-foreground">
+                    <tr className="text-muted-foreground text-left">
                       <th className="py-1">维度</th>
                       <th className="py-1">检项</th>
                       <th className="py-1 text-right">失败条数</th>
@@ -368,7 +396,9 @@ export function QualityAnalysisWorkspace() {
                         <td className="py-2">{t.dimensionLabel}</td>
                         <td className="py-2">{t.itemName}</td>
                         <td className="py-2 text-right">{t.failCount}</td>
-                        <td className="py-2">{defectShareReading(t.share, distribution.totals.failCheckCount)}</td>
+                        <td className="py-2">
+                          {defectShareReading(t.share, distribution.totals.failCheckCount)}
+                        </td>
                         <td className="py-2 text-right">{t.openBoxQty}</td>
                       </tr>
                     ))}
@@ -381,9 +411,12 @@ export function QualityAnalysisWorkspace() {
           {/* ---------- 批次质量趋势 ---------- */}
           {trend && (
             <SectionCard title="批次质量趋势">
-              <p className="text-sm text-muted-foreground">{trend.basisNote}</p>
+              <p className="text-muted-foreground text-sm">{trend.basisNote}</p>
               {trend.buckets.length === 0 ? (
-                <EmptyState title="期间内没有已判定质检单" description="换一个期间试试，或先在 11.2.3.1 完成质检判定。" />
+                <EmptyState
+                  title="期间内没有已判定质检单"
+                  description="换一个期间试试，或先在 11.2.3.1 完成质检判定。"
+                />
               ) : (
                 <ul className="mt-3 space-y-2">
                   {trend.buckets.map((b) => (
@@ -407,13 +440,16 @@ export function QualityAnalysisWorkspace() {
           {/* ---------- 供应商质量对比 ---------- */}
           {suppliers && (
             <SectionCard title="供应商质量对比">
-              <p className="text-sm text-muted-foreground">{suppliers.basisNote}</p>
+              <p className="text-muted-foreground text-sm">{suppliers.basisNote}</p>
               {suppliers.suppliers.length === 0 ? (
-                <EmptyState title="还没有带供应商的归因" description="批次上挂了供应商之后才会有对比数据。" />
+                <EmptyState
+                  title="还没有带供应商的归因"
+                  description="批次上挂了供应商之后才会有对比数据。"
+                />
               ) : (
                 <table className="mt-3 w-full text-sm">
                   <thead>
-                    <tr className="text-left text-muted-foreground">
+                    <tr className="text-muted-foreground text-left">
                       <th className="py-1">供应商</th>
                       <th className="py-1 text-right">批次数</th>
                       <th className="py-1 text-right">生产责任占比</th>
@@ -427,7 +463,9 @@ export function QualityAnalysisWorkspace() {
                         <td className="py-2">
                           {supplierDisplayName(s.supplierName)}
                           {!s.registered ? (
-                            <span className="ml-2 text-xs text-muted-foreground">（未登记名称）</span>
+                            <span className="text-muted-foreground ml-2 text-xs">
+                              （未登记名称）
+                            </span>
                           ) : null}
                         </td>
                         <td className="py-2 text-right">{s.lotCount}</td>
@@ -440,7 +478,7 @@ export function QualityAnalysisWorkspace() {
                 </table>
               )}
               {suppliers.unnamedCount > 0 && (
-                <p className="mt-2 text-xs text-muted-foreground">
+                <p className="text-muted-foreground mt-2 text-xs">
                   有 {suppliers.unnamedCount} 行尚未登记供应商名称 —— 显示为「未登记供应商」，
                   而不是把 uuid 当成供应商名。
                 </p>
@@ -451,9 +489,12 @@ export function QualityAnalysisWorkspace() {
           {/* ---------- 缺陷照片聚类 ---------- */}
           {clusters && (
             <SectionCard title="缺陷照片聚类">
-              <p className="text-sm text-muted-foreground">{clusters.basisNote}</p>
+              <p className="text-muted-foreground text-sm">{clusters.basisNote}</p>
               {clusters.clusters.length === 0 ? (
-                <EmptyState title="没有重复出现的照片" description="同一份字节在两张以上归因单上复用时才会成簇。" />
+                <EmptyState
+                  title="没有重复出现的照片"
+                  description="同一份字节在两张以上归因单上复用时才会成簇。"
+                />
               ) : (
                 <ul className="mt-3 space-y-2 text-sm">
                   {clusters.clusters.map((c) => (
@@ -461,7 +502,9 @@ export function QualityAnalysisWorkspace() {
                       <code className="text-xs">{c.contentSha256.slice(0, 16)}…</code>
                       <p className="mt-1">{photoClusterReading(c)}</p>
                       {c.sampleUris ? (
-                        <p className="mt-1 break-all text-xs text-muted-foreground">{c.sampleUris}</p>
+                        <p className="text-muted-foreground mt-1 break-all text-xs">
+                          {c.sampleUris}
+                        </p>
                       ) : null}
                     </li>
                   ))}
@@ -473,7 +516,7 @@ export function QualityAnalysisWorkspace() {
           {/* ---------- 责任分布 + 改进清单 ---------- */}
           {improvements && (
             <SectionCard title="责任分布与改进清单">
-              <p className="text-sm text-muted-foreground">{improvements.basisNote}</p>
+              <p className="text-muted-foreground text-sm">{improvements.basisNote}</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {improvements.responsibility.map((r) => (
                   <Badge key={r.stage} tone={r.attributionCount === 0 ? 'neutral' : 'warning'}>
@@ -493,10 +536,12 @@ export function QualityAnalysisWorkspace() {
                         </span>
                         <span className="flex gap-2">
                           <Badge tone="neutral">{item.stageLabel}</Badge>
-                          {item.lotFlagged ? <Badge tone="danger">{item.lotFlagStatus}</Badge> : null}
+                          {item.lotFlagged ? (
+                            <Badge tone="danger">{item.lotFlagStatus}</Badge>
+                          ) : null}
                         </span>
                       </div>
-                      <p className="mt-1 text-muted-foreground">{item.attributionNote}</p>
+                      <p className="text-muted-foreground mt-1">{item.attributionNote}</p>
                       <p className="mt-1">改进建议：{item.improvementSuggestion}</p>
                     </li>
                   ))}
@@ -508,7 +553,7 @@ export function QualityAnalysisWorkspace() {
           {/* ---------- 缺陷观察 ---------- */}
           {observations && (
             <SectionCard title="缺陷观察（开箱率的唯一数据来源）">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 列表<b>默认含已作废行</b>：作废是留痕，抹掉就看不出这里曾经记错过什么。
                 筛选「仅有效」才只看计入统计的行。
               </p>
@@ -529,11 +574,19 @@ export function QualityAnalysisWorkspace() {
                 </label>
                 <label className="text-sm">
                   名称
-                  <Input className="ml-2 w-40" value={obsName} onChange={(e) => setObsName(e.target.value)} />
+                  <Input
+                    className="ml-2 w-40"
+                    value={obsName}
+                    onChange={(e) => setObsName(e.target.value)}
+                  />
                 </label>
                 <label className="text-sm">
                   件数
-                  <Input className="ml-2 w-20" value={obsQty} onChange={(e) => setObsQty(e.target.value)} />
+                  <Input
+                    className="ml-2 w-20"
+                    value={obsQty}
+                    onChange={(e) => setObsQty(e.target.value)}
+                  />
                 </label>
                 <label className="text-sm">
                   严重度
@@ -542,13 +595,16 @@ export function QualityAnalysisWorkspace() {
                     value={obsSeverity}
                     onChange={(e) => setObsSeverity(e.target.value)}
                   >
-                    {Object.entries({ MINOR: '轻微', MODERATE: '一般', MAJOR: '严重', CRITICAL: '致命' }).map(
-                      ([value, label]) => (
-                        <option key={value} value={value}>
-                          {label}
-                        </option>
-                      ),
-                    )}
+                    {Object.entries({
+                      MINOR: '轻微',
+                      MODERATE: '一般',
+                      MAJOR: '严重',
+                      CRITICAL: '致命',
+                    }).map(([value, label]) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    ))}
                   </select>
                 </label>
                 <Button variant="secondary" onClick={() => void submitObservation()}>
@@ -587,7 +643,9 @@ export function QualityAnalysisWorkspace() {
                   <li key={b}>{b.replaceAll('**', '')}</li>
                 ))}
               </ul>
-              <p className="mt-3 text-xs text-muted-foreground">{caps.crossServiceNote.replaceAll('**', '')}</p>
+              <p className="text-muted-foreground mt-3 text-xs">
+                {caps.crossServiceNote.replaceAll('**', '')}
+              </p>
             </SectionCard>
           )}
         </>

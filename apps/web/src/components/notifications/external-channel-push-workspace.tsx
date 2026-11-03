@@ -133,10 +133,7 @@ export function ExternalChannelPushWorkspace() {
   }, [load]);
 
   const summary = useMemo(() => summarizeDeliveries(deliveries), [deliveries]);
-  const grouped = useMemo(
-    () => splitByStatus(deliveries?.deliveries ?? []),
-    [deliveries],
-  );
+  const grouped = useMemo(() => splitByStatus(deliveries?.deliveries ?? []), [deliveries]);
 
   /** 登记 / 修改一个渠道。 */
   const saveChannel = useCallback(async () => {
@@ -317,8 +314,8 @@ export function ExternalChannelPushWorkspace() {
           key={item.kind}
           className={
             item.kind === 'error'
-              ? 'text-destructive bg-destructive-soft rounded-md px-3 py-2 text-copy-13'
-              : 'text-success bg-success-soft rounded-md px-3 py-2 text-copy-13'
+              ? 'text-destructive bg-destructive-soft text-copy-13 rounded-md px-3 py-2'
+              : 'text-success bg-success-soft text-copy-13 rounded-md px-3 py-2'
           }
         >
           {item.text}
@@ -326,7 +323,7 @@ export function ExternalChannelPushWorkspace() {
       ))}
 
       {loading && !deliveries ? (
-        <div className="text-muted-foreground px-1 py-10 text-center text-copy-13">
+        <div className="text-muted-foreground text-copy-13 px-1 py-10 text-center">
           正在读取外部渠道与投递记录…
         </div>
       ) : null}
@@ -349,7 +346,7 @@ export function ExternalChannelPushWorkspace() {
           {/* ---------------------------------------------- 能力与边界 */}
           <section className="space-y-2">
             <h2 className="text-copy-14 text-foreground font-medium">能力与边界</h2>
-            <div className="text-muted-foreground space-y-1 text-copy-13">
+            <div className="text-muted-foreground text-copy-13 space-y-1">
               <div>
                 已登记 <b>{channels?.total ?? 0}</b> 个外部渠道（启用 {channels?.enabledCount ?? 0}{' '}
                 个），本批投递记录 <b>{summary.total}</b> 条：已投递 {summary.delivered} · 待重试{' '}
@@ -464,7 +461,7 @@ export function ExternalChannelPushWorkspace() {
                 <label className="space-y-1">
                   <span className="text-copy-13 text-muted-foreground">外部渠道</span>
                   <select
-                    className="border-control-border bg-card h-9 w-full rounded-md border px-2 text-copy-13"
+                    className="border-control-border bg-card text-copy-13 h-9 w-full rounded-md border px-2"
                     value={channelDraft.channelCode}
                     onChange={(e) =>
                       setChannelDraft({ ...channelDraft, channelCode: e.target.value })
@@ -499,7 +496,7 @@ export function ExternalChannelPushWorkspace() {
                     }
                   />
                 </label>
-                <label className="flex items-center gap-2 text-copy-13">
+                <label className="text-copy-13 flex items-center gap-2">
                   <input
                     type="checkbox"
                     checked={channelDraft.cardEnabled}
@@ -509,7 +506,7 @@ export function ExternalChannelPushWorkspace() {
                   />
                   支持卡片化消息
                 </label>
-                <label className="flex items-center gap-2 text-copy-13">
+                <label className="text-copy-13 flex items-center gap-2">
                   <input
                     type="checkbox"
                     checked={channelDraft.linkEnabled}
@@ -572,7 +569,9 @@ export function ExternalChannelPushWorkspace() {
               <ul className="divide-border divide-y rounded-md border">
                 {(candidates?.candidates ?? []).map((candidate) => (
                   <li key={candidate.sourceRef} className="space-y-1 px-4 py-3">
-                    <div className="text-copy-14 text-foreground font-medium">{candidate.title}</div>
+                    <div className="text-copy-14 text-foreground font-medium">
+                      {candidate.title}
+                    </div>
                     <div className="text-muted-foreground text-copy-13">
                       {candidate.body ?? '（无正文）'}
                     </div>
@@ -612,11 +611,9 @@ export function ExternalChannelPushWorkspace() {
                 <label className="space-y-1">
                   <span className="text-copy-13 text-muted-foreground">推送来源</span>
                   <select
-                    className="border-control-border bg-card h-9 w-full rounded-md border px-2 text-copy-13"
+                    className="border-control-border bg-card text-copy-13 h-9 w-full rounded-md border px-2"
                     value={pushDraft.sourceKind}
-                    onChange={(e) =>
-                      setPushDraft({ ...pushDraft, sourceKind: e.target.value })
-                    }
+                    onChange={(e) => setPushDraft({ ...pushDraft, sourceKind: e.target.value })}
                   >
                     {Object.entries(SOURCE_KIND_LABELS).map(([code, label]) => (
                       <option key={code} value={code}>
@@ -630,7 +627,7 @@ export function ExternalChannelPushWorkspace() {
                     通知类型（规则命中不带类型，由这里选定）
                   </span>
                   <select
-                    className="border-control-border bg-card h-9 w-full rounded-md border px-2 text-copy-13"
+                    className="border-control-border bg-card text-copy-13 h-9 w-full rounded-md border px-2"
                     value={pushDraft.notificationType}
                     onChange={(e) =>
                       setPushDraft({ ...pushDraft, notificationType: e.target.value })
@@ -646,7 +643,7 @@ export function ExternalChannelPushWorkspace() {
                 <label className="space-y-1">
                   <span className="text-copy-13 text-muted-foreground">消息样式</span>
                   <select
-                    className="border-control-border bg-card h-9 w-full rounded-md border px-2 text-copy-13"
+                    className="border-control-border bg-card text-copy-13 h-9 w-full rounded-md border px-2"
                     value={pushDraft.cardStyle}
                     onChange={(e) => setPushDraft({ ...pushDraft, cardStyle: e.target.value })}
                   >
@@ -658,7 +655,9 @@ export function ExternalChannelPushWorkspace() {
                   </select>
                 </label>
                 <label className="space-y-1">
-                  <span className="text-copy-13 text-muted-foreground">跳转目标（站内相对路径）</span>
+                  <span className="text-copy-13 text-muted-foreground">
+                    跳转目标（站内相对路径）
+                  </span>
                   <Input
                     value={pushDraft.linkUrl}
                     placeholder="/inventory/stockout-alerts"
@@ -691,7 +690,7 @@ export function ExternalChannelPushWorkspace() {
                 <span className="text-copy-13 text-muted-foreground">目标渠道</span>
                 <div className="space-y-1">
                   {(channels?.channels ?? []).map((channel) => (
-                    <label key={channel.id} className="flex items-center gap-2 text-copy-13">
+                    <label key={channel.id} className="text-copy-13 flex items-center gap-2">
                       <input
                         type="checkbox"
                         checked={pushDraft.channelIds.includes(channel.id)}
@@ -719,7 +718,12 @@ export function ExternalChannelPushWorkspace() {
                 <Button size="sm" onClick={() => void send()} disabled={saving}>
                   推送
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => setPushDraft(null)} disabled={saving}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setPushDraft(null)}
+                  disabled={saving}
+                >
                   取消
                 </Button>
               </div>
@@ -731,7 +735,7 @@ export function ExternalChannelPushWorkspace() {
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-copy-14 text-foreground font-medium">投递记录</h2>
               <select
-                className="border-control-border bg-card h-9 rounded-md border px-2 text-copy-13"
+                className="border-control-border bg-card text-copy-13 h-9 rounded-md border px-2"
                 value={query.status}
                 onChange={(e) => setQuery({ ...query, status: e.target.value, offset: 0 })}
               >
@@ -761,8 +765,8 @@ export function ExternalChannelPushWorkspace() {
                 下一页
               </Button>
               <span className="text-muted-foreground text-copy-13">
-                第 {query.offset + 1} ~ {Math.min(query.offset + query.limit, summary.total)} 条 / 共{' '}
-                {summary.total} 条
+                第 {query.offset + 1} ~ {Math.min(query.offset + query.limit, summary.total)} 条 /
+                共 {summary.total} 条
               </span>
             </div>
             {grouped.delivered.length +
@@ -780,7 +784,9 @@ export function ExternalChannelPushWorkspace() {
                 {(deliveries?.deliveries ?? []).map((delivery) => (
                   <li key={delivery.id} className="space-y-1 px-4 py-3">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-copy-14 text-foreground font-medium">{delivery.title}</span>
+                      <span className="text-copy-14 text-foreground font-medium">
+                        {delivery.title}
+                      </span>
                       <Badge
                         tone={
                           statusTone(delivery.status) === 'ok'
@@ -808,9 +814,10 @@ export function ExternalChannelPushWorkspace() {
                     </div>
                     <div className="text-muted-foreground text-copy-13 space-y-0.5">
                       <div>
-                        通知类型 {NOTIFICATION_TYPE_LABELS[delivery.notificationType] ??
-                          delivery.notificationType} · 样式 {CARD_STYLE_LABELS[delivery.cardStyle] ??
-                          delivery.cardStyle}
+                        通知类型{' '}
+                        {NOTIFICATION_TYPE_LABELS[delivery.notificationType] ??
+                          delivery.notificationType}{' '}
+                        · 样式 {CARD_STYLE_LABELS[delivery.cardStyle] ?? delivery.cardStyle}
                         {delivery.linkUrl ? ` · 跳转 ${delivery.linkUrl}` : ''}
                       </div>
                       <div>

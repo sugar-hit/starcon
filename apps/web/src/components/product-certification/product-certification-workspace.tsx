@@ -1,15 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  Badge,
-  Button,
-  EmptyState,
-  Input,
-  PageHeader,
-  SectionCard,
-  StatCard,
-} from '@starcon/ui';
+import { Badge, Button, EmptyState, Input, PageHeader, SectionCard, StatCard } from '@starcon/ui';
 import {
   BadgeCheck,
   CalendarClock,
@@ -156,17 +148,25 @@ export function ProductCertificationWorkspace() {
     setLoading(true);
     setError(null);
     try {
-      const [capsResult, overviewResult, typesResult, policyResult, reminderResult, coverageResult, listResult, requirementResult] =
-        await Promise.all([
-          fetchCapabilities(),
-          fetchOverview(),
-          fetchTypes(),
-          fetchPolicy(),
-          fetchExpiryReminders(0, 20),
-          fetchCoverage(),
-          loadList(0),
-          fetchRequirements({ page: 0, size: PAGE_SIZE }),
-        ]);
+      const [
+        capsResult,
+        overviewResult,
+        typesResult,
+        policyResult,
+        reminderResult,
+        coverageResult,
+        listResult,
+        requirementResult,
+      ] = await Promise.all([
+        fetchCapabilities(),
+        fetchOverview(),
+        fetchTypes(),
+        fetchPolicy(),
+        fetchExpiryReminders(0, 20),
+        fetchCoverage(),
+        loadList(0),
+        fetchRequirements({ page: 0, size: PAGE_SIZE }),
+      ]);
       setCaps(capsResult);
       setOverview(overviewResult);
       setTypes(typesResult);
@@ -503,7 +503,7 @@ export function ProductCertificationWorkspace() {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 text-muted-foreground">
+      <div className="text-muted-foreground flex items-center gap-2">
         <Loader2 className="h-4 w-4 animate-spin" />
         正在加载认证与资质…
       </div>
@@ -524,12 +524,12 @@ export function ProductCertificationWorkspace() {
       />
 
       {error && (
-        <div className="border-destructive/40 bg-destructive-soft text-destructive rounded-md border px-4 py-3 text-copy-13">
+        <div className="border-destructive/40 bg-destructive-soft text-destructive text-copy-13 rounded-md border px-4 py-3">
           {error}
         </div>
       )}
       {notice && (
-        <div className="border-info/40 bg-info-soft text-info rounded-md border px-4 py-3 text-copy-13">
+        <div className="border-info/40 bg-info-soft text-info text-copy-13 rounded-md border px-4 py-3">
           {notice}
         </div>
       )}
@@ -569,7 +569,7 @@ export function ProductCertificationWorkspace() {
         title="到期提醒"
         description="临近到期与已过期的认证，按剩余天数排序（剩得少的排前面）。剩余天数由后端按数据库时钟算好。"
         extra={
-          <div className="flex items-center gap-2 text-copy-13">
+          <div className="text-copy-13 flex items-center gap-2">
             <span className="text-muted-foreground">即将过期窗口</span>
             <Input
               className="w-20"
@@ -584,7 +584,7 @@ export function ProductCertificationWorkspace() {
         }
       >
         {reminders && reminders.items.length > 0 ? (
-          <table className="w-full text-copy-13">
+          <table className="text-copy-13 w-full">
             <thead className="text-muted-foreground">
               <tr className="border-border border-b text-left">
                 <th className="px-3 py-2 font-medium">认证编号</th>
@@ -648,7 +648,7 @@ export function ProductCertificationWorkspace() {
 
             <div>
               <h4 className="text-copy-13 text-foreground mb-2 font-medium">按认证类型</h4>
-              <table className="w-full text-copy-13">
+              <table className="text-copy-13 w-full">
                 <thead className="text-muted-foreground">
                   <tr className="border-border border-b text-left">
                     <th className="px-3 py-2 font-medium">认证类型</th>
@@ -660,7 +660,10 @@ export function ProductCertificationWorkspace() {
                 </thead>
                 <tbody>
                   {coverage.byType.map((row) => (
-                    <tr key={row.certificationTypeCode} className="border-border border-b last:border-0">
+                    <tr
+                      key={row.certificationTypeCode}
+                      className="border-border border-b last:border-0"
+                    >
                       <td className="px-3 py-2">{row.certificationTypeName}</td>
                       <td className="px-3 py-2">{row.requiredCount}</td>
                       <td className="px-3 py-2">{row.coveredCount}</td>
@@ -675,7 +678,7 @@ export function ProductCertificationWorkspace() {
             {coverage.byCategory.length > 0 && (
               <div>
                 <h4 className="text-copy-13 text-foreground mb-2 font-medium">按类目</h4>
-                <table className="w-full text-copy-13">
+                <table className="text-copy-13 w-full">
                   <thead className="text-muted-foreground">
                     <tr className="border-border border-b text-left">
                       <th className="px-3 py-2 font-medium">类目</th>
@@ -709,7 +712,9 @@ export function ProductCertificationWorkspace() {
                 <ul className="space-y-1">
                   {coverage.missingSkus.map((row) => (
                     <li key={row.skuId} className="text-copy-13 flex items-center gap-2">
-                      <span className="text-foreground">{row.skuCode || row.skuName || row.skuId}</span>
+                      <span className="text-foreground">
+                        {row.skuCode || row.skuName || row.skuId}
+                      </span>
                       <span className="text-muted-foreground">{row.skuName}</span>
                       <Badge tone="danger">缺 {row.missingTypeCodes.join(' / ')}</Badge>
                     </li>
@@ -736,7 +741,12 @@ export function ProductCertificationWorkspace() {
         title="认证档案"
         description="认证编号、有效期、适用 SKU、对应类目要求与扫描件。"
         extra={
-          <Button variant="outline" size="sm" onClick={() => void searchCandidates()} disabled={busy}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => void searchCandidates()}
+            disabled={busy}
+          >
             拉取 catalog 候选
           </Button>
         }
@@ -749,7 +759,7 @@ export function ProductCertificationWorkspace() {
             onChange={(e) => setKeyword(e.target.value)}
           />
           <select
-            className="border-control-border bg-card h-9 rounded-md border px-2 text-copy-13"
+            className="border-control-border bg-card text-copy-13 h-9 rounded-md border px-2"
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
           >
@@ -761,7 +771,7 @@ export function ProductCertificationWorkspace() {
             ))}
           </select>
           <select
-            className="border-control-border bg-card h-9 rounded-md border px-2 text-copy-13"
+            className="border-control-border bg-card text-copy-13 h-9 rounded-md border px-2"
             value={filterExpiry}
             onChange={(e) => setFilterExpiry(e.target.value)}
           >
@@ -788,7 +798,7 @@ export function ProductCertificationWorkspace() {
 
         {list && list.items.length > 0 ? (
           <>
-            <table className="w-full text-copy-13">
+            <table className="text-copy-13 w-full">
               <thead className="text-muted-foreground">
                 <tr className="border-border border-b text-left">
                   <th className="px-3 py-2 font-medium">认证编号</th>
@@ -827,7 +837,7 @@ export function ProductCertificationWorkspace() {
                         {expiryStateLabel(row.expiryState)}
                       </Badge>
                     </td>
-                    <td className="px-3 py-2 text-muted-foreground">
+                    <td className="text-muted-foreground px-3 py-2">
                       SKU {row.skuCount} · 类目 {row.categoryCount} · 扫描件 {row.documentCount}
                     </td>
                     <td className="px-3 py-2">
@@ -841,7 +851,7 @@ export function ProductCertificationWorkspace() {
                 ))}
               </tbody>
             </table>
-            <div className="text-muted-foreground mt-2 flex items-center gap-2 text-copy-13">
+            <div className="text-muted-foreground text-copy-13 mt-2 flex items-center gap-2">
               <span>
                 共 {list.total} 张，当前第 {page + 1} 页
               </span>
@@ -896,7 +906,7 @@ export function ProductCertificationWorkspace() {
             onChange={(e) => setNewCode(e.target.value)}
           />
           <select
-            className="border-control-border bg-card h-9 rounded-md border px-2 text-copy-13"
+            className="border-control-border bg-card text-copy-13 h-9 rounded-md border px-2"
             value={newType}
             onChange={(e) => setNewType(e.target.value)}
           >
@@ -952,7 +962,7 @@ export function ProductCertificationWorkspace() {
               {detail.skus.length > 0 ? (
                 <ul className="space-y-1">
                   {detail.skus.map((row) => (
-                    <li key={row.id} className="flex items-center gap-2 text-copy-13">
+                    <li key={row.id} className="text-copy-13 flex items-center gap-2">
                       <span>{row.skuCode || row.skuId}</span>
                       <span className="text-muted-foreground">{row.skuName}</span>
                       <Button
@@ -970,7 +980,7 @@ export function ProductCertificationWorkspace() {
               )}
               <div className="flex flex-wrap items-center gap-2">
                 <select
-                  className="border-control-border bg-card h-9 rounded-md border px-2 text-copy-13"
+                  className="border-control-border bg-card text-copy-13 h-9 rounded-md border px-2"
                   value={attachSkuId}
                   onChange={(e) => setAttachSkuId(e.target.value)}
                 >
@@ -997,7 +1007,7 @@ export function ProductCertificationWorkspace() {
               {detail.categories.length > 0 ? (
                 <ul className="space-y-1">
                   {detail.categories.map((row) => (
-                    <li key={row.id} className="flex items-center gap-2 text-copy-13">
+                    <li key={row.id} className="text-copy-13 flex items-center gap-2">
                       <span>{row.categoryCode}</span>
                       <span className="text-muted-foreground">{row.categoryName}</span>
                       <span className="text-muted-foreground">{row.requirementNote}</span>
@@ -1016,7 +1026,7 @@ export function ProductCertificationWorkspace() {
               )}
               <div className="flex flex-wrap items-center gap-2">
                 <select
-                  className="border-control-border bg-card h-9 rounded-md border px-2 text-copy-13"
+                  className="border-control-border bg-card text-copy-13 h-9 rounded-md border px-2"
                   value={attachCategoryId}
                   onChange={(e) => setAttachCategoryId(e.target.value)}
                 >
@@ -1048,7 +1058,9 @@ export function ProductCertificationWorkspace() {
                     <Badge tone="info">{documentKindLabel(row.documentKind)}</Badge>
                     <span>{row.documentName}</span>
                     <span className="text-muted-foreground">{row.mimeType}</span>
-                    <span className="text-muted-foreground">{fileSizeText(Number(row.sizeBytes))}</span>
+                    <span className="text-muted-foreground">
+                      {fileSizeText(Number(row.sizeBytes))}
+                    </span>
                     <span className="text-muted-foreground">{row.uploadedAt.slice(0, 10)}</span>
                   </li>
                 ))}
@@ -1060,7 +1072,7 @@ export function ProductCertificationWorkspace() {
             )}
             <div className="flex flex-wrap items-center gap-2">
               <select
-                className="border-control-border bg-card h-9 rounded-md border px-2 text-copy-13"
+                className="border-control-border bg-card text-copy-13 h-9 rounded-md border px-2"
                 value={uploadKind}
                 onChange={(e) => setUploadKind(e.target.value)}
               >
@@ -1074,7 +1086,7 @@ export function ProductCertificationWorkspace() {
                 value={uploadNote}
                 onChange={(e) => setUploadNote(e.target.value)}
               />
-              <label className="border-control-border bg-card hover:bg-muted inline-flex h-9 cursor-pointer items-center gap-2 rounded-md border px-4 text-btn-14">
+              <label className="border-control-border bg-card hover:bg-muted text-btn-14 inline-flex h-9 cursor-pointer items-center gap-2 rounded-md border px-4">
                 <FileUp className="h-4 w-4" />
                 选择文件并上传
                 <input
@@ -1104,7 +1116,7 @@ export function ProductCertificationWorkspace() {
       >
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
           <select
-            className="border-control-border bg-card h-9 rounded-md border px-2 text-copy-13"
+            className="border-control-border bg-card text-copy-13 h-9 rounded-md border px-2"
             value={requirementSkuId}
             onChange={(e) => {
               const candidate = skuCandidates.find((row) => row.id === e.target.value);
@@ -1121,7 +1133,7 @@ export function ProductCertificationWorkspace() {
             ))}
           </select>
           <select
-            className="border-control-border bg-card h-9 rounded-md border px-2 text-copy-13"
+            className="border-control-border bg-card text-copy-13 h-9 rounded-md border px-2"
             value={requirementType}
             onChange={(e) => setRequirementType(e.target.value)}
           >
@@ -1133,7 +1145,7 @@ export function ProductCertificationWorkspace() {
             ))}
           </select>
           <select
-            className="border-control-border bg-card h-9 rounded-md border px-2 text-copy-13"
+            className="border-control-border bg-card text-copy-13 h-9 rounded-md border px-2"
             value={requirementCategoryId}
             onChange={(e) => {
               const candidate = categoryCandidates.find((row) => row.id === e.target.value);
@@ -1157,7 +1169,7 @@ export function ProductCertificationWorkspace() {
         </div>
 
         {requirements && requirements.items.length > 0 ? (
-          <table className="mt-3 w-full text-copy-13">
+          <table className="text-copy-13 mt-3 w-full">
             <thead className="text-muted-foreground">
               <tr className="border-border border-b text-left">
                 <th className="px-3 py-2 font-medium">SKU</th>
@@ -1176,7 +1188,11 @@ export function ProductCertificationWorkspace() {
                   <td className="px-3 py-2">{row.certificationTypeName}</td>
                   <td className="px-3 py-2">{row.categoryName || row.categoryCode || '—'}</td>
                   <td className="px-3 py-2">
-                    <Button variant="ghost" size="sm" onClick={() => void removeRequirement(row.id)}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => void removeRequirement(row.id)}
+                    >
                       撤销登记
                     </Button>
                   </td>
@@ -1185,7 +1201,7 @@ export function ProductCertificationWorkspace() {
             </tbody>
           </table>
         ) : (
-          <p className="text-muted-foreground mt-3 text-copy-13">
+          <p className="text-muted-foreground text-copy-13 mt-3">
             还没有登记认证要求。先「拉取 catalog 候选」，再登记「哪个 SKU 需要哪个认证类型」。
           </p>
         )}
@@ -1208,7 +1224,7 @@ export function ProductCertificationWorkspace() {
             onChange={(e) => setNewTypeName(e.target.value)}
           />
           <select
-            className="border-control-border bg-card h-9 rounded-md border px-2 text-copy-13"
+            className="border-control-border bg-card text-copy-13 h-9 rounded-md border px-2"
             value={newTypeScope}
             onChange={(e) => setNewTypeScope(e.target.value)}
           >
@@ -1222,7 +1238,7 @@ export function ProductCertificationWorkspace() {
           </div>
         </div>
 
-        <table className="mt-3 w-full text-copy-13">
+        <table className="text-copy-13 mt-3 w-full">
           <thead className="text-muted-foreground">
             <tr className="border-border border-b text-left">
               <th className="px-3 py-2 font-medium">编码</th>
@@ -1266,7 +1282,7 @@ export function ProductCertificationWorkspace() {
       {/* ---------------- 能力声明 ---------------- */}
       {caps && (
         <SectionCard title="能力声明" description="口径与边界由后端给出，页面原样显示。">
-          <dl className="space-y-2 text-copy-13">
+          <dl className="text-copy-13 space-y-2">
             <div>
               <dt className="text-foreground font-medium">到期状态口径</dt>
               <dd className="text-muted-foreground">{caps.expirySemantics}</dd>

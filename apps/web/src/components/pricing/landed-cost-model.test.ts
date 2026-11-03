@@ -109,8 +109,12 @@ describe('覆盖度', () => {
 
 describe('分量状态', () => {
   it('缺口 / 有事实但不计入 / 计入是三种不同的状态', () => {
-    expect(landedComponentState(component({ available: false, included: false })).tone).toBe('danger');
-    expect(landedComponentState(component({ available: true, included: false })).tone).toBe('warning');
+    expect(landedComponentState(component({ available: false, included: false })).tone).toBe(
+      'danger',
+    );
+    expect(landedComponentState(component({ available: true, included: false })).tone).toBe(
+      'warning',
+    );
     expect(landedComponentState(component()).tone).toBe('success');
   });
 
@@ -175,11 +179,15 @@ describe('本地校验', () => {
   });
 
   it('计算必须给出上游发运单的 id 或单号', () => {
-    expect(validateLandedCostCompute({ sourceShipmentId: null, sourceShipmentCode: null })).toHaveLength(
-      1,
+    expect(
+      validateLandedCostCompute({ sourceShipmentId: null, sourceShipmentCode: null }),
+    ).toHaveLength(1);
+    expect(validateLandedCostCompute({ sourceShipmentId: 'x', sourceShipmentCode: null })).toEqual(
+      [],
     );
-    expect(validateLandedCostCompute({ sourceShipmentId: 'x', sourceShipmentCode: null })).toEqual([]);
-    expect(validateLandedCostCompute({ sourceShipmentId: null, sourceShipmentCode: 'FM-1' })).toEqual([]);
+    expect(
+      validateLandedCostCompute({ sourceShipmentId: null, sourceShipmentCode: 'FM-1' }),
+    ).toEqual([]);
   });
 });
 

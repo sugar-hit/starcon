@@ -79,7 +79,11 @@ export function ReasonTaxonomyWorkspace() {
   const [error, setError] = useState<string | null>(null);
 
   // ---- 分类树维护 ----
-  const [filters, setFilters] = useState({ categoryStatus: '', rootKind: '', assignableOnly: false });
+  const [filters, setFilters] = useState({
+    categoryStatus: '',
+    rootKind: '',
+    assignableOnly: false,
+  });
   const [newCategory, setNewCategory] = useState({
     parentId: '',
     categoryCode: '',
@@ -360,9 +364,7 @@ export function ReasonTaxonomyWorkspace() {
   // 渲染
   // ==========================================================================
   if (loading) {
-    return (
-      <PageHeader title="售后原因分类" description="正在加载分类树、报表与平台原因码映射…" />
-    );
+    return <PageHeader title="售后原因分类" description="正在加载分类树、报表与平台原因码映射…" />;
   }
   if (error && !tree) {
     return (
@@ -415,18 +417,18 @@ export function ReasonTaxonomyWorkspace() {
       <SectionCard title="能力与上下游" description={caps?.platformMappingNote ?? ''}>
         <ul className="space-y-2 text-sm">
           {caps?.unavailableDimensions.map((d) => (
-            <li key={d.name} className="rounded-md border border-border p-3">
+            <li key={d.name} className="border-border rounded-md border p-3">
               <div className="flex items-center gap-2">
                 <span className="font-medium">{d.label}</span>
-                <span className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
+                <span className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 text-xs">
                   不可得 · 归属 {d.ownerModule}
                 </span>
               </div>
-              <p className="mt-1 text-muted-foreground">{d.detail}</p>
+              <p className="text-muted-foreground mt-1">{d.detail}</p>
             </li>
           ))}
         </ul>
-        <p className="mt-3 text-xs text-muted-foreground">{caps?.reportSemantics}</p>
+        <p className="text-muted-foreground mt-3 text-xs">{caps?.reportSemantics}</p>
       </SectionCard>
 
       {/* ---- 归因 ---- */}
@@ -463,7 +465,7 @@ export function ReasonTaxonomyWorkspace() {
         </div>
 
         {attribution && !attribution.attributed ? (
-          <p className="mt-3 rounded-md border border-border p-3 text-sm text-muted-foreground">
+          <p className="border-border text-muted-foreground mt-3 rounded-md border p-3 text-sm">
             这张售后单<strong className="text-foreground">还没有归因</strong>。
             「还没归因」与「归因为空」是两件不同的事 —— 后者在数据库层就提交不了。
           </p>
@@ -474,29 +476,31 @@ export function ReasonTaxonomyWorkspace() {
         {draft ? (
           <div className="mt-4 space-y-4">
             {attribution?.current ? (
-              <p className="text-sm text-muted-foreground">
-                当前生效：{attribution.current.itemCount} 个原因 /
-                主因 {attribution.current.primaryCount} 个 · 历史版本{' '}
-                {attribution.versionCount} 版 · 归因于 {attribution.current.attributedAt}
+              <p className="text-muted-foreground text-sm">
+                当前生效：{attribution.current.itemCount} 个原因 / 主因{' '}
+                {attribution.current.primaryCount} 个 · 历史版本 {attribution.versionCount} 版 ·
+                归因于 {attribution.current.attributedAt}
               </p>
             ) : null}
 
             <div>
               <p className="mb-2 text-sm font-medium">
                 可选分类（{assignable.length}）
-                <span className="ml-2 text-xs text-muted-foreground">
+                <span className="text-muted-foreground ml-2 text-xs">
                   灰掉的分类不能被新归因选中，停用是一个显式的口径变更动作
                 </span>
               </p>
               {assignable.length === 0 ? (
                 <EmptyState title="没有可归因的分类" description="分类树为空或全部被停用。" />
               ) : (
-                <div className="max-h-72 overflow-auto rounded-md border border-border">
-                  <ul className="divide-y divide-border">
+                <div className="border-border max-h-72 overflow-auto rounded-md border">
+                  <ul className="divide-border divide-y">
                     {nodes.map((node) => {
                       const p = nodePresentation(node);
                       const chosenPrimary = draft.primary?.categoryId === node.id;
-                      const chosenSecondary = draft.secondaries.some((s) => s.categoryId === node.id);
+                      const chosenSecondary = draft.secondaries.some(
+                        (s) => s.categoryId === node.id,
+                      );
                       return (
                         <li
                           key={node.id}
@@ -522,7 +526,7 @@ export function ReasonTaxonomyWorkspace() {
                             {p.prefix}
                             {node.categoryName}
                           </span>
-                          <span className="ml-auto shrink-0 text-xs text-muted-foreground">
+                          <span className="text-muted-foreground ml-auto shrink-0 text-xs">
                             {node.rootKindLabel ?? `第 ${node.depth} 层`} · {node.categoryCode}
                           </span>
                         </li>
@@ -534,7 +538,7 @@ export function ReasonTaxonomyWorkspace() {
             </div>
 
             {draftItemCount(draft) > 0 ? (
-              <div className="space-y-2 rounded-md border border-border p-3">
+              <div className="border-border space-y-2 rounded-md border p-3">
                 {draft.primary ? (
                   <label className="flex items-center gap-3 text-sm">
                     <span className="w-16 shrink-0 font-medium">主因</span>
@@ -551,7 +555,7 @@ export function ReasonTaxonomyWorkspace() {
                 ) : null}
                 {draft.secondaries.map((s) => (
                   <label key={s.categoryId} className="flex items-center gap-3 text-sm">
-                    <span className="w-16 shrink-0 text-muted-foreground">次因</span>
+                    <span className="text-muted-foreground w-16 shrink-0">次因</span>
                     <span className="flex-1 truncate">{s.categoryName}</span>
                     <Input
                       className="w-32"
@@ -600,7 +604,7 @@ export function ReasonTaxonomyWorkspace() {
               >
                 {attrBusy ? '保存中…' : '保存归因'}
               </Button>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-muted-foreground text-xs">
                 {attribution?.enforcementNote ?? ''}
               </span>
             </div>
@@ -612,12 +616,12 @@ export function ReasonTaxonomyWorkspace() {
       <SectionCard title="分类树维护" description={tree?.treeRules ?? ''}>
         <div className="mb-4 flex flex-wrap items-end gap-3">
           <div>
-            <label className="mb-1 block text-xs text-muted-foreground" htmlFor="f-status">
+            <label className="text-muted-foreground mb-1 block text-xs" htmlFor="f-status">
               状态
             </label>
             <select
               id="f-status"
-              className="h-9 rounded-md border border-border bg-transparent px-2 text-sm"
+              className="border-border h-9 rounded-md border bg-transparent px-2 text-sm"
               value={filters.categoryStatus}
               onChange={(e) => setFilters({ ...filters, categoryStatus: e.target.value })}
             >
@@ -627,12 +631,12 @@ export function ReasonTaxonomyWorkspace() {
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-xs text-muted-foreground" htmlFor="f-root">
+            <label className="text-muted-foreground mb-1 block text-xs" htmlFor="f-root">
               根口径
             </label>
             <select
               id="f-root"
-              className="h-9 rounded-md border border-border bg-transparent px-2 text-sm"
+              className="border-border h-9 rounded-md border bg-transparent px-2 text-sm"
               value={filters.rootKind}
               onChange={(e) => setFilters({ ...filters, rootKind: e.target.value })}
             >
@@ -660,9 +664,9 @@ export function ReasonTaxonomyWorkspace() {
         {nodes.length === 0 ? (
           <EmptyState title="分类树为空" description="新建一个根分类开始（七类之一）。" />
         ) : (
-          <div className="overflow-x-auto rounded-md border border-border">
+          <div className="border-border overflow-x-auto rounded-md border">
             <table className="w-full text-sm">
-              <thead className="bg-muted/40 text-left text-xs text-muted-foreground">
+              <thead className="bg-muted/40 text-muted-foreground text-left text-xs">
                 <tr>
                   <th className="px-3 py-2 font-medium">分类</th>
                   <th className="px-3 py-2 font-medium">编码</th>
@@ -673,15 +677,18 @@ export function ReasonTaxonomyWorkspace() {
                   <th className="px-3 py-2 font-medium">操作</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody className="divide-border divide-y">
                 {nodes.map((node) => {
                   const p = nodePresentation(node);
                   return (
                     <tr key={node.id} className={node.assignable ? '' : 'opacity-60'}>
                       <td className="px-3 py-2" style={{ paddingLeft: `${12 + p.level * 16}px` }}>
-                        <div>{p.prefix}{node.categoryName}</div>
+                        <div>
+                          {p.prefix}
+                          {node.categoryName}
+                        </div>
                         {p.hint ? (
-                          <div className="text-xs text-muted-foreground">{p.hint}</div>
+                          <div className="text-muted-foreground text-xs">{p.hint}</div>
                         ) : null}
                       </td>
                       <td className="px-3 py-2 font-mono text-xs">{node.categoryCode}</td>
@@ -721,16 +728,16 @@ export function ReasonTaxonomyWorkspace() {
         )}
 
         <div className="mt-4 grid gap-3 md:grid-cols-2">
-          <div className="rounded-md border border-border p-3">
+          <div className="border-border rounded-md border p-3">
             <p className="mb-2 text-sm font-medium">新建分类</p>
             <div className="space-y-2">
               <div>
-                <label className="mb-1 block text-xs text-muted-foreground" htmlFor="c-parent">
+                <label className="text-muted-foreground mb-1 block text-xs" htmlFor="c-parent">
                   父分类（留空 = 建根）
                 </label>
                 <select
                   id="c-parent"
-                  className="h-9 w-full rounded-md border border-border bg-transparent px-2 text-sm"
+                  className="border-border h-9 w-full rounded-md border bg-transparent px-2 text-sm"
                   value={newCategory.parentId}
                   onChange={(e) => setNewCategory({ ...newCategory, parentId: e.target.value })}
                 >
@@ -746,12 +753,12 @@ export function ReasonTaxonomyWorkspace() {
               </div>
               {!newCategory.parentId ? (
                 <div>
-                  <label className="mb-1 block text-xs text-muted-foreground" htmlFor="c-kind">
+                  <label className="text-muted-foreground mb-1 block text-xs" htmlFor="c-kind">
                     根口径（七类之一）
                   </label>
                   <select
                     id="c-kind"
-                    className="h-9 w-full rounded-md border border-border bg-transparent px-2 text-sm"
+                    className="border-border h-9 w-full rounded-md border bg-transparent px-2 text-sm"
                     value={newCategory.rootKind}
                     onChange={(e) => setNewCategory({ ...newCategory, rootKind: e.target.value })}
                   >
@@ -787,9 +794,7 @@ export function ReasonTaxonomyWorkspace() {
                 <Input
                   placeholder="说明（可选）"
                   value={newCategory.description}
-                  onChange={(e) =>
-                    setNewCategory({ ...newCategory, description: e.target.value })
-                  }
+                  onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
                   aria-label="说明"
                 />
               </div>
@@ -806,8 +811,8 @@ export function ReasonTaxonomyWorkspace() {
               </Button>
             </div>
           </div>
-          <div className="rounded-md border border-border p-3 text-sm text-muted-foreground">
-            <p className="mb-2 font-medium text-foreground">为什么有些东西不能改</p>
+          <div className="border-border text-muted-foreground rounded-md border p-3 text-sm">
+            <p className="text-foreground mb-2 font-medium">为什么有些东西不能改</p>
             <ul className="list-disc space-y-1 pl-5">
               <li>
                 <strong>编码不可改</strong>：11.5.2 质量分析与 6 采购索赔的历史数据按编码对齐。
@@ -830,12 +835,12 @@ export function ReasonTaxonomyWorkspace() {
       <SectionCard title="平台原因码映射" description={mappings?.ownershipNote ?? ''}>
         <div className="mb-3 flex flex-wrap items-end gap-3">
           <div>
-            <label className="mb-1 block text-xs text-muted-foreground" htmlFor="m-platform">
+            <label className="text-muted-foreground mb-1 block text-xs" htmlFor="m-platform">
               平台
             </label>
             <select
               id="m-platform"
-              className="h-9 rounded-md border border-border bg-transparent px-2 text-sm"
+              className="border-border h-9 rounded-md border bg-transparent px-2 text-sm"
               value={mappingFilter.platformSource}
               onChange={(e) => {
                 const next = { ...mappingFilter, platformSource: e.target.value };
@@ -855,12 +860,12 @@ export function ReasonTaxonomyWorkspace() {
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-xs text-muted-foreground" htmlFor="m-status">
+            <label className="text-muted-foreground mb-1 block text-xs" htmlFor="m-status">
               状态
             </label>
             <select
               id="m-status"
-              className="h-9 rounded-md border border-border bg-transparent px-2 text-sm"
+              className="border-border h-9 rounded-md border bg-transparent px-2 text-sm"
               value={mappingFilter.mappingStatus}
               onChange={(e) => {
                 const next = { ...mappingFilter, mappingStatus: e.target.value };
@@ -884,9 +889,9 @@ export function ReasonTaxonomyWorkspace() {
             description="平台原因码与内部口径的对应关系当前由租户自己维护；同步器按同一形状写入后无需改结构。"
           />
         ) : (
-          <div className="overflow-x-auto rounded-md border border-border">
+          <div className="border-border overflow-x-auto rounded-md border">
             <table className="w-full text-sm">
-              <thead className="bg-muted/40 text-left text-xs text-muted-foreground">
+              <thead className="bg-muted/40 text-muted-foreground text-left text-xs">
                 <tr>
                   <th className="px-3 py-2 font-medium">平台</th>
                   <th className="px-3 py-2 font-medium">平台原因码</th>
@@ -897,19 +902,21 @@ export function ReasonTaxonomyWorkspace() {
                   <th className="px-3 py-2 font-medium">操作</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody className="divide-border divide-y">
                 {mappings?.rows.map((m) => (
                   <tr key={m.id}>
                     <td className="px-3 py-2">{m.platformSource}</td>
                     <td className="px-3 py-2 font-mono text-xs">
                       {m.platformReasonCode}
                       {m.platformReasonName ? (
-                        <div className="font-sans text-muted-foreground">{m.platformReasonName}</div>
+                        <div className="text-muted-foreground font-sans">
+                          {m.platformReasonName}
+                        </div>
                       ) : null}
                     </td>
                     <td className="px-3 py-2">
                       {m.categoryName}
-                      <div className="text-xs text-muted-foreground">{m.rootKindLabel ?? ''}</div>
+                      <div className="text-muted-foreground text-xs">{m.rootKindLabel ?? ''}</div>
                     </td>
                     <td className="px-3 py-2 text-xs">{m.mappingSource}</td>
                     <td className="px-3 py-2 text-xs tabular-nums">{m.capturedAt}</td>
@@ -947,11 +954,11 @@ export function ReasonTaxonomyWorkspace() {
         )}
 
         <div className="mt-4 grid gap-3 md:grid-cols-2">
-          <div className="rounded-md border border-border p-3">
+          <div className="border-border rounded-md border p-3">
             <p className="mb-2 text-sm font-medium">新建映射</p>
             <div className="space-y-2">
               <select
-                className="h-9 w-full rounded-md border border-border bg-transparent px-2 text-sm"
+                className="border-border h-9 w-full rounded-md border bg-transparent px-2 text-sm"
                 value={newMapping.categoryId}
                 onChange={(e) => setNewMapping({ ...newMapping, categoryId: e.target.value })}
                 aria-label="内部原因分类"
@@ -964,7 +971,7 @@ export function ReasonTaxonomyWorkspace() {
                 ))}
               </select>
               <select
-                className="h-9 w-full rounded-md border border-border bg-transparent px-2 text-sm"
+                className="border-border h-9 w-full rounded-md border bg-transparent px-2 text-sm"
                 value={newMapping.platformSource}
                 onChange={(e) => setNewMapping({ ...newMapping, platformSource: e.target.value })}
                 aria-label="平台"
@@ -993,13 +1000,15 @@ export function ReasonTaxonomyWorkspace() {
               />
               <Button
                 onClick={() => void submitMapping()}
-                disabled={mappingBusy || !newMapping.categoryId || !newMapping.platformReasonCode.trim()}
+                disabled={
+                  mappingBusy || !newMapping.categoryId || !newMapping.platformReasonCode.trim()
+                }
               >
                 {mappingBusy ? '保存中…' : '新建映射'}
               </Button>
             </div>
           </div>
-          <p className="rounded-md border border-border p-3 text-xs text-muted-foreground">
+          <p className="border-border text-muted-foreground rounded-md border p-3 text-xs">
             {caps?.platformMappingNote}
             {mappingMessage ? (
               <span className="mt-2 block text-amber-600">{mappingMessage}</span>
@@ -1018,9 +1027,9 @@ export function ReasonTaxonomyWorkspace() {
         {!report ? null : (
           <>
             <p className="mb-2 text-sm font-medium">按七类根口径（零也出现）</p>
-            <div className="overflow-x-auto rounded-md border border-border">
+            <div className="border-border overflow-x-auto rounded-md border">
               <table className="w-full text-sm">
-                <thead className="bg-muted/40 text-left text-xs text-muted-foreground">
+                <thead className="bg-muted/40 text-muted-foreground text-left text-xs">
                   <tr>
                     <th className="px-3 py-2 font-medium">口径</th>
                     <th className="px-3 py-2 font-medium">主因单数</th>
@@ -1028,7 +1037,7 @@ export function ReasonTaxonomyWorkspace() {
                     <th className="px-3 py-2 font-medium">占比</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border">
+                <tbody className="divide-border divide-y">
                   {report.rootTotals.map((t) => (
                     <tr key={t.rootKind}>
                       <td className="px-3 py-2">{t.rootKindLabel}</td>
@@ -1041,9 +1050,9 @@ export function ReasonTaxonomyWorkspace() {
               </table>
             </div>
             <p className="mb-2 mt-4 text-sm font-medium">按分类明细</p>
-            <div className="max-h-96 overflow-auto rounded-md border border-border">
+            <div className="border-border max-h-96 overflow-auto rounded-md border">
               <table className="w-full text-sm">
-                <thead className="sticky top-0 bg-muted/40 text-left text-xs text-muted-foreground">
+                <thead className="bg-muted/40 text-muted-foreground sticky top-0 text-left text-xs">
                   <tr>
                     <th className="px-3 py-2 font-medium">分类</th>
                     <th className="px-3 py-2 font-medium">主因</th>
@@ -1052,15 +1061,18 @@ export function ReasonTaxonomyWorkspace() {
                     <th className="px-3 py-2 font-medium">占比</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border">
+                <tbody className="divide-border divide-y">
                   {report.rows.map((r) => (
-                    <tr key={r.categoryId} className={r.attributionCaseCount > 0 ? '' : 'opacity-60'}>
+                    <tr
+                      key={r.categoryId}
+                      className={r.attributionCaseCount > 0 ? '' : 'opacity-60'}
+                    >
                       <td className="px-3 py-2">
                         <div style={{ paddingLeft: `${(r.depth - 1) * 14}px` }}>
                           {r.depth > 1 ? '└ ' : ''}
                           {r.categoryName}
                         </div>
-                        <div className="text-xs text-muted-foreground">{r.categoryCode}</div>
+                        <div className="text-muted-foreground text-xs">{r.categoryCode}</div>
                       </td>
                       <td className="px-3 py-2 tabular-nums">{r.primaryCaseCount}</td>
                       <td className="px-3 py-2 tabular-nums">{r.secondaryCaseCount}</td>
@@ -1071,7 +1083,7 @@ export function ReasonTaxonomyWorkspace() {
                 </tbody>
               </table>
             </div>
-            <p className="mt-2 text-xs text-muted-foreground">{report.downstreamNote}</p>
+            <p className="text-muted-foreground mt-2 text-xs">{report.downstreamNote}</p>
           </>
         )}
       </SectionCard>

@@ -78,40 +78,22 @@ export type DevelopmentSampleUsageType = 'DEVELOPMENT';
 
 /** 打样单状态。 */
 export type DevelopmentSampleOrderStatus =
-  | 'REQUESTED'
-  | 'IN_PROGRESS'
-  | 'COMPLETED'
-  | 'CLOSED'
-  | 'CANCELLED';
+  'REQUESTED' | 'IN_PROGRESS' | 'COMPLETED' | 'CLOSED' | 'CANCELLED';
 
 /** 样品状态。 */
 export type DevelopmentSampleStatus =
-  | 'REQUESTED'
-  | 'MAKING'
-  | 'SHIPPED'
-  | 'RECEIVED'
-  | 'CONFIRMED'
-  | 'REVISING'
-  | 'ABANDONED';
+  'REQUESTED' | 'MAKING' | 'SHIPPED' | 'RECEIVED' | 'CONFIRMED' | 'REVISING' | 'ABANDONED';
 
 /** 确认结果：通过 / 修改 / 放弃。 */
 export type DevelopmentSampleConfirmationResult = 'PASSED' | 'MODIFY' | 'ABANDONED';
 
 /** 成本类型（封闭五值，无「其它」）。 */
 export type DevelopmentSampleCostType =
-  | 'SAMPLE_FEE'
-  | 'MATERIAL'
-  | 'TOOLING'
-  | 'FREIGHT'
-  | 'INSPECTION';
+  'SAMPLE_FEE' | 'MATERIAL' | 'TOOLING' | 'FREIGHT' | 'INSPECTION';
 
 /** 物流状态（人工登记的快照口径）。 */
 export type DevelopmentSampleLogisticsStatus =
-  | 'SHIPPED'
-  | 'IN_TRANSIT'
-  | 'DELIVERED'
-  | 'EXCEPTION'
-  | 'RETURNED';
+  'SHIPPED' | 'IN_TRANSIT' | 'DELIVERED' | 'EXCEPTION' | 'RETURNED';
 
 // ================================================================ 查询参数
 
@@ -140,8 +122,7 @@ export function developmentSampleOrderQuery(params: DevelopmentSampleOrderParams
   if (params.sourceType) parts.push(`sourceType=${encodeURIComponent(params.sourceType)}`);
   if (params.developmentProjectId)
     parts.push(`developmentProjectId=${encodeURIComponent(params.developmentProjectId)}`);
-  if (params.keyword?.trim())
-    parts.push(`keyword=${encodeURIComponent(params.keyword.trim())}`);
+  if (params.keyword?.trim()) parts.push(`keyword=${encodeURIComponent(params.keyword.trim())}`);
   if (params.page !== undefined) parts.push(`page=${params.page}`);
   if (params.size !== undefined) parts.push(`size=${params.size}`);
   return parts.length ? `?${parts.join('&')}` : '';
@@ -154,8 +135,7 @@ export function developmentSampleLedgerQuery(params: DevelopmentSampleLedgerPara
   if (params.developmentProjectId)
     parts.push(`developmentProjectId=${encodeURIComponent(params.developmentProjectId)}`);
   if (params.orderId) parts.push(`orderId=${encodeURIComponent(params.orderId)}`);
-  if (params.keyword?.trim())
-    parts.push(`keyword=${encodeURIComponent(params.keyword.trim())}`);
+  if (params.keyword?.trim()) parts.push(`keyword=${encodeURIComponent(params.keyword.trim())}`);
   if (params.page !== undefined) parts.push(`page=${params.page}`);
   if (params.size !== undefined) parts.push(`size=${params.size}`);
   return parts.length ? `?${parts.join('&')}` : '';
@@ -200,11 +180,7 @@ export function updateDevelopmentSampleOrder(
   orderId: string,
   input: DevelopmentSampleOrderUpdateInput,
 ) {
-  return api<DevelopmentSampleOrderDetail>(
-    `${base}/${encodeURIComponent(orderId)}`,
-    'PUT',
-    input,
-  );
+  return api<DevelopmentSampleOrderDetail>(`${base}/${encodeURIComponent(orderId)}`, 'PUT', input);
 }
 
 export function transitionDevelopmentSampleOrder(
@@ -392,7 +368,10 @@ export function fmt(value: number | null | undefined): string {
 /** 带币种的金额。币种为空时只显示数字（不补一个猜出来的币种）。 */
 export function money(value: number | null | undefined, currency?: string | null): string {
   if (value === null || value === undefined) return '无数据';
-  const text = value.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+  const text = value.toLocaleString('zh-CN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 4,
+  });
   return currency ? `${text} ${currency}` : text;
 }
 
@@ -548,11 +527,15 @@ export function capabilityGaps(caps: DevelopmentSampleCapabilities | null): stri
   if (!caps.expenseAggregationAvailable)
     gaps.push(`样品成本${caps.expenseAggregationOwnerModule}归集：${caps.expenseAggregationNote}`);
   if (!caps.logisticsTrackingAvailable)
-    gaps.push(`真实物流轨迹（${caps.logisticsTrackingOwnerModule}）：${caps.logisticsTrackingNote}`);
+    gaps.push(
+      `真实物流轨迹（${caps.logisticsTrackingOwnerModule}）：${caps.logisticsTrackingNote}`,
+    );
   if (!caps.pilotOrderAvailable)
     gaps.push(`试产衔接（${caps.pilotOrderOwnerModule}）：${caps.pilotOrderNote}`);
   if (!caps.marketingSampleDelivered)
-    gaps.push(`达人寄样（${caps.marketingSampleOwnerModule}）不归本模块：${caps.marketingSampleNote}`);
+    gaps.push(
+      `达人寄样（${caps.marketingSampleOwnerModule}）不归本模块：${caps.marketingSampleNote}`,
+    );
   return gaps;
 }
 

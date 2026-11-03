@@ -165,9 +165,13 @@ export function ProductionTrialWorkspace() {
     if (!caps) return [];
     const list: string[] = [];
     if (!caps.inventoryDeductionAvailable)
-      list.push(`库存扣减归 ${caps.inventoryDeductionOwnerModule} 管：${caps.inventoryDeductionNote}`);
+      list.push(
+        `库存扣减归 ${caps.inventoryDeductionOwnerModule} 管：${caps.inventoryDeductionNote}`,
+      );
     if (!caps.massProductionHandoffAvailable)
-      list.push(`转量产建档归 ${caps.massProductionHandoffOwnerModule} 管：${caps.massProductionHandoffNote}`);
+      list.push(
+        `转量产建档归 ${caps.massProductionHandoffOwnerModule} 管：${caps.massProductionHandoffNote}`,
+      );
     if (!caps.exchangeRateAvailable)
       list.push(`汇率归 ${caps.exchangeRateOwnerModule} 管：${caps.exchangeRateNote}`);
     return list;
@@ -208,10 +212,12 @@ export function ProductionTrialWorkspace() {
       <div className="flex items-start gap-2 rounded-md border border-sky-500/40 bg-sky-500/10 p-3 text-sm">
         <PackageSearch className="mt-0.5 size-4 shrink-0" />
         <div className="flex flex-col gap-1">
-          <p className="font-medium">本页只出「试产单 + 组件领用需求 + 良率与成本结果 + 转量产建议」</p>
+          <p className="font-medium">
+            本页只出「试产单 + 组件领用需求 + 良率与成本结果 + 转量产建议」
+          </p>
           <p className="text-muted-foreground">
-            🔴 组件领用需求是<b>需求</b>，不是「已领用」：本页<b>不扣库存</b> —— 试产消耗真实组件库存，
-            领用需走 8 加工单，由 warehouse 侧 8.4.1 组装单承接。
+            🔴 组件领用需求是<b>需求</b>，不是「已领用」：本页<b>不扣库存</b> ——
+            试产消耗真实组件库存， 领用需走 8 加工单，由 warehouse 侧 8.4.1 组装单承接。
           </p>
           <p className="text-muted-foreground">
             良率按<b>比例</b>存储（0.95 = 95%），页面显示的百分数只是同一份值的显示格式；
@@ -354,12 +360,17 @@ export function ProductionTrialWorkspace() {
                     <td className="px-2 py-1">{formatQuantity(row.targetQuantity)}</td>
                     <td className="px-2 py-1">
                       <div>{row.productionLineName || row.productionLineCode || '—'}</div>
-                      <div className="text-muted-foreground">{row.factoryName || row.factoryCode || '—'}</div>
+                      <div className="text-muted-foreground">
+                        {row.factoryName || row.factoryCode || '—'}
+                      </div>
                     </td>
                     <td className="px-2 py-1">
                       <Badge tone={statusTone(row.status)}>{row.statusLabel}</Badge>
                     </td>
-                    <td className="px-2 py-1" title={row.hasResult ? `比例 ${row.yieldRate}` : undefined}>
+                    <td
+                      className="px-2 py-1"
+                      title={row.hasResult ? `比例 ${row.yieldRate}` : undefined}
+                    >
                       {row.hasResult ? formatYieldRate(row.yieldRate) : '—'}
                     </td>
                     <td className="px-2 py-1">{formatMoney(row.trialCostTotal, row.currency)}</td>
@@ -392,7 +403,11 @@ export function ProductionTrialWorkspace() {
 
       {total > 0 && (
         <div className="flex items-center justify-end gap-2 text-sm">
-          <Button variant="ghost" disabled={page <= 0} onClick={() => setPage((p) => Math.max(0, p - 1))}>
+          <Button
+            variant="ghost"
+            disabled={page <= 0}
+            onClick={() => setPage((p) => Math.max(0, p - 1))}
+          >
             上一页
           </Button>
           <span className="text-muted-foreground">
@@ -431,13 +446,7 @@ export function ProductionTrialWorkspace() {
 
 // ================================================================ 新建试产单
 
-function CreateTrialModal({
-  onClose,
-  onCreated,
-}: {
-  onClose: () => void;
-  onCreated: () => void;
-}) {
+function CreateTrialModal({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
   const [trialNo, setTrialNo] = useState('');
   const [bomVersionId, setBomVersionId] = useState('');
   const [targetQuantity, setTargetQuantity] = useState('100');
@@ -572,10 +581,7 @@ function CreateTrialModal({
           </label>
           <label className="flex flex-col gap-1 text-sm">
             <span className="text-muted-foreground">质检标准编号</span>
-            <Input
-              value={qualityStandard}
-              onChange={(e) => setQualityStandard(e.target.value)}
-            />
+            <Input value={qualityStandard} onChange={(e) => setQualityStandard(e.target.value)} />
           </label>
           <label className="flex flex-col gap-1 text-sm">
             <span className="text-muted-foreground">量产目标成本（可留空 = 不可比）</span>
@@ -593,7 +599,7 @@ function CreateTrialModal({
               onChange={(e) => setRequestedAt(e.target.value)}
             />
           </label>
-          <label className="flex col-span-2 flex-col gap-1 text-sm">
+          <label className="col-span-2 flex flex-col gap-1 text-sm">
             <span className="text-muted-foreground">试产目的</span>
             <Input value={purpose} onChange={(e) => setPurpose(e.target.value)} />
           </label>
@@ -703,7 +709,8 @@ function TrialDetailModal({
         <ModalHeader>
           <ModalTitle>试产单详情{order ? ` · ${order.trialNo}` : ''}</ModalTitle>
           <ModalDescription>
-            组件领用需求是<b>需求</b>不是库存扣减；良率按比例存储；成本只与<b>同一币种</b>的量产目标成本可比。
+            组件领用需求是<b>需求</b>不是库存扣减；良率按比例存储；成本只与<b>同一币种</b>
+            的量产目标成本可比。
           </ModalDescription>
         </ModalHeader>
 
@@ -801,8 +808,8 @@ function TrialDetailModal({
 
             <SectionCard title={`组件领用需求（${detail?.componentRequirements.length ?? 0}）`}>
               <p className="text-muted-foreground mb-2 text-sm">
-                🔴 这些是<b>需求</b>：本页<b>不扣库存</b>，真实领用由 8.4.1 组装单（warehouse）承接。
-                提交需求 ≠ 已领用。
+                🔴 这些是<b>需求</b>：本页<b>不扣库存</b>，真实领用由 8.4.1
+                组装单（warehouse）承接。 提交需求 ≠ 已领用。
               </p>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
@@ -824,7 +831,9 @@ function TrialDetailModal({
                         <td className="px-2 py-1">{row.lineNo}</td>
                         <td className="px-2 py-1">
                           <div className="font-mono">{row.skuCode}</div>
-                          {row.skuName && <div className="text-muted-foreground">{row.skuName}</div>}
+                          {row.skuName && (
+                            <div className="text-muted-foreground">{row.skuName}</div>
+                          )}
                         </td>
                         <td className="px-2 py-1">{formatQuantity(row.unitQuantity)}</td>
                         <td className="px-2 py-1">{formatQuantity(row.scrapRate)}%</td>
@@ -864,7 +873,9 @@ function TrialDetailModal({
                   </tbody>
                 </table>
               </div>
-              {detail?.componentRequirements.some((row) => row.requirementStatus === 'SUBMITTED') && (
+              {detail?.componentRequirements.some(
+                (row) => row.requirementStatus === 'SUBMITTED',
+              ) && (
                 <div className="mt-3 flex flex-wrap items-end gap-2">
                   <label className="flex flex-col gap-1 text-sm">
                     <span className="text-muted-foreground">组装单号（8.4.1）</span>
@@ -1249,7 +1260,9 @@ function TrialDetailModal({
                   <select
                     className="rounded-md border px-2 py-1"
                     value={decision}
-                    onChange={(e) => setDecision(e.target.value as ProductionTrialMassProductionDecision)}
+                    onChange={(e) =>
+                      setDecision(e.target.value as ProductionTrialMassProductionDecision)
+                    }
                   >
                     {DECISIONS.map((row) => (
                       <option key={row.value} value={row.value}>
@@ -1266,11 +1279,11 @@ function TrialDetailModal({
                   <span className="text-muted-foreground">成本偏差上限（比例）</span>
                   <Input value={maxVariance} onChange={(e) => setMaxVariance(e.target.value)} />
                 </label>
-                <label className="flex col-span-2 flex-col gap-1 text-sm">
+                <label className="col-span-2 flex flex-col gap-1 text-sm">
                   <span className="text-muted-foreground">建议文本 *</span>
                   <Input value={rationale} onChange={(e) => setRationale(e.target.value)} />
                 </label>
-                <label className="flex col-span-2 flex-col gap-1 text-sm">
+                <label className="col-span-2 flex flex-col gap-1 text-sm">
                   <span className="text-muted-foreground">生成条件说明 *</span>
                   <Input value={conditionNote} onChange={(e) => setConditionNote(e.target.value)} />
                 </label>

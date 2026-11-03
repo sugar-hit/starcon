@@ -133,22 +133,16 @@ export function useWorkbenchLayout(): UseWorkbenchLayout {
     setState((previous) => ({ ...previous, ...patch }));
   }, []);
 
-  const setOrder = useCallback(
-    (order: string[]) => update({ order }),
-    [update],
-  );
+  const setOrder = useCallback((order: string[]) => update({ order }), [update]);
 
-  const moveCard = useCallback(
-    (key: string, offset: number) => {
-      dirtyRef.current = true;
-      setNotice('');
-      setState((previous) => ({
-        ...previous,
-        order: moveWorkbenchCard(previous.order, key, offset),
-      }));
-    },
-    [],
-  );
+  const moveCard = useCallback((key: string, offset: number) => {
+    dirtyRef.current = true;
+    setNotice('');
+    setState((previous) => ({
+      ...previous,
+      order: moveWorkbenchCard(previous.order, key, offset),
+    }));
+  }, []);
 
   const reorderCard = useCallback((from: string, to: string) => {
     dirtyRef.current = true;
@@ -168,10 +162,7 @@ export function useWorkbenchLayout(): UseWorkbenchLayout {
     }));
   }, []);
 
-  const setDefaultTab = useCallback(
-    (tab: WorkbenchTabId) => update({ defaultTab: tab }),
-    [update],
-  );
+  const setDefaultTab = useCallback((tab: WorkbenchTabId) => update({ defaultTab: tab }), [update]);
 
   const reset = useCallback(() => {
     // 重置 = 回到系统默认布局，并且服务端那一行也删掉。

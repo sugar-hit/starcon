@@ -89,7 +89,9 @@ describe('收藏清单解析', () => {
     expect(toFavorite({ label: 'A', system: 'ops' })).toBeNull();
     expect(toFavorite({ href: '/a', system: 'ops' })).toBeNull();
     expect(toFavorite(null)).toBeNull();
-    expect(toFavorite({ href: '/a', label: 'A', system: 'ops', pageCode: '', order: 0 })).not.toBeNull();
+    expect(
+      toFavorite({ href: '/a', label: 'A', system: 'ops', pageCode: '', order: 0 }),
+    ).not.toBeNull();
   });
 });
 

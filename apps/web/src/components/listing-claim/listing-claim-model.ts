@@ -190,7 +190,10 @@ export function targetSiteOptions(shop: ShopView | null): ShopMarketplaceView[] 
  *
  * 页面上提前把它们标出来，而不是让用户点一次提交才吃一个 422。
  */
-export function siteBoundFields(sourceMarketplaceId: string | null, targetMarketplaceId: string): string[] {
+export function siteBoundFields(
+  sourceMarketplaceId: string | null,
+  targetMarketplaceId: string,
+): string[] {
   if (!targetMarketplaceId) return [];
   if (sourceMarketplaceId && sourceMarketplaceId === targetMarketplaceId) return [];
   return FIELD_OPTIONS.filter((o) => o.siteBound).map((o) => o.value);

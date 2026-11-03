@@ -194,7 +194,11 @@ describe('14.3.2.2 建议幅度：比例优先', () => {
 describe('14.3.2.2 规则表单：阈值是必填的', () => {
   it('高花费零转化缺金额门槛 ⇒ 拒', () => {
     const result = validateAdDiagnosisRule(
-      ruleInput({ ruleCode: 'R1', ruleType: 'HIGH_SPEND_NO_CONVERSION', actionType: 'PAUSE_CAMPAIGN' }),
+      ruleInput({
+        ruleCode: 'R1',
+        ruleType: 'HIGH_SPEND_NO_CONVERSION',
+        actionType: 'PAUSE_CAMPAIGN',
+      }),
     );
     expect(result.ok).toBe(false);
     expect(result.errors.join()).toContain('金额门槛');

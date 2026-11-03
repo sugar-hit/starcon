@@ -393,10 +393,7 @@ export function comparisonCellText(
 }
 
 /** 对比矩阵单元格的环比文本。 */
-export function comparisonGrowthText(
-  row: SalesTrendComparisonRow,
-  metricCode: string,
-): string {
+export function comparisonGrowthText(row: SalesTrendComparisonRow, metricCode: string): string {
   const metric = comparisonMetricOf(row, metricCode);
   if (!metric) return '—';
   return percentText(metric.periodOverPeriodRate);
@@ -637,6 +634,8 @@ export function refreshStatusTone(status: string): Tone {
 }
 
 /** 刷新结果列表。 */
-export function refreshResultsOf(results: SalesTrendRefreshResult[] | null): SalesTrendRefreshResult[] {
+export function refreshResultsOf(
+  results: SalesTrendRefreshResult[] | null,
+): SalesTrendRefreshResult[] {
   return results ?? [];
 }

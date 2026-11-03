@@ -124,14 +124,15 @@ export function assignReconciliationDiff(id: string, input: ReconciliationDiffAs
 
 /** 分类归因（**分类 + 理由都必填**）。 */
 export function classifyReconciliationDiff(id: string, input: ReconciliationDiffClassify) {
-  return api<ReconciliationDiffHandling>(`${base}/${encodeURIComponent(id)}/classify`, 'POST', input);
+  return api<ReconciliationDiffHandling>(
+    `${base}/${encodeURIComponent(id)}/classify`,
+    'POST',
+    input,
+  );
 }
 
 /** 登记调整分录（**凭证或说明**至少有一个）。 */
-export function recordReconciliationAdjustment(
-  id: string,
-  input: ReconciliationDiffAdjustment,
-) {
+export function recordReconciliationAdjustment(id: string, input: ReconciliationDiffAdjustment) {
   return api<ReconciliationDiffAdjustmentRow>(
     `${base}/${encodeURIComponent(id)}/adjustments`,
     'POST',
@@ -146,7 +147,11 @@ export function adjustReconciliationDiff(id: string, input: ReconciliationDiffDe
 
 /** 人工判定：**已核销**（终态；= 判定不需要调整）。 */
 export function writeOffReconciliationDiff(id: string, input: ReconciliationDiffDecide) {
-  return api<ReconciliationDiffHandling>(`${base}/${encodeURIComponent(id)}/write-off`, 'POST', input);
+  return api<ReconciliationDiffHandling>(
+    `${base}/${encodeURIComponent(id)}/write-off`,
+    'POST',
+    input,
+  );
 }
 
 // ================================================================ 展示口径
@@ -387,6 +392,8 @@ export function reconciliationDiffAdjustmentBasisHint(input: {
 }
 
 /** 分类理由是否为空（人工分类 + 理由是蓝图点名的输入）。 */
-export function reconciliationDiffClassifyHint(input: { reason?: string | null | undefined }): string {
+export function reconciliationDiffClassifyHint(input: {
+  reason?: string | null | undefined;
+}): string {
   return (input.reason ?? '').trim() === '' ? '分类理由不能为空（人工分类 + 理由）。' : '';
 }

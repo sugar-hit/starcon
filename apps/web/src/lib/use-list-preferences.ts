@@ -136,18 +136,9 @@ export function useListPreferences(options: ListPreferenceOptions): UseListPrefe
     setState((previous) => ({ ...previous, ...patch }));
   }, []);
 
-  const setSortKey = useCallback(
-    (key: string) => update({ sortKey: key }),
-    [update],
-  );
-  const setPageSize = useCallback(
-    (size: number) => update({ pageSize: size }),
-    [update],
-  );
-  const setColumns = useCallback(
-    (columns: string[]) => update({ columns }),
-    [update],
-  );
+  const setSortKey = useCallback((key: string) => update({ sortKey: key }), [update]);
+  const setPageSize = useCallback((size: number) => update({ pageSize: size }), [update]);
+  const setColumns = useCallback((columns: string[]) => update({ columns }), [update]);
 
   const toggleColumn = useCallback((key: string, visible: boolean) => {
     dirtyRef.current = true;
@@ -158,9 +149,7 @@ export function useListPreferences(options: ListPreferenceOptions): UseListPrefe
       // 打开一列时放回它在页面默认列序里的位置，而不是追加到末尾
       const order = optionsRef.current.columns.map((c) => c.key);
       const visibleNow = previous.columns.filter((c) => c !== key);
-      const next = order.filter(
-        (c) => c === key || visibleNow.includes(c),
-      );
+      const next = order.filter((c) => c === key || visibleNow.includes(c));
       return { ...previous, columns: next };
     });
   }, []);

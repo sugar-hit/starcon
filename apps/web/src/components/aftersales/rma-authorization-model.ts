@@ -93,7 +93,8 @@ export const recordReturnLogistics = (id: string, body: unknown) =>
 export const cancelRma = (id: string, body: unknown) =>
   call<RmaDetail>(`${base}/${id}/cancel`, { method: 'POST', body: JSON.stringify(body) });
 
-export const expireOverdue = () => call<RmaExpireResult>(`${base}/expire-overdue`, { method: 'POST' });
+export const expireOverdue = () =>
+  call<RmaExpireResult>(`${base}/expire-overdue`, { method: 'POST' });
 
 // ================================================================ 展示口径
 
@@ -150,7 +151,10 @@ export function quantity(value: number | string | null | undefined): string {
 /** 指示性金额。⚠️ 它**不是**可退余额校验的结果（11.3.1.1 未交付），更不是实际退款额（12 财务）。 */
 export function amount(value: number | string | null | undefined): string {
   if (value === null || value === undefined || value === '') return '—';
-  return Number(value).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return Number(value).toLocaleString('zh-CN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 }
 
 /**
@@ -160,11 +164,15 @@ export function amount(value: number | string | null | undefined): string {
  * 后者是额度被别人占满 —— 运营对这两种情况的处理完全不同，
  * 合成一个「可退 0」会让「货根本没发出去」被误当成「额度用完了」。
  */
-export function returnableText(line: RmaReturnableLine): { value: string; tone: 'neutral' | 'success' | 'warning' | 'danger' } {
+export function returnableText(line: RmaReturnableLine): {
+  value: string;
+  tone: 'neutral' | 'success' | 'warning' | 'danger';
+} {
   if (line.blockingReasons.length > 0) {
     return { value: '不可退', tone: 'danger' };
   }
-  if (line.returnableQty === null || line.returnableQty === undefined) return { value: '—', tone: 'neutral' };
+  if (line.returnableQty === null || line.returnableQty === undefined)
+    return { value: '—', tone: 'neutral' };
   const n = Number(line.returnableQty);
   if (n <= 0) return { value: '额度已占满', tone: 'warning' };
   return { value: quantity(n), tone: 'success' };
@@ -219,7 +227,8 @@ export function actionButton(action: RmaActionEntry | null | undefined): {
   disabled: boolean;
   reason: string | null;
 } {
-  if (!action) return { label: '—', variant: 'ghost', disabled: true, reason: '后端未给出动作入口' };
+  if (!action)
+    return { label: '—', variant: 'ghost', disabled: true, reason: '后端未给出动作入口' };
   return {
     label: action.label,
     variant: action.allowed ? 'default' : 'ghost',
@@ -229,7 +238,9 @@ export function actionButton(action: RmaActionEntry | null | undefined): {
 }
 
 /** 「刻意不做的事」清单：页面照着显示，而不是让用户自己猜为什么找不到按钮。 */
-export function boundaryRows(boundaries: RmaBoundary[]): { scope: string; owner: string; reason: string }[] {
+export function boundaryRows(
+  boundaries: RmaBoundary[],
+): { scope: string; owner: string; reason: string }[] {
   return boundaries.map((b) => ({ scope: b.boundary, owner: b.ownerModule, reason: b.reason }));
 }
 

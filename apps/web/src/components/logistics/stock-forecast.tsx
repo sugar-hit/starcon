@@ -237,7 +237,10 @@ export function StockForecastWorkspace() {
         unitWeightKg: detail.lines[0]?.unitWeightKg ?? null,
       },
     ];
-    void run(() => replaceLines(detail.forecast.id, lines), () => loadDetail(detail.forecast.id));
+    void run(
+      () => replaceLines(detail.forecast.id, lines),
+      () => loadDetail(detail.forecast.id),
+    );
   }
 
   // ---- 规格维护 ----
@@ -300,9 +303,7 @@ export function StockForecastWorkspace() {
     if (!detail) return;
     const ref = window.prompt('仓端回执编号') ?? '';
     const reason =
-      receiptType === 'REJECTED'
-        ? window.prompt('拒收理由（拒收必须写理由）') ?? ''
-        : '';
+      receiptType === 'REJECTED' ? (window.prompt('拒收理由（拒收必须写理由）') ?? '') : '';
     if (receiptType === 'REJECTED' && !reason.trim()) {
       setError('拒收必须写理由');
       return;
@@ -328,7 +329,9 @@ export function StockForecastWorkspace() {
   const canRetry = task?.status === 'FAILED';
   const canReceive = detail?.forecast.status === 'SHIPMENT_CREATED';
   const canCancel = ['DRAFT', 'VALIDATED', 'SUBMITTED'].includes(detail?.forecast.status ?? '');
-  const activeSpec = specs.find((s) => s.accountId === detail?.forecast.accountId && s.status === 'ACTIVE');
+  const activeSpec = specs.find(
+    (s) => s.accountId === detail?.forecast.accountId && s.status === 'ACTIVE',
+  );
 
   return (
     <>
@@ -393,13 +396,19 @@ export function StockForecastWorkspace() {
                   }}
                 >
                   <option value="">全部状态</option>
-                  {['DRAFT', 'VALIDATED', 'SUBMITTED', 'SHIPMENT_CREATED', 'ACCEPTED', 'REJECTED', 'CANCELLED'].map(
-                    (s) => (
-                      <option key={s} value={s}>
-                        {forecastStatusLabel(s)}
-                      </option>
-                    ),
-                  )}
+                  {[
+                    'DRAFT',
+                    'VALIDATED',
+                    'SUBMITTED',
+                    'SHIPMENT_CREATED',
+                    'ACCEPTED',
+                    'REJECTED',
+                    'CANCELLED',
+                  ].map((s) => (
+                    <option key={s} value={s}>
+                      {forecastStatusLabel(s)}
+                    </option>
+                  ))}
                 </select>
                 <select
                   className="rounded border px-2 py-1 text-sm"
@@ -477,9 +486,7 @@ export function StockForecastWorkspace() {
                           {f.lineCount} 行 / {quantityText(f.totalQuantity, 'PCS')}
                         </td>
                         <td className="py-2">{new Date(f.expectedArrivalAt).toLocaleString()}</td>
-                        <td className="py-2 font-mono text-xs">
-                          {f.platformShipmentId || '—'}
-                        </td>
+                        <td className="py-2 font-mono text-xs">{f.platformShipmentId || '—'}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -623,7 +630,7 @@ export function StockForecastWorkspace() {
               }
             >
               {violations.length > 0 ? (
-                <div className="mb-4 rounded border border-destructive p-3">
+                <div className="border-destructive mb-4 rounded border p-3">
                   <p className="text-destructive flex items-center gap-1.5 text-sm font-medium">
                     <AlertTriangle className="h-4 w-4" />
                     规格校验未通过（{violations.length} 条）—— 提交前必须改掉，否则会被仓端拒收
@@ -680,14 +687,23 @@ export function StockForecastWorkspace() {
                 <div className="mb-6 text-sm">
                   <p className="flex flex-wrap items-center gap-2">
                     <span className="font-mono text-xs">{task.taskNo}</span>
-                    <Badge tone={task.status === 'SUCCEEDED' ? 'success' : task.status === 'FAILED' ? 'danger' : 'info'}>
+                    <Badge
+                      tone={
+                        task.status === 'SUCCEEDED'
+                          ? 'success'
+                          : task.status === 'FAILED'
+                            ? 'danger'
+                            : 'info'
+                      }
+                    >
                       {shipmentTaskStatusLabel(task.status)}
                     </Badge>
                     <span className="text-muted-foreground">尝试 {task.attempts} 次</span>
                   </p>
                   {task.platformShipmentId ? (
                     <p className="mt-1">
-                      平台货件编号 <span className="font-mono text-xs">{task.platformShipmentId}</span>
+                      平台货件编号{' '}
+                      <span className="font-mono text-xs">{task.platformShipmentId}</span>
                     </p>
                   ) : null}
                   {task.lastError ? (
@@ -713,8 +729,8 @@ export function StockForecastWorkspace() {
               <h3 className="mb-2 text-sm font-medium">备货可用性</h3>
               {!availability ? (
                 <p className="text-muted-foreground mb-6 text-sm">
-                  可用性口径不可用：自营可售量与头程在途都读不到（上游不可达）。
-                  这里**不用 0 冒充** —— 0 会被读成「没有库存需求」。
+                  可用性口径不可用：自营可售量与头程在途都读不到（上游不可达）。 这里**不用 0 冒充**
+                  —— 0 会被读成「没有库存需求」。
                 </p>
               ) : availability.rows.length === 0 ? (
                 <p className="text-muted-foreground mb-6 text-sm">该预报单没有可核的 SKU。</p>
@@ -821,14 +837,21 @@ export function StockForecastWorkspace() {
                       </div>
                       <p className="text-muted-foreground mt-1 text-sm">
                         箱型 {s.allowedBoxTypes.join(' / ') || '不限'} · 单箱≤
-                        {s.maxUnitsPerCarton ?? '—'} 件 / {s.maxWeightPerCartonKg ?? '—'} kg · 同箱型≤
+                        {s.maxUnitsPerCarton ?? '—'} 件 / {s.maxWeightPerCartonKg ?? '—'} kg ·
+                        同箱型≤
                         {s.maxSkusPerCarton ?? '—'} SKU
                       </p>
                       <p className="text-muted-foreground mt-1 text-sm">
-                        贴标 {s.requiresFnskuLabel ? `必填（${s.allowedLabelFormats.join('/') || '任意'}）` : '不要求'}
+                        贴标{' '}
+                        {s.requiresFnskuLabel
+                          ? `必填（${s.allowedLabelFormats.join('/') || '任意'}）`
+                          : '不要求'}
                         {s.requiresCartonLabel ? ' · 箱唛必填' : ''} · 托盘{' '}
-                        {s.palletRequired ? `必填（单托盘≤${s.maxCartonsPerPallet ?? '—'} 箱 / ${s.maxPalletWeightKg ?? '—'} kg）` : '不要求'}
-                        · 混装 {s.mixedLoadingAllowed ? '允许' : '禁止'} · 提前期 {s.minArrivalLeadDays} 天
+                        {s.palletRequired
+                          ? `必填（单托盘≤${s.maxCartonsPerPallet ?? '—'} 箱 / ${s.maxPalletWeightKg ?? '—'} kg）`
+                          : '不要求'}
+                        · 混装 {s.mixedLoadingAllowed ? '允许' : '禁止'} · 提前期{' '}
+                        {s.minArrivalLeadDays} 天
                       </p>
                     </div>
                     {s.status === 'ACTIVE' ? (
@@ -862,7 +885,9 @@ export function StockForecastWorkspace() {
                     <div className="min-w-0">
                       <span className="font-medium">{d.label}</span>
                       <p className="text-muted-foreground mt-1 text-sm">{d.impact}</p>
-                      <p className="text-muted-foreground mt-0.5 text-xs">归属模块 {d.ownerModule}</p>
+                      <p className="text-muted-foreground mt-0.5 text-xs">
+                        归属模块 {d.ownerModule}
+                      </p>
                     </div>
                     <Badge tone={d.available ? 'success' : 'warning'}>
                       {d.available ? '已接通' : '未接通'}

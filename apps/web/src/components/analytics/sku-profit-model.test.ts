@@ -51,9 +51,7 @@ import type {
  * 5. **前端不做业务算术**。净利、净利率、成本合计一律来自服务端，这里只做格式化。
  */
 
-function component(
-  overrides: Partial<SkuProfitComponentAmount> = {},
-): SkuProfitComponentAmount {
+function component(overrides: Partial<SkuProfitComponentAmount> = {}): SkuProfitComponentAmount {
   return {
     component: 'COGS',
     label: '采购成本',
@@ -281,9 +279,9 @@ describe('13.4.1.2 SKU 利润 · 订单明细钻取', () => {
 
   it('未归属的模式要标出来 —— 它不是一种经营模式', () => {
     expect(orderModeText(item)).toBe('自发货');
-    expect(orderModeText({ ...item, operatingMode: 'UNKNOWN', operatingModeLabel: '未归属' })).toContain(
-      '未归属',
-    );
+    expect(
+      orderModeText({ ...item, operatingMode: 'UNKNOWN', operatingModeLabel: '未归属' }),
+    ).toContain('未归属');
   });
 });
 

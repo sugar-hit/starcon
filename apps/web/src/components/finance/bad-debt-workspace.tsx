@@ -282,8 +282,8 @@ export function BadDebtWorkspace() {
         <Notice tone="warning" title="能力边界">
           <ul className="space-y-1">
             <li>
-              <b>会计处理不可用</b>：下游 12.5.2.1「凭证管理」未交付 ⇒ 核销记录里只有
-              「归属模块 12.5.2.1 + 空凭证号」，**不会**显示成「已入账 0 块」。
+              <b>会计处理不可用</b>：下游 12.5.2.1「凭证管理」未交付 ⇒ 核销记录里只有 「归属模块
+              12.5.2.1 + 空凭证号」，**不会**显示成「已入账 0 块」。
               {accounting?.detail}
             </li>
             <li>
@@ -291,7 +291,8 @@ export function BadDebtWorkspace() {
               {batchCapability?.detail}
             </li>
             <li>
-              <b>上游纠纷</b>：{upstreamDispute?.available ? '已接通' : '未接通'} —— {upstreamDispute?.detail}
+              <b>上游纠纷</b>：{upstreamDispute?.available ? '已接通' : '未接通'} ——{' '}
+              {upstreamDispute?.detail}
             </li>
           </ul>
         </Notice>
@@ -308,7 +309,10 @@ export function BadDebtWorkspace() {
       )}
 
       {summary && summary.currencyTotals.length > 0 && (
-        <SectionCard title="核销金额（按币种）" description="USD 与 EUR 加起来不是任何一个金额 ⇒ 一律按币种分组。">
+        <SectionCard
+          title="核销金额（按币种）"
+          description="USD 与 EUR 加起来不是任何一个金额 ⇒ 一律按币种分组。"
+        >
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {summary.currencyTotals.map((total) => (
               <div key={total.currency}>
@@ -408,7 +412,10 @@ export function BadDebtWorkspace() {
       )}
 
       {/* 筛选 + 列表 */}
-      <SectionCard title="核销申请" description="真分页 + 真筛选；汇总覆盖整个筛选结果集，不是当前页。">
+      <SectionCard
+        title="核销申请"
+        description="真分页 + 真筛选；汇总覆盖整个筛选结果集，不是当前页。"
+      >
         <div className="grid gap-3 md:grid-cols-4">
           <FormField id="bad-debt-filter-status" label="状态">
             <select
@@ -481,14 +488,17 @@ export function BadDebtWorkspace() {
         {!loading && page && page.items.length === 0 && (
           <EmptyState
             title="没有坏账核销申请"
-            description={badDebtEmptyHint(page.total, Boolean(status || reasonType || currency || keyword))}
+            description={badDebtEmptyHint(
+              page.total,
+              Boolean(status || reasonType || currency || keyword),
+            )}
           />
         )}
 
         {!loading && page && page.items.length > 0 && (
           <>
             <div className="mt-4 overflow-x-auto">
-              <table className="w-full text-left text-copy-13">
+              <table className="text-copy-13 w-full text-left">
                 <thead className="text-muted-foreground border-b">
                   <tr>
                     <th className="py-2 pr-3 font-medium">核销单号</th>
@@ -516,11 +526,19 @@ export function BadDebtWorkspace() {
                         {row.receivableNo}
                         {row.disputeNo ? ` · 纠纷 ${row.disputeNo}` : ''}
                       </td>
-                      <td className="py-2 pr-3">{badDebtReasonLabel(row.reasonType, options?.reasonTypeOptions)}</td>
-                      <td className="py-2 pr-3">{formatBadDebtMoney(row.writeOffAmount, row.currency)}</td>
-                      <td className="py-2 pr-3">{formatBadDebtMoney(row.openBalance, row.currency)}</td>
                       <td className="py-2 pr-3">
-                        <Badge tone="neutral">{badDebtStatusLabel(row.status, options?.statusOptions)}</Badge>
+                        {badDebtReasonLabel(row.reasonType, options?.reasonTypeOptions)}
+                      </td>
+                      <td className="py-2 pr-3">
+                        {formatBadDebtMoney(row.writeOffAmount, row.currency)}
+                      </td>
+                      <td className="py-2 pr-3">
+                        {formatBadDebtMoney(row.openBalance, row.currency)}
+                      </td>
+                      <td className="py-2 pr-3">
+                        <Badge tone="neutral">
+                          {badDebtStatusLabel(row.status, options?.statusOptions)}
+                        </Badge>
                       </td>
                       <td className="py-2">{badDebtAccountingLabel(row)}</td>
                     </tr>
@@ -528,9 +546,10 @@ export function BadDebtWorkspace() {
                 </tbody>
               </table>
             </div>
-            <div className="text-muted-foreground mt-3 flex items-center gap-3 text-copy-12">
+            <div className="text-muted-foreground text-copy-12 mt-3 flex items-center gap-3">
               <span>
-                共 {page.total} 笔 · 第 {page.page + 1} / {Math.max(1, Math.ceil(page.total / page.size))} 页
+                共 {page.total} 笔 · 第 {page.page + 1} /{' '}
+                {Math.max(1, Math.ceil(page.total / page.size))} 页
               </span>
               <Button
                 variant="ghost"
@@ -561,16 +580,26 @@ export function BadDebtWorkspace() {
           )}`}
         >
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <StatCard label="应收总额（核销时快照）" value={formatBadDebtAmount(detail.row.receivableAmount)} />
-            <StatCard label="已核销额（核销时快照）" value={formatBadDebtAmount(detail.row.receivableSettled)} />
-            <StatCard label="未核销余额（核销时快照）" value={formatBadDebtAmount(detail.row.openBalance)} />
+            <StatCard
+              label="应收总额（核销时快照）"
+              value={formatBadDebtAmount(detail.row.receivableAmount)}
+            />
+            <StatCard
+              label="已核销额（核销时快照）"
+              value={formatBadDebtAmount(detail.row.receivableSettled)}
+            />
+            <StatCard
+              label="未核销余额（核销时快照）"
+              value={formatBadDebtAmount(detail.row.openBalance)}
+            />
             <StatCard label="本次核销金额" value={formatBadDebtAmount(detail.row.writeOffAmount)} />
           </div>
 
-          <div className="mt-4 space-y-1 text-copy-13">
+          <div className="text-copy-13 mt-4 space-y-1">
             <p>
               <span className="text-muted-foreground">事由：</span>
-              {badDebtReasonLabel(detail.row.reasonType, options?.reasonTypeOptions)} —— {detail.row.reasonDetail}
+              {badDebtReasonLabel(detail.row.reasonType, options?.reasonTypeOptions)} ——{' '}
+              {detail.row.reasonDetail}
             </p>
             {detail.row.disputeNo && (
               <p>
@@ -587,13 +616,13 @@ export function BadDebtWorkspace() {
               <p>
                 <span className="text-muted-foreground">核销路径：</span>
                 {badDebtWriteOffMethodLabel(detail.row)}
-                {detail.row.voidedReceivableNo ? ` · 已作废原单 ${detail.row.voidedReceivableNo}` : ''}
+                {detail.row.voidedReceivableNo
+                  ? ` · 已作废原单 ${detail.row.voidedReceivableNo}`
+                  : ''}
                 {detail.row.replacementReceivableNo
                   ? ` · 承接单 ${detail.row.replacementReceivableNo}`
                   : ' · 无承接余额'}
-                {detail.row.replacementDueDateAdjusted
-                  ? '（原单已逾期，承接单到期日取今天）'
-                  : ''}
+                {detail.row.replacementDueDateAdjusted ? '（原单已逾期，承接单到期日取今天）' : ''}
               </p>
             )}
             {detail.row.decisionComment && (
@@ -619,13 +648,18 @@ export function BadDebtWorkspace() {
                       <div>
                         <p className="text-copy-13">
                           <Badge tone="neutral">
-                            {badDebtEvidenceTypeLabel(item.evidenceType, options?.evidenceTypeOptions)}
+                            {badDebtEvidenceTypeLabel(
+                              item.evidenceType,
+                              options?.evidenceTypeOptions,
+                            )}
                           </Badge>{' '}
                           {item.title}
                         </p>
                         <p className="text-copy-12 text-muted-foreground mt-1">{item.content}</p>
                         {item.referenceNo && (
-                          <p className="text-copy-12 text-muted-foreground mt-1">外部单号：{item.referenceNo}</p>
+                          <p className="text-copy-12 text-muted-foreground mt-1">
+                            外部单号：{item.referenceNo}
+                          </p>
                         )}
                       </div>
                       {detail.row.status === 'DRAFT' && (
@@ -683,7 +717,10 @@ export function BadDebtWorkspace() {
             )}
             {detail.row.status === 'DRAFT' && (
               <div className="mt-2 space-y-2">
-                <label htmlFor="bad-debt-evidence-content" className="text-label-13 text-foreground block">
+                <label
+                  htmlFor="bad-debt-evidence-content"
+                  className="text-label-13 text-foreground block"
+                >
                   依据内容<span className="text-destructive ml-1">*</span>
                 </label>
                 <textarea
@@ -729,7 +766,11 @@ export function BadDebtWorkspace() {
                       onClick={() => {
                         const id = detail.row.id;
                         if (action.code === 'SUBMIT') {
-                          void run(() => submitBadDebtCase(id), '已提交审批。', () => open(id));
+                          void run(
+                            () => submitBadDebtCase(id),
+                            '已提交审批。',
+                            () => open(id),
+                          );
                         } else if (action.code === 'APPROVE') {
                           void run(
                             () => approveBadDebtCase(id, { comment: decisionComment.trim() }),
@@ -743,7 +784,11 @@ export function BadDebtWorkspace() {
                             () => open(id),
                           );
                         } else if (action.code === 'WRITE_OFF') {
-                          void run(() => writeOffBadDebtCase(id), '核销已完成。', () => open(id));
+                          void run(
+                            () => writeOffBadDebtCase(id),
+                            '核销已完成。',
+                            () => open(id),
+                          );
                         } else if (action.code === 'VOID') {
                           void run(
                             () => voidBadDebtCase(id, decisionComment.trim() || '作废申请'),
@@ -777,8 +822,8 @@ export function BadDebtWorkspace() {
                     {event.occurredAt ? new Date(event.occurredAt).toLocaleString('zh-CN') : ''}
                   </span>
                   <span>
-                    <Badge tone="neutral">{event.eventType}</Badge>{' '}
-                    {event.fromStatus || '—'} → {event.toStatus || '—'}
+                    <Badge tone="neutral">{event.eventType}</Badge> {event.fromStatus || '—'} →{' '}
+                    {event.toStatus || '—'}
                     {event.reason ? ` · ${event.reason}` : ''}
                   </span>
                 </li>

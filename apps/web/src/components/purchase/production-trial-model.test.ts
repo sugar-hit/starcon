@@ -108,9 +108,9 @@ describe('查询串', () => {
     expect(productionTrialOrderQuery({ status: 'IN_PROGRESS' })).toBe('?status=IN_PROGRESS');
     expect(productionTrialOrderQuery({ keyword: ' TP-1 ' })).toBe('?keyword=TP-1');
     expect(productionTrialOrderQuery({ page: 2, size: 20 })).toBe('?page=2&size=20');
-    expect(
-      productionTrialOrderQuery({ status: 'COMPLETED', bomVersionId: 'bom-1', page: 0 }),
-    ).toBe('?status=COMPLETED&bomVersionId=bom-1&page=0');
+    expect(productionTrialOrderQuery({ status: 'COMPLETED', bomVersionId: 'bom-1', page: 0 })).toBe(
+      '?status=COMPLETED&bomVersionId=bom-1&page=0',
+    );
   });
 
   it('空白关键词不进查询串（不是「搜了个空」）', () => {

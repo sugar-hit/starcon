@@ -226,7 +226,14 @@ export function FilingCalendarWorkspace() {
   }, []);
 
   const applyFilters = useCallback(
-    (next: Partial<{ jurisdictionCode: string; taxType: string; filingCycle: string; status: string }>) => {
+    (
+      next: Partial<{
+        jurisdictionCode: string;
+        taxType: string;
+        filingCycle: string;
+        status: string;
+      }>,
+    ) => {
       setJurisdictionCode(next.jurisdictionCode ?? jurisdictionCode);
       setTaxType(next.taxType ?? taxType);
       setFilingCycle(next.filingCycle ?? filingCycle);
@@ -242,24 +249,27 @@ export function FilingCalendarWorkspace() {
     setConfigOpen(true);
   }, []);
 
-  const openConfigEdit = useCallback((id: string) => {
-    const item = configs?.items.find((row) => row.id === id);
-    if (!item) return;
-    setConfigEditing(item.id);
-    setConfigForm({
-      jurisdictionCode: item.jurisdictionCode,
-      taxType: item.taxType,
-      filingCycle: item.filingCycle,
-      periodAnchorDay: String(item.periodAnchorDay),
-      dueOffsetDays: String(item.dueOffsetDays),
-      dueHour: String(item.dueHour),
-      dueTimezone: item.dueTimezone,
-      reminderLeadDays: String(item.reminderLeadDays),
-      effectiveFrom: item.effectiveFrom,
-      note: item.note,
-    });
-    setConfigOpen(true);
-  }, [configs]);
+  const openConfigEdit = useCallback(
+    (id: string) => {
+      const item = configs?.items.find((row) => row.id === id);
+      if (!item) return;
+      setConfigEditing(item.id);
+      setConfigForm({
+        jurisdictionCode: item.jurisdictionCode,
+        taxType: item.taxType,
+        filingCycle: item.filingCycle,
+        periodAnchorDay: String(item.periodAnchorDay),
+        dueOffsetDays: String(item.dueOffsetDays),
+        dueHour: String(item.dueHour),
+        dueTimezone: item.dueTimezone,
+        reminderLeadDays: String(item.reminderLeadDays),
+        effectiveFrom: item.effectiveFrom,
+        note: item.note,
+      });
+      setConfigOpen(true);
+    },
+    [configs],
+  );
 
   const submitConfig = useCallback(
     () =>
@@ -422,7 +432,7 @@ export function FilingCalendarWorkspace() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center gap-2 py-16 text-muted-foreground">
+      <div className="text-muted-foreground flex items-center justify-center gap-2 py-16">
         <Loader2 className="size-4 animate-spin" />
         <span className="text-label-13">正在加载申报日历…</span>
       </div>
@@ -433,7 +443,7 @@ export function FilingCalendarWorkspace() {
     return (
       <SectionCard title="申报日历">
         <EmptyState
-          icon={<TriangleAlert className="size-8 text-destructive" />}
+          icon={<TriangleAlert className="text-destructive size-8" />}
           title="申报日历加载失败"
           description={error}
           action={
@@ -541,7 +551,7 @@ export function FilingCalendarWorkspace() {
               </li>
             ))}
           </ul>
-          <p className="text-muted-foreground mt-3 text-copy-12">{caps.scopeNote}</p>
+          <p className="text-muted-foreground text-copy-12 mt-3">{caps.scopeNote}</p>
         </SectionCard>
       )}
 
@@ -601,7 +611,7 @@ export function FilingCalendarWorkspace() {
       >
         {(entries?.items.length ?? 0) === 0 ? (
           <EmptyState
-            icon={<CalendarClock className="size-8 text-muted-foreground" />}
+            icon={<CalendarClock className="text-muted-foreground size-8" />}
             title={emptyKind === 'NO_CONFIG' ? '还没有申报周期配置' : '没有申报义务'}
             description={emptyStateText(emptyKind)}
             action={
@@ -614,7 +624,7 @@ export function FilingCalendarWorkspace() {
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-copy-13">
+              <table className="text-copy-13 w-full text-left">
                 <thead className="text-muted-foreground border-b">
                   <tr>
                     <th className="py-2 pr-3 font-medium">辖区</th>
@@ -648,19 +658,21 @@ export function FilingCalendarWorkspace() {
                         <td className="py-2 pr-3">
                           {item.periodStart} ~ {item.periodEnd}
                         </td>
-                        <td className="py-2 pr-3">
-                          {deadlineText(item.dueAt, item.dueTimezone)}
-                        </td>
+                        <td className="py-2 pr-3">{deadlineText(item.dueAt, item.dueTimezone)}</td>
                         <td className="py-2 pr-3">
                           <Badge tone={statusTone(item.status)}>{statusLabel(item.status)}</Badge>
                         </td>
-                        <td className="py-2 pr-3 max-w-72">
+                        <td className="max-w-72 py-2 pr-3">
                           <div className="flex items-center gap-2">
                             <Badge tone={item.dataReady ? 'success' : 'neutral'}>
-                              {item.dataReady ? '就绪' : item.dataReadinessAvailable ? '未就绪' : '读不到'}
+                              {item.dataReady
+                                ? '就绪'
+                                : item.dataReadinessAvailable
+                                  ? '未就绪'
+                                  : '读不到'}
                             </Badge>
                           </div>
-                          <div className="text-muted-foreground mt-1 text-copy-12">
+                          <div className="text-muted-foreground text-copy-12 mt-1">
                             {readinessText(item)}
                           </div>
                         </td>
@@ -668,7 +680,7 @@ export function FilingCalendarWorkspace() {
                         <td className="py-2 pr-3">
                           <Badge tone={urgencyTone(urgency)}>{urgencyLabel(urgency)}</Badge>
                           {item.daysToDue !== null && (
-                            <div className="text-muted-foreground mt-1 text-copy-12">
+                            <div className="text-muted-foreground text-copy-12 mt-1">
                               {item.daysToDue >= 0
                                 ? `还有 ${item.daysToDue} 天`
                                 : `已过 ${Math.abs(item.daysToDue)} 天`}
@@ -677,11 +689,7 @@ export function FilingCalendarWorkspace() {
                         </td>
                         <td className="py-2">
                           <div className="flex flex-wrap items-center gap-1">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => openEntryEdit(item)}
-                            >
+                            <Button variant="outline" size="sm" onClick={() => openEntryEdit(item)}>
                               编辑
                             </Button>
                             <Button
@@ -716,7 +724,7 @@ export function FilingCalendarWorkspace() {
                 </tbody>
               </table>
             </div>
-            <div className="text-muted-foreground mt-3 flex flex-wrap items-center justify-between gap-2 text-copy-12">
+            <div className="text-muted-foreground text-copy-12 mt-3 flex flex-wrap items-center justify-between gap-2">
               <span>{entries?.notice}</span>
               <div className="flex items-center gap-2">
                 <Button
@@ -751,14 +759,14 @@ export function FilingCalendarWorkspace() {
       >
         {(reminders?.items.length ?? 0) === 0 ? (
           <EmptyState
-            icon={<BellRing className="size-8 text-muted-foreground" />}
+            icon={<BellRing className="text-muted-foreground size-8" />}
             title="没有到期提醒"
             description="日历上还没有临近截止的申报义务；登记申报义务后会自动派生提醒。"
           />
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-copy-13">
+              <table className="text-copy-13 w-full text-left">
                 <thead className="text-muted-foreground border-b">
                   <tr>
                     <th className="py-2 pr-3 font-medium">提醒</th>
@@ -777,7 +785,7 @@ export function FilingCalendarWorkspace() {
                         <Badge tone={item.acknowledged ? 'neutral' : 'warning'}>
                           {reminderKindLabel(item.kind)}
                         </Badge>
-                        <div className="text-muted-foreground mt-1 text-copy-12">
+                        <div className="text-muted-foreground text-copy-12 mt-1">
                           提醒于 {item.remindAt.replace('T', ' ').slice(0, 16)}
                         </div>
                       </td>
@@ -813,7 +821,7 @@ export function FilingCalendarWorkspace() {
                 </tbody>
               </table>
             </div>
-            <div className="text-muted-foreground mt-3 flex flex-wrap items-center justify-between gap-2 text-copy-12">
+            <div className="text-muted-foreground text-copy-12 mt-3 flex flex-wrap items-center justify-between gap-2">
               <span>{reminders?.notice}</span>
               <div className="flex items-center gap-2">
                 <Button
@@ -830,7 +838,9 @@ export function FilingCalendarWorkspace() {
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={(reminders?.page ?? 0) * PAGE_SIZE + PAGE_SIZE >= (reminders?.total ?? 0)}
+                  disabled={
+                    (reminders?.page ?? 0) * PAGE_SIZE + PAGE_SIZE >= (reminders?.total ?? 0)
+                  }
                   onClick={() => setReminderPage((p) => p + 1)}
                 >
                   下一页
@@ -854,13 +864,13 @@ export function FilingCalendarWorkspace() {
       >
         {(configs?.items.length ?? 0) === 0 ? (
           <EmptyState
-            icon={<ScrollText className="size-8 text-muted-foreground" />}
+            icon={<ScrollText className="text-muted-foreground size-8" />}
             title="还没有申报周期配置"
             description="日历上还没有申报期，是因为还没有「怎么算」的模板。登记一份（辖区 × 申报线 × 周期）就能按配置生成。"
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-copy-13">
+            <table className="text-copy-13 w-full text-left">
               <thead className="text-muted-foreground border-b">
                 <tr>
                   <th className="py-2 pr-3 font-medium">辖区</th>
@@ -875,9 +885,7 @@ export function FilingCalendarWorkspace() {
               <tbody>
                 {configs?.items.map((item) => (
                   <tr key={item.id} className="border-b last:border-0">
-                    <td className="py-2 pr-3">
-                      {item.jurisdictionName || item.jurisdictionCode}
-                    </td>
+                    <td className="py-2 pr-3">{item.jurisdictionName || item.jurisdictionCode}</td>
                     <td className="py-2 pr-3">
                       {taxTypeLabel(item.taxType)} / {filingCycleLabel(item.filingCycle)}
                     </td>
@@ -917,9 +925,7 @@ export function FilingCalendarWorkspace() {
                 id="fc-jurisdiction"
                 className="border-control-border bg-card text-copy-13 h-9 w-full rounded-md border px-2"
                 value={configForm.jurisdictionCode}
-                onChange={(e) =>
-                  setConfigForm({ ...configForm, jurisdictionCode: e.target.value })
-                }
+                onChange={(e) => setConfigForm({ ...configForm, jurisdictionCode: e.target.value })}
               >
                 <option value="">请选择辖区</option>
                 {(options?.jurisdictions ?? []).map((item) => (
@@ -1060,9 +1066,7 @@ export function FilingCalendarWorkspace() {
                 id="fe-jurisdiction"
                 className="border-control-border bg-card text-copy-13 h-9 w-full rounded-md border px-2"
                 value={entryForm.jurisdictionCode}
-                onChange={(e) =>
-                  setEntryForm({ ...entryForm, jurisdictionCode: e.target.value })
-                }
+                onChange={(e) => setEntryForm({ ...entryForm, jurisdictionCode: e.target.value })}
               >
                 <option value="">请选择辖区</option>
                 {(options?.jurisdictions ?? []).map((item) => (
@@ -1167,9 +1171,7 @@ export function FilingCalendarWorkspace() {
               <Input
                 id="fe-required"
                 value={entryForm.requiredDataText}
-                onChange={(e) =>
-                  setEntryForm({ ...entryForm, requiredDataText: e.target.value })
-                }
+                onChange={(e) => setEntryForm({ ...entryForm, requiredDataText: e.target.value })}
               />
             </FormField>
             <FormField id="fe-note" label="备注">
@@ -1195,9 +1197,7 @@ export function FilingCalendarWorkspace() {
       <Modal open={advanceTarget !== null} onOpenChange={(open) => !open && setAdvanceTarget(null)}>
         <ModalContent>
           <ModalHeader>
-            <ModalTitle>
-              标记为「{advanceStatus === 'SUBMITTED' ? '已提交' : '已确认'}」
-            </ModalTitle>
+            <ModalTitle>标记为「{advanceStatus === 'SUBMITTED' ? '已提交' : '已确认'}」</ModalTitle>
             <ModalDescription>
               🔴 **必须填凭据号**：系统**不代造受理号**，凭据号是你从税务机构那边拿到的外部凭据。
               没有凭据号的「已提交」是假的。

@@ -220,11 +220,7 @@ export function abcLabel(abc: string | null): string {
 }
 
 /** ABC 排名的文案（**并列同档**，名次可能跳号）。 */
-export function abcRankText(
-  abc: string | null,
-  rank: number | null,
-  total: number | null,
-): string {
+export function abcRankText(abc: string | null, rank: number | null, total: number | null): string {
   if (!abc || rank === null || total === null) return '不进榜';
   return `${abc} 档 · 第 ${rank} / ${total} 名`;
 }
@@ -310,7 +306,10 @@ export type PageState = 'loading' | 'error' | 'empty' | 'ready';
  * <p>🔴 **「读不到」与「没有数据」是两种状态** —— 上游不可达是 error，
  * 上游可达但这个窗口没有分层结果是 empty。混成一个空态会让用户以为「这个商品没有分层」。
  */
-export function pageState(response: LifecycleSegmentationResponse | null, error: string): PageState {
+export function pageState(
+  response: LifecycleSegmentationResponse | null,
+  error: string,
+): PageState {
   if (error) return 'error';
   if (!response) return 'loading';
   if (response.status === 'EMPTY') return 'empty';
@@ -443,7 +442,9 @@ export function metricFormulaText(reference: LifecycleMetricReference): string {
 // ================================================================ 能力声明
 
 /** 能力声明里的「确实拿不到」条目。 */
-export function notDeliveredLines(capabilities: LifecycleSegmentationCapabilities | null): string[] {
+export function notDeliveredLines(
+  capabilities: LifecycleSegmentationCapabilities | null,
+): string[] {
   return capabilities?.notDelivered ?? [];
 }
 
@@ -453,7 +454,9 @@ export function upstreamModules(capabilities: LifecycleSegmentationCapabilities 
 }
 
 /** 能力声明里的规则清单。 */
-export function ruleNotes(capabilities: LifecycleSegmentationCapabilities | null): LifecycleSegmentationRuleNote[] {
+export function ruleNotes(
+  capabilities: LifecycleSegmentationCapabilities | null,
+): LifecycleSegmentationRuleNote[] {
   return capabilities?.rules ?? [];
 }
 

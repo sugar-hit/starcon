@@ -179,9 +179,7 @@ describe('草稿校验', () => {
       '对象范围是「具体某个对象」时必须给出对象标识',
     );
     const all = { ...specific, objectScope: 'ALL', objectRef: 'SKU-1' };
-    expect(validateDraft(all, vocabulary)).toBe(
-      '对象范围是「所有该类型对象」时不能给对象标识',
-    );
+    expect(validateDraft(all, vocabulary)).toBe('对象范围是「所有该类型对象」时不能给对象标识');
   });
 
   it('合法草稿通过校验', () => {
@@ -227,9 +225,7 @@ describe('措辞', () => {
       '低于 14 天',
     );
     expect(
-      windowPhrase(
-        rule({ timeWindow: 'CALENDAR_MONTH', changeBasis: 'PERIOD_OVER_PERIOD' }),
-      ),
+      windowPhrase(rule({ timeWindow: 'CALENDAR_MONTH', changeBasis: 'PERIOD_OVER_PERIOD' })),
     ).toBe('自然月 · 环比');
     expect(scopePhrase(rule({ objectScope: 'SPECIFIC', objectRef: 'SKU-1' }))).toBe(
       '具体对象 SKU-1',

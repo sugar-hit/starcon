@@ -64,7 +64,9 @@ export interface ElementSetParams {
  * <b>没有</b>隐式索引签名，直接传进去会报「不能赋给 Record<string, ...>」。
  */
 function query(params: object): string {
-  const parts = Object.entries(params as Record<string, string | number | boolean | undefined | null>)
+  const parts = Object.entries(
+    params as Record<string, string | number | boolean | undefined | null>,
+  )
     .filter(([, v]) => v !== undefined && v !== null && `${v}` !== '')
     .map(([k, v]) => `${k}=${encodeURIComponent(String(v))}`);
   return parts.length ? `?${parts.join('&')}` : '';
@@ -113,7 +115,10 @@ export function updateElementSet(id: string, input: ElementSetInput): Promise<El
   return api<ElementSetSaved>(`${base}/${id}`, 'PUT', input);
 }
 
-export function publishElementSet(id: string, input: ElementSetPublishInput): Promise<ElementSetSaved> {
+export function publishElementSet(
+  id: string,
+  input: ElementSetPublishInput,
+): Promise<ElementSetSaved> {
   return api<ElementSetSaved>(`${base}/${id}/publish`, 'POST', input);
 }
 
@@ -149,7 +154,8 @@ export function rowStateLabel(row: ElementSetRow): string {
   // 局部变量刻意**不叫 base**：白名单测试会从源码反向抽 `${base}` 调用点，
   // 一个同名局部变量会被当成路径常量替换，抽出一条根本不存在的路径。
   const label = statusLabel(row.status);
-  if (row.status === 'PUBLISHED') return row.effectiveNow ? `${label} · 此刻生效` : `${label} · 此刻不生效`;
+  if (row.status === 'PUBLISHED')
+    return row.effectiveNow ? `${label} · 此刻生效` : `${label} · 此刻不生效`;
   return label;
 }
 

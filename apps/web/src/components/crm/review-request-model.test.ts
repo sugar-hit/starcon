@@ -96,12 +96,8 @@ describe('15.2.2.1 索评前端模型', () => {
     });
 
     it('比硬上限更松时逐条点名是哪一条更松', () => {
-      expect(
-        ruleAgainstPolicy({ ...rule, maxPerBuyer: 9 }, policy),
-      ).toContain('每买家上限');
-      expect(
-        ruleAgainstPolicy({ ...rule, maxPerOrder: 3 }, policy),
-      ).toContain('每订单上限');
+      expect(ruleAgainstPolicy({ ...rule, maxPerBuyer: 9 }, policy)).toContain('每买家上限');
+      expect(ruleAgainstPolicy({ ...rule, maxPerOrder: 3 }, policy)).toContain('每订单上限');
       expect(ruleAgainstPolicy({ ...rule, cooldownHours: 1 }, policy)).toContain('冷却窗口');
       expect(ruleAgainstPolicy({ ...rule, delayHours: 1 }, policy)).toContain('时点');
     });

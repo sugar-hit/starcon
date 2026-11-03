@@ -230,10 +230,12 @@ describe('环比 / 同比：不可判定显示「—」，不是 0%', () => {
         reason,
       });
     expect(label('对比期取值为 0，变化率不可比（不显示成 0%）。')).toBe('基期为 0');
-    expect(label('缺少汇率快照，折算不到同一本位币 —— 不可判定（没有汇率就不可判定，不是按 1:1 算）。')).toBe(
-      '缺汇率快照',
+    expect(
+      label('缺少汇率快照，折算不到同一本位币 —— 不可判定（没有汇率就不可判定，不是按 1:1 算）。'),
+    ).toBe('缺汇率快照');
+    expect(label('多币种指标没有单一的变化率：指定本位币后按汇率快照折算比较。')).toBe(
+      '多币种不可比',
     );
-    expect(label('多币种指标没有单一的变化率：指定本位币后按汇率快照折算比较。')).toBe('多币种不可比');
     expect(label('对比期或本期缺少这个币种的数据，无法计算变化率。')).toBe('基期缺该币种');
     expect(label('说不清的原因')).toBe('不可判定');
   });
@@ -323,9 +325,13 @@ describe('能力声明：未接通的逐条列出来', () => {
 
 describe('数据范围：取最宽的一条授权', () => {
   it('ALL > DEPARTMENT > SELF', () => {
-    expect(scopeModeOf([grant('SELF'), grant('DEPARTMENT'), grant('ALL')], 'reporting.overview.read', true)).toBe(
-      'ALL',
-    );
+    expect(
+      scopeModeOf(
+        [grant('SELF'), grant('DEPARTMENT'), grant('ALL')],
+        'reporting.overview.read',
+        true,
+      ),
+    ).toBe('ALL');
     expect(scopeModeOf([grant('SELF'), grant('DEPARTMENT')], 'reporting.overview.read', true)).toBe(
       'DEPARTMENT',
     );

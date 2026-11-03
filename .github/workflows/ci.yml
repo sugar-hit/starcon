@@ -6,6 +6,13 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
+env:
+  NEXT_TELEMETRY_DISABLED: '1'
+  TURBO_TELEMETRY_DISABLED: '1'
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -14,6 +21,7 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -22,12 +30,19 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ runner.arch }}-lint-${{ hashFiles('.nvmrc', 'pnpm-lock.yaml', 'turbo.json') }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-${{ runner.arch }}-lint-${{ hashFiles('.nvmrc', 'pnpm-lock.yaml', 'turbo.json') }}-
       - run: pnpm lint
       - run: pnpm format:check
 
   typecheck:
     name: Typecheck
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -36,11 +51,18 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ runner.arch }}-typecheck-${{ hashFiles('.nvmrc', 'pnpm-lock.yaml', 'turbo.json') }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-${{ runner.arch }}-typecheck-${{ hashFiles('.nvmrc', 'pnpm-lock.yaml', 'turbo.json') }}-
       - run: pnpm typecheck
 
   test:
     name: Unit & Integration Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -55,6 +77,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     needs: [lint, typecheck, test]
     steps:
       - uses: actions/checkout@v4
@@ -64,6 +87,12 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ runner.arch }}-build-${{ hashFiles('.nvmrc', 'pnpm-lock.yaml', 'turbo.json') }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-${{ runner.arch }}-build-${{ hashFiles('.nvmrc', 'pnpm-lock.yaml', 'turbo.json') }}-
       - run: pnpm build
 
   security:
@@ -73,6 +102,7 @@ jobs:
       security-events: write
       actions: read
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -88,8 +118,35 @@ jobs:
       - run: pnpm audit --audit-level=high
 
   backend:
-    name: Java 21 & PostgreSQL Integration
+    name: Java 21 & PostgreSQL Integration (${{ matrix.module }})
     runs-on: ubuntu-latest
+    # 🔴 按服务拆矩阵，而不是 9 个服务挤一个 reactor。
+    #
+    # 为什么：每个集成测试类都会拉起一个 Testcontainers PostgreSQL 并跑一遍 Flyway，
+    # 9 个服务串在一条 reactor 上实测 163 分钟（catalog 31 + warehouse 31 + 其余），
+    # 离 180 分钟的超时上限只剩 17 分钟 —— 再多一个慢模块就会整轮红，
+    # 而「整轮红」与「某个模块红」在合并门禁上是同一个后果。
+    #
+    # 拆开之后每个服务一个独立 runner，最慢的那个约 35 分钟 ⇒ 整轮 40 分钟内出结果，
+    # 离超时上限有 2 倍以上的余量。代价是 runner 分钟数约翻倍（9 × 35 ≈ 315 分钟），
+    # 换来的是「一次就能修完所有红灯」而不是「一次只能修一个」。
+    #
+    # fail-fast: false ⇒ 一个服务炸了，其余 8 个照跑 ⇒ 一次跑出全部失败，
+    # 不用等下一轮才发现第二个模块也红了。
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        module:
+          - identity
+          - catalog
+          - channel
+          - warehouse
+          - trade
+          - crm
+          - finance
+          - reporting
+          - platform
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -97,14 +154,33 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: maven
-      - run: ./mvnw -B -ntp verify spotless:check
+      # -pl services/<module> -am 只构建这一个服务（+ 父工程 + tenancy）；
+      # 服务之间**没有**互相依赖（每个服务只依赖 tenancy），所以单模块构建是完整的。
+      #
+      # ⚠️ 这里**故意不加 -Dtest 过滤**：一过滤就有「过滤表达式写错 ⇒ 静默跑 0 个
+      # 用例却报绿」的风险，那比红灯更坏 —— 它会让整个后端门禁形同虚设。
+      # 每个服务跑自己的全量用例，慢一点，但绿是真的绿。
+      - run: ./mvnw -B -ntp -fae verify -pl services/${{ matrix.module }} -am
         working-directory: backend
         env:
           JAVA_TOOL_OPTIONS: -Dapi.version=1.44
+          # 与 backend/pom.xml 里 surefire 钉的时区一致，双保险：
+          # 测试 JVM 的默认时区决定 timestamptz 读回来的偏移量，
+          # runner 默认是 UTC，仓库断言的是 +08:00。
+          TZ: Asia/Shanghai
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: backend-test-reports-${{ matrix.module }}
+          path: backend/**/target/surefire-reports/*.xml
+          retention-days: 7
+          if-no-files-found: ignore
 
   catalog-e2e:
     name: Catalog Browser & Contract Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: [lint, typecheck, test]
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -162,4 +238,26 @@ jobs:
         if: always()
         with:
           name: catalog-screenshots
-          path: work/catalog-*.png
+          path: |
+            work/catalog-*.png
+            playwright-report/
+            test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  quality-gate:
+    name: Quality Gate
+    if: always()
+    needs: [lint, typecheck, test, build, security, backend, catalog-e2e]
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Require every layer to succeed
+        env:
+          RESULTS: ${{ toJSON(needs.*.result) }}
+        run: |
+          python3 - <<'PYTHON'
+          import json, os
+          results = json.loads(os.environ['RESULTS'])
+          assert results and all(r == 'success' for r in results), results
+          PYTHON

@@ -99,16 +99,24 @@ export function AnalyticsLogisticsAnalysisWorkspace() {
     setError('');
     try {
       const [ov, fr, hm, ch, tl, co, ex, ca, dr, caps] = await Promise.all([
-        api<LogisticsCostOverviewResponse>(`reporting/logistics-analysis/overview?from=${from}&to=${to}`),
+        api<LogisticsCostOverviewResponse>(
+          `reporting/logistics-analysis/overview?from=${from}&to=${to}`,
+        ),
         api<LogisticsFreightPerOrderResponse>(
           `reporting/logistics-analysis/freight-per-order?from=${from}&to=${to}`,
         ),
-        api<LogisticsHeadMileResponse>(`reporting/logistics-analysis/head-mile?from=${from}&to=${to}`),
+        api<LogisticsHeadMileResponse>(
+          `reporting/logistics-analysis/head-mile?from=${from}&to=${to}`,
+        ),
         api<LogisticsChannelComparisonResponse>(
           `reporting/logistics-analysis/channels?from=${from}&to=${to}${currencyQuery}&size=20`,
         ),
-        api<LogisticsTimelinessResponse>(`reporting/logistics-analysis/timeliness?from=${from}&to=${to}`),
-        api<LogisticsCountryCostResponse>(`reporting/logistics-analysis/countries?from=${from}&to=${to}`),
+        api<LogisticsTimelinessResponse>(
+          `reporting/logistics-analysis/timeliness?from=${from}&to=${to}`,
+        ),
+        api<LogisticsCountryCostResponse>(
+          `reporting/logistics-analysis/countries?from=${from}&to=${to}`,
+        ),
         api<LogisticsExceptionShareResponse>(
           `reporting/logistics-analysis/exceptions?from=${from}&to=${to}`,
         ),
@@ -258,7 +266,10 @@ export function AnalyticsLogisticsAnalysisWorkspace() {
 
       {state === 'loading' && (
         <SectionCard>
-          <EmptyState title="正在读取物流分析…" description="读取期间页面上的「数据截至」仍然有效。" />
+          <EmptyState
+            title="正在读取物流分析…"
+            description="读取期间页面上的「数据截至」仍然有效。"
+          />
         </SectionCard>
       )}
 
@@ -297,8 +308,8 @@ export function AnalyticsLogisticsAnalysisWorkspace() {
                         </span>
                       </div>
                       <div className="text-copy-13 text-muted-foreground mt-1">
-                        运费合计 {amountText(row.freightAmount, row.currency)} · 运单 {row.waybillCount} 票 ·
-                        每公斤 {amountText(row.perKg, row.currency)}
+                        运费合计 {amountText(row.freightAmount, row.currency)} · 运单{' '}
+                        {row.waybillCount} 票 · 每公斤 {amountText(row.perKg, row.currency)}
                       </div>
                       <div className="text-copy-13 text-muted-foreground mt-1">{row.note}</div>
                     </div>
@@ -326,29 +337,39 @@ export function AnalyticsLogisticsAnalysisWorkspace() {
                         <span className="text-copy-15 font-medium tabular-nums">
                           {amountText(row.subtotal, row.currency)}
                         </span>
-                        <span className="text-copy-13 text-muted-foreground">{row.currency} 合计</span>
+                        <span className="text-copy-13 text-muted-foreground">
+                          {row.currency} 合计
+                        </span>
                         <Badge tone={row.missingComponents.length > 0 ? 'warning' : 'success'}>
                           {row.missingComponents.length > 0
                             ? `缺 ${row.missingComponents.length} 个分量`
                             : '分量齐全'}
                         </Badge>
                       </div>
-                      <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-copy-13 md:grid-cols-4">
+                      <dl className="text-copy-13 mt-2 grid grid-cols-2 gap-x-4 gap-y-1 md:grid-cols-4">
                         <div>
                           <dt className="text-muted-foreground">尾程运费</dt>
-                          <dd className="tabular-nums">{amountText(row.lastMileFreight, row.currency)}</dd>
+                          <dd className="tabular-nums">
+                            {amountText(row.lastMileFreight, row.currency)}
+                          </dd>
                         </div>
                         <div>
                           <dt className="text-muted-foreground">头程分摊后</dt>
-                          <dd className="tabular-nums">{amountText(row.firstMileAllocation, row.currency)}</dd>
+                          <dd className="tabular-nums">
+                            {amountText(row.firstMileAllocation, row.currency)}
+                          </dd>
                         </div>
                         <div>
                           <dt className="text-muted-foreground">关税</dt>
-                          <dd className="tabular-nums">{amountText(row.dutyAndTax, row.currency)}</dd>
+                          <dd className="tabular-nums">
+                            {amountText(row.dutyAndTax, row.currency)}
+                          </dd>
                         </div>
                         <div>
                           <dt className="text-muted-foreground">包材</dt>
-                          <dd className="tabular-nums">{amountText(row.packaging, row.currency)}</dd>
+                          <dd className="tabular-nums">
+                            {amountText(row.packaging, row.currency)}
+                          </dd>
                         </div>
                       </dl>
                       <div className="text-copy-13 text-muted-foreground mt-1">{row.note}</div>
@@ -373,7 +394,10 @@ export function AnalyticsLogisticsAnalysisWorkspace() {
                 <>
                   <div className="space-y-2">
                     {headMile.rows.map((row) => (
-                      <div key={row.currency} className="text-copy-13 flex flex-wrap items-baseline gap-4">
+                      <div
+                        key={row.currency}
+                        className="text-copy-13 flex flex-wrap items-baseline gap-4"
+                      >
                         <span className="text-copy-15 font-medium tabular-nums">
                           {amountText(row.allocatedAmount, row.currency)}
                         </span>
@@ -388,10 +412,15 @@ export function AnalyticsLogisticsAnalysisWorkspace() {
                   </div>
                   {headMile.allocations.length > 0 && (
                     <div className="mt-3">
-                      <div className="text-copy-13 text-muted-foreground mb-1">分摊单（最新在前）</div>
+                      <div className="text-copy-13 text-muted-foreground mb-1">
+                        分摊单（最新在前）
+                      </div>
                       <ul className="space-y-1">
                         {headMile.allocations.map((row) => (
-                          <li key={row.allocationCode} className="text-copy-13 flex flex-wrap gap-3">
+                          <li
+                            key={row.allocationCode}
+                            className="text-copy-13 flex flex-wrap gap-3"
+                          >
                             <span className="font-medium">{row.allocationCode}</span>
                             <span className="text-muted-foreground">
                               {row.ruleCode} v{row.ruleVersion} · {row.allocationBasisLabel}
@@ -399,7 +428,9 @@ export function AnalyticsLogisticsAnalysisWorkspace() {
                             <span className="text-muted-foreground">
                               目的国 {row.destinationCountry || '—'}
                             </span>
-                            <span className="tabular-nums">{amountText(row.allocatedTotalAmount, row.currency)}</span>
+                            <span className="tabular-nums">
+                              {amountText(row.allocatedTotalAmount, row.currency)}
+                            </span>
                             <span className="text-muted-foreground">{row.statusLabel}</span>
                           </li>
                         ))}
@@ -422,7 +453,7 @@ export function AnalyticsLogisticsAnalysisWorkspace() {
                   这个窗口还没有渠道成本快照 —— 先刷新投影。
                 </p>
               ) : (
-                <table className="w-full text-copy-13">
+                <table className="text-copy-13 w-full">
                   <thead>
                     <tr className="text-muted-foreground border-border border-b text-left">
                       <th className="py-1.5 pr-3 font-medium">承运商</th>
@@ -435,15 +466,22 @@ export function AnalyticsLogisticsAnalysisWorkspace() {
                   </thead>
                   <tbody>
                     {channels.rows.map((row) => (
-                      <tr key={`${row.carrierCode}-${row.carrierChannel}-${row.currency}`} className="border-border border-b">
+                      <tr
+                        key={`${row.carrierCode}-${row.carrierChannel}-${row.currency}`}
+                        className="border-border border-b"
+                      >
                         <td className="py-1.5 pr-3">{row.carrierCode}</td>
-                        <td className="py-1.5 pr-3">{row.carrierChannelLabel || row.carrierChannel}</td>
+                        <td className="py-1.5 pr-3">
+                          {row.carrierChannelLabel || row.carrierChannel}
+                        </td>
                         <td className="py-1.5 pr-3">{row.currency}</td>
                         <td className="py-1.5 pr-3 text-right tabular-nums">
                           {amountText(row.amount, row.currency)}
                         </td>
                         <td className="py-1.5 pr-3 text-right tabular-nums">{row.waybills}</td>
-                        <td className="py-1.5 pr-3 text-right tabular-nums">{percentText(row.shareOfCurrency)}</td>
+                        <td className="py-1.5 pr-3 text-right tabular-nums">
+                          {percentText(row.shareOfCurrency)}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -467,11 +505,15 @@ export function AnalyticsLogisticsAnalysisWorkspace() {
                 </div>
                 <div>
                   <div className="text-copy-13 text-muted-foreground">可比数</div>
-                  <div className="text-copy-15 font-medium tabular-nums">{timeliness.comparableCount}</div>
+                  <div className="text-copy-15 font-medium tabular-nums">
+                    {timeliness.comparableCount}
+                  </div>
                 </div>
                 <div>
                   <div className="text-copy-13 text-muted-foreground">超时</div>
-                  <div className="text-copy-15 font-medium tabular-nums">{timeliness.overdueCount}</div>
+                  <div className="text-copy-15 font-medium tabular-nums">
+                    {timeliness.overdueCount}
+                  </div>
                 </div>
                 <div>
                   <div className="text-copy-13 text-muted-foreground">平均实际时效</div>
@@ -488,7 +530,7 @@ export function AnalyticsLogisticsAnalysisWorkspace() {
                   这个窗口还没有时效快照 —— 达成率**不可比**（不是 0%）。
                 </p>
               ) : (
-                <table className="w-full text-copy-13">
+                <table className="text-copy-13 w-full">
                   <thead>
                     <tr className="text-muted-foreground border-border border-b text-left">
                       <th className="py-1.5 pr-3 font-medium">渠道</th>
@@ -507,7 +549,9 @@ export function AnalyticsLogisticsAnalysisWorkspace() {
                       >
                         <td className="py-1.5 pr-3">{cell.channelName || cell.channelCode}</td>
                         <td className="py-1.5 pr-3">{cell.countryCode}</td>
-                        <td className="py-1.5 pr-3 text-right tabular-nums">{cell.comparableCount}</td>
+                        <td className="py-1.5 pr-3 text-right tabular-nums">
+                          {cell.comparableCount}
+                        </td>
                         <td className="py-1.5 pr-3 text-right tabular-nums">{cell.onTimeCount}</td>
                         <td className="py-1.5 pr-3 text-right tabular-nums">
                           {percentText(cell.onTimeRate)}
@@ -534,7 +578,7 @@ export function AnalyticsLogisticsAnalysisWorkspace() {
                   这个窗口没有任何运单 —— 各国成本**不可比**（不是 0）。
                 </p>
               ) : (
-                <table className="w-full text-copy-13">
+                <table className="text-copy-13 w-full">
                   <thead>
                     <tr className="text-muted-foreground border-border border-b text-left">
                       <th className="py-1.5 pr-3 font-medium">币种</th>
@@ -598,8 +642,13 @@ export function AnalyticsLogisticsAnalysisWorkspace() {
               ) : (
                 <ul className="space-y-1">
                   {exceptions.byType.map((row) => (
-                    <li key={`${row.dimension}-${row.dimensionKey}`} className="text-copy-13 flex items-center gap-3">
-                      <span className="w-40 shrink-0">{row.dimensionLabel || row.dimensionKey}</span>
+                    <li
+                      key={`${row.dimension}-${row.dimensionKey}`}
+                      className="text-copy-13 flex items-center gap-3"
+                    >
+                      <span className="w-40 shrink-0">
+                        {row.dimensionLabel || row.dimensionKey}
+                      </span>
                       <span className="tabular-nums">{row.count}</span>
                       <span className="text-muted-foreground tabular-nums">
                         {percentText(row.shareOfExceptions)}
@@ -628,7 +677,7 @@ export function AnalyticsLogisticsAnalysisWorkspace() {
                   这个窗口没有类目维度的头程分摊 —— 占比**不可比**（不是 0%）。
                 </p>
               ) : (
-                <table className="w-full text-copy-13">
+                <table className="text-copy-13 w-full">
                   <thead>
                     <tr className="text-muted-foreground border-border border-b text-left">
                       <th className="py-1.5 pr-3 font-medium">币种</th>
@@ -678,7 +727,7 @@ export function AnalyticsLogisticsAnalysisWorkspace() {
               {drilldown.rows.length === 0 ? (
                 <p className="text-copy-13 text-muted-foreground">这个窗口没有运单。</p>
               ) : (
-                <table className="w-full text-copy-13">
+                <table className="text-copy-13 w-full">
                   <thead>
                     <tr className="text-muted-foreground border-border border-b text-left">
                       <th className="py-1.5 pr-3 font-medium">运单号</th>

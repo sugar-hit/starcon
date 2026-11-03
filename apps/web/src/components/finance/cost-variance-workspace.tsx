@@ -329,7 +329,7 @@ export function CostVarianceWorkspace() {
           <label className="text-copy-12">
             <span className="text-muted-foreground">基线类型</span>
             <select
-              className="border-control-border bg-card mt-1 h-9 w-full rounded-md border px-2 text-copy-13"
+              className="border-control-border bg-card text-copy-13 mt-1 h-9 w-full rounded-md border px-2"
               value={baselineType}
               onChange={(e) => setBaselineType(e.target.value)}
             >
@@ -340,7 +340,7 @@ export function CostVarianceWorkspace() {
           <label className="text-copy-12">
             <span className="text-muted-foreground">维度</span>
             <select
-              className="border-control-border bg-card mt-1 h-9 w-full rounded-md border px-2 text-copy-13"
+              className="border-control-border bg-card text-copy-13 mt-1 h-9 w-full rounded-md border px-2"
               value={baselineDimension}
               onChange={(e) => setBaselineDimension(e.target.value)}
             >
@@ -413,7 +413,7 @@ export function CostVarianceWorkspace() {
               description="没有基线，「实际 vs 预算/标准成本」这一类差异不可计算（**不是 0**）。先登记一版标准成本。"
             />
           ) : (
-            <table className="w-full text-left text-copy-13">
+            <table className="text-copy-13 w-full text-left">
               <thead className="text-muted-foreground">
                 <tr>
                   <th className="py-2 pr-3">对象</th>
@@ -430,7 +430,7 @@ export function CostVarianceWorkspace() {
                   <tr key={row.id} className="border-t">
                     <td className="py-2 pr-3">
                       {row.dimensionCode || row.dimensionName || '—'}
-                      <span className="ml-1 text-muted-foreground">
+                      <span className="text-muted-foreground ml-1">
                         {costVarianceDimensionLabel(row.dimension)}
                       </span>
                     </td>
@@ -442,9 +442,7 @@ export function CostVarianceWorkspace() {
                       {costVariancePeriodLabel(row.effectiveFrom, row.effectiveTo)}
                     </td>
                     <td className="py-2 pr-3">
-                      <Badge
-                        tone={row.status === 'ACTIVE' ? 'success' : 'neutral'}
-                      >
+                      <Badge tone={row.status === 'ACTIVE' ? 'success' : 'neutral'}>
                         {costVarianceBaselineStatusLabel(row.status)}
                       </Badge>
                     </td>
@@ -465,7 +463,7 @@ export function CostVarianceWorkspace() {
           <label className="text-copy-12">
             <span className="text-muted-foreground">计价范围</span>
             <select
-              className="border-control-border bg-card mt-1 h-9 w-full rounded-md border px-2 text-copy-13"
+              className="border-control-border bg-card text-copy-13 mt-1 h-9 w-full rounded-md border px-2"
               value={formScopeType}
               onChange={(e) => {
                 setFormScopeType(e.target.value);
@@ -479,7 +477,7 @@ export function CostVarianceWorkspace() {
           <label className="text-copy-12">
             <span className="text-muted-foreground">范围</span>
             <select
-              className="border-control-border bg-card mt-1 h-9 w-full rounded-md border px-2 text-copy-13"
+              className="border-control-border bg-card text-copy-13 mt-1 h-9 w-full rounded-md border px-2"
               value={formScopeRefId}
               onChange={(e) => setFormScopeRefId(e.target.value)}
             >
@@ -521,7 +519,7 @@ export function CostVarianceWorkspace() {
           <label className="text-copy-12">
             <span className="text-muted-foreground">基线类型</span>
             <select
-              className="border-control-border bg-card mt-1 h-9 w-full rounded-md border px-2 text-copy-13"
+              className="border-control-border bg-card text-copy-13 mt-1 h-9 w-full rounded-md border px-2"
               value={formBaselineType}
               onChange={(e) => setFormBaselineType(e.target.value)}
             >
@@ -532,7 +530,7 @@ export function CostVarianceWorkspace() {
           <label className="text-copy-12">
             <span className="text-muted-foreground">基线维度</span>
             <select
-              className="border-control-border bg-card mt-1 h-9 w-full rounded-md border px-2 text-copy-13"
+              className="border-control-border bg-card text-copy-13 mt-1 h-9 w-full rounded-md border px-2"
               value={formDimension}
               onChange={(e) => setFormDimension(e.target.value)}
             >
@@ -561,7 +559,7 @@ export function CostVarianceWorkspace() {
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-copy-13">
+            <table className="text-copy-13 w-full text-left">
               <thead className="text-muted-foreground">
                 <tr>
                   <th className="py-2 pr-3">期间</th>
@@ -646,10 +644,10 @@ export function CostVarianceWorkspace() {
                       主因：{costVariancePrimaryDriverLabel(group.drivers) || '无'}
                     </Badge>
                   </div>
-                  <p className="mt-1 text-copy-12 text-muted-foreground">{group.note}</p>
+                  <p className="text-copy-12 text-muted-foreground mt-1">{group.note}</p>
 
                   <div className="mt-3 overflow-x-auto">
-                    <table className="w-full text-left text-copy-13">
+                    <table className="text-copy-13 w-full text-left">
                       <thead className="text-muted-foreground">
                         <tr>
                           <th className="py-1 pr-3">排名</th>
@@ -671,7 +669,9 @@ export function CostVarianceWorkspace() {
                               {driver.driverLabel ?? costVarianceDriverLabel(driver.driver)}
                             </td>
                             <td className="py-1 pr-3">{formatCostVarianceMoney(driver.amount)}</td>
-                            <td className="py-1 pr-3">{formatCostVarianceShare(driver.contributionShare)}</td>
+                            <td className="py-1 pr-3">
+                              {formatCostVarianceShare(driver.contributionShare)}
+                            </td>
                             <td className="py-1 pr-3">
                               {driver.comparability === 'COMPARABLE' ? (
                                 <Badge tone="success">
@@ -684,7 +684,7 @@ export function CostVarianceWorkspace() {
                                 </Badge>
                               )}
                             </td>
-                            <td className="py-1 pr-3 text-muted-foreground">
+                            <td className="text-muted-foreground py-1 pr-3">
                               {driver.comparableReason || driver.basis}
                             </td>
                           </tr>
@@ -727,7 +727,7 @@ export function CostVarianceWorkspace() {
       {caps ? (
         <SectionCard title="能力声明" description="哪些上游真接通、哪些还没交付、归谁。">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-copy-13">
+            <table className="text-copy-13 w-full text-left">
               <thead className="text-muted-foreground">
                 <tr>
                   <th className="py-2 pr-3">模块</th>
@@ -747,7 +747,7 @@ export function CostVarianceWorkspace() {
                         {c.available ? '已交付' : '未交付'}
                       </Badge>
                     </td>
-                    <td className="py-2 pr-3 text-muted-foreground">{c.basis}</td>
+                    <td className="text-muted-foreground py-2 pr-3">{c.basis}</td>
                     <td className="py-2 pr-3">{c.detail}</td>
                   </tr>
                 ))}

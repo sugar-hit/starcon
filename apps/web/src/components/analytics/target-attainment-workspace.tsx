@@ -149,8 +149,7 @@ export function AnalyticsTargetAttainmentWorkspace() {
         <p>
           <span className="text-foreground font-medium">算不出来 ≠ 等于 0：</span>
           拿不到实际值时显示「不可得」+ 原因 ——{' '}
-          <span className="text-foreground">0% 达成率是有业务含义的断言</span>，
-          「不可得」不是。
+          <span className="text-foreground">0% 达成率是有业务含义的断言</span>， 「不可得」不是。
         </p>
         <p>
           <span className="text-foreground font-medium">没达标 ≠ 还没法判定：</span>
@@ -229,11 +228,21 @@ export function AnalyticsTargetAttainmentWorkspace() {
               <option value="ARCHIVED">已归档</option>
             </select>
           </label>
-          <Button variant="outline" size="sm" disabled={loading || busy} onClick={() => void load()}>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={loading || busy}
+            onClick={() => void load()}
+          >
             <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
             重读
           </Button>
-          <Button variant="outline" size="sm" disabled={loading || busy} onClick={() => void evaluate()}>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={loading || busy}
+            onClick={() => void evaluate()}
+          >
             评估并落快照
           </Button>
         </div>
@@ -256,14 +265,13 @@ export function AnalyticsTargetAttainmentWorkspace() {
             <p className="text-copy-13 text-muted-foreground mt-1">
               未达标 {behind.length} 项（差一点 / 明显跟不上）；算不出达成率 {unknown.length} 项。
             </p>
-            {board ? <p className="text-copy-13 text-muted-foreground mt-1">{board.rankNote}</p> : null}
+            {board ? (
+              <p className="text-copy-13 text-muted-foreground mt-1">{board.rankNote}</p>
+            ) : null}
           </SectionCard>
 
           {/* ── 预警 ───────────────────────────────────────────────────── */}
-          <SectionCard
-            title="预警"
-            description="预警覆盖全部符合条件的目标（不随分页截断）。"
-          >
+          <SectionCard title="预警" description="预警覆盖全部符合条件的目标（不随分页截断）。">
             {(board?.alerts ?? []).length === 0 ? (
               <p className="text-copy-13 text-muted-foreground">当前没有预警。</p>
             ) : (
@@ -273,18 +281,18 @@ export function AnalyticsTargetAttainmentWorkspace() {
                     key={`${alert.targetId}-${index}`}
                     className="border-border flex flex-wrap items-center gap-2 rounded-lg border px-3 py-2"
                   >
-                    <Badge tone={alertTone(alert.level)}>
-                      {alertLevelLabel(alert.level)}
-                    </Badge>
-                    <span className="text-copy-13 text-foreground font-medium">{alert.ownerName}</span>
+                    <Badge tone={alertTone(alert.level)}>{alertLevelLabel(alert.level)}</Badge>
+                    <span className="text-copy-13 text-foreground font-medium">
+                      {alert.ownerName}
+                    </span>
                     <span className="text-copy-13 text-muted-foreground">
                       {scopeLabel(alert.scopeType)} · {alert.metricCode} · {alert.currency}
                     </span>
                     <Badge tone="neutral">{alertKindLabel(alert.kind)}</Badge>
                     <span className="text-copy-13 text-muted-foreground">{alert.message}</span>
                     <span className="text-copy-13 text-muted-foreground">
-                      达成率 {rateText(alert.attainmentRate)} · 预测 {rateText(alert.forecastRate)} ·
-                      时间进度 {progressText(alert.elapsedRatio)}
+                      达成率 {rateText(alert.attainmentRate)} · 预测 {rateText(alert.forecastRate)}{' '}
+                      · 时间进度 {progressText(alert.elapsedRatio)}
                     </span>
                   </li>
                 ))}
@@ -334,7 +342,8 @@ export function AnalyticsTargetAttainmentWorkspace() {
                         {rateText(row.forecastRate)}
                       </span>
                       <span>
-                        时间进度 {progressText(row.elapsedRatio)} · 距周期结束 {row.remainingDays} 天
+                        时间进度 {progressText(row.elapsedRatio)} · 距周期结束 {row.remainingDays}{' '}
+                        天
                       </span>
                     </div>
                     <p className="text-copy-13 text-muted-foreground mt-1">{row.statusNote}</p>
@@ -367,13 +376,17 @@ export function AnalyticsTargetAttainmentWorkspace() {
               <ol className="space-y-1">
                 {(ranking?.entries ?? []).map((entry) => (
                   <li key={`${entry.groupKey}-${entry.ownerId}`} className="text-copy-13">
-                    <span className="text-foreground font-medium">{rankText(entry.rank, entry.rankTotal)}</span>{' '}
+                    <span className="text-foreground font-medium">
+                      {rankText(entry.rank, entry.rankTotal)}
+                    </span>{' '}
                     · {rankEntryText(entry)}
                   </li>
                 ))}
               </ol>
             )}
-            {ranking ? <p className="text-copy-13 text-muted-foreground mt-2">{ranking.note}</p> : null}
+            {ranking ? (
+              <p className="text-copy-13 text-muted-foreground mt-2">{ranking.note}</p>
+            ) : null}
           </SectionCard>
 
           {/* ── 已落快照 ───────────────────────────────────────────────── */}
@@ -391,8 +404,9 @@ export function AnalyticsTargetAttainmentWorkspace() {
                   <li key={snapshot.id} className="text-copy-13 text-muted-foreground">
                     <span className="text-foreground font-medium">{snapshot.ownerName}</span> ·{' '}
                     {scopeLabel(snapshot.scopeType)} · {snapshot.metricCode} · {snapshot.currency} ·
-                    评估日 {snapshot.evaluatedOn} · 目标 {amountText(snapshot.targetValue, snapshot.currency)} ·
-                    当前 {amountText(snapshot.currentValue, snapshot.currency)} · 达成率{' '}
+                    评估日 {snapshot.evaluatedOn} · 目标{' '}
+                    {amountText(snapshot.targetValue, snapshot.currency)} · 当前{' '}
+                    {amountText(snapshot.currentValue, snapshot.currency)} · 达成率{' '}
                     {rateText(snapshot.attainmentRate)} · 预测 {rateText(snapshot.forecastRate)} ·{' '}
                     {statusLabel(snapshot.status)}
                   </li>
@@ -434,10 +448,7 @@ export function AnalyticsTargetAttainmentWorkspace() {
       ) : null}
 
       {/* ── 能力声明 ───────────────────────────────────────────────────── */}
-      <SectionCard
-        title="能力声明"
-        description="哪些上游真接通、哪些确实拿不到、判定规则是什么。"
-      >
+      <SectionCard title="能力声明" description="哪些上游真接通、哪些确实拿不到、判定规则是什么。">
         <p className="text-copy-13 text-muted-foreground">
           {evaluatedAtText(board)} · 上游已接通：{capabilities?.upstreamConnected ? '是' : '否'}
         </p>

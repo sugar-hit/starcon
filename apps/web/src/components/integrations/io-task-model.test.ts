@@ -148,8 +148,13 @@ describe('下载有效期', () => {
     const hours = (n: number) => new Date(Date.now() + n * 3_600_000).toISOString();
     expect(expiryText(task({ expiresAt: hours(-1) }))).toBe('已过下载有效期');
     expect(expiryText(task({ expiresAt: hours(0.5) }))).toBe('不到 1 小时后过期');
-    expect(expiryText(task({ expiresAt: hours(5) }))).toBe('还剩 5 小时过期');
-    expect(expiryText(task({ expiresAt: hours(72) }))).toBe('还剩 3 天过期');
+    // 🔴 取整边界：实现的剩余毫秒是「构造 expiresAt 的那次 Date.now()」减
+    // 「expiryText 内部的 Date.now()」。两次取时之间只要跨过一个毫秒，
+    // Math.floor(剩余/1 小时) 就会掉一档（5 小时变 4 小时、72 小时变 71 小时
+    // 进而 3 天变 2 天）—— 这是**毫秒边界竞态**，与被测逻辑无关。
+    // ⇒ 取带半小时余量的值，让断言离取整边界有 30 分钟的余量。
+    expect(expiryText(task({ expiresAt: hours(5.5) }))).toBe('还剩 5 小时过期');
+    expect(expiryText(task({ expiresAt: hours(72.5) }))).toBe('还剩 3 天过期');
     expect(expiryText(task({ expiresAt: '' }))).toBe('');
   });
 });

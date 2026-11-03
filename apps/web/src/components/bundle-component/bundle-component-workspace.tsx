@@ -130,28 +130,25 @@ export function BundleComponentWorkspace() {
     }
   }, []);
 
-  const runCheck = useCallback(
-    async (id: string, warehouse: string) => {
-      const trimmed = warehouse.trim();
-      if (!trimmed) {
-        setCheckError('必须填写目标仓库：可售量按仓库计算，不指定仓库就没有唯一的答案');
-        setCheck(null);
-        return;
-      }
-      setCheckLoading(true);
-      setCheckError(null);
-      try {
-        setCheck(await fetchSellableCheck(id, trimmed));
-      } catch (e) {
-        // 🔴 查不到就是查不到：不保留上一次的结论，也不显示「全部可售」
-        setCheck(null);
-        setCheckError(e instanceof Error ? e.message : '可售性校验失败');
-      } finally {
-        setCheckLoading(false);
-      }
-    },
-    [],
-  );
+  const runCheck = useCallback(async (id: string, warehouse: string) => {
+    const trimmed = warehouse.trim();
+    if (!trimmed) {
+      setCheckError('必须填写目标仓库：可售量按仓库计算，不指定仓库就没有唯一的答案');
+      setCheck(null);
+      return;
+    }
+    setCheckLoading(true);
+    setCheckError(null);
+    try {
+      setCheck(await fetchSellableCheck(id, trimmed));
+    } catch (e) {
+      // 🔴 查不到就是查不到：不保留上一次的结论，也不显示「全部可售」
+      setCheck(null);
+      setCheckError(e instanceof Error ? e.message : '可售性校验失败');
+    } finally {
+      setCheckLoading(false);
+    }
+  }, []);
 
   const missing = useMemo(() => unavailableDimensions(caps), [caps]);
   const banner = useMemo(() => sellableBanner(check), [check]);
@@ -272,7 +269,9 @@ export function BundleComponentWorkspace() {
           <Field label="映射 ID">
             <Input
               value={filters.mappingId}
-              onChange={(e) => setFilters(applyFilterChange(filters, { mappingId: e.target.value }))}
+              onChange={(e) =>
+                setFilters(applyFilterChange(filters, { mappingId: e.target.value }))
+              }
               placeholder="4.1.2.1 套装映射的 UUID"
             />
           </Field>
@@ -294,7 +293,7 @@ export function BundleComponentWorkspace() {
           </Field>
           <Field label="生效状态">
             <select
-              className="border-input h-9 w-full rounded-md border px-3 text-copy-13"
+              className="border-input text-copy-13 h-9 w-full rounded-md border px-3"
               value={filters.effectiveState}
               onChange={(e) =>
                 setFilters(applyFilterChange(filters, { effectiveState: e.target.value }))
@@ -339,7 +338,7 @@ export function BundleComponentWorkspace() {
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-copy-13">
+            <table className="text-copy-13 w-full text-left">
               <thead className="text-muted-foreground border-b">
                 <tr>
                   <th className="px-3 py-2">状态</th>
@@ -461,9 +460,7 @@ export function BundleComponentWorkspace() {
                   step={quantityStep()}
                   disabled={!detail.binding.current}
                 />
-                {qtyReason && (
-                  <span className="text-copy-13 text-destructive">{qtyReason}</span>
-                )}
+                {qtyReason && <span className="text-copy-13 text-destructive">{qtyReason}</span>}
               </Field>
               <Field label="角色">
                 <Input
@@ -496,9 +493,7 @@ export function BundleComponentWorkspace() {
                 <span className="text-copy-13">{writeError}</span>
               </div>
             )}
-            {writeNotice && (
-              <p className="text-copy-13 text-muted-foreground">{writeNotice}</p>
-            )}
+            {writeNotice && <p className="text-copy-13 text-muted-foreground">{writeNotice}</p>}
 
             {detail.components.length === 0 ? (
               <EmptyState
@@ -507,7 +502,7 @@ export function BundleComponentWorkspace() {
               />
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-copy-13">
+                <table className="text-copy-13 w-full text-left">
                   <thead className="text-muted-foreground border-b">
                     <tr>
                       <th className="px-3 py-2">组件 SKU</th>
@@ -596,7 +591,7 @@ export function BundleComponentWorkspace() {
 
               {check && check.components.length > 0 && (
                 <div className="mt-3 overflow-x-auto">
-                  <table className="w-full text-left text-copy-13">
+                  <table className="text-copy-13 w-full text-left">
                     <thead className="text-muted-foreground border-b">
                       <tr>
                         <th className="px-3 py-2">组件 SKU</th>
@@ -617,9 +612,7 @@ export function BundleComponentWorkspace() {
                             <Badge tone={c.sellable ? 'success' : 'danger'}>
                               {c.sellable ? '可售' : '不可售'}
                             </Badge>
-                            {c.reason && (
-                              <div className="text-muted-foreground">{c.reason}</div>
-                            )}
+                            {c.reason && <div className="text-muted-foreground">{c.reason}</div>}
                           </td>
                         </tr>
                       ))}

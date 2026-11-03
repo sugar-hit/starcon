@@ -232,7 +232,14 @@ export function OrderTimelinessWorkspace() {
       />
 
       {/* 1. 能力声明与缺口 */}
-      <SectionCard title="能力声明与上游缺口" extra={<span className="text-muted-foreground"><BarChart3 className="size-4" /></span>}>
+      <SectionCard
+        title="能力声明与上游缺口"
+        extra={
+          <span className="text-muted-foreground">
+            <BarChart3 className="size-4" />
+          </span>
+        }
+      >
         {loading && !caps ? (
           <p className="text-muted-foreground text-sm">加载中…</p>
         ) : (
@@ -265,11 +272,18 @@ export function OrderTimelinessWorkspace() {
       </SectionCard>
 
       {/* 2. 同步入口 */}
-      <SectionCard title="从 9.4.1.2 发货记录刷新时效事实" extra={<span className="text-muted-foreground"><BarChart3 className="size-4" /></span>}>
+      <SectionCard
+        title="从 9.4.1.2 发货记录刷新时效事实"
+        extra={
+          <span className="text-muted-foreground">
+            <BarChart3 className="size-4" />
+          </span>
+        }
+      >
         <p className="text-muted-foreground text-sm">
           时效事实只来自 9.4.1.2 的发货记录、9.4.1.1 的待发货投影与销售订单的提交时刻，
-          三者都在本服务库内（跨服务 SQL 被 AGENTS.md 禁止）。缺一个端点就如实落 UNSET 桶，
-          不会按 0 算。
+          三者都在本服务库内（跨服务 SQL 被 AGENTS.md 禁止）。缺一个端点就如实落 UNSET 桶， 不会按 0
+          算。
         </p>
         <Button className="mt-3" onClick={() => void runSync()} disabled={syncing}>
           {syncing ? '同步中…' : '同步时效事实'}
@@ -291,7 +305,14 @@ export function OrderTimelinessWorkspace() {
       )}
 
       {/* 3. 时效报表 */}
-      <SectionCard title="时效报表" extra={<span className="text-muted-foreground"><BarChart3 className="size-4" /></span>}>
+      <SectionCard
+        title="时效报表"
+        extra={
+          <span className="text-muted-foreground">
+            <BarChart3 className="size-4" />
+          </span>
+        }
+      >
         {loading && !report ? (
           <p className="text-muted-foreground text-sm">加载中…</p>
         ) : report && report.totalFacts === 0 ? (
@@ -371,7 +392,14 @@ export function OrderTimelinessWorkspace() {
       </SectionCard>
 
       {/* 4. 分维度对比 */}
-      <SectionCard title="分维度对比" extra={<span className="text-muted-foreground"><BarChart3 className="size-4" /></span>}>
+      <SectionCard
+        title="分维度对比"
+        extra={
+          <span className="text-muted-foreground">
+            <BarChart3 className="size-4" />
+          </span>
+        }
+      >
         <SelectField
           id="dimensionBy"
           label="拆解维度"
@@ -434,11 +462,18 @@ export function OrderTimelinessWorkspace() {
       </SectionCard>
 
       {/* 5. 超时明细 */}
-      <SectionCard title="超时明细" extra={<span className="text-muted-foreground"><BarChart3 className="size-4" /></span>}>
+      <SectionCard
+        title="超时明细"
+        extra={
+          <span className="text-muted-foreground">
+            <BarChart3 className="size-4" />
+          </span>
+        }
+      >
         <p className="text-muted-foreground text-sm">
-          发货时限超期 <b>{overdue?.shipOverdueCount ?? 0}</b> 票 ·
-          到货承诺超期 <b>{overdue?.promiseLateCount ?? 0}</b> 票 ·
-          两端有缺口无法判定 <b>{overdue?.unmeasuredPromiseCount ?? 0}</b> 票。
+          发货时限超期 <b>{overdue?.shipOverdueCount ?? 0}</b> 票 · 到货承诺超期{' '}
+          <b>{overdue?.promiseLateCount ?? 0}</b> 票 · 两端有缺口无法判定{' '}
+          <b>{overdue?.unmeasuredPromiseCount ?? 0}</b> 票。
           两个来源刻意分列：一个是平台要求「几天内发出」，另一个是「哪天到货」。
         </p>
         {overdue && overdue.items.length === 0 ? (
@@ -547,7 +582,7 @@ export function OrderTimelinessWorkspace() {
                 {(facts?.items ?? []).map((row) => (
                   <tr
                     key={row.id}
-                    className="cursor-pointer border-b hover:bg-muted/50"
+                    className="hover:bg-muted/50 cursor-pointer border-b"
                     onClick={() => void openDetail(row.id)}
                   >
                     <td className="p-2 font-mono text-xs">{row.factNo}</td>
@@ -605,9 +640,13 @@ export function OrderTimelinessWorkspace() {
       {/* 7. 明细与登记 */}
       {detail && (
         <SectionCard
-        title={`时效明细 ${detail.fact.factNo}`}
-        extra={<span className="text-muted-foreground"><Clock className="size-4" /></span>}
-      >
+          title={`时效明细 ${detail.fact.factNo}`}
+          extra={
+            <span className="text-muted-foreground">
+              <Clock className="size-4" />
+            </span>
+          }
+        >
           <div className="grid gap-3 sm:grid-cols-3">
             <div>
               <p className="text-muted-foreground text-xs">下单时刻</p>
@@ -648,8 +687,7 @@ export function OrderTimelinessWorkspace() {
 
           <h4 className="mt-4 text-sm font-medium">实际到货登记</h4>
           <p className="text-muted-foreground text-xs">
-            真实来源是承运商轨迹的签收事件（10.3 未交付），本模块<b>登记</b>人工上报，
-            不抓取轨迹。
+            真实来源是承运商轨迹的签收事件（10.3 未交付），本模块<b>登记</b>人工上报， 不抓取轨迹。
           </p>
           <div className="mt-2 flex flex-wrap items-end gap-2">
             <FormField id="delivered-at" label="签收时刻">

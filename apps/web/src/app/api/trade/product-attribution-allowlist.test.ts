@@ -27,7 +27,9 @@ import { DELETE, GET, POST, PUT } from './[...path]/route';
 
 // 相对**本文件**定位：vitest 从仓库根或 apps/web 跑时 cwd 都不同，用 cwd 会静默读空。
 const SOURCE = readFileSync(
-  fileURLToPath(new URL('../../../components/aftersales/product-issue-attribution-model.ts', import.meta.url)),
+  fileURLToPath(
+    new URL('../../../components/aftersales/product-issue-attribution-model.ts', import.meta.url),
+  ),
   'utf8',
 );
 
@@ -118,7 +120,9 @@ it('写形状（POST / PUT）被放行，且真的转发到 8085', async () => {
   }
 
   const photos = await PUT(request(`trade/product-attribution/attributions/${ID}/photos`, 'PUT'), {
-    params: Promise.resolve({ path: `trade/product-attribution/attributions/${ID}/photos`.split('/') }),
+    params: Promise.resolve({
+      path: `trade/product-attribution/attributions/${ID}/photos`.split('/'),
+    }),
   });
   expect(photos.status, 'PUT photos 未被放行').toBe(200);
 

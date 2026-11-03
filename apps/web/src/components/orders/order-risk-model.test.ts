@@ -18,7 +18,10 @@ import {
   verdictText,
   weight,
 } from './order-risk-model';
-import type { RiskAssessment, RiskComponent } from '../../../../../packages/api-contracts/src/index';
+import type {
+  RiskAssessment,
+  RiskComponent,
+} from '../../../../../packages/api-contracts/src/index';
 
 /**
  * 9.2.2.2 风控校验前端模型。

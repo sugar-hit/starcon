@@ -25,6 +25,7 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -290,8 +291,10 @@ public class ProductReviewService {
     OffsetDateTime end = now();
     OffsetDateTime start = end.minusDays(effectiveDays);
     // 显式给了时间范围就以它为准（否则以 days 为准），两种口径**只有一条**生效。
-    if (filter.from() != null) start = filter.from();
-    if (filter.to() != null) end = filter.to();
+    // 🔴 调用方给的范围同样要对齐到微秒：不对齐的话，下面 date_bin 的原点会被
+    //    PG 落到微秒，而 Java 侧按未对齐的原点算桶边界 ⇒ 趋势每个桶都查不到（计数全 0）。
+    if (filter.from() != null) start = filter.from().truncatedTo(ChronoUnit.MICROS);
+    if (filter.to() != null) end = filter.to().truncatedTo(ChronoUnit.MICROS);
     if (!end.isAfter(start)) {
       throw bad("评分统计的时间范围不对：终点必须晚于起点。");
     }
@@ -387,14 +390,19 @@ public class ProductReviewService {
    */
   private List<CrmProductReviewTrendBucket> trend(
       ReviewFilter filter, OffsetDateTime start, OffsetDateTime end) {
-    long spanDays = Math.max(1, Duration.between(start, end).toDays());
+    // 🔴 原点与终点都对齐到微秒：PG 的 date_bin 只会把原点落到微秒，
+    //    而本方法用 Java 侧的 cursor（origin + k*stride）去 map 里按 Instant 配对。
+    //    两边只要差 0.x 微秒就永远配不上 ⇒ 每个桶的计数都是 0（趋势图整片空白）。
+    OffsetDateTime origin = start.truncatedTo(ChronoUnit.MICROS);
+    OffsetDateTime limit = end.truncatedTo(ChronoUnit.MICROS);
+    long spanDays = Math.max(1, Duration.between(origin, limit).toDays());
     int bucketDays = (int) Math.max(1, (spanDays + TREND_BUCKETS - 1) / TREND_BUCKETS);
 
     List<Object> binds = new ArrayList<>();
     String where = reviewWhere(filter, binds);
     List<Object> queryBinds = new ArrayList<>();
     queryBinds.add(bucketDays);
-    queryBinds.add(start);
+    queryBinds.add(origin);
     queryBinds.addAll(binds);
     Map<java.time.Instant, Record> byStart = new HashMap<>();
     for (Record row :
@@ -408,14 +416,14 @@ public class ProductReviewService {
     }
 
     List<CrmProductReviewTrendBucket> out = new ArrayList<>();
-    OffsetDateTime cursor = start;
-    while (cursor.isBefore(end)) {
+    OffsetDateTime cursor = origin;
+    while (cursor.isBefore(limit)) {
       OffsetDateTime next = cursor.plusDays(bucketDays);
       Record row = byStart.get(cursor.toInstant());
       out.add(
           new CrmProductReviewTrendBucket(
               cursor.toString(),
-              (next.isAfter(end) ? end : next).toString(),
+              (next.isAfter(limit) ? limit : next).toString(),
               row == null ? 0L : row.get("cnt", Long.class),
               row == null ? null : row.get("avg_rating", BigDecimal.class)));
       cursor = next;
@@ -1038,8 +1046,17 @@ public class ProductReviewService {
         .get(0, UUID.class);
   }
 
+  /**
+   * 当前时刻（UTC），**已对齐到数据库的存储精度**。
+   *
+   * <p>🔴 必须截断到微秒：PostgreSQL 的 {@code timestamptz} 只把时刻存到微秒，
+   * 而 {@code OffsetDateTime.now()} 在 Linux 上带亚微秒尾巴（clock_gettime），
+   * 在 macOS 上恰好是微秒对齐（gettimeofday）—— 于是同一个缺陷只在一半机器上出现。
+   * 不截断的话，写进去的 {@code platform_reviewed_at} 与读回来的值就不是同一个数，
+   * 页面上的「刚刚」会差零点几微秒，而更糟的是它把趋势分桶的桶边界整个错开。
+   */
   private static OffsetDateTime now() {
-    return OffsetDateTime.now(ZoneOffset.UTC);
+    return OffsetDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.MICROS);
   }
 
   /**
