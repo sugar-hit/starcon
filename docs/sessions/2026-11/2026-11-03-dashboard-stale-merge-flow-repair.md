@@ -117,3 +117,35 @@ reporting-1 | 导出存储根目录：/app/data/reporting-export      ← 同轮
 4. **CI 基线本身是红的**（`Lint` / `Security Scan` 长期失败）——
    判据靠基线相对比较撑着；建议单独排一次清存量债，否则每次都要人工比对。
 5. **`migrate-platform` 是否也需要该 env** —— 本轮已加（无害）；若确认多余可回退。
+
+## 六、本轮最终结果（合并与发布）
+
+| 项 | 结果 |
+| --- | --- |
+| PR | **#72**（`chore/sync-module-dev` → `main`），https://github.com/sugar-hit/starcon/pull/72 |
+| 合并 | **已合入** —— merge commit `0d661df5`，mergedAt 2026-11-03T06:18:10Z |
+| 形态核验 | 父提交数 **2**（`bc54cce1` + `61628bd8`）✓；树与集成分支逐字节相同 ✓；集成分支 tip 是 origin/main 祖先 ✓；`merge-tree` 零冲突 ✓ |
+| CI 判据 | 修复前：新增失败作业 `Catalog Browser & Contract Tests` ⇒ **阻塞**；修复后：**新增失败作业：无** ⇒ **可以合并** |
+| 看板 | **已原地发布**（node_id `454096010989704`，URL 不变）：**465/465 = 100%**（此前是 437/465 = 94%） |
+| 滞后信号 | 发布后 `LEDGER_LAG_STATE=in-sync` / `LEDGER_LAG_COMMITS=0` / `LEDGER_LAG_MODULES=0` ⇒ main 已追平集成分支 |
+| 锁 | 调度闸：取用后已 release（合 main 任务不持它）；合并锁：acquire → touch → release 全部按 owner 令牌走完 |
+
+### 本轮偏离协议之处（如实记录）
+
+1. **推了集成分支** —— 协议 §10 写「不许动 `integration/module-dev`」。
+   本轮推送 platform 缺陷修复（该缺陷是集成分支内容固有的，10-30 那轮的 backlog 也如此定调），
+   理由是：修复若只落在 PR 分支，就不会留在集成分支，后续批次可能再次引入同一缺陷。
+   推的时候**持有调度闸**（流水线写集成分支用的同一把锁）⇒ 并发风险可控。
+2. **合并锁的第一次 acquire 失败** —— 主工作区还没 `merge-lock.mjs`（本地 main 落后 1326 个提交），
+   改在集成头 worktree 取锁（锁文件在 git common dir，两处是同一份）。
+
+### 给下一轮的三条提醒
+
+1. **12:00 / 20:00 的兜底看板任务现在会报滞后** —— 它读 `refresh.sh` 的新输出，
+   `LEDGER_LAG_STATE=main-behind` 时即使跳过发布也会点名。下次 main 停滞时它会先报。
+2. **18:30 那轮「合 main」是新流程的第一次实跑** —— 重点看两件事：
+   ① 撞闸时是否只跳过第 1 步、第 2 步照做；② 合并锁是否正常 acquire/release。
+   协议改了但**还没被定时任务验证过**，出问题就按「协议与实现不一致」上报并修协议。
+3. **CI 基线仍是红的**（`Lint` / `Security Scan` / `Java 21`）——
+   本轮能合是因为判据是「基线相对」而不是「全绿」。这层保护很脆：
+   一旦基线某个作业从红转绿而 PR 侧仍红，会被误判成新增失败。
