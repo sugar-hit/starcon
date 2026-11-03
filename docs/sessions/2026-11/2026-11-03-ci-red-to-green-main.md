@@ -44,6 +44,59 @@
   每个集成测试类都拉起一个 Testcontainers PostgreSQL 并跑一遍 Flyway；
   实测 identity+catalog 就接近 30 分钟，整条链路远超 60 分钟。
 
+## 第一次跑完整条链，捞出一个真缺陷：「上周」算成了本周
+
+`-fae` 跑通全链后，platform 报出一个从没见过的失败：
+
+```
+Expecting actual: 2026-11-08 to be strictly before: 2026-11-03
+```
+
+2026-11-03 是**周二**。问「上周」得到的是 **11-02 ~ 11-08**（本周），
+正确答案应是 **10-26 ~ 11-01**（上一个完整自然周）。
+
+**根因**：`today.with(TemporalAdjusters.previous(DayOfWeek.MONDAY))`。
+`previous(DayOfWeek)` 的语义是「**最近的一个已经过去的**那个星期几」——
+今天不是周一时它落在**本周**的周一，不是上一周的周一
+（实测：周二时 `previous(MONDAY)` 与 `previousOrSame(MONDAY)` 都返回本周的周一）。
+⇒ 「上周」的窗口终点是**本周末**，在非周一的日子会问到**还没发生的几天**。
+`AssistantService` 与 `SmartQueryService` 是同一份写法，两边都受影响。
+
+🔴 **这个缺陷 6/7 的日子都发作，但集成测试只在「今天不是周一」时才红**
+⇒ 等于有一半时间是绿的，缺陷被时钟藏起来 —— 这也是它一直没被发现的原因。
+
+**修法**：口径抽到 `PeriodWindow.lastWeekMonday(today)`（先退一周再对齐那一周的周一），
+两个服务共用；新增 `PeriodWindowRulesTest` 用**固定日期**覆盖一整周七天 + 跨年，
+把口径钉成「与今天星期几无关」；并强化集成测试（补 5 条确定性断言）。
+变异验证：把口径改回旧写法 ⇒ 单测 2 例红 + 集成测试 1 例红。
+
+## 本地全量（9 个模块，816 个测试类，12,225 个用例）
+
+| 模块 | 测试类 | 用例 | 结果 |
+| --- | --- | --- | --- |
+| identity | 54 | 644 | ✅ |
+| catalog | 133 | 2108 | ✅ |
+| channel | 188 | 2462 | ✅ |
+| warehouse | 72 | 1674 | ✅ |
+| trade | 141 | 2461 | ✅ |
+| crm | 56 | 620 | ✅ |
+| finance | 65 | 970 | ✅ |
+| reporting | 51 | 585 | ✅ |
+| platform | 56 | 701 | ✅（修掉「上周」缺陷后） |
+
+**只有 1 个真实失败**（platform 的「上周」），其余是变异测试留下的旧 surefire XML。
+
+> 教训：读 surefire 报告要**按 mtime 过滤**——变异测试会覆盖同名报告文件，
+> 留下的失败会让人以为真缺陷还在。
+
+## 仍然存在的盲区：时钟精度
+
+本地 macOS 的 `OffsetDateTime.now()` 是**微秒对齐**（`gettimeofday`），
+而 CI 的 Linux runner 用 `clock_gettime` ⇒ **带亚微秒尾巴**（实测 `…722795824`）。
+⇒ 本地**永远复现不了** CI 的精度类红灯。本轮已系统扫过：
+「`now()` 派生值 → 写库 → 精确相等断言」的形状全仓只有一处（catalog，已修）；
+warehouse 模块此前已用 `truncatedTo(MICROS)` 硬化过。
+
 ## 涉及文件
 
 - `backend/pom.xml` — surefire 钉时区；移除 spotless 插件
