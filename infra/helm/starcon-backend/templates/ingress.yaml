@@ -1,0 +1,53 @@
+{{/*
+=============================================================================
+Ingress —— 按需把某个后端服务暴露到集群外
+=============================================================================
+默认所有服务都不开 Ingress：浏览器只跟前端说话，前端做服务端代理
+（apps/web/src/lib/api-proxy.ts 的白名单放行）。
+
+唯一常见的例外是 channel：平台（Amazon / Shopify）的 OAuth 回跳地址
+只能指向后端，而外部平台必须能访问到它，所以生产环境要给 channel
+开一个 Ingress，并把 services.channel.oauth.publicBaseUrl 填成同一个地址。
+*/}}
+{{- $root := . }}
+{{- range $name, $svcRaw := .Values.services }}
+{{- if $svcRaw.enabled }}
+{{- $cfg := mergeOverwrite (deepCopy $root.Values.common) (deepCopy $svcRaw) }}
+{{- if and $cfg.ingress $cfg.ingress.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ printf "%s-%s" (include "starcon-backend.fullname" $root) $name }}
+  namespace: {{ $root.Release.Namespace }}
+  labels:
+    {{- include "starcon-backend.labels" $root | nindent 4 }}
+    starcon.io/service: {{ $name }}
+  {{- with $cfg.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with $cfg.ingress.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  {{- if $cfg.ingress.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ required (printf "services.%s.ingress.host 必须填写" $name) $cfg.ingress.host }}
+      secretName: {{ $cfg.ingress.tls.secretName | default (printf "%s-%s-tls" (include "starcon-backend.fullname" $root) $name) }}
+  {{- end }}
+  rules:
+    - host: {{ required (printf "services.%s.ingress.host 必须填写" $name) $cfg.ingress.host }}
+      http:
+        paths:
+          - path: {{ $cfg.ingress.path }}
+            pathType: {{ $cfg.ingress.pathType }}
+            backend:
+              service:
+                name: {{ printf "%s-%s" (include "starcon-backend.fullname" $root) $name }}
+                port:
+                  number: {{ $cfg.port }}
+{{- end }}
+{{- end }}
+{{- end }}

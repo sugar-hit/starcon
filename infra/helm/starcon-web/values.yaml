@@ -1,0 +1,182 @@
+# ============================================================
+# starcon-web —— Next.js 前端
+#
+# 浏览器**不直接**访问后端微服务。前端在服务端做代理：
+# 浏览器 → /api/<服务>/<路径> → 前端 Next.js route handler → 后端微服务
+# 代理白名单见 apps/web/src/lib/api-proxy.ts。
+#
+# 前端因此只需要 9 个环境变量（每个后端服务一个 URL）。
+# 它们在**运行时**读取（process.env[service.env]），不是构建期烘焙的，
+# 所以同一个镜像可以指向不同的后端地址。
+# ============================================================
+
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+  imagePullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: ""
+labels: {}
+annotations: {}
+
+image:
+  # 留空 → starcon/web
+  repository: ""
+  # 留空 → 取 Chart.appVersion
+  tag: ""
+  pullPolicy: ""
+
+replicaCount: 2
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
+
+# ------------------------------------------------------------
+# 后端服务地址
+#
+# 后端 chart（starcon-backend）里每个服务的 Service 名是
+#   <后端 fullname>-<服务名>
+# 所以这里填后端的 release 名字即可；后端用别的 release 名时改这一项。
+# ------------------------------------------------------------
+backend:
+  # 后端 chart 的 fullname（= 后端 release 名 + chart 名）
+  fullname: starcon-backend
+  # 后端所在 namespace。留空 → 与前端同 namespace
+  namespace: ""
+  # 环境变量名 → 目标后端服务
+  services:
+    IDENTITY_URL: identity
+    CATALOG_URL: catalog
+    CHANNEL_URL: channel
+    WAREHOUSE_URL: warehouse
+    TRADE_URL: trade
+    CRM_URL: crm
+    FINANCE_URL: finance
+    REPORTING_URL: reporting
+    PLATFORM_URL: platform
+  # 目标服务端口（与后端 chart 的 services.<名>.port 一致）
+  ports:
+    identity: 8081
+    catalog: 8082
+    channel: 8083
+    warehouse: 8084
+    trade: 8085
+    crm: 8086
+    finance: 8087
+    reporting: 8088
+    platform: 8089
+  # 逐项覆盖完整 URL。留空 → 由上面推导
+  # 例：后端在别的集群 / 走 API 网关时：
+  #   IDENTITY_URL: "https://api.example.com/identity"
+  urls:
+    IDENTITY_URL: ""
+    CATALOG_URL: ""
+    CHANNEL_URL: ""
+    WAREHOUSE_URL: ""
+    TRADE_URL: ""
+    CRM_URL: ""
+    FINANCE_URL: ""
+    REPORTING_URL: ""
+    PLATFORM_URL: ""
+
+# ------------------------------------------------------------
+# 入口
+# ------------------------------------------------------------
+ingress:
+  enabled: true
+  className: nginx
+  # 对外主机名
+  host: starcon.example.com
+  path: /
+  pathType: Prefix
+  # 额外注解。nginx-ingress 默认会带 X-Forwarded-Proto / X-Forwarded-Host，
+  # 前端用它算 request.nextUrl.origin 来做写请求的同源校验，所以**不能**删。
+  annotations: {}
+  tls:
+    enabled: false
+    # 留空 → 用 <fullname>-tls
+    secretName: ""
+  # 额外 host（同一套证书的其它域名）
+  extraHosts: []
+
+# ------------------------------------------------------------
+# 运行时
+# ------------------------------------------------------------
+nodeEnv: production
+port: 3000
+
+# 额外的环境变量（value 形态）
+extraEnv: []
+extraEnvFrom: []
+
+podAnnotations: {}
+podLabels: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+topologySpreadConstraints: []
+priorityClassName: ""
+terminationGracePeriodSeconds: 30
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  fsGroup: 1001
+  seccompProfile:
+    type: RuntimeDefault
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  # ⚠️ 前端这里保持 false：Next.js standalone 会把图片优化缓存写进
+  #    应用目录下的 .next/cache，只读根文件系统会让它写失败。
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop:
+      - ALL
+
+# 探针走 /api/health（Next.js route handler，返回 {"status":"ok"}）
+probes:
+  startup:
+    path: /api/health
+    initialDelaySeconds: 0
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 30
+  liveness:
+    path: /api/health
+    initialDelaySeconds: 0
+    periodSeconds: 15
+    timeoutSeconds: 3
+    failureThreshold: 3
+  readiness:
+    path: /api/health
+    initialDelaySeconds: 0
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+pdb:
+  enabled: true
+  minAvailable: 1
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 8
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: ""
+
+networkPolicy:
+  enabled: false
+
+serviceAccount:
+  create: true
+  automountServiceAccountToken: false
+  annotations: {}

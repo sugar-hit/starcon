@@ -1,0 +1,35 @@
+{{/*
+=============================================================================
+PodDisruptionBudget —— 每个服务一份
+=============================================================================
+节点排空（drain）时保证至少有一个副本活着。
+注意：minAvailable 与副本数一起看 —— 副本数为 1 时 minAvailable=1
+会让节点永远排空不掉。单副本场景请把 minAvailable 调成 0。
+*/}}
+{{- $root := . }}
+{{- range $name, $svcRaw := .Values.services }}
+{{- if $svcRaw.enabled }}
+{{- $cfg := mergeOverwrite (deepCopy $root.Values.common) (deepCopy $svcRaw) }}
+{{- if $cfg.pdb.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ printf "%s-%s" (include "starcon-backend.fullname" $root) $name }}
+  namespace: {{ $root.Release.Namespace }}
+  labels:
+    {{- include "starcon-backend.labels" $root | nindent 4 }}
+    starcon.io/service: {{ $name }}
+spec:
+  {{- if hasKey $cfg.pdb "maxUnavailable" }}
+  maxUnavailable: {{ $cfg.pdb.maxUnavailable }}
+  {{- else }}
+  minAvailable: {{ $cfg.pdb.minAvailable | default 1 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "starcon-backend.selectorLabels" $root | nindent 6 }}
+      starcon.io/service: {{ $name }}
+{{- end }}
+{{- end }}
+{{- end }}

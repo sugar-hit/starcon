@@ -5,6 +5,14 @@ packages/api-contracts/
 packages/sdk/
 docs/product/capability-blueprint/module-progress.md
 
+# Helm 部署件：不参与 prettier 格式化
+#
+# infra/helm/**/templates/ 下的是 **Go 模板**，不是纯 YAML ——
+# {{ ... }} 的控制流让整份文件不是合法 YAML，prettier 直接解析失败
+# （SyntaxError: Unexpected scalar at node end）。
+# chart 的排版由 `helm lint` + `helm template` 校验，不由 prettier 管。
+infra/helm/
+
 # Markdown 文档：不参与 prettier 格式化
 #
 # 仓库对 Markdown 表格的既有约定是**紧凑写法** `| --- | --- |`

@@ -1,0 +1,41 @@
+starcon-backend 已部署到命名空间 {{ .Release.Namespace }}。
+
+部署的服务（9 个，各自独占数据库）：
+{{- $root := . }}
+{{- range $name, $svc := .Values.services }}
+{{- if $svc.enabled }}
+  - {{ $name }}  端口 {{ $svc.port }}  库 {{ $svc.database }}  角色 {{ $svc.appUser }}
+{{- end }}
+{{- end }}
+
+集群内互访地址：
+{{- range $name, $svc := .Values.services }}
+{{- if $svc.enabled }}
+  {{ $name }}: {{ include "starcon-backend.serviceURL" (dict "ctx" $root "target" $name) }}
+{{- end }}
+{{- end }}
+
+{{ if .Values.common.migration.enabled }}
+迁移：已开启。发布时按 {{ .Values.common.migration.order | join " → " }} 的顺序
+执行 Flyway 迁移 Job，任一失败即中止发布。
+{{- else }}
+迁移：未开启独立迁移 Job —— 应用在启动时自己跑 Flyway（与本地开发一致）。
+{{- end }}
+
+{{- if .Values.secretManager.enabled }}
+
+⚠️ 密钥由 External Secrets Operator 同步。
+   请确认 SecretStore「{{ .Values.secretManager.storeRef.name }}」存在，
+   且下列远端键已写入 secret manager：
+{{- range $name, $svc := .Values.services }}
+{{- if $svc.enabled }}
+   - {{ $name }}: {{ index $root.Values.secretManager.remoteKeys "db-password" | replace "{service}" $name }} / {{ index $root.Values.secretManager.remoteKeys "db-migration-password" }} / {{ index $root.Values.secretManager.remoteKeys "internal-key" }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+下一步：
+  1. 等 Pod 就绪：  kubectl get pods -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }} -w
+  2. 装前端：      helm install starcon-web infra/helm/starcon-web -n {{ .Release.Namespace }}
+     前端的 backend.fullname 请填「{{ include "starcon-backend.fullname" . }}」
+  3. 渠道 OAuth 回跳需要 channel 对外可达 —— 见 values 里 services.channel.oauth.publicBaseUrl

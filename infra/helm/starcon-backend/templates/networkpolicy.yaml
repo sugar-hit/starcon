@@ -1,0 +1,76 @@
+{{/*
+=============================================================================
+NetworkPolicy —— 每个服务一份（默认关闭）
+=============================================================================
+默认关闭，理由写在下面：策略一旦写错，表现是「Pod 全灭但看不出原因」，
+对首次上生产的部署不友好。确认集群网络策略已就位后再打开。
+
+打开后的语义：
+  入向  只放行 starcon 家族（前端代理 + 同族服务）与 Ingress 控制器
+  出向  DNS + starcon 家族 + 其余一律放行（外部托管 PG / 平台 API 在集群外，
+        要收紧就把 postgres.host 对应的 CIDR 写进 egress）
+
+⚠️ 打开前请确认集群的 CNI 真的支持 NetworkPolicy
+   （calico / cilium 支持；kube-proxy + flannel 不支持，会静默失效）。
+*/}}
+{{- $root := . }}
+{{- range $name, $svcRaw := .Values.services }}
+{{- if $svcRaw.enabled }}
+{{- $cfg := mergeOverwrite (deepCopy $root.Values.common) (deepCopy $svcRaw) }}
+{{- if $cfg.networkPolicy.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ printf "%s-%s" (include "starcon-backend.fullname" $root) $name }}
+  namespace: {{ $root.Release.Namespace }}
+  labels:
+    {{- include "starcon-backend.labels" $root | nindent 4 }}
+    starcon.io/service: {{ $name }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "starcon-backend.selectorLabels" $root | nindent 6 }}
+      starcon.io/service: {{ $name }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        # starcon 家族：前端代理 + 后端服务之间的互访
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/part-of: starcon
+      ports:
+        - protocol: TCP
+          port: {{ $cfg.port }}
+    - from:
+        # Ingress 控制器所在命名空间（渠道 OAuth 回跳需要外部访问 channel）
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: {{ $cfg.port }}
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/part-of: starcon
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # 外部托管 PG、平台 API 等集群外依赖
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: 5432
+        - protocol: TCP
+          port: 443
+{{- end }}
+{{- end }}
+{{- end }}

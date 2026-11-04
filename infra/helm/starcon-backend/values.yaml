@@ -1,0 +1,435 @@
+# ============================================================
+# starcon-backend —— 9 个 Java Spring Boot 微服务
+#
+# ⚠️ 这个 chart 部署的是 **9 个互相独立的微服务**，不是一个可水平扩的应用。
+#    每个服务独占自己的 PostgreSQL 库、自己的镜像、自己的 Service。
+#    服务之间的调用走集群内 DNS（http://<release>-starcon-backend-<svc>.<ns>.svc:port）。
+#
+# 端口与数据库名的对应关系来自 deploy/docker/docker-compose.catalog.yml，
+# 改动前先看那份文件 —— 它是本地拓扑的事实来源。
+# ============================================================
+
+# ------------------------------------------------------------
+# 全局
+# ------------------------------------------------------------
+global:
+  # 镜像仓库前缀。留空则直接用下方 image.repository。
+  # 例：registry.cn-hangzhou.aliyuncs.com/starcon
+  imageRegistry: ""
+  # 私有仓库拉取凭证
+  imagePullSecrets: []
+  # IfNotPresent / Always
+  imagePullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: ""
+# 追加到所有资源的 label
+labels: {}
+# 追加到所有资源的 annotation
+annotations: {}
+
+# ------------------------------------------------------------
+# 前端公开地址
+#
+# ⚠️ channel 服务的渠道 OAuth 回调要跳回前端，
+#    代码里的默认值是 http://127.0.0.1:3000/channels（容器内必然错），
+#    所以这里必须填前端 Ingress 的真实地址。
+#
+# 🔴 下面这个 **示例值不会被接受**：模板会直接 `fail` 掉渲染。
+#    留着占位值不报错的话，装上去之后渠道授权完成会把浏览器送去
+#    一个不存在的域名 —— 而且**安装过程一声不响**，排查成本极高。
+#    覆盖方式：`--set web.publicUrl=https://erp.你的域名`
+# ------------------------------------------------------------
+web:
+  publicUrl: "http://starcon.example.com"
+
+# ------------------------------------------------------------
+# PostgreSQL（外部托管实例，库由 Terraform / 云侧 PG 提供）
+#
+# AGENTS.md：每个服务拥有自己的数据库，禁止跨服务访问别人的库。
+# 本 chart **不**内置 Postgres，只负责把连接串接对。
+# ------------------------------------------------------------
+postgres:
+  # 外部 PG 主机名（必填）
+  host: ""
+  port: 5432
+  # disable / require / verify-ca / verify-full
+  sslMode: require
+  # Flyway 迁移角色（每个服务共用的迁移账号，非运行账号）
+  migrationUser: starcon_migrator
+  # 连接串模板，{host}/{port}/{database}/{sslmode} 会被替换
+  urlTemplate: "jdbc:postgresql://{host}:{port}/{database}?sslmode={sslmode}"
+
+# ------------------------------------------------------------
+# 密钥管理：External Secrets Operator（Vault / SecretStore）
+#
+# AGENTS.md：接入第三方 API 的 key 全部走 secret manager，不入仓库。
+# 本 chart 为每个服务创建一个 ExternalSecret，Deployment 用 secretKeyRef 引用。
+# ------------------------------------------------------------
+secretManager:
+  enabled: true
+  # 已有 k8s Secret 时置 false，直接复用（开发环境 / 手工管理场景）
+  create: true
+  refreshInterval: 1h
+  storeRef:
+    kind: ClusterSecretStore
+    name: vault
+  # 远端键名 → 远端路径。键名即生成的 k8s Secret 里的 key。
+  # {service} 会被替换成服务名。
+  remoteKeys:
+    db-password: "{service}.db.password"
+    db-migration-password: "postgres.migrator.password"
+    internal-key: "internal.key"
+    channel-webhook-signing-key: "channel.webhook.signing.key"
+
+# ------------------------------------------------------------
+# 所有服务的公共默认值
+#
+# 每个 services.<name> 块会**深度覆盖**本块（mergo 语义：标量覆盖、map 递归合并、列表整体替换）。
+# 只写要改的字段即可。
+# ------------------------------------------------------------
+common:
+  replicaCount: 2
+  image:
+    # 留空 → starcon/<服务名>
+    repository: ""
+    # 留空 → 取 Chart.appVersion
+    tag: ""
+    pullPolicy: ""
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+  # JVM 参数。MaxRAMPercentage 让容器内存上限自动决定堆大小，
+  # 不用在 9 个服务里各写一份 -Xmx。
+  javaOpts: "-XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom"
+  # 额外的纯文本环境变量（value 形态）
+  extraEnv: []
+  # 额外的 envFrom 来源
+  extraEnvFrom: []
+  podAnnotations: {}
+  podLabels: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  topologySpreadConstraints: []
+  priorityClassName: ""
+  terminationGracePeriodSeconds: 30
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 10001
+    runAsGroup: 10001
+    fsGroup: 10001
+    seccompProfile:
+      type: RuntimeDefault
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
+  # 探针。
+  # ⚠️ 后端没有引入 spring-boot-starter-actuator，**没有** /actuator/health，
+  #    所以这里用 tcpSocket 探针而不是 httpGet —— 不要想当然地改成 /actuator/health。
+  probes:
+    startup:
+      initialDelaySeconds: 0
+      periodSeconds: 5
+      timeoutSeconds: 3
+      failureThreshold: 60
+    liveness:
+      initialDelaySeconds: 0
+      periodSeconds: 10
+      timeoutSeconds: 3
+      failureThreshold: 3
+    readiness:
+      initialDelaySeconds: 0
+      periodSeconds: 5
+      timeoutSeconds: 3
+      failureThreshold: 3
+  # PodDisruptionBudget
+  pdb:
+    enabled: true
+    minAvailable: 1
+  # 水平扩缩（需要 metrics-server）
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 8
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: ""
+  # 迁移任务：见 templates/migration-job.yaml
+  migration:
+    enabled: false
+    backoffLimit: 3
+    # 挂钟等待 PG 就绪（外部 PG 冷启动时用）
+    waitForDatabaseSeconds: 0
+    # 迁移顺序。identity 必须最先 —— 其它服务的权限码、租户关系都要落在 identity 建好的结构上。
+    order:
+      - identity
+      - catalog
+      - channel
+      - warehouse
+      - trade
+      - crm
+      - finance
+      - reporting
+      - platform
+  # 网络策略
+  networkPolicy:
+    enabled: false
+  # 是否创建 ServiceAccount（后端不访问 K8s API，令牌一律不挂载）
+  serviceAccount:
+    create: true
+    automountServiceAccountToken: false
+    annotations: {}
+
+# ------------------------------------------------------------
+# 9 个服务
+#
+# 字段说明：
+#   port              服务端口（同时是 Spring 的 server.port）
+#   database          独占数据库名
+#   appUser           运行角色（非 owner / 非 superuser / 非 BYPASSRLS）
+#   upstreams         本服务读取的跨服务地址：{环境变量名: 目标服务名}
+#                     ⚠️ 代码里这些变量的默认值是 http://127.0.0.1:80xx（容器内是错的，
+#                        个别默认值还指向了错误端口）。这里必须逐个显式覆盖成集群内 DNS。
+#   storage           需要落盘的目录：{键名: {env, path, ...}}
+#   extraEnv          该服务特有的环境变量
+# ------------------------------------------------------------
+services:
+  identity:
+    enabled: true
+    port: 8081
+    database: starcon_identity
+    appUser: identity_app
+    upstreams:
+      CHANNEL_URL: channel
+      WAREHOUSE_URL: warehouse
+    storage: {}
+    extraEnv: []
+    # 本地引导（建本地租户 + local-admin 账号）。
+    # ⚠️ 生产环境保持 false —— 它会用 LOCAL_ADMIN_PASSWORD 建一个管理员账号。
+    # LOCAL_BOOTSTRAP_ENABLED 走 common.extraEnv 注入时按此说明取舍。
+
+  catalog:
+    enabled: true
+    port: 8082
+    database: starcon_catalog
+    appUser: catalog_app
+    upstreams:
+      IDENTITY_URL: identity
+      CHANNEL_URL: channel
+      WAREHOUSE_URL: warehouse
+      TRADE_URL: trade
+    storage:
+      media:
+        env: MEDIA_STORAGE_ROOT
+        path: /app/data/media
+        size: 20Gi
+        storageClass: ""
+        accessModes:
+          - ReadWriteOnce
+        enabled: true
+    extraEnv: []
+    # 商品导出下载链接有效期（小时）
+    # - name: EXPORT_DOWNLOAD_TTL_HOURS
+    #   value: "24"
+
+  channel:
+    enabled: true
+    port: 8083
+    database: starcon_channel
+    appUser: channel_app
+    upstreams:
+      IDENTITY_URL: identity
+      CATALOG_URL: catalog
+      WAREHOUSE_URL: warehouse
+      TRADE_URL: trade
+      CRM_URL: crm
+      FINANCE_URL: finance
+      REPORTING_URL: reporting
+    storage:
+      # 渠道对接的密钥配置
+      secretStore:
+        env: CHANNEL_SECRET_STORE_DIR
+        path: /app/data/channel-secrets
+        size: 1Gi
+        storageClass: ""
+        accessModes:
+          - ReadWriteOnce
+        enabled: true
+      # 品牌授权书 / 证书
+      credentialStore:
+        env: CREDENTIAL_STORAGE_ROOT
+        path: /app/data/credential-store
+        size: 5Gi
+        storageClass: ""
+        accessModes:
+          - ReadWriteOnce
+        enabled: true
+      # 认证扫描件
+      certificationStore:
+        env: CERTIFICATION_STORAGE_ROOT
+        path: /app/data/certification-store
+        size: 5Gi
+        storageClass: ""
+        accessModes:
+          - ReadWriteOnce
+        enabled: true
+    # 渠道 OAuth 的三个变量由 chart 统一填（代码里的默认值是 127.0.0.1，容器内必然错）。
+    oauth:
+      # 平台回跳用的对外地址。
+      # ⚠️ 平台的 redirect_uri 只能指向**后端**，而外部平台（Amazon / Shopify）必须能访问到它，
+      #    所以生产环境这里要填 channel 服务**对外可达**的地址（通常给它单独开一个 Ingress），
+      #    集群内地址只适合联调。留空 → 集群内 Service 地址。
+      publicBaseUrl: ""
+      # 授权完成后把浏览器送回前端的地址。留空 → {web.publicUrl}/channels
+      uiReturnUrl: ""
+      # OAuth state 有效期
+      stateTtl: PT15M
+    extraEnv: []
+    # 从 Secret 取的环境变量。
+    # CHANNEL_WEBHOOK_SIGNING_KEY **没有默认值**，缺失会让 channel 起不来
+    # （WebhookService 构造时注入），所以它必须来自 secret manager。
+    secretEnv:
+      - name: CHANNEL_WEBHOOK_SIGNING_KEY
+        key: channel-webhook-signing-key
+    # 可选：把 channel 暴露到集群外。
+    # 平台的 redirect_uri 只能指向后端，而 Amazon / Shopify 回跳时必须能访问到它，
+    # 所以生产环境需要在这里开一个 Ingress，并把 oauth.publicBaseUrl 填成同一个地址。
+    ingress:
+      enabled: false
+      className: nginx
+      host: ""
+      path: /
+      pathType: Prefix
+      annotations: {}
+      tls:
+        enabled: false
+        secretName: ""
+
+  warehouse:
+    enabled: true
+    port: 8084
+    database: starcon_warehouse
+    appUser: warehouse_app
+    upstreams:
+      IDENTITY_URL: identity
+      CHANNEL_URL: channel
+      TRADE_URL: trade
+    storage: {}
+    extraEnv: []
+
+  trade:
+    enabled: true
+    port: 8085
+    database: starcon_trade
+    appUser: trade_app
+    upstreams:
+      IDENTITY_URL: identity
+      CATALOG_URL: catalog
+      CHANNEL_URL: channel
+      WAREHOUSE_URL: warehouse
+    storage: {}
+    extraEnv:
+      # 调 catalog 的超时（秒）
+      - name: CATALOG_TIMEOUT_SECONDS
+        value: "8"
+      # 次品库存服务地址（未接通用空）
+      - name: DEFECTIVE_INVENTORY_URL
+        value: ""
+
+  crm:
+    enabled: true
+    port: 8086
+    database: starcon_crm
+    appUser: crm_app
+    upstreams:
+      IDENTITY_URL: identity
+      CATALOG_URL: catalog
+      CHANNEL_URL: channel
+      TRADE_URL: trade
+    storage: {}
+    extraEnv: []
+
+  finance:
+    enabled: true
+    port: 8087
+    database: starcon_finance
+    appUser: finance_app
+    upstreams:
+      IDENTITY_URL: identity
+      CATALOG_URL: catalog
+      CHANNEL_URL: channel
+      WAREHOUSE_URL: warehouse
+      TRADE_URL: trade
+      FINANCE_URL: finance
+    storage: {}
+    extraEnv:
+      # 支付通道允许的出口主机（逗号分隔）
+      - name: PAYMENT_CHANNEL_ALLOWED_HOSTS
+        value: ""
+      # 支付凭证保管服务（未接通用空）
+      - name: PAYMENT_SECRET_MANAGER_URL
+        value: ""
+      - name: PAYMENT_SECRET_MANAGER_KEY
+        value: ""
+
+  reporting:
+    enabled: true
+    port: 8088
+    database: starcon_reporting
+    appUser: reporting_app
+    upstreams:
+      IDENTITY_URL: identity
+      CATALOG_URL: catalog
+      CHANNEL_URL: channel
+      WAREHOUSE_URL: warehouse
+      TRADE_URL: trade
+      FINANCE_URL: finance
+    storage:
+      export:
+        env: REPORTING_EXPORT_STORAGE_ROOT
+        path: /app/data/reporting-export
+        size: 10Gi
+        storageClass: ""
+        accessModes:
+          - ReadWriteOnce
+        enabled: true
+    extraEnv:
+      # PDF 完整 CJK 字形字体路径；留空用内置字体（部分字形会缺）
+      # 需要挂额外卷时在下面写挂载：
+      # - name: REPORTING_PDF_FONT_PATH
+      #   value: /app/data/fonts/NotoSansCJKsc-Regular.otf
+      - name: REPORTING_PDF_FONT_PATH
+        value: ""
+
+  platform:
+    enabled: true
+    port: 8089
+    database: starcon_platform
+    appUser: platform_app
+    upstreams:
+      IDENTITY_URL: identity
+      CATALOG_URL: catalog
+      CHANNEL_URL: channel
+      WAREHOUSE_URL: warehouse
+      TRADE_URL: trade
+      CRM_URL: crm
+      FINANCE_URL: finance
+      REPORTING_URL: reporting
+      PLATFORM_URL: platform
+    storage:
+      io:
+        env: PLATFORM_IO_STORAGE_ROOT
+        path: /app/data/platform-io-store
+        size: 20Gi
+        storageClass: ""
+        accessModes:
+          - ReadWriteOnce
+        enabled: true
+    extraEnv: []

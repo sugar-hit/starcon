@@ -1,0 +1,109 @@
+{{/*
+=============================================================================
+迁移 Job —— Flyway 迁移在发布前单独跑一次
+=============================================================================
+默认 **关闭**（common.migration.enabled: false）。关闭时应用在启动时自己跑
+Flyway（spring.flyway.url 有配），这与本地开发的行为一致，也是最省事的一种。
+
+开启后：
+  - 创建一个 pre-install / pre-upgrade 的 hook Job，按 common.migration.order 顺序执行
+  - Deployment 上追加 SPRING_FLYWAY_ENABLED=false，避免多副本同时迁移
+  - Job 成功 → Helm 才继续创建 / 更新 Deployment；Job 失败 → 整个发布中止
+
+⚠️ 为什么 Job 里挂 emptyDir 而不是 PVC：
+   pre-install hook 在**普通资源创建之前**执行，那时 PVC 还不存在，
+   挂 PVC 的 Job 会直接卡在「卷未找到」。
+   而迁移只需要「目录可写」—— 各个存储实现的构造器里会 createDirectories(root)，
+   目录不存在会抛 IllegalStateException 让 Spring 起不来。
+   迁移过程本身不往磁盘写业务数据（Flyway 写的是数据库），所以临时目录足够。
+   前提是所有 *_STORAGE_ROOT 都在 /app/data 之下（当前 4 个服务都是）。
+
+⚠️ 如果将来某个服务在迁移期真的要往磁盘写业务数据，
+   就得把这个 Job 改成普通资源（并把 Deployment 的
+   SPRING_FLYWAY_ENABLED 去掉），或者用 initContainer 等待 PVC 就绪。
+*/}}
+{{- if .Values.common.migration.enabled }}
+{{- $root := . }}
+{{- $order := .Values.common.migration.order }}
+{{- range $idx, $name := $order }}
+{{- $svc := index $root.Values.services $name }}
+{{- if and $svc $svc.enabled }}
+{{- $cfg := mergeOverwrite (deepCopy $root.Values.common) (deepCopy $svc) }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ printf "%s-%s-migrate" (include "starcon-backend.fullname" $root) $name }}
+  namespace: {{ $root.Release.Namespace }}
+  labels:
+    {{- include "starcon-backend.labels" $root | nindent 4 }}
+    starcon.io/service: {{ $name }}
+    app.kubernetes.io/component: migration
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    # 必须加引号 —— annotation 的值只能是字符串，
+    # 渲染成裸数字会被 API server 拒掉（cannot unmarshal number into string）。
+    "helm.sh/hook-weight": {{ $idx | quote }}
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: {{ $cfg.migration.backoffLimit | default 3 }}
+  template:
+    metadata:
+      labels:
+        {{- include "starcon-backend.selectorLabels" $root | nindent 8 }}
+        starcon.io/service: {{ $name }}
+        app.kubernetes.io/component: migration
+    spec:
+      restartPolicy: Never
+      serviceAccountName: {{ include "starcon-backend.serviceAccountName" $root }}
+      automountServiceAccountToken: false
+      {{- with $root.Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml $cfg.podSecurityContext | nindent 8 }}
+      {{- if $cfg.migration.waitForDatabaseSeconds }}
+      initContainers:
+        # 外部托管 PG 冷启动时先等一会儿再迁移
+        - name: wait-for-database
+          image: busybox:1.36
+          command: ["sh", "-c", "sleep {{ $cfg.migration.waitForDatabaseSeconds }}"]
+          securityContext:
+            {{- toYaml $cfg.containerSecurityContext | nindent 12 }}
+      {{- end }}
+      containers:
+        - name: migrate
+          image: {{ include "starcon-backend.image" (dict "ctx" $root "name" $name "image" $cfg.image) | quote }}
+          imagePullPolicy: {{ $cfg.image.pullPolicy | default $root.Values.global.imagePullPolicy }}
+          {{- with $cfg.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          # Dockerfile.backend 的 ENTRYPOINT 是 `java -jar /app/service.jar`，
+          # args 追加 --spring.main.web-application-type=none 让它只跑迁移不监听端口。
+          # 与 deploy/docker/docker-compose.catalog.yml 里的 migrate-* 服务同一套做法。
+          args: ["--spring.main.web-application-type=none"]
+          env:
+            {{- include "starcon-backend.serviceEnv" (dict "ctx" $root "name" $name "svc" $cfg "cfg" $cfg "secretName" (include "starcon-backend.secretName" (dict "ctx" $root "name" $name))) | nindent 12 }}
+            - name: JAVA_TOOL_OPTIONS
+              value: {{ $cfg.javaOpts | quote }}
+            - name: SERVER_PORT
+              value: {{ $cfg.port | quote }}
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+            - name: tmp
+              mountPath: /tmp
+          resources:
+            {{- toYaml $cfg.resources | nindent 12 }}
+      volumes:
+        - name: data
+          emptyDir:
+            sizeLimit: 1Gi
+        - name: tmp
+          emptyDir:
+            sizeLimit: 512Mi
+{{- end }}
+{{- end }}
+{{- end }}
