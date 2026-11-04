@@ -41,6 +41,7 @@ import {
   fetchLaborTrend,
   formatDay,
   formatMoment,
+  defaultRange,
   isIdleDay,
   metricIsRate,
   metricValueText,
@@ -97,6 +98,11 @@ export function LaborEfficiencyWorkspace() {
   const readable = session.permissions.includes('warehouse.inventory.read');
   const writable = session.permissions.includes('warehouse.inventory.update');
 
+  // 🔴 默认区间取模型里的 defaultRange()（最近 14 天，与后端缺省一致）。
+  //    写死一个自然年窗口的话，页面一进来就在查一段写死的日期 ——
+  //    那是真实数据的**错窗口**，不是假数据，但一样是错的。
+  const initialRange = defaultRange();
+
   const [capabilities, setCapabilities] = useState<LaborCapabilities | null>(null);
   const [warehouses, setWarehouses] = useState<WarehouseRef[]>([]);
   const [report, setReport] = useState<LaborReport | null>(null);
@@ -110,8 +116,8 @@ export function LaborEfficiencyWorkspace() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
 
-  const [from, setFrom] = useState('2026-01-01');
-  const [to, setTo] = useState('2026-12-31');
+  const [from, setFrom] = useState(initialRange.from);
+  const [to, setTo] = useState(initialRange.to);
   const [warehouseId, setWarehouseId] = useState('');
   const [workType, setWorkType] = useState('');
   const [metric, setMetric] = useState('PICKED_PIECES');

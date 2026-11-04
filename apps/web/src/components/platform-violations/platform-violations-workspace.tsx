@@ -27,12 +27,17 @@ import {
   TriangleAlert,
 } from 'lucide-react';
 import {
+  EVIDENCE_TYPES,
   MEASURE_OPTIONS,
   STATUS_OPTIONS,
   addEvidence,
   addPenalty,
   addRemediation,
   attachSubjects,
+  buildDeductionInput,
+  buildEvidenceInput,
+  buildRemediationInput,
+  buildSubjectInput,
   delistAffected,
   emptyState,
   emptyStateKind,
@@ -197,21 +202,40 @@ export function PlatformViolationsWorkspace({ focus }: Props) {
     [detail, run, loadViolations, page, shopId],
   );
 
+  const doAddDeductionPenalty = useCallback(() => {
+    // 🔴 扣款金额与币种由用户给出：写死 100 USD 的话，一笔凭空出现的扣款
+    //    会跟着该店铺走完全流程（扣款金额是要进 12 财务的）。
+    const amount = window.prompt('扣款金额（必填，如 120.50）', '');
+    if (amount === null) return;
+    const currency = window.prompt('扣款币种（必填，如 USD）', '');
+    if (currency === null) return;
+    const built = buildDeductionInput({ amount, currency });
+    if (!built.ok) {
+      setError(built.error);
+      return;
+    }
+    void doAddPenalty(built.value);
+  }, [doAddPenalty]);
+
   const doAttachSubjects = useCallback(
     () =>
       run(async () => {
         if (!detail) return;
-        await attachSubjects(detail.violation.violationId, [
-          {
-            subjectType: 'SKU',
-            subjectRef: 'MANUAL-SKU',
-            skuId: null,
-            listingId: null,
-            orderRef: null,
-            affectedQuantity: null,
-            note: '页面上挂的示例主体',
-          },
-        ]).catch(() => undefined);
+        // 🔴 主体必须由用户给出真实 id：后端会校验 SKU/LISTING 的 UUID 与 ORDER 的订单号，
+        //    这里塞占位值只会 422，或者把指向不存在对象的主体写进真实违规记录。
+        const subjectType = window.prompt('挂哪个类型的主体？SKU / LISTING / ORDER（必填）', 'SKU');
+        if (subjectType === null) return;
+        const subjectRef = window.prompt(
+          subjectType.trim().toUpperCase() === 'ORDER' ? '订单号（必填）' : '主体 id（UUID，必填）',
+          '',
+        );
+        if (subjectRef === null) return;
+        const built = buildSubjectInput({ subjectType, subjectRef });
+        if (!built.ok) {
+          setError(built.error);
+          return;
+        }
+        await attachSubjects(detail.violation.violationId, [built.value]);
         const refreshed = await fetchViolation(detail.violation.violationId);
         setDetail(refreshed);
       }),
@@ -243,11 +267,20 @@ export function PlatformViolationsWorkspace({ focus }: Props) {
     () =>
       run(async () => {
         if (!detail) return;
-        await addRemediation(detail.violation.violationId, {
-          requirement: '按平台通知补齐材料',
-          dueAt: null,
-          ownerRef: '',
-        });
+        // 🔴 整改要求由用户写清楚「要做什么」：写死一句通用文案的话，
+        //    每张违规单都会长出完全一样的一行，事后追责时是假线索。
+        const requirement = window.prompt('整改要求：要补什么 / 要改什么（必填）', '');
+        if (requirement === null) return;
+        const ownerRef = window.prompt('责任人（可留空）', '');
+        if (ownerRef === null) return;
+        const dueAt = window.prompt('期限（YYYY-MM-DD，可留空）', '');
+        if (dueAt === null) return;
+        const built = buildRemediationInput({ requirement, ownerRef, dueAt });
+        if (!built.ok) {
+          setError(built.error);
+          return;
+        }
+        await addRemediation(detail.violation.violationId, built.value);
         const refreshed = await fetchViolation(detail.violation.violationId);
         setDetail(refreshed);
         await fetchRemediations(0, PAGE_SIZE, { shopId }).then(setRemediations);
@@ -271,11 +304,23 @@ export function PlatformViolationsWorkspace({ focus }: Props) {
   const doAddEvidence = useCallback(
     (remediationId: string) =>
       run(async () => {
-        await addEvidence(remediationId, {
-          evidenceType: 'DOCUMENT',
-          evidenceRef: 'evidence.pdf',
-          summary: '整改凭证',
-        });
+        // 🔴 凭证引用由用户给出：写死一个文件名的话，取证台账里会攒出一批
+        //    指向同一个不存在文件的「凭证」，事后追责时全是假线索。
+        const evidenceType = window.prompt(
+          `凭证类型：${EVIDENCE_TYPES.join(' / ')}（必填）`,
+          'DOCUMENT',
+        );
+        if (evidenceType === null) return;
+        const evidenceRef = window.prompt('凭证引用（文件名 / 链接，可留空）', '');
+        if (evidenceRef === null) return;
+        const summary = window.prompt('凭证说明（可留空）', '');
+        if (summary === null) return;
+        const built = buildEvidenceInput({ evidenceType, evidenceRef, summary });
+        if (!built.ok) {
+          setError(built.error);
+          return;
+        }
+        await addEvidence(remediationId, built.value);
         if (detail) {
           const refreshed = await fetchViolation(detail.violation.violationId);
           setDetail(refreshed);
@@ -797,15 +842,9 @@ export function PlatformViolationsWorkspace({ focus }: Props) {
                     size="sm"
                     variant="secondary"
                     disabled={busy}
-                    onClick={() =>
-                      void doAddPenalty({
-                        measure: 'DEDUCTION',
-                        penaltyAmount: 100,
-                        penaltyCurrency: 'USD',
-                      })
-                    }
+                    onClick={() => doAddDeductionPenalty()}
                   >
-                    记一笔扣款（USD）
+                    记一笔扣款
                   </Button>
                 </div>
               </div>
@@ -841,7 +880,7 @@ export function PlatformViolationsWorkspace({ focus }: Props) {
                   disabled={busy}
                   onClick={() => void doAttachSubjects()}
                 >
-                  挂一个涉及主体
+                  挂涉及主体（填真实 id）
                 </Button>
               </div>
 
@@ -968,7 +1007,7 @@ export function PlatformViolationsWorkspace({ focus }: Props) {
                   onClick={() => void doAddRemediation()}
                 >
                   加一条整改要求
-                </Button>
+                </Button>{' '}
               </div>
 
               {/* 整改凭证：只追加 */}
