@@ -6,6 +6,10 @@
 - [`incidents/`](incidents/) — 历史故障复盘（postmortem）
 - [`on-call/`](on-call/) — On-call 排班 / 升级路径
 
+## 部署
+
+- [`kubernetes-deployment.md`](kubernetes-deployment.md) — Kubernetes 部署手册（Helm chart、前置条件、部署顺序、升级与回滚）
+
 ## Runbook 列表
 
 （待补充）
