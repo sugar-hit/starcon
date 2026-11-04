@@ -4,8 +4,26 @@ export interface TaskPage {
   domain: string;
   label: string;
   description: string;
-  fields: string[];
-  workflow: string[];
+  /**
+   * 该任务页的表格字段。
+   *
+   * 🔴 **只有「还没有真实页面」的条目才需要它** —— 它是 `TaskWorkspace`
+   * （`[...slug]` 兜底页）渲染出来的**占位表头**，不是真实表结构。
+   *
+   * <p>已经有真实 `page.tsx` 的条目**不许**写这一串字段：那串字段描述的是一张
+   * 并不存在的表，写在那里只会让后来的人以为那一页真有那些列。
+   * 本仓库此前有 30 个条目挂着这样的字段表，其中 7 个是域首页
+   * （定价 / CRM / 供应 / 采购 / 物流 / 仓储 / 利润）—— 它们真正的内容是**域索引**，
+   * 压根不是一张表。
+   */
+  fields?: string[];
+  /**
+   * 该任务页的处理流程（三步）。
+   *
+   * 🔴 同 {@link fields}：只有「还没有真实页面」的条目才需要它。
+   * 有真实页面的条目写一条流程，等于替那一页编了一条它并不执行的流程。
+   */
+  workflow?: string[];
   /**
    * 该任务页是否已有真实页面（apps/web/src/app 下存在对应 page.tsx）。
    *
@@ -25,8 +43,6 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'channels',
     label: '渠道与店铺',
     description: '平台目录、授权连接、店铺档案与启用站点。',
-    fields: ['平台', '连接状态', '店铺', '经营模式', '启用站点', '凭据有效期'],
-    workflow: ['选平台', '授权连接', '建店铺并启用站点'],
   },
   {
     href: '/products',
@@ -34,8 +50,6 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'products',
     label: '商品档案',
     description: '维护 SPU、SKU、自定义属性与公共值继承。',
-    fields: ['SPU', '商品名称', '品牌分类', 'SKU 数', '公共属性', '状态'],
-    workflow: ['建档', '校验', '发布主数据'],
   },
   {
     href: '/products/research',
@@ -43,8 +57,6 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'products',
     label: '选品与开发',
     description: '从选品线索、样品评估到开发立项，保留决策依据。',
-    fields: ['项目编号', '目标市场', '预估成本', '样品进度', '负责人', '评审结果'],
-    workflow: ['收集线索', '样品评估', '开发立项'],
   },
   {
     href: '/products/compliance',
@@ -52,8 +64,6 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'products',
     label: '合规与资质',
     description: '按销售国家与品类管理认证、品牌授权和到期提醒。',
-    fields: ['商品', '目标国家', '资质类型', '有效期', '责任人', '审核状态'],
-    workflow: ['上传资质', '审核', '到期复核'],
   },
   {
     href: '/products/assets',
@@ -61,8 +71,6 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'products',
     label: '素材与翻译',
     description: '集中管理产品图片、文案和各站点语言版本。',
-    fields: ['SKU', '素材类型', '语言', '版本', '审核人', '状态'],
-    workflow: ['整理素材', '翻译审核', '分发刊登'],
   },
   {
     href: '/org/roles',
@@ -70,8 +78,6 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'org',
     label: '角色配置',
     description: '为角色勾选页面权限与数据范围，保存后立即生效。',
-    fields: ['角色名称', '状态', '页面权限', '成员数'],
-    workflow: ['新建角色', '勾选权限', '分配给成员'],
   },
   {
     href: '/org/members',
@@ -79,8 +85,6 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'org',
     label: '用户与成员',
     description: '维护成员账号、所属部门与角色分配，必要时转移所有者。',
-    fields: ['成员', '状态', '所属部门', '角色与范围', '所有者'],
-    workflow: ['新增成员', '分配角色', '停用成员'],
   },
   {
     href: '/org/departments',
@@ -88,8 +92,6 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'org',
     label: '部门管理',
     description: '维护部门作为成员归属，本部门数据范围按此判定。',
-    fields: ['部门名称', '成员数'],
-    workflow: ['创建部门', '重命名部门', '删除部门'],
   },
   {
     href: '/org/children',
@@ -97,8 +99,6 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'org',
     label: '子租户管理',
     description: '创建子租户并指定首位所有者，子租户需分别授权才能访问。',
-    fields: ['租户编码', '名称', '状态'],
-    workflow: ['创建子租户', '指定所有者', '切换租户'],
   },
   {
     href: '/org/hierarchy',
@@ -106,8 +106,6 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'org',
     label: '层级授权',
     description: '父租户访问子租户数据的显式授权：数据域、只读可写、有效期与撤销。',
-    fields: ['子租户', '数据域', '权限级别', '有效期', '状态'],
-    workflow: ['新增授权', '调整范围', '撤销授权'],
   },
   {
     href: '/listings',
@@ -115,8 +113,6 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'listings',
     label: '在线商品',
     description: '按平台与店铺管理在线商品、映射和同步状态。',
-    fields: ['平台', '店铺', '站点', '平台商品编号', 'SKU', '同步状态'],
-    workflow: ['匹配 SKU', '核对内容', '同步平台'],
   },
   {
     href: '/listings/drafts',
@@ -137,17 +133,13 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'listings',
     label: '发布任务',
     description: '追踪批量刊登、平台反馈和失败重试。',
-    fields: ['任务编号', '平台', '店铺', '提交时间', '成功数', '失败原因'],
-    workflow: ['提交任务', '接收反馈', '处理失败'],
   },
   {
     href: '/pricing',
     implemented: true,
     domain: 'pricing',
-    label: '定价规则',
-    description: '按站点、币种和成本边界维护价格策略。',
-    fields: ['规则名', '站点', '币种', '成本口径', '利润下限', '生效时间'],
-    workflow: ['测算成本', '审批规则', '发布价格'],
+    label: '定价中心',
+    description: '多币种价格、汇率、定价策略与平台费率模型。',
   },
   {
     href: '/pricing/simulation',
@@ -171,10 +163,8 @@ export const TASK_PAGES: TaskPage[] = [
     href: '/purchase',
     implemented: true,
     domain: 'purchase',
-    label: '采购订单',
-    description: '跟进供应商交期、到货、质检和采购结算。',
-    fields: ['采购单号', '供应商', 'SKU', '采购数量', '预计到货', '状态'],
-    workflow: ['下单', '跟单', '到货验收'],
+    label: '采购中心',
+    description: '采购需求、采购单、1688 档口直连。',
   },
   {
     href: '/purchase/plans',
@@ -207,10 +197,8 @@ export const TASK_PAGES: TaskPage[] = [
     href: '/supply',
     implemented: true,
     domain: 'supply',
-    label: '供应商档案',
-    description: '维护供应商、合作资质、联系人和账期。',
-    fields: ['供应商编号', '名称', '联系人', '账期', '合作状态', '负责人'],
-    workflow: ['准入审核', '维护资料', '定期评估'],
+    label: '供应中心',
+    description: '供应商档案、评分、分级管理。',
   },
   {
     href: '/supply/quotes',
@@ -236,8 +224,6 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'orders',
     label: '全部订单',
     description: '按平台、店铺、订单状态和履约方式核对订单。',
-    fields: ['订单号', '平台店铺', '付款状态', '履约方式', '金额币种', '下单时间'],
-    workflow: ['同步订单', '审核', '交付履约'],
   },
   {
     // 9.7.1.1 批发订单与账期。与 /orders 同属订单域，domain 取域级 'orders'，
@@ -250,8 +236,6 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'orders',
     label: '批发订单',
     description: '按客户分级价与阶梯价录单，管理起订量、账期结算与开票对账需求。',
-    fields: ['订单号', '客户分级', '收款方式', '订单总额', '已确认应收', '账期到期日', '开票需求'],
-    workflow: ['试算阶梯价与起订量', '发货确认账期应收', '按账期开票对账'],
   },
   {
     // 9.7.1.2 经销与分销管理。与 /orders/b2b 同属订单域且**紧邻**，domain 取域级 'orders'，
@@ -265,17 +249,6 @@ export const TASK_PAGES: TaskPage[] = [
     label: '经销商与分销',
     description:
       '管理经销商授权区域与产品线、授权期限、经销价与返点，按销量配额与回款考核，并监控跨区域窜货。',
-    fields: [
-      '授权编号',
-      '授权区域',
-      '授权产品线',
-      '授权期限',
-      '经销价',
-      '返点比例',
-      '配额完成率',
-      '窜货预警',
-    ],
-    workflow: ['建授权台账', '登记销售与回款考核', '计提返点并处置窜货'],
   },
   {
     href: '/orders/review',
@@ -293,8 +266,6 @@ export const TASK_PAGES: TaskPage[] = [
     label: '审单规则',
     description:
       '按店铺、金额、买家等级、商品、收货国家配置自动审单；命中黑名单、地址异常、大额、异常折扣的强制转人工。',
-    fields: ['规则编号', '规则名称', '维度', '运算符', '动作', '优先级', '生效期', '命中规则链'],
-    workflow: ['定义条件', '试跑真实订单', '启用并查看命中链'],
   },
   {
     href: '/orders/review/intercept',
@@ -303,17 +274,6 @@ export const TASK_PAGES: TaskPage[] = [
     label: '异常拦截',
     description:
       '识别并拦截异常订单：地址不可达/信息不全、黑名单买家、重复下单、异常折扣（低于成本）、疑似欺诈、超出收货国家限制、平台合规风险。',
-    fields: [
-      '订单号',
-      '命中项',
-      '拦截原因',
-      '建议处置',
-      '最终处置',
-      '命中明细',
-      '处置人',
-      '处置时刻',
-    ],
-    workflow: ['登记限制与成本基线', '运行八项检查', '人工处置留痕（不自动取消）'],
   },
   {
     href: '/orders/risk-validation',
@@ -321,8 +281,6 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'orders',
     label: '风控校验',
     description: '多信号风险打分：买家历史、设备与 IP 关联、下单频次、金额异常、地址集中度。',
-    fields: ['订单号', '风险分', '建议动作', '最终动作', '缺失维度', '复核人'],
-    workflow: ['登记规则与信号', '触发评估', '人工复核'],
   },
   {
     href: '/orders/address-payment-check',
@@ -331,8 +289,6 @@ export const TASK_PAGES: TaskPage[] = [
     label: '地址与支付校验',
     description:
       '校验买家地址可投递性（国家/邮编/街道格式）、禁运国家清单、支付状态一致性，输出校验结果与风险等级。',
-    fields: ['订单号', '校验结果', '风险等级', '命中项', '禁运清单', '支付一致性'],
-    workflow: ['登记禁运清单与国别规则', '跑一次校验', '读结论交异常拦截'],
   },
   {
     href: '/orders/fulfillment',
@@ -340,8 +296,6 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'orders',
     label: '待发货订单',
     description: '按发货时限、仓库与物流渠道安排订单履约。',
-    fields: ['订单号', '发货截止', '仓库', '物流渠道', '运单号', '作业状态'],
-    workflow: ['分配仓库', '申请面单', '交接发货'],
   },
   {
     // 9.3.1.1 拆单。**不占用** /orders/fulfillment 本身（那是 9.3.3.1 履约请求的路由），
@@ -352,23 +306,8 @@ export const TASK_PAGES: TaskPage[] = [
     label: '订单拆单',
     description:
       '把一个订单拆成多个履约单元：按仓库拆、按承运商拆、按发货时效拆、按平台限制拆。拆单不产生新的销售订单，订单总金额与买家视角不变。',
-    fields: [
-      '拆单号',
-      '订单引用',
-      '拆分维度',
-      '履约单元',
-      '订单总额',
-      '尾差',
-      '预占指令',
-      '发货回传',
-    ],
     // workflow 固定三步（task-pages.test.ts 钉死这个长度）：
     // 「能拆」→「拆成什么」→「发出去没有」就是运营脑子里真实的三段。
-    workflow: [
-      '登记发货仓与可用库存分布、配拆单规则',
-      '预览拆单（无副作用）并落拆单',
-      '登记预占回执与逐单元发货回传',
-    ],
   },
   {
     href: '/orders/rules',
@@ -385,8 +324,6 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'aftersales',
     label: '售后工单',
     description: '统一跟进退款、退货、补发和平台争议。',
-    fields: ['工单号', '订单号', '问题类型', '诉求', '责任人', '处理期限'],
-    workflow: ['受理', '核实', '处理结案'],
   },
   {
     // 11.2.1.1 退货授权单。/aftersales/returns 是蓝图 11.2「退货管理」的 L3 锚点，
@@ -402,16 +339,6 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'aftersales',
     label: '退货授权单',
     description: '审批退货申请：校验可退数量、登记退货地址与买家回寄物流，超时未寄自动关闭。',
-    fields: [
-      '授权单号',
-      '原订单行',
-      '可退数量',
-      '退货地址',
-      '买家回寄物流',
-      '目标处理方式',
-      '状态',
-    ],
-    workflow: ['受理退货申请', '校验可退量并审批', '登记回寄与超时关闭'],
   },
   {
     href: '/aftersales/refunds',
@@ -421,17 +348,13 @@ export const TASK_PAGES: TaskPage[] = [
     // 原标签是「退款与补发」。**补发（REISSUE）是 11.1.1.1 的售后单类型，不是本模块**，
     // 11.3.1.2 只交付退款执行状态与对账差异；沿用旧标签会让导航声称覆盖了一个不存在的能力。
     description: '跟踪退款执行与平台同步状态，查证后重试，裁定对账差异。',
-    fields: ['退款单号', '订单号', '退款金额', '币种', '执行状态', '平台同步状态', '建议动作'],
-    workflow: ['登记待发起', '派发或先查证交易', '裁定对账差异'],
   },
   {
     href: '/crm',
     implemented: true,
     domain: 'crm',
-    label: '客户档案',
-    description: '按平台聚合买家联系历史与服务记录。',
-    fields: ['客户编号', '来源平台', '客户标签', '关联订单', '服务记录', '负责人'],
-    workflow: ['关联订单', '维护档案', '服务跟进'],
+    label: 'CRM / 客服',
+    description: '客户档案、工单、平台站内信、评价管理。',
   },
   {
     href: '/crm/inbox',
@@ -457,8 +380,6 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'analytics',
     label: '销售分析',
     description: '按店铺、站点、商品及币种分析销售表现。',
-    fields: ['日期', '平台店铺', 'SKU', '销量', '销售额', '币种'],
-    workflow: ['选择口径', '对比趋势', '追踪变化'],
   },
   {
     href: '/analytics/ads',
@@ -484,8 +405,6 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'finance',
     label: '平台结算',
     description: '按结算单核对销售、佣金、退款与平台回款。',
-    fields: ['结算单号', '平台店铺', '结算周期', '原币金额', '币种', '核对状态'],
-    workflow: ['导入账单', '匹配订单', '确认差异'],
   },
   {
     href: '/finance/payables',
@@ -493,8 +412,6 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'finance',
     label: '应付与付款',
     description: '跟进采购、物流和服务商费用的审批与付款。',
-    fields: ['应付单号', '往来单位', '费用类型', '金额币种', '到期日', '付款状态'],
-    workflow: ['核对费用', '审批', '登记付款'],
   },
   {
     href: '/finance/reconciliation',
@@ -518,10 +435,8 @@ export const TASK_PAGES: TaskPage[] = [
     href: '/profit',
     implemented: true,
     domain: 'profit',
-    label: '订单利润',
-    description: '按订单分摊商品、物流与平台费用。',
-    fields: ['订单号', '销售收入', '商品成本', '平台费', '物流费', '利润口径'],
-    workflow: ['归集费用', '分摊成本', '核对利润'],
+    label: '利润中心',
+    description: '毛利、分润、成本归集。',
   },
   {
     href: '/profit/products',
@@ -547,8 +462,6 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'org',
     label: '个人资料',
     description: '维护个人资料、登录安全与界面偏好。',
-    fields: ['姓名', '邮箱', '头像', '语言与时区', '默认店铺', '密码'],
-    workflow: ['编辑资料', '保存', '立即生效'],
   },
   {
     href: '/org',
@@ -556,8 +469,6 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'org',
     label: '租户概览',
     description: '查看当前企业工作空间与组织管理入口。',
-    fields: ['成员', '部门', '角色', '负责人', '账号状态', '最近活动'],
-    workflow: ['邀请成员', '分配角色', '定期复核'],
   },
   {
     href: '/org/legal-entities',
@@ -565,8 +476,6 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'org',
     label: '法人档案',
     description: '维护法人主体、注册信息、本位币与账簿舍入规则。',
-    fields: ['法人编码', '法定名称', '本位币', '注册国家', '登记号', '状态'],
-    workflow: ['新增法人', '维护资料', '店铺绑定'],
   },
   {
     href: '/org/accounting-books',
@@ -574,8 +483,6 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'org',
     label: '会计账簿',
     description: '为法人配置会计账簿、本位币与记账规则（精度、舍入、期间设置）。',
-    fields: ['所属法人', '账簿类型', '本位币', '金额/数量精度', '期间粒度', '会计年度起始月'],
-    workflow: ['新增账簿', '设置记账规则', '核对会计年度'],
   },
   {
     href: '/org/business-parameters',
@@ -583,8 +490,6 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'org',
     label: '业务参数',
     description: '配置全局与分场景业务参数默认值，按全局、法人、店铺三档解析生效值并保留变更历史。',
-    fields: ['参数', '出厂默认值', '生效范围', '生效值', '来源档位', '变更历史'],
-    workflow: ['新增覆盖配置', '核对生效值', '冻结单据参数'],
   },
   {
     href: '/org/stores',
@@ -612,8 +517,6 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'org',
     label: '审计日志',
     description: '检索关键操作留痕、授权上下文与脱敏后的变更详情，并按条件导出。',
-    fields: ['发生时间', '操作人', '动作', '资源类型', '授权上下文', '变更详情'],
-    workflow: ['检索记录', '核对变更', '导出审计'],
   },
   {
     // 17.5.3.2 操作日志。排障用，含技术细节（耗时、状态码、错误堆栈）与请求 ID 链路。
@@ -623,17 +526,13 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'org',
     label: '操作日志',
     description: '检索登录、API 调用、任务执行与错误堆栈，按请求 ID 查看完整链路。',
-    fields: ['发生时间', '事件类型', '级别', '请求 ID', '操作人', '摘要', '耗时'],
-    workflow: ['检索日志', '查看链路', '定位错误'],
   },
   {
     href: '/logistics',
     implemented: true,
     domain: 'logistics',
-    label: '发货与运单',
-    description: '管理自发货订单的运单申请、交接和配送。',
-    fields: ['运单号', '订单号', '渠道', '包裹重量', '交接时间', '物流状态'],
-    workflow: ['申请面单', '交接承运商', '追踪签收'],
+    label: '物流中心',
+    description: '物流商对接、路由推荐、轨迹跟踪。',
   },
   {
     href: '/logistics/fba',
@@ -651,8 +550,6 @@ export const TASK_PAGES: TaskPage[] = [
     label: '轨迹查询',
     description:
       '查询并展示包裹物流轨迹：节点时间线、预计时效对比、异常节点标记，支持按承运商批量拉取。',
-    fields: ['运单号', '承运商', '目的国', '最新节点', '时效状态', '异常标记'],
-    workflow: ['同步运单集合', '批量拉取轨迹', '查时间线与时效对比'],
   },
   {
     href: '/logistics/channels',
@@ -660,8 +557,6 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'logistics',
     label: '物流渠道',
     description: '维护承运商服务、计费规则与可达范围。',
-    fields: ['承运商', '渠道名称', '目的区域', '计费规则', '预计时效', '状态'],
-    workflow: ['接入渠道', '核对报价', '启用路由'],
   },
   {
     href: '/logistics/claims',
@@ -676,10 +571,8 @@ export const TASK_PAGES: TaskPage[] = [
     href: '/warehouse',
     implemented: true,
     domain: 'warehouse',
-    label: '仓库与库位',
-    description: '配置本地仓、海外仓、库区及拣货路径。',
-    fields: ['仓库', '类型', '库区', '库位', '负责人', '状态'],
-    workflow: ['建立仓库', '划分库区', '维护库位'],
+    label: '仓储中心',
+    description: '仓库档案、仓位、库内作业。',
   },
   {
     // 8.1.1.1 仓库列表：路由取蓝图 08 的 L3 锚点 /warehouse/facilities。
@@ -692,8 +585,6 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'warehouse',
     label: '仓库列表',
     description: '查看仓库类型、货权法人、国家与时区、库存量与作业量，并新增仓库。',
-    fields: ['仓库', '类型', '所属法人', '国家地区', '时区', '库存量', '作业量', '状态'],
-    workflow: ['筛选仓库', '核对货权与库存', '新增仓库'],
   },
   {
     // 8.1.2.2 库位自动分配：按规则为入库商品推荐库位（残次品入残次库位是硬规则）。
@@ -705,8 +596,6 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'warehouse',
     label: '库位自动分配',
     description: '为入库商品推荐库位：同品类聚类、最短上架路径、容量与承重匹配，并给出推荐理由。',
-    fields: ['收货单', 'SKU', '质量状态', '目标库位', '容量承重', '推荐理由', '状态'],
-    workflow: ['选收货单', '看候选与理由', '指派库位'],
   },
   {
     href: '/warehouse/inbound',
@@ -723,8 +612,6 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'warehouse',
     label: '拣货与出库',
     description: '按波次完成拣货、复核、包装和出库交接。',
-    fields: ['出库单号', '波次', '仓库', '拣货人', '复核状态', '交接状态'],
-    workflow: ['生成波次', '拣货复核', '包装交接'],
   },
   {
     href: '/warehouse/transfers',
@@ -750,8 +637,6 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'inventory',
     label: '全仓库存',
     description: '统一查看本地、海外、FBA 与在途库存。',
-    fields: ['SKU', '仓库类型', '可用量', '锁定量', '在途量', '更新时间'],
-    workflow: ['汇总库存', '核对锁定', '分析可用'],
   },
   {
     href: '/inventory/replenishment',
@@ -768,8 +653,6 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'inventory',
     label: '库存流水',
     description: '逐笔核对出入库、调拨和调整的库存变化。',
-    fields: ['流水号', 'SKU', '仓库', '业务单据', '变动数量', '发生时间'],
-    workflow: ['选择对象', '追踪单据', '核对变化'],
   },
   {
     href: '/inventory/aging',
@@ -777,8 +660,6 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'inventory',
     label: '库龄与预警',
     description: '识别断货、滞销和超龄库存并安排处理。',
-    fields: ['SKU', '仓库', '库龄区间', '安全库存', '预警类型', '负责人'],
-    workflow: ['识别风险', '制定处置', '跟进结果'],
   },
   {
     // 7.2.1.1 预占需求列表。与 ledger / aging 同属库存卷，按 href 排序插在 ledger 之后。
@@ -788,8 +669,6 @@ export const TASK_PAGES: TaskPage[] = [
     domain: 'inventory',
     label: '预占需求',
     description: '查看订单履约、加工领料与其他占用的预占需求及剩余量、超时时长。',
-    fields: ['预占单号', '需求来源', 'SKU', '需求量', '剩余量', '状态', '超时时长'],
-    workflow: ['筛选需求', '核对剩余量', '跟进超时'],
   },
 ];
 export function findTaskPage(href: string) {
