@@ -15,9 +15,9 @@
    采购 20、定价 13、供应 7、利润 5）就躺在同一个目录里。
    本仓自己的判定标准（`tools/module-progress/sync.mjs`）把 `DomainPlaceholder`
    列为「未开发」的典型形态，而台账写的是 465/465 已交付 —— **占位页说的话全是假的**。
-2. **两处手维护的交付状态漂移** —— `domain-spec.ts` 的 `pageStatus` 与每个 feature 的
-   `status`，以及 `task-pages.ts` 里 30 条已实现任务的「占位字段表」
-   （`fields: ['规则名','站点','币种',...]` 描述的是一张并不存在的表）。
+2. **两处手维护的交付状态漂移** —— `domain-spec.ts` 的 `pageStatus`（18 处）与每个 feature 的
+   `status`（121 处），以及 `task-pages.ts` 里 **50 条**已实现任务（全部 `implemented: true` 的条目）
+   的「占位字段表」（`fields: ['规则名','站点','币种',...]` 描述的是一张并不存在的表）。
 3. **四处会写进真实数据库的假数据** —— 见「决策 3」。
 4. **后端一处「0 冒充算不出来」** —— 违反该类自己声明的 `NO_FAKE_ZERO` 契约。
 5. **部署件的占位值不会被拒绝** —— Helm 示例地址静默渲染、dev compose 弱口令 + 全网卡端口。
@@ -35,15 +35,17 @@
 | 方案 | 问题 |
 | --- | --- |
 | 手写清单 | 必然漂移；且 `fields` / `workflow` 那类描述只能靠编 —— **那就是新的假数据** |
-| 从功能台账解析 | 台账 465 条里只有 56 条记了路由，其余路由字段是 `—`，解析不出完整清单 |
+| 从功能台账解析 | 台账 465 条里只有 114 条记了路由，其余 351 条路由字段是 `—`，解析不出完整清单 |
 | **从真实页面生成** ✅ | 路由 = 文件系统事实；模块号与模块名 = 页面**自己写的文档注释**；分组名 = 蓝图原文。三样都不是编的 |
 
 ⇒ 定 `tools/codegen/build-domain-modules.mjs`：扫 `apps/web/src/app` 下所有 `page.tsx`，
 从文档注释抽模块号与模块名，从蓝图功能树抽 L2 / L3 分组名，
 生成 `apps/web/src/lib/domain-modules.generated.ts`（393 条 / 27 个域）。
 
-**抽不到模块号的页面一律跳过**（46 个，多半是 `CatalogWorkspace kind="research"` 这类
-薄壳页）—— 宁可少列，也不编一个名字出来。
+**抽不到模块号的页面一律跳过**（46 个：20 个 `/org/*` 账户域页面、7 个域根、
+19 个薄壳页如 `/products/sku` `/settings/profile`）—— 宁可少列，也不编一个名字出来。
+（实测这 46 个里只有 1 个是 `CatalogWorkspace kind="research"` 薄壳页；
+原先以为「多半是 research 薄壳页」是**没核过的印象**，已按生成器实际输出更正。）
 
 **同步守卫**：`apps/web/src/lib/domain-modules.test.ts` 重新生成一遍与仓库里的文件
 **逐字比对**，并逐条验「路由真的有 page.tsx」「模块名逐字等于页面文档注释里的那个」。
@@ -66,7 +68,7 @@
 | 同上 · 整改凭证 | `'evidence.pdf'` + `'整改凭证'` | 引用/说明二选一即可 ⇒ **真的落库**，攒出一批指向不存在文件的凭证 | 用户自己填引用或说明 |
 | 同上 · 扣款 | `penaltyAmount: 100` / `'USD'` | 扣款必须给金额与币种 ⇒ **真的落库**，一笔凭空扣款还跟着店铺走进 12 财务 | 用户填金额与币种 |
 
-**取舍**：用 `window.prompt`（仓库惯例，128 处在用）而不是新造弹窗 ——
+**取舍**：用 `window.prompt`（仓库惯例：改动前全仓 128 处在用，本轮又加了 10 处）而不是新造弹窗 ——
 四处输入都是一两行文本，弹窗的成本大于收益。校验逻辑落在模型层的纯函数
 （`buildSubjectInput` / `buildRemediationInput` / `buildEvidenceInput` / `buildDeductionInput`），
 这样能单测。
@@ -82,17 +84,20 @@
 
 - Helm `starcon-backend`：`web.publicUrl` 为空或仍是 `starcon.example.com` ⇒ `fail`。
   留着占位值的话，渠道 OAuth 授权完成会把浏览器送进不存在的域名，**安装过程一声不响**。
-- Helm `starcon-web`：`ingress.host` 仍是示例值 ⇒ `fail`（后端 chart 早就有这道守卫）。
+  （该 chart 原有的守卫只管 `postgres.host` 为空，不管 `publicUrl` 是不是示例值。）
+- Helm `starcon-web`：`ingress.host` 仍是示例值 ⇒ `fail`。这个 chart 改动前**一道守卫都没有**
+  （`ingress.yaml` 里 `fail` 出现 0 次），本轮新加，与后端 chart 原有守卫同一档。
 - `docker-compose.dev.yml`：口令从 env 注入且**缺了直接失败**（`${VAR:?…}`），
   端口全部绑 `127.0.0.1`（此前是 `5432:5432` 这种全网卡写法）。
   `scripts/bootstrap.sh` 生成 `.env` 时把口令换成随机值 —— 仓库里那个
   `starcon/starcon` 弱口令从此只存在于 `.env.example` 的占位里。
 
-**Helm 那两条去了另一个分支**：两个 chart 本身还在 PR #76
+**Helm 那两条去了另一个分支**：写作时两个 chart 本身还在 PR #76
 （`feat/helm-kubernetes-deployment`）里没合进 `main`，而守卫必须改的是那两个
 chart 的文件 —— 所以守卫跟着 chart 走，提交到该分支（`1829cec9`），
 本分支只留 dev compose 那一半。否则把本分支合进 `main` 会顺手把 PR #76 的内容
 也带进去，变成「借道合入别人的 PR」。
+（收尾时 PR #76 也已合入 `main`，见「合并结果」。）
 
 ### 6. 交付状态字段：**删掉**，不是改对
 
@@ -137,7 +142,7 @@ chart 的文件 —— 所以守卫跟着 chart 走，提交到该分支（`1829
 
 两个 PR 的改动文件**零重叠**（`comm -12` 为空），互不借道；合并走 merge commit
 （与仓库既有历史一致）。两个 PR 的 CI 各 16 个作业全绿（含 `Quality Gate`），
-合入后 main 上那轮 run 同样全绿。
+合入后 main 上那轮 run（`41884967597`，对应 `19fbe465`）同样全绿。
 
 **合入顺序**：先 #77 再 #76。#77 合入后 main 前进，GitHub 对 #76 重跑了一轮 CI
 （run `41879522080`），那轮把 #76 的 head 对着「已含 #77 的 main」验了一遍 ——
@@ -145,13 +150,17 @@ chart 的文件 —— 所以守卫跟着 chart 走，提交到该分支（`1829
 
 ## 后续待办
 
-- **域首页只列得出模块，进不去模块** —— 导航侧仍只有 31 个任务页，
-  另有 400+ 真实页面在文件系统里却不在菜单。域索引解决了「域首页骗人」，
+- **域首页只列得出模块，进不去模块** —— 导航侧仍只有 **37 个任务页**
+  （`TASK_PAGES` 76 条里 `implemented: true` 的 50 条中，落在 14 个系统一级域下的那 37 条），
+  另有 **443 个真实 `page.tsx` 路由**在文件系统里却不在菜单。域索引解决了「域首页骗人」，
   但「侧栏看不到某个模块」这件事还在（属于导航信息架构问题，不是假数据问题）。
 - **`apps/web/src/components/platform-order-sync` 的模板**仍是「真实写入」入口，
   已把身份标成 `示例` / `EXAMPLE-`、`skuId` 留空，但**还没有**上传式取证。
-- **46 个抽不到模块号的页面**（薄壳页）不在域索引里。若要让它们也进去，
-  得先把模块号写进这些页面的文档注释 —— 那是一次单独的批量改动。
+- **46 个抽不到模块号的页面**不在域索引里，构成是：20 个 `/org/*` 账户域页面、
+  7 个域根（`/pricing` `/crm` `/logistics` `/purchase` `/supply` `/warehouse` `/profit`，
+  它们现在渲染域索引、自身不是模块）、19 个薄壳页（`/products/sku` `/products/media`
+  `/settings/profile` 之类）。若要让后 19 个也进去，得先把模块号写进这些页面的文档注释 ——
+  那是一次单独的批量改动；前 27 个要么属于账户域、要么本来就是域根，未必该进。
 - **`AccountMenu`（`packages/ui`）** 里的「体验用户」原型身份：只被 `/styleguide` 走到，
   UI 已自陈「交互原型 · 未接入真实账户」，暂按「诚实原型」处理，没动。
 - **夹具写死日期是同一族问题，但本轮没碰** —— backlog 条目
