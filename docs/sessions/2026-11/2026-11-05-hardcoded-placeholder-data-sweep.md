@@ -128,6 +128,21 @@ chart 的文件 —— 所以守卫跟着 chart 走，提交到该分支（`1829
 - `infra/helm/starcon-backend/{values.yaml,templates/_helpers.tpl}`、`infra/helm/starcon-web/templates/ingress.yaml`
   —— **这条去了 PR #76 的分支**（见「决策 5」）
 
+## 合并结果
+
+| PR | 分支 | 内容 | 合入 main |
+| --- | --- | --- | --- |
+| [#77](https://github.com/sugar-hit/starcon/pull/77) | `fix/remove-hardcoded-placeholder-data` | 本轮全部修复（7 个 commit） | `76fa3ca8` |
+| [#76](https://github.com/sugar-hit/starcon/pull/76) | `feat/helm-kubernetes-deployment` | Helm chart + 占位地址守卫 `1829cec9` | `19fbe465` |
+
+两个 PR 的改动文件**零重叠**（`comm -12` 为空），互不借道；合并走 merge commit
+（与仓库既有历史一致）。两个 PR 的 CI 各 16 个作业全绿（含 `Quality Gate`），
+合入后 main 上那轮 run 同样全绿。
+
+**合入顺序**：先 #77 再 #76。#77 合入后 main 前进，GitHub 对 #76 重跑了一轮 CI
+（run `41879522080`），那轮把 #76 的 head 对着「已含 #77 的 main」验了一遍 ——
+比单看各自分支更严格，绿了才合。
+
 ## 后续待办
 
 - **域首页只列得出模块，进不去模块** —— 导航侧仍只有 31 个任务页，
@@ -139,3 +154,8 @@ chart 的文件 —— 所以守卫跟着 chart 走，提交到该分支（`1829
   得先把模块号写进这些页面的文档注释 —— 那是一次单独的批量改动。
 - **`AccountMenu`（`packages/ui`）** 里的「体验用户」原型身份：只被 `/styleguide` 走到，
   UI 已自陈「交互原型 · 未接入真实账户」，暂按「诚实原型」处理，没动。
+- **夹具写死日期是同一族问题，但本轮没碰** —— backlog 条目
+  [`2026-10-2026-10-26-hardcoded-fixture-dates-self-failing`](../backlog/2026-10-2026-10-26-hardcoded-fixture-dates-self-failing.md)
+  记的是**测试夹具**把「昨天」写成绝对日期、到点自己变红那一类。本轮只修了一处前端默认区间
+  （`labor-efficiency-workspace.tsx` 改用模型层 `defaultRange()`），后端夹具那批仍是系统性待办，
+  且按该条目的判定形状要求**逐条判、不许批量替换**。
