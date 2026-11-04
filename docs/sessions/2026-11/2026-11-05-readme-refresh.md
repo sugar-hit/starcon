@@ -1,14 +1,17 @@
-# 2026-11-04: 主页 README 与架构图刷新 —— 进度口径从 32.7% 对齐到 100%
+# 2026-11-05: 主页 README 全面刷新 —— 事实对齐、换 logo、补更新时间、中英文重写
 
 ## 摘要
 
 仓库主页 README 停留在 **2026-10-15** 的快照，已经和 main 脱节：后端服务从 6 个
 增加到 9 个（新增 `finance` / `reporting` / `platform`），交付台账从 152/465（32.7%）
 推进到 **465/465（100.0%）**，而 README 仍写着「465 个规划模块，152 个已交付」。
-本轮把 README（中英文）与 `docs/design/readme/architecture.svg` 一起刷到当前状态，
-经 PR #75 合入。
+本轮分两批做完，经 PR #75 合入：
 
-本轮只做文档：没有运行时代码、依赖、迁移或数据库改动。
+1. **事实对齐**：进度表、端口表、架构图、仓库结构、演示路线全部刷到当前状态；
+2. **视觉与文案**：换 logo（app icon + 深浅色适配）、补 Spring Boot / PostgreSQL
+   两个 badge、文末加更新时间、中英文两版全文重写。
+
+全程只做文档：没有运行时代码、依赖、迁移或数据库改动。
 
 ## 决策 / 结论
 
@@ -27,16 +30,29 @@
    apps/notification-gateway、workers/*、services/*、infra/* 在仓库结构里明确写成
    脚手架；packages 里只有 `ui`（设计系统）与 `api-contracts`（OpenAPI 生成物）
    真正有实现，其余仍是占位包 —— 不写成「15 个共享库」这种会误导的措辞。
-6. **推送路径走分支 + PR**：AGENTS.md 规定分支命名 `<type>/<ticket-id>-<short-desc>`、
+6. **logo 换成应用图标，并用 `<picture>` 适配深浅色**：原来的裸 mark（`logo-mark-brand.svg`）
+   在 README 顶部像一枚孤零零的贴纸；换成 `logo-app-icon-dark.svg`（蓝底白标的圆角
+   app icon，96×96），并用 `<picture>` 让 GitHub 深色主题下切到浅色版
+   `logo-app-icon-light.svg`。这是品牌规范 `docs/design/brand-source-b1-refined.png`
+   里明确列出的「深色 App Icon / 浅色 App Icon」用法，**没有另造图形**。
+7. **badge 补到 6 枚**：新增 `spring-boot.svg`、`postgresql.svg`，与既有的
+   java / next / typescript / license badge 同规格（24px 高、圆角 5、左灰右彩）。
+8. **更新时间写在文末**：`<sub>Last reviewed against main on 2026-11-05 · 提交历史 ·
+   贡献者 · Issues</sub>`。README 是静态文件，没有自动时间戳机制，所以**写清楚
+   「对齐哪个分支、哪一天」比只写一个日期更重要**。
+9. **推送路径走分支 + PR**：AGENTS.md 规定分支命名 `<type>/<ticket-id>-<short-desc>`、
    禁止直接 push main。用户在「直接推 main」与「推分支 + 开 PR」之间选了后者，
    分支为 `docs/readme-refresh`。
 
 ## 涉及文件
 
-- `README.md` — 英文主页：实现进度、端口表、亮点、演示路线、仓库结构、开发命令
-- `README.zh-CN.md` — 中文主页，与英文版逐段对齐
+- `README.md` — 英文主页：实现进度、端口表、亮点、演示路线、仓库结构、开发命令、
+  logo、badge、更新时间
+- `README.zh-CN.md` — 中文主页，与英文版逐段对齐（中文版按中文的语感重写，
+  不是照着英文逐句翻译）
 - `docs/design/readme/architecture.svg` — 服务架构图，6 个服务补到 9 个
-- `docs/sessions/2026-11/2026-11-04-readme-refresh.md` — 本记录
+- `docs/design/readme/spring-boot.svg`、`docs/design/readme/postgresql.svg` — 新 badge
+- `docs/sessions/2026-11/2026-11-05-readme-refresh.md` — 本记录
 
 ## 关键 trade-off / 讨论
 
@@ -48,14 +64,36 @@
   任务接口的存在不等于外部平台已完成真实连接」。**诚实的前提 + 明确的限定词**，
   比回避数字更安全。
 
-**架构图改造成本 vs 收益。** 改图要手工排 9 个方块 SVG，但 README 里那张图原来
-只有 6 个服务，而正文已经按 9 个服务描述 —— 图与文互相打脸比没有图更糟。收益大于
-成本，做了。
+**logo 用 app icon 还是用 lockup（带 STARCON 字标）？** 选 app icon。
+
+- lockup（`logo-lockup.svg`，232×64）自带「STARCON / Commerce OS」字标，但 README
+  下方已经有 `# starcon` 一级标题，两者叠在一起会重复；而且 GitHub 上 232×64 的
+  横版图在窄屏上偏小。
+- app icon 是正方形、深浅两版都在品牌规范里，96×96 居中最稳，也更像「这个产品」
+  而不是「一张贴纸」。
+
+**README 的中英文怎么保持一致？** 保持**结构一致、文案各自地道**。
+
+- 两版的小节顺序、表格列、锚点一一对应，读者对照着看不迷路；
+- 但中文版重写句子（例：英文 "Cross-platform work stops being reconciliation and
+  starts being routine." → 中文「跨平台协作于是从『对账』变回『日常』」），
+  不做逐句直译，避免中英夹杂的翻译腔。
 
 **根 README 受 prettier 管辖，`docs/` 不受。** 根目录的 `README.md` /
 `README.zh-CN.md` 在 prettier 的管辖范围内（`.prettierignore` 只排除了 `docs/`），
 所以表格会被重排成对齐写法；`docs/` 下的表格走仓库的紧凑写法约定（`| --- | --- |`）。
 本轮两种风格各自保持原样，没有互相污染。
+
+**共享工作区被并发进程切分支怎么办？** 另开 worktree，不抢主目录。
+
+- 本轮第二批开工时，主工作区被另一个 agent（Helm / K8s 部署那条线）切回了 `main`，
+  我的分支改动因此从工作区「消失」——内容没丢（已在分支与远端），但工作区状态
+  被别人接管了。
+- 处置：按仓库既有约定（`/Users/guan/Projects/starcon-worktrees/<name>`）另开
+  `starcon-worktrees/readme` 独立 worktree 干活，主工作区一行不碰；改完把主目录里
+  自己那两份 README 还原，避免被别人顺手提交进去。
+- **教训**：同一个仓库里有多条 agent 线并行时，改分支前先看 `git worktree list`，
+  不要在共享主目录里切来切去。
 
 ## 后续待办
 
@@ -74,6 +112,7 @@
 - PR：<https://github.com/sugar-hit/starcon/pull/75>
 - 交付台账：`docs/product/capability-blueprint/module-progress.md`
 - 功能蓝图：`docs/product/capability-blueprint/README.md`
+- 品牌规范：`docs/design/brand-source-b1-refined.png` · `docs/design/visual-spec.md`
 - ADR-0004（服务边界）：`docs/decisions/0004-java-spring-boot-microservices.md`
 - ADR-0005（租户层级与页面 RBAC）：`docs/decisions/0005-tenant-hierarchy-and-page-rbac.md`
 - 相关会话：`docs/sessions/2026-11/2026-11-04-nanosecond-microsecond-boundary.md`（CI 矩阵拆分）
