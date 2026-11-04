@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import {
   AMOUNT_TOLERANCE,
@@ -10,6 +12,8 @@ import {
   documentStatusLabel,
   errorCodeLabel,
   eventOutcomeLabel,
+  eventWindowEnd,
+  eventWindowStart,
   fmt,
   moment,
   money,
@@ -182,6 +186,77 @@ describe('9.1.2.1 平台订单同步前端模型', () => {
       expect(address.countryCode).toBe('US');
       expect(address.recipientName).toBeDefined();
       expect(address.addressLine1).toBeDefined();
+    });
+
+    it('🔴 模板里的身份必须带「示例」标记，不能看着像真实买家', () => {
+      // 这一栏是**真实写入**：留一个像真的买家 / 收件人 / 单号，
+      // 就有人会忘了改，于是订单带着假买家进了真实数据。
+      const template = EVENT_TEMPLATE as Record<string, unknown>;
+      expect(String(template.buyerId)).toMatch(/示例|EXAMPLE/i);
+      expect(String(template.buyerName)).toMatch(/示例|EXAMPLE/i);
+      expect(String(template.externalOrderNo)).toMatch(/示例|EXAMPLE/i);
+      const address = template.shippingAddress as Record<string, unknown>;
+      expect(String(address.recipientName)).toMatch(/示例|EXAMPLE/i);
+      expect(String(address.recipientEmail)).toMatch(/示例|EXAMPLE/i);
+    });
+
+    it('🔴 模板的 skuId 留空：必须由操作者填真实的 SKU id', () => {
+      // 填一个编出来的 UUID 只会得到一句「SKU 不存在」，
+      // 那更像系统坏了，不像「这里要你自己填」。
+      const template = EVENT_TEMPLATE as Record<string, unknown>;
+      const lines = template.lines as Array<Record<string, unknown>>;
+      expect(lines[0]?.skuId).toBe('');
+    });
+  });
+
+  describe('🔴 补拉窗口按报文自己的时刻推，不写死', () => {
+    it('窗口覆盖事件的下单 / 更新时刻', () => {
+      const payload = {
+        platformPlacedAt: '2026-03-01T08:00:00Z',
+        platformUpdatedAt: '2026-03-01T09:30:00Z',
+      };
+      const start = Date.parse(eventWindowStart(payload));
+      const end = Date.parse(eventWindowEnd(payload));
+      expect(start).toBeLessThanOrEqual(Date.parse('2026-03-01T08:00:00Z'));
+      expect(end).toBeGreaterThanOrEqual(Date.parse('2026-03-01T09:30:00Z'));
+      expect(end).toBeGreaterThan(start);
+    });
+
+    it('🔴 窗口不落在写死的某一段日期上', () => {
+      const payload = { platformPlacedAt: '2027-11-20T12:00:00Z' };
+      expect(eventWindowStart(payload)).not.toContain('2026-03-01');
+      expect(eventWindowEnd(payload)).not.toContain('2026-03-02');
+    });
+
+    it('报文里没有时刻时退回「此刻附近」，而不是某段写死的日期', () => {
+      const start = Date.parse(eventWindowStart({}));
+      const now = Date.now();
+      expect(Math.abs(start - now)).toBeLessThanOrEqual(3600_000);
+    });
+  });
+
+  describe('🔴 重放面板不许有兜底默认值', () => {
+    // 「手工重放平台事件」是**真实写入**：
+    // 平台 / 店铺悄悄兜底成 'AMAZON' / 'SHOP-A'，等于把订单挂到不存在的店铺名下；
+    // 补拉窗口写死一段日期，则会与运营粘进来的真实报文对不上。
+    const WORKSPACE = readFileSync(
+      fileURLToPath(new URL('./platform-order-sync-workspace.tsx', import.meta.url)),
+      'utf8',
+    );
+
+    it('平台与店铺没有硬编码兜底', () => {
+      expect(WORKSPACE).not.toMatch(/\|\|\s*'AMAZON'/);
+      expect(WORKSPACE).not.toMatch(/\|\|\s*'SHOP-A'/);
+    });
+
+    it('补拉窗口没有写死的日期', () => {
+      expect(WORKSPACE).not.toMatch(/windowStart:\s*'20\d\d-\d\d-\d\d/);
+      expect(WORKSPACE).not.toMatch(/windowEnd:\s*'20\d\d-\d\d-\d\d/);
+    });
+
+    it('窗口改由报文自己的时刻推出来', () => {
+      expect(WORKSPACE).toContain('eventWindowStart');
+      expect(WORKSPACE).toContain('eventWindowEnd');
     });
   });
 
