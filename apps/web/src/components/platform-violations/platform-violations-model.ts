@@ -49,6 +49,9 @@ export const REMEDIATION_STATUSES = [
 /** 涉及主体类型值域。 */
 export const SUBJECT_TYPES = ['SKU', 'LISTING', 'ORDER'] as const;
 
+/** 🔴 整改凭证类型值域（与后端 addEvidence 的白名单逐字一致）。 */
+export const EVIDENCE_TYPES = ['DOCUMENT', 'IMAGE', 'VIDEO', 'LINK', 'NOTE'] as const;
+
 /** 🔴 来源值域：平台同步来的 / 人工登记的。 */
 export const SOURCES = ['PLATFORM_SYNC', 'MANUAL'] as const;
 
@@ -593,7 +596,151 @@ export async function fetchSyncRuns(
 }
 
 // ==================================================================
-// 展示口径（**不重算后端的结论**）
+// 写入入参整理（🔴 写进真实违规记录的东西，一律不许带占位值）
+// ==================================================================
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** UUID 形状校验。 */
+export function isUuid(value: string): boolean {
+  return UUID_RE.test(value.trim());
+}
+
+/** 整理结果：要么是能提交的入参，要么是一句能直接显示给用户的错误。 */
+export type Built<T> = { ok: true; value: T } | { ok: false; error: string };
+
+/** 主体挂载的入参形状（与后端 attachSubjects 的入参逐字段对齐）。 */
+export interface SubjectInput {
+  subjectType: string;
+  subjectRef: string;
+  skuId: string | null;
+  listingId: string | null;
+  orderRef: string | null;
+  affectedQuantity: number | null;
+  note: string;
+}
+
+/**
+ * 🔴 把用户填的主体整理成后端要的形状。
+ *
+ * <p>**不接受**「先挂一个占位主体，以后再改」：
+ *
+ * <ul>
+ *   <li>后端会校验 —— SKU 必须给 {@code skuId}、LISTING 必须给 {@code listingId}、
+ *       ORDER 必须给 {@code orderRef}，占位值只会 422 掉；</li>
+ *   <li>就算后端不校验，一条指向不存在对象的主体进了真实违规记录，
+ *       事后批量定位受影响 listing 时就会拿着假 id 去查 —— 那比不挂更糟。</li>
+ * </ul>
+ *
+ * <p>所以这里**没有默认值**：填不出真实 id 就返回错误，不产出可提交的入参。
+ */
+export function buildSubjectInput(input: {
+  subjectType: string;
+  subjectRef: string;
+}): Built<SubjectInput> {
+  const type = input.subjectType.trim().toUpperCase();
+  if (!(SUBJECT_TYPES as readonly string[]).includes(type)) {
+    return { ok: false, error: '主体类型只能是 SKU / LISTING / ORDER' };
+  }
+  const ref = input.subjectRef.trim();
+  if (!ref) return { ok: false, error: '主体引用不能为空' };
+  if (type !== 'ORDER' && !isUuid(ref)) {
+    return { ok: false, error: `${type} 的 id 必须是合法 UUID` };
+  }
+  return {
+    ok: true,
+    value: {
+      subjectType: type,
+      subjectRef: ref,
+      skuId: type === 'SKU' ? ref : null,
+      listingId: type === 'LISTING' ? ref : null,
+      orderRef: type === 'ORDER' ? ref : null,
+      affectedQuantity: null,
+      note: '',
+    },
+  };
+}
+
+/**
+ * 🔴 整改要求的入参整理。
+ *
+ * <p>后端只校验「要求内容不能为空」，所以任何一句写得通顺的占位文案都能落库 ——
+ * 而每张违规单都长出同一句「按平台通知补齐材料」，事后追责时全是假线索。
+ * 这里要求用户自己写清楚**要做什么**，责任人留空即可。
+ */
+export function buildRemediationInput(input: {
+  requirement: string;
+  ownerRef: string;
+  dueAt: string;
+}): Built<{ requirement: string; ownerRef: string; dueAt: string | null }> {
+  const requirement = input.requirement.trim();
+  if (!requirement) return { ok: false, error: '整改要求不能为空' };
+  const dueAt = input.dueAt.trim();
+  if (dueAt && !/^\d{4}-\d{2}-\d{2}$/.test(dueAt)) {
+    return { ok: false, error: '期限格式应为 YYYY-MM-DD' };
+  }
+  return {
+    ok: true,
+    value: {
+      requirement,
+      ownerRef: input.ownerRef.trim(),
+      dueAt: dueAt || null,
+    },
+  };
+}
+
+/**
+ * 🔴 整改凭证的入参整理。
+ *
+ * <p>后端要求「引用或说明至少给一个」，所以写死一个 {@code evidence.pdf} 就能过 ——
+ * 于是一批指向同一个不存在文件的「凭证」进了取证台账。这里让用户自己给引用或说明。
+ */
+export function buildEvidenceInput(input: {
+  evidenceType: string;
+  evidenceRef: string;
+  summary: string;
+}): Built<{ evidenceType: string; evidenceRef: string; summary: string }> {
+  const type = input.evidenceType.trim().toUpperCase();
+  if (!(EVIDENCE_TYPES as readonly string[]).includes(type)) {
+    return { ok: false, error: `凭证类型只能是 ${EVIDENCE_TYPES.join(' / ')}` };
+  }
+  const ref = input.evidenceRef.trim();
+  const summary = input.summary.trim();
+  if (!ref && !summary) {
+    return { ok: false, error: '凭证至少要给一个引用或一句说明' };
+  }
+  return { ok: true, value: { evidenceType: type, evidenceRef: ref, summary } };
+}
+
+/**
+ * 🔴 扣款的入参整理。
+ *
+ * <p>后端要求扣款必须给金额与币种（非扣款措施则必须**不带**金额），
+ * 所以「点一下按钮就记一笔 100 USD」是能落库的 —— 一条凭空出现的扣款
+ * 会跟着该店铺走完全流程（扣款金额是要进 12 财务的）。
+ * 这里金额与币种都由用户给出，且金额必须大于 0。
+ */
+export function buildDeductionInput(input: {
+  amount: string;
+  currency: string;
+}): Built<{ measure: string; penaltyAmount: number; penaltyCurrency: string }> {
+  const raw = input.amount.trim();
+  const amount = Number(raw);
+  if (!raw || !Number.isFinite(amount) || amount <= 0) {
+    return { ok: false, error: '扣款金额必须是一个大于 0 的数字' };
+  }
+  const currency = input.currency.trim().toUpperCase();
+  if (!/^[A-Z]{3}$/.test(currency)) {
+    return { ok: false, error: '扣款币种必须是三位大写字母（如 USD）' };
+  }
+  return {
+    ok: true,
+    value: { measure: 'DEDUCTION', penaltyAmount: amount, penaltyCurrency: currency },
+  };
+}
+
+// ==================================================================
+// 展示口径（**不重算后端的结论**)
 // ==================================================================
 
 /**
