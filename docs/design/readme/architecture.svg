@@ -1,48 +1,66 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 390" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 380" role="img" aria-labelledby="title desc">
 <title id="title">starcon service architecture</title>
-<desc id="desc">The Next.js workspace connects to six Java services, each owning its own PostgreSQL database. Authorized APIs verify identity and permissions.</desc>
-<rect width="1000" height="390" rx="20" fill="#f8fafc"/>
+<desc id="desc">The Next.js workspace connects to nine Java services, each owning its own PostgreSQL database. Authorized APIs verify identity and permissions.</desc>
+<rect width="1000" height="380" rx="20" fill="#f8fafc"/>
 <g font-family="Arial,sans-serif" text-anchor="middle">
-<path d="M500 74v27M500 155v33M80 188h840" stroke="#94a3b8" stroke-width="2" fill="none"/>
-<rect x="385.0" y="30" width="230" height="44" rx="10" fill="#e0e7ff"/>
-<text x="500" y="58" fill="#0f172a" font-size="17">Browser workspace</text>
-<rect x="375.0" y="101" width="250" height="44" rx="10" fill="#dbeafe"/>
-<text x="500" y="129" fill="#0f172a" font-size="17">Next.js / TypeScript</text>
-<path d="M87 188v20M87 268v26" stroke="#94a3b8" stroke-width="2"/>
-<rect x="15" y="208" width="144" height="60" rx="10" fill="#1d4ed8"/>
-<text x="87" y="233" fill="#fff" font-size="16" font-weight="bold">identity</text>
-<text x="87" y="253" fill="#dbeafe" font-size="12">Authorization</text>
-<rect x="15" y="294" width="144" height="44" rx="10" fill="#e2e8f0"/>
-<text x="87" y="321" fill="#334155" font-size="13">identity DB</text>
-<path d="M252 188v20M252 268v26" stroke="#94a3b8" stroke-width="2"/>
-<rect x="180" y="208" width="144" height="60" rx="10" fill="#1d4ed8"/>
-<text x="252" y="233" fill="#fff" font-size="16" font-weight="bold">catalog</text>
-<text x="252" y="253" fill="#dbeafe" font-size="12">Products</text>
-<rect x="180" y="294" width="144" height="44" rx="10" fill="#e2e8f0"/>
-<text x="252" y="321" fill="#334155" font-size="13">catalog DB</text>
-<path d="M417 188v20M417 268v26" stroke="#94a3b8" stroke-width="2"/>
-<rect x="345" y="208" width="144" height="60" rx="10" fill="#1d4ed8"/>
-<text x="417" y="233" fill="#fff" font-size="16" font-weight="bold">channel</text>
-<text x="417" y="253" fill="#dbeafe" font-size="12">Channels</text>
-<rect x="345" y="294" width="144" height="44" rx="10" fill="#e2e8f0"/>
-<text x="417" y="321" fill="#334155" font-size="13">channel DB</text>
-<path d="M582 188v20M582 268v26" stroke="#94a3b8" stroke-width="2"/>
-<rect x="510" y="208" width="144" height="60" rx="10" fill="#1d4ed8"/>
-<text x="582" y="233" fill="#fff" font-size="16" font-weight="bold">trade</text>
-<text x="582" y="253" fill="#dbeafe" font-size="12">Orders</text>
-<rect x="510" y="294" width="144" height="44" rx="10" fill="#e2e8f0"/>
-<text x="582" y="321" fill="#334155" font-size="13">trade DB</text>
-<path d="M747 188v20M747 268v26" stroke="#94a3b8" stroke-width="2"/>
-<rect x="675" y="208" width="144" height="60" rx="10" fill="#1d4ed8"/>
-<text x="747" y="233" fill="#fff" font-size="16" font-weight="bold">warehouse</text>
-<text x="747" y="253" fill="#dbeafe" font-size="12">Inventory</text>
-<rect x="675" y="294" width="144" height="44" rx="10" fill="#e2e8f0"/>
-<text x="747" y="321" fill="#334155" font-size="13">warehouse DB</text>
-<path d="M912 188v20M912 268v26" stroke="#94a3b8" stroke-width="2"/>
-<rect x="840" y="208" width="144" height="60" rx="10" fill="#1d4ed8"/>
-<text x="912" y="233" fill="#fff" font-size="16" font-weight="bold">crm</text>
-<text x="912" y="253" fill="#dbeafe" font-size="12">Support</text>
-<rect x="840" y="294" width="144" height="44" rx="10" fill="#e2e8f0"/>
-<text x="912" y="321" fill="#334155" font-size="13">crm DB</text>
-<text x="500" y="370" fill="#475569" font-size="13">Java 21 / Spring Boot · Authorized APIs · Independent databases · PostgreSQL RLS</text>
+<path d="M500 68v24M500 136v28M68 164h864" stroke="#94a3b8" stroke-width="2" fill="none"/>
+<rect x="385.0" y="24" width="230" height="44" rx="10" fill="#e0e7ff"/>
+<text x="500" y="52" fill="#0f172a" font-size="17">Browser workspace</text>
+<rect x="375.0" y="92" width="250" height="44" rx="10" fill="#dbeafe"/>
+<text x="500" y="120" fill="#0f172a" font-size="17">Next.js / TypeScript</text>
+<path d="M68 164v26M68 252v26" stroke="#94a3b8" stroke-width="2"/>
+<rect x="20" y="190" width="96" height="62" rx="10" fill="#1d4ed8"/>
+<text x="68" y="216" fill="#fff" font-size="13" font-weight="bold">identity</text>
+<text x="68" y="236" fill="#dbeafe" font-size="9">Authorization</text>
+<rect x="20" y="278" width="96" height="40" rx="10" fill="#e2e8f0"/>
+<text x="68" y="303" fill="#334155" font-size="10">identity DB</text>
+<path d="M176 164v26M176 252v26" stroke="#94a3b8" stroke-width="2"/>
+<rect x="128" y="190" width="96" height="62" rx="10" fill="#1d4ed8"/>
+<text x="176" y="216" fill="#fff" font-size="13" font-weight="bold">catalog</text>
+<text x="176" y="236" fill="#dbeafe" font-size="9">Products</text>
+<rect x="128" y="278" width="96" height="40" rx="10" fill="#e2e8f0"/>
+<text x="176" y="303" fill="#334155" font-size="10">catalog DB</text>
+<path d="M284 164v26M284 252v26" stroke="#94a3b8" stroke-width="2"/>
+<rect x="236" y="190" width="96" height="62" rx="10" fill="#1d4ed8"/>
+<text x="284" y="216" fill="#fff" font-size="13" font-weight="bold">channel</text>
+<text x="284" y="236" fill="#dbeafe" font-size="9">Channels</text>
+<rect x="236" y="278" width="96" height="40" rx="10" fill="#e2e8f0"/>
+<text x="284" y="303" fill="#334155" font-size="10">channel DB</text>
+<path d="M392 164v26M392 252v26" stroke="#94a3b8" stroke-width="2"/>
+<rect x="344" y="190" width="96" height="62" rx="10" fill="#1d4ed8"/>
+<text x="392" y="216" fill="#fff" font-size="13" font-weight="bold">trade</text>
+<text x="392" y="236" fill="#dbeafe" font-size="9">Orders</text>
+<rect x="344" y="278" width="96" height="40" rx="10" fill="#e2e8f0"/>
+<text x="392" y="303" fill="#334155" font-size="10">trade DB</text>
+<path d="M500 164v26M500 252v26" stroke="#94a3b8" stroke-width="2"/>
+<rect x="452" y="190" width="96" height="62" rx="10" fill="#1d4ed8"/>
+<text x="500" y="216" fill="#fff" font-size="13" font-weight="bold">warehouse</text>
+<text x="500" y="236" fill="#dbeafe" font-size="9">Inventory</text>
+<rect x="452" y="278" width="96" height="40" rx="10" fill="#e2e8f0"/>
+<text x="500" y="303" fill="#334155" font-size="10">warehouse DB</text>
+<path d="M608 164v26M608 252v26" stroke="#94a3b8" stroke-width="2"/>
+<rect x="560" y="190" width="96" height="62" rx="10" fill="#1d4ed8"/>
+<text x="608" y="216" fill="#fff" font-size="13" font-weight="bold">crm</text>
+<text x="608" y="236" fill="#dbeafe" font-size="9">Support</text>
+<rect x="560" y="278" width="96" height="40" rx="10" fill="#e2e8f0"/>
+<text x="608" y="303" fill="#334155" font-size="10">crm DB</text>
+<path d="M716 164v26M716 252v26" stroke="#94a3b8" stroke-width="2"/>
+<rect x="668" y="190" width="96" height="62" rx="10" fill="#1d4ed8"/>
+<text x="716" y="216" fill="#fff" font-size="13" font-weight="bold">finance</text>
+<text x="716" y="236" fill="#dbeafe" font-size="9">Finance</text>
+<rect x="668" y="278" width="96" height="40" rx="10" fill="#e2e8f0"/>
+<text x="716" y="303" fill="#334155" font-size="10">finance DB</text>
+<path d="M824 164v26M824 252v26" stroke="#94a3b8" stroke-width="2"/>
+<rect x="776" y="190" width="96" height="62" rx="10" fill="#1d4ed8"/>
+<text x="824" y="216" fill="#fff" font-size="13" font-weight="bold">reporting</text>
+<text x="824" y="236" fill="#dbeafe" font-size="9">Reports</text>
+<rect x="776" y="278" width="96" height="40" rx="10" fill="#e2e8f0"/>
+<text x="824" y="303" fill="#334155" font-size="10">reporting DB</text>
+<path d="M932 164v26M932 252v26" stroke="#94a3b8" stroke-width="2"/>
+<rect x="884" y="190" width="96" height="62" rx="10" fill="#1d4ed8"/>
+<text x="932" y="216" fill="#fff" font-size="13" font-weight="bold">platform</text>
+<text x="932" y="236" fill="#dbeafe" font-size="9">AI &amp; Ops</text>
+<rect x="884" y="278" width="96" height="40" rx="10" fill="#e2e8f0"/>
+<text x="932" y="303" fill="#334155" font-size="10">platform DB</text>
+<text x="500" y="356" fill="#475569" font-size="13">Java 21 / Spring Boot · Authorized APIs · Independent databases · PostgreSQL RLS</text>
 </g></svg>
