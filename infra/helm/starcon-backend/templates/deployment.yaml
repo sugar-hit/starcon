@@ -1,0 +1,145 @@
+{{/*
+=============================================================================
+Deployment —— 9 个后端服务各一个
+=============================================================================
+每个服务的配置 = common 深度覆盖 services.<name>（mergo 语义：
+标量覆盖、map 递归合并、列表整体替换），所以这里只需要写差异。
+*/}}
+{{- $root := . }}
+{{- range $name, $svcRaw := .Values.services }}
+{{- if $svcRaw.enabled }}
+{{- $cfg := mergeOverwrite (deepCopy $root.Values.common) (deepCopy $svcRaw) }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ printf "%s-%s" (include "starcon-backend.fullname" $root) $name }}
+  namespace: {{ $root.Release.Namespace }}
+  labels:
+    {{- include "starcon-backend.labels" $root | nindent 4 }}
+    starcon.io/service: {{ $name }}
+  {{- with $root.Values.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not $cfg.autoscaling.enabled }}
+  replicas: {{ $cfg.replicaCount }}
+  {{- end }}
+  revisionHistoryLimit: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      {{- include "starcon-backend.selectorLabels" $root | nindent 6 }}
+      starcon.io/service: {{ $name }}
+  template:
+    metadata:
+      labels:
+        {{- include "starcon-backend.selectorLabels" $root | nindent 8 }}
+        starcon.io/service: {{ $name }}
+        {{- with $cfg.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        {{- with $cfg.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with $root.Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "starcon-backend.serviceAccountName" $root }}
+      automountServiceAccountToken: false
+      {{- with $cfg.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      terminationGracePeriodSeconds: {{ $cfg.terminationGracePeriodSeconds }}
+      securityContext:
+        {{- toYaml $cfg.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ $name }}
+          image: {{ include "starcon-backend.image" (dict "ctx" $root "name" $name "image" $cfg.image) | quote }}
+          imagePullPolicy: {{ $cfg.image.pullPolicy | default $root.Values.global.imagePullPolicy }}
+          {{- with $cfg.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ $cfg.port }}
+              protocol: TCP
+          env:
+            {{- include "starcon-backend.serviceEnv" (dict "ctx" $root "name" $name "svc" $cfg "cfg" $cfg "secretName" (include "starcon-backend.secretName" (dict "ctx" $root "name" $name))) | nindent 12 }}
+            - name: JAVA_TOOL_OPTIONS
+              value: {{ $cfg.javaOpts | quote }}
+            - name: SERVER_PORT
+              value: {{ $cfg.port | quote }}
+            {{- if $cfg.migration.enabled }}
+            # 迁移由 pre-install / pre-upgrade 的 hook Job 单独跑，
+            # 这里关掉应用自带的 Flyway，避免多副本同时迁移。
+            - name: SPRING_FLYWAY_ENABLED
+              value: "false"
+            {{- end }}
+          {{- with $cfg.extraEnvFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            {{- include "starcon-backend.storageMounts" (dict "ctx" $root "name" $name "svc" $cfg) | nindent 12 }}
+            # 只读根文件系统下 JVM 仍然需要可写的临时目录
+            - name: tmp
+              mountPath: /tmp
+          resources:
+            {{- toYaml $cfg.resources | nindent 12 }}
+          {{- if $cfg.probes.startup }}
+          startupProbe:
+            tcpSocket:
+              port: http
+            {{- toYaml (omit $cfg.probes.startup "tcpSocket") | nindent 12 }}
+          {{- end }}
+          {{- if $cfg.probes.liveness }}
+          livenessProbe:
+            tcpSocket:
+              port: http
+            {{- toYaml (omit $cfg.probes.liveness "tcpSocket") | nindent 12 }}
+          {{- end }}
+          {{- if $cfg.probes.readiness }}
+          readinessProbe:
+            tcpSocket:
+              port: http
+            {{- toYaml (omit $cfg.probes.readiness "tcpSocket") | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 512Mi
+        {{- range $key, $st := $cfg.storage }}
+        {{- if $st.enabled }}
+        - name: {{ printf "%s-%s" $name (include "starcon-backend.storageKey" $key) | trunc 63 | trimSuffix "-" }}
+          persistentVolumeClaim:
+            claimName: {{ printf "%s-%s-%s" (include "starcon-backend.fullname" $root) $name (include "starcon-backend.storageKey" $key) | trunc 63 | trimSuffix "-" }}
+        {{- end }}
+        {{- end }}
+      {{- with $cfg.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $cfg.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $cfg.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $cfg.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
+{{- end }}

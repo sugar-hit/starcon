@@ -1,0 +1,48 @@
+{{/*
+=============================================================================
+NetworkPolicy（默认关闭）
+=============================================================================
+打开后的语义：
+  入向  只放行 Ingress 控制器
+  出向  后端服务 + DNS + 其余（外部 API）
+*/}}
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "starcon-web.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "starcon-web.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "starcon-web.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: {{ .Values.port }}
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/part-of: starcon
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: 443
+{{- end }}

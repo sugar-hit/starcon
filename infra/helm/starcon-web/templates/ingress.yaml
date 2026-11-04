@@ -1,0 +1,53 @@
+{{/*
+=============================================================================
+Ingress —— 前端对外入口
+=============================================================================
+⚠️ 前端有一道**同源校验**：写请求（POST/PUT/DELETE）会比对请求的 origin
+   与 request.nextUrl.origin，不一致就返回 403
+   （见 apps/web/src/lib/api-proxy.ts）。
+   request.nextUrl 来自 Next.js 对 X-Forwarded-Proto / X-Forwarded-Host 的解析，
+   所以 Ingress **必须**正确转发这两个头，否则所有写操作都会 403。
+   nginx-ingress 默认就带这两个头，不要用注解把它们覆盖掉。
+*/}}
+{{- if .Values.ingress.enabled }}
+{{- $hosts := list .Values.ingress.host }}
+{{- range .Values.ingress.extraHosts }}
+{{- $hosts = append $hosts . }}
+{{- end }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "starcon-web.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "starcon-web.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with .Values.ingress.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  {{- if .Values.ingress.tls.enabled }}
+  tls:
+    - hosts:
+        {{- range $hosts }}
+        - {{ . }}
+        {{- end }}
+      secretName: {{ include "starcon-web.tlsSecretName" . }}
+  {{- end }}
+  rules:
+    {{- range $hosts }}
+    - host: {{ . }}
+      http:
+        paths:
+          - path: {{ $.Values.ingress.path }}
+            pathType: {{ $.Values.ingress.pathType }}
+            backend:
+              service:
+                name: {{ include "starcon-web.fullname" $ }}
+                port:
+                  number: {{ $.Values.port }}
+    {{- end }}
+{{- end }}

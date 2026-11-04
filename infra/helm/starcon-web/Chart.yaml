@@ -1,0 +1,18 @@
+apiVersion: v2
+name: starcon-web
+description: starcon 前端 —— Next.js 15 standalone 的 Helm 部署件（服务端代理 9 个后端服务）
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+kubeVersion: ">=1.25.0-0"
+keywords:
+  - starcon
+  - erp
+  - nextjs
+  - frontend
+sources:
+  - https://github.com/starcon/starcon
+maintainers:
+  - name: starcon platform team
+annotations:
+  starcon.io/component: web

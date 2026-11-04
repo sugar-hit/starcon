@@ -1,0 +1,48 @@
+{{/*
+=============================================================================
+PersistentVolumeClaim —— 需要落盘的目录
+=============================================================================
+只给确实有状态的目录建卷：
+  catalog   商品图片
+  channel   渠道密钥配置 / 品牌授权书 / 认证扫描件
+  reporting 报表导出文件
+  platform  导入导出任务中间文件
+
+⚠️ 这些目录在镜像里已建好且属于 UID 10001；PVC 挂上去后由
+   podSecurityContext.fsGroup 保证组可写。
+*/}}
+{{- $root := . }}
+{{- range $name, $svcRaw := .Values.services }}
+{{- if $svcRaw.enabled }}
+{{- $cfg := mergeOverwrite (deepCopy $root.Values.common) (deepCopy $svcRaw) }}
+{{- range $key, $st := $cfg.storage }}
+{{- if $st.enabled }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ printf "%s-%s-%s" (include "starcon-backend.fullname" $root) $name (include "starcon-backend.storageKey" $key) | trunc 63 | trimSuffix "-" }}
+  namespace: {{ $root.Release.Namespace }}
+  labels:
+    {{- include "starcon-backend.labels" $root | nindent 4 }}
+    starcon.io/service: {{ $name }}
+  annotations:
+    # 删掉 Pod 时保留数据；删掉 PVC 时一并清理（按需改）
+    helm.sh/resource-policy: keep
+    {{- with $root.Values.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  accessModes:
+    {{- toYaml ($st.accessModes | default (list "ReadWriteOnce")) | nindent 4 }}
+  {{- $sc := $st.storageClass | default $root.Values.global.storageClass }}
+  {{- if $sc }}
+  storageClassName: {{ $sc }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ $st.size | default "5Gi" }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

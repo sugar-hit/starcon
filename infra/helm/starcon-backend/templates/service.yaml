@@ -1,0 +1,37 @@
+{{/*
+=============================================================================
+Service —— 每个服务一个 ClusterIP
+=============================================================================
+集群内互访用 <fullname>-<服务名>.<ns>.svc.cluster.local:<port>。
+这些 Service **不对外暴露**：浏览器只跟前端说话，前端做服务端代理
+（apps/web/src/lib/api-proxy.ts 的白名单放行）。
+*/}}
+{{- $root := . }}
+{{- range $name, $svcRaw := .Values.services }}
+{{- if $svcRaw.enabled }}
+{{- $cfg := mergeOverwrite (deepCopy $root.Values.common) (deepCopy $svcRaw) }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ printf "%s-%s" (include "starcon-backend.fullname" $root) $name }}
+  namespace: {{ $root.Release.Namespace }}
+  labels:
+    {{- include "starcon-backend.labels" $root | nindent 4 }}
+    starcon.io/service: {{ $name }}
+  {{- with $root.Values.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: {{ $cfg.port }}
+      targetPort: http
+      protocol: TCP
+  selector:
+    {{- include "starcon-backend.selectorLabels" $root | nindent 4 }}
+    starcon.io/service: {{ $name }}
+{{- end }}
+{{- end }}

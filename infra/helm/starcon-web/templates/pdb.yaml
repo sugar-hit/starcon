@@ -1,0 +1,23 @@
+{{/*
+=============================================================================
+PodDisruptionBudget
+=============================================================================
+*/}}
+{{- if .Values.pdb.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "starcon-web.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "starcon-web.labels" . | nindent 4 }}
+spec:
+  {{- if hasKey .Values.pdb "maxUnavailable" }}
+  maxUnavailable: {{ .Values.pdb.maxUnavailable }}
+  {{- else }}
+  minAvailable: {{ .Values.pdb.minAvailable | default 1 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "starcon-web.selectorLabels" . | nindent 6 }}
+{{- end }}
