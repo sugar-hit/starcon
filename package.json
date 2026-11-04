@@ -31,6 +31,8 @@
     "test:backend": "./deploy/scripts/backend-test.sh",
     "contracts:generate": "python3 tools/codegen/catalog-contracts.py",
     "test:codegen": "python3 -m unittest discover -s tools/codegen -p 'test_*.py'",
+    "domain-modules:generate": "node tools/codegen/build-domain-modules.mjs",
+    "domain-modules:check": "node tools/codegen/build-domain-modules.mjs --check",
     "progress:sync": "node tools/module-progress/sync.mjs",
     "progress:check": "node tools/module-progress/sync.mjs --check",
     "progress:lock": "node tools/module-progress/lock.mjs"
