@@ -1,11 +1,58 @@
+# ============================================================
+# starcon 后端服务镜像
+#
+# 一份 Dockerfile 出 9 个镜像：用 --build-arg SERVICE=<服务名> 选。
+# 例：--build-arg SERVICE=identity
+#
+# 镜像名约定：starcon/<服务名>:<tag>（与 infra/helm/starcon-backend 对齐）
+# ============================================================
+
+# ---- Stage 1: build ----
 FROM maven:3.9.9-eclipse-temurin-21 AS build
 WORKDIR /workspace
 COPY backend ./backend
-RUN --mount=type=cache,target=/root/.m2 mvn -f backend/pom.xml -B -ntp -DskipTests package
-FROM eclipse-temurin:21-jre
+
+# SERVICE 只决定构建哪个模块，它**不**出现在最终镜像里。
 ARG SERVICE
+
+# 只构建目标服务 + 它依赖的模块（父 pom + libraries/tenancy）。
+#
+# 为什么不一次构建全部 9 个服务：每个镜像最终只带走其中一个 jar，
+# 一次构建 9 个等于把编译量乘以 9；而 CI 要出 9 个镜像，总量会变成 81 次服务编译。
+#
+# ⚠️ jOOQ 代码生成在 `jooq-codegen` profile 里（需要活库），
+#    默认不激活 ⇒ 这里不需要数据库。
+# ⚠️ 服务之间没有互相依赖（各自只依赖 libraries/tenancy），
+#    所以 -pl + -am 不会漏掉任何东西。
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn -f backend/pom.xml -B -ntp -DskipTests \
+        -pl "services/${SERVICE}" -am package
+
+# 把产物收敛到固定路径 /tmp/service.jar。
+#
+# ⚠️ 这里**不能**把版本号写死。早先这里写的是 ${SERVICE}-0.1.0-SNAPSHOT.jar：
+#    版本一改（backend/pom.xml 的 <version>），这个 Dockerfile 就断，
+#    而且失败点在 COPY —— 表现为「镜像构建失败」，排查方向会被带偏
+#    （真正的原因是 pom 里的版本变了）。
+#
+#    改成构建后定位：target/ 下恰好一个 <服务名>-*.jar。
+#    · spring-boot repackage 留下的 *.jar.original 以 .original 结尾，不匹配 *.jar；
+#    · 找到 0 个或多个都直接失败，不猜 —— 猜错会带进一个错的 jar，
+#      而且要到服务运行时才暴露。
+RUN set -eux; \
+    dir="backend/services/${SERVICE}/target"; \
+    set -- "$dir/${SERVICE}-"*.jar; \
+    if [ ! -f "$1" ] || [ "$#" -ne 1 ]; then \
+        echo "期望恰好 1 个 ${SERVICE}-*.jar，实际找到 $(find "$dir" -maxdepth 1 -type f -name "${SERVICE}-*.jar" | wc -l) 个：" >&2; \
+        ls -1 "$dir" >&2 || true; \
+        exit 1; \
+    fi; \
+    cp "$1" /tmp/service.jar
+
+# ---- Stage 2: runtime ----
+FROM eclipse-temurin:21-jre
 WORKDIR /app
-COPY --from=build /workspace/backend/services/${SERVICE}/target/${SERVICE}-0.1.0-SNAPSHOT.jar /app/service.jar
+COPY --from=build /tmp/service.jar /app/service.jar
 # 数据根目录。
 #
 # 为什么必须在镜像里建好并授权：这些存储实现在**构造函数**里就
