@@ -321,23 +321,29 @@ export function moment(value: string | null | undefined): string {
  *
  * <p>刻意做成一个**可编辑的 JSON 模板**而不是一堆表单字段：
  * 平台事件是平台自己给的东西，运营手里通常已经有原始报文；
- * 让���把报文粘进来重放，比让人照着界面重新拼一遍更接近真实场景，
+ * 让他把报文粘进来重放，比让人照着界面重新拼一遍更接近真实场景，
  * 而且拼错字段名时后端会**明确拒收**（而不是半落地）。
+ *
+ * <p>🔴 **模板里的身份一律带 `示例` / `EXAMPLE-` 前缀**，而且 **`skuId` 留空**：
+ * 这一栏是**真实写入**，不是演练。留一个看起来像真的买家 / 收件人 / 单号，
+ * 就有人会忘了改，于是订单带着假买家进了真实数据。
+ * 留空的 `skuId` 会被后端的必填校验挡住（"skuId 不能为空"），
+ * 这比拿一个不存在的 UUID 去撞库、报一句「SKU 不存在」清楚得多。
  *
  * <p>模板里的字段名与后端 {@code PlatformOrderSyncEventInput} 逐字一致 ——
  * 改了一边另一边就会 400，不会「静默忽略」。
  */
 export const EVENT_TEMPLATE = {
   eventType: 'ORDER_CREATED',
-  externalOrderNo: 'AMZ-2026-0001',
+  externalOrderNo: 'EXAMPLE-AMZ-0001',
   platformStatus: 'Shipped',
   platformEventVersion: 1,
   platformPlacedAt: '2026-03-01T08:00:00Z',
   platformUpdatedAt: '2026-03-01T08:00:00Z',
   currency: 'USD',
   paymentMethod: 'PREPAID',
-  buyerId: 'BUYER-1',
-  buyerName: 'Acme Trading Co.',
+  buyerId: 'EXAMPLE-BUYER-1',
+  buyerName: '示例买家',
   buyerType: 'ORGANIZATION',
   discountAmount: '0.00',
   taxAmount: '0.00',
@@ -345,26 +351,28 @@ export const EVENT_TEMPLATE = {
   otherAmount: '0.00',
   platformGrandTotalAmount: '21.00',
   shippingAddress: {
-    recipientName: 'Jane Doe',
+    recipientName: '示例收件人',
     recipientPhone: '+1-555-0100',
-    recipientEmail: 'jane@acme.example',
-    companyName: 'Acme Trading Co.',
+    recipientEmail: 'EXAMPLE-BUYER@example.invalid',
+    companyName: '示例公司',
     countryCode: 'US',
     province: 'CA',
     city: 'Los Angeles',
     district: '',
     postcode: '90001',
-    addressLine1: '100 Main St',
+    addressLine1: '示例地址 1 号',
     addressLine2: '',
     taxId: '',
     note: '',
   },
   lines: [
     {
-      skuId: '11111111-1111-1111-1111-111111111111',
-      skuCode: 'SKU-1',
-      skuName: '商品 1',
-      specSnapshot: '蓝色 / M',
+      // 🔴 留空：SKU id 必须由操作者填真实的。填一个编出来的 UUID 只会得到
+      //    一句「SKU 不存在」，而那更像系统坏了，不像「这里要你自己填」。
+      skuId: '',
+      skuCode: 'EXAMPLE-SKU-1',
+      skuName: '示例商品',
+      specSnapshot: '示例规格',
       skuMappingVersion: 'map-v1',
       quantity: '1',
       unitPrice: '21.00',
@@ -388,6 +396,42 @@ export function parseEventPayload(
   } catch (e) {
     return { ok: false, message: `事件报文不是合法 JSON：${(e as Error).message}` };
   }
+}
+
+/**
+ * 🔴 补拉窗口按**报文自己的时刻**推出来，不写死。
+ *
+ * <p>写死一段日期（比如「2026-03-01 → 2026-03-02」）看着无害，实际上：
+ * 运营粘的是**别的平台、别的时段**的报文，窗口却还是那一段 ——
+ * 轻则捞不到，重则捞到那一段里别的订单。
+ *
+ * <p>取不到时刻时回落到一个**明确的当前时刻**（而不是某段写死的日期），
+ * 窗口就退化成「此刻起的一小段」，捞不到是明摆着的，不会误伤别的时段。
+ */
+function eventMoment(value: unknown, ...keys: string[]): string | null {
+  if (!value || typeof value !== 'object') return null;
+  const record = value as Record<string, unknown>;
+  for (const key of keys) {
+    const raw = record[key];
+    if (typeof raw === 'string' && raw.trim() && !Number.isNaN(Date.parse(raw))) {
+      return new Date(raw).toISOString();
+    }
+  }
+  return null;
+}
+
+/** 补拉窗口起点：事件的下单时刻（其次更新时刻），往前留一小时。 */
+export function eventWindowStart(value: unknown): string {
+  const moment = eventMoment(value, 'platformPlacedAt', 'platformUpdatedAt');
+  const base = moment ? new Date(moment).getTime() : Date.now();
+  return new Date(base - 3600_000).toISOString();
+}
+
+/** 补拉窗口终点：事件的更新时刻（其次下单时刻），往后留一小时。 */
+export function eventWindowEnd(value: unknown): string {
+  const moment = eventMoment(value, 'platformUpdatedAt', 'platformPlacedAt');
+  const base = moment ? new Date(moment).getTime() : Date.now();
+  return new Date(base + 3600_000).toISOString();
 }
 
 /**

@@ -17,7 +17,6 @@ export * from './common/logo';
 export * from './common/avatar';
 export * from './common/page-header';
 export * from './common/feature-list';
-export * from './common/domain-status-banner';
 export * from './common/domain-placeholder';
 export * from './common/detail-drawer';
 export * from './common/external-link';

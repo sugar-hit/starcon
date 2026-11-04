@@ -21,6 +21,8 @@ import {
   documentStatusLabel,
   errorCodeLabel,
   eventOutcomeLabel,
+  eventWindowEnd,
+  eventWindowStart,
   fetchBatch,
   fetchBatches,
   fetchCapabilities,
@@ -522,8 +524,16 @@ function ReplayPanel({
         setFailure(parsed.message);
         return;
       }
-      const platform = platformCode.trim() || 'AMAZON';
-      const shop = shopCode.trim() || 'SHOP-A';
+      // 🔴 平台与店铺**不许**有兜底默认值：这一栏是真实写入，
+      //    默默写成 'AMAZON' / 'SHOP-A' 会把订单挂到一个不存在的店铺名下。
+      const platform = platformCode.trim();
+      const shop = shopCode.trim();
+      if (!platform || !shop) {
+        setFailure(
+          '请先在上面的筛选框里填平台编码与店铺编码 —— 重放会真实写入，不能落到默认的店铺名下。',
+        );
+        return;
+      }
       const response =
         mode === 'webhook'
           ? await submitWebhook({
@@ -534,8 +544,11 @@ function ReplayPanel({
           : await submitPoll({
               platformCode: platform,
               shopCode: shop,
-              windowStart: '2026-03-01T00:00:00Z',
-              windowEnd: '2026-03-02T00:00:00Z',
+              // 🔴 补拉窗口按**这条事件自己的时刻**推出来，
+              //    而不是写死一段日期 —— 写死的窗口会与报文对不上，
+              //    轻则捞不到、重则捞到别的时段的数据。
+              windowStart: eventWindowStart(parsed.value),
+              windowEnd: eventWindowEnd(parsed.value),
               orders: [parsed.value as never],
             });
       setResult(response);

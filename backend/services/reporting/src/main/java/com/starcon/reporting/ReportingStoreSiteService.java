@@ -163,11 +163,7 @@ public class ReportingStoreSiteService {
                     key.note()));
           }
           // 排序：按**跨币种可比的销量**倒序（金额按币种分别报，跨币种比大小本来就不可比）。
-          rows.sort(
-              Comparator.comparing(
-                      (ReportingStoreSiteModels.StoreSiteRow r) ->
-                          negated(cellValue(r, ReportingStoreSiteCatalog.STORE_SITE_SALES_QUANTITY)))
-                  .thenComparing(ReportingStoreSiteModels.StoreSiteRow::dimensionKey));
+          rows.sort(bySalesQuantityDesc());
 
           var totalRows = rows.size();
           var safePage = Math.max(page, 0);
@@ -1257,18 +1253,34 @@ public class ReportingStoreSiteService {
     return out;
   }
 
-  /** 维度取值（取不到 ⇒ null = 算不出来）。 */
+  /**
+   * 维度取值（取不到 ⇒ {@code null} = 算不出来）。
+   *
+   * <p>🔴 这里**不许**拿 0 顶：基期缺失、基期为 0、事实不存在是三件不同的事，
+   * 用 0 顶掉会把「算不出来」伪装成「销量为零」—— 那是本类开头明令禁止的。
+   */
   private static BigDecimal cellValue(ReportingStoreSiteModels.StoreSiteRow row, String metricCode) {
     for (var metric : row.metrics()) {
       if (metric.metricCode().equals(metricCode)) {
-        return metric.value() == null ? BigDecimal.ZERO : metric.value();
+        return metric.value();
       }
     }
-    return BigDecimal.ZERO;
+    return null;
   }
 
-  private static BigDecimal negated(BigDecimal value) {
-    return value.negate();
+  /**
+   * 排序口径：按**跨币种可比的销量**倒序，同销量按维度键稳定排序。
+   *
+   * <p>🔴 「算不出来」的销量排在**最后**，而不是当成 0 混进排序里 ——
+   * 拿 0 顶会让「没有销量事实」的行与「真卖 0 件」的行并列，
+   * 那正是本类禁止的「0 冒充」。
+   */
+  static Comparator<ReportingStoreSiteModels.StoreSiteRow> bySalesQuantityDesc() {
+    return Comparator.comparing(
+            (ReportingStoreSiteModels.StoreSiteRow r) ->
+                cellValue(r, ReportingStoreSiteCatalog.STORE_SITE_SALES_QUANTITY),
+            Comparator.nullsLast(Comparator.reverseOrder()))
+        .thenComparing(ReportingStoreSiteModels.StoreSiteRow::dimensionKey);
   }
 
   private static BigDecimal nz(BigDecimal value) {

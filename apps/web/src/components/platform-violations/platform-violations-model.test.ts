@@ -1,14 +1,20 @@
 import { describe, expect, it } from 'vitest';
 import {
   BASE,
+  EVIDENCE_TYPES,
   MEASURES,
   REMEDIATION_STATUSES,
   SOURCES,
   STATUSES,
+  buildDeductionInput,
+  buildEvidenceInput,
+  buildRemediationInput,
+  buildSubjectInput,
   emptyState,
   emptyStateKind,
   impactLabel,
   impactTone,
+  isUuid,
   measureLabel,
   moneyText,
   remediationStatusLabel,
@@ -202,5 +208,173 @@ describe('🔴 三态空态各不相同', () => {
 describe('白名单前缀独立', () => {
   it('BASE 是本模块自己的独立前缀（不并进既有 channel 分支）', () => {
     expect(BASE).toBe('channel/platform-violations');
+  });
+});
+
+/**
+ * 🔴 写进真实违规记录的入参，一律不许带占位值。
+ *
+ * <p>这一组用例守的是本模块最贵的一个教训：占位值不一定是「假数据」，
+ * 它更常见的两副面孔是
+ *
+ * <ul>
+ *   <li><b>假装成功</b> —— 后端 422 掉了，前端把错误吞掉，界面看着像挂上了；
+ *   <li><b>真的落库</b> —— 后端只校验「非空」，一句通用文案就写进了真实记录，
+ *       事后追责时全是假线索（写死的扣款金额还要跟着店铺走进 12 财务）。
+ * </ul>
+ */
+describe('🔴 主体挂载：不许塞占位 id', () => {
+  it('SKU 必须给真实 UUID，且 skuId / listingId / orderRef 只填对应那一个', () => {
+    const built = buildSubjectInput({
+      subjectType: 'sku',
+      subjectRef: '11111111-1111-4111-8111-111111111111',
+    });
+    expect(built.ok).toBe(true);
+    if (!built.ok) return;
+    expect(built.value.subjectType).toBe('SKU');
+    expect(built.value.skuId).toBe('11111111-1111-4111-8111-111111111111');
+    expect(built.value.listingId).toBeNull();
+    expect(built.value.orderRef).toBeNull();
+  });
+
+  it('LISTING 填 listingId，ORDER 填订单号', () => {
+    const listing = buildSubjectInput({
+      subjectType: 'LISTING',
+      subjectRef: '22222222-2222-4222-8222-222222222222',
+    });
+    expect(listing.ok).toBe(true);
+    if (listing.ok) {
+      expect(listing.value.listingId).toBe('22222222-2222-4222-8222-222222222222');
+      expect(listing.value.skuId).toBeNull();
+    }
+
+    const order = buildSubjectInput({ subjectType: 'ORDER', subjectRef: 'AMZ-2026-0001' });
+    expect(order.ok).toBe(true);
+    if (order.ok) {
+      expect(order.value.orderRef).toBe('AMZ-2026-0001');
+      expect(order.value.skuId).toBeNull();
+    }
+  });
+
+  it('🔴 SKU / LISTING 的 id 不是 UUID 就直接拒绝，不产出可提交的入参', () => {
+    const built = buildSubjectInput({ subjectType: 'SKU', subjectRef: 'MANUAL-SKU' });
+    expect(built.ok).toBe(false);
+    if (built.ok) return;
+    expect(built.error).toContain('UUID');
+  });
+
+  it('🔴 引用为空、类型不认识，都拒绝', () => {
+    expect(buildSubjectInput({ subjectType: 'SKU', subjectRef: '  ' }).ok).toBe(false);
+    expect(buildSubjectInput({ subjectType: 'WAREHOUSE', subjectRef: 'x' }).ok).toBe(false);
+  });
+
+  it('🔴 产出值里没有任何写死的示例引用', () => {
+    const built = buildSubjectInput({
+      subjectType: 'ORDER',
+      subjectRef: 'AMZ-2026-0001',
+    });
+    if (!built.ok) return;
+    expect(built.value.subjectRef).toBe('AMZ-2026-0001');
+    expect(built.value.note).toBe('');
+  });
+
+  it('UUID 形状校验认得真 UUID、认不得占位串', () => {
+    expect(isUuid('11111111-1111-4111-8111-111111111111')).toBe(true);
+    expect(isUuid('11111111-1111-4111-8111-11111111111')).toBe(false);
+    expect(isUuid('MANUAL-SKU')).toBe(false);
+  });
+});
+
+describe('🔴 整改要求：必须是用户真写的内容', () => {
+  it('空要求被拒', () => {
+    const built = buildRemediationInput({ requirement: '   ', ownerRef: '', dueAt: '' });
+    expect(built.ok).toBe(false);
+    if (!built.ok) expect(built.error).toContain('不能为空');
+  });
+
+  it('期限格式不对被拒（YYYY-MM-DD）', () => {
+    const built = buildRemediationInput({
+      requirement: '补齐材质报告',
+      ownerRef: '张三',
+      dueAt: '2026/12/31',
+    });
+    expect(built.ok).toBe(false);
+    if (!built.ok) expect(built.error).toContain('YYYY-MM-DD');
+  });
+
+  it('合法输入被接受，前后空白被裁掉，期限留空变成 null', () => {
+    const built = buildRemediationInput({
+      requirement: '  补齐材质报告  ',
+      ownerRef: ' 李四 ',
+      dueAt: '',
+    });
+    expect(built.ok).toBe(true);
+    if (!built.ok) return;
+    expect(built.value).toEqual({
+      requirement: '补齐材质报告',
+      ownerRef: '李四',
+      dueAt: null,
+    });
+  });
+});
+
+describe('🔴 整改凭证：引用或说明至少给一个，且不许是假文件名', () => {
+  it('类型不在后端白名单里就拒绝', () => {
+    const built = buildEvidenceInput({
+      evidenceType: 'PDF',
+      evidenceRef: 'x.pdf',
+      summary: 'y',
+    });
+    expect(built.ok).toBe(false);
+    if (!built.ok) expect(built.error).toContain('DOCUMENT');
+    expect(EVIDENCE_TYPES).toEqual(['DOCUMENT', 'IMAGE', 'VIDEO', 'LINK', 'NOTE']);
+  });
+
+  it('引用与说明都空被拒', () => {
+    const built = buildEvidenceInput({
+      evidenceType: 'DOCUMENT',
+      evidenceRef: ' ',
+      summary: ' ',
+    });
+    expect(built.ok).toBe(false);
+    if (!built.ok) expect(built.error).toContain('至少');
+  });
+
+  it('只给引用也算合法（后端允许二选一）', () => {
+    const built = buildEvidenceInput({
+      evidenceType: 'DOCUMENT',
+      evidenceRef: 'material-report.pdf',
+      summary: '',
+    });
+    expect(built.ok).toBe(true);
+    if (!built.ok) return;
+    expect(built.value.evidenceRef).toBe('material-report.pdf');
+    expect(built.value.summary).toBe('');
+  });
+});
+
+describe('🔴 扣款：金额与币种都得用户给，且金额必须大于 0', () => {
+  it('金额不是数字 / 是 0 / 是负数，都拒绝', () => {
+    expect(buildDeductionInput({ amount: 'abc', currency: 'USD' }).ok).toBe(false);
+    expect(buildDeductionInput({ amount: '0', currency: 'USD' }).ok).toBe(false);
+    expect(buildDeductionInput({ amount: '-5', currency: 'USD' }).ok).toBe(false);
+    expect(buildDeductionInput({ amount: '', currency: 'USD' }).ok).toBe(false);
+  });
+
+  it('币种必须是三位大写字母', () => {
+    expect(buildDeductionInput({ amount: '10', currency: 'US' }).ok).toBe(false);
+    expect(buildDeductionInput({ amount: '10', currency: '人民币' }).ok).toBe(false);
+    expect(buildDeductionInput({ amount: '10', currency: '' }).ok).toBe(false);
+  });
+
+  it('合法输入被接受，币种被归一成大写', () => {
+    const built = buildDeductionInput({ amount: ' 120.50 ', currency: 'usd' });
+    expect(built.ok).toBe(true);
+    if (!built.ok) return;
+    expect(built.value).toEqual({
+      measure: 'DEDUCTION',
+      penaltyAmount: 120.5,
+      penaltyCurrency: 'USD',
+    });
   });
 });

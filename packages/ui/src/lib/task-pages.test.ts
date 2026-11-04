@@ -18,10 +18,23 @@ it('every task is uniquely addressable and has matching nav/header metadata', ()
   expect(new Set(TASK_PAGES.map((page) => page.href)).size).toBe(TASK_PAGES.length);
   for (const page of TASK_PAGES) {
     expect(findTaskPage(page.href)).toBe(page);
-    expect(page.fields.length).toBeGreaterThan(0);
-    expect(page.workflow).toHaveLength(3);
   }
   expect(findTaskPage('/orders/unknown')).toBeUndefined();
+});
+
+it('🔴 只有「还没有真实页面」的条目才写字段表与流程', () => {
+  // fields / workflow 是 `[...slug]` 兜底页（TaskWorkspace）渲染的**占位表头**，
+  // 只有真正落到兜底页的条目才需要它们 ——
+  // 已经有真实 page.tsx 的条目写一串字段，描述的是一张并不存在的表。
+  for (const page of TASK_PAGES) {
+    if (page.implemented) {
+      expect(page.fields, `${page.href} 已有真实页面，不该再写占位字段表`).toBeUndefined();
+      expect(page.workflow, `${page.href} 已有真实页面，不该再写占位流程`).toBeUndefined();
+    } else {
+      expect(page.fields?.length ?? 0, `${page.href} 未实现，必须有字段表`).toBeGreaterThan(0);
+      expect(page.workflow, `${page.href} 未实现，必须有流程`).toHaveLength(3);
+    }
+  }
 });
 
 it('业务菜单只承载业务页面，账户页面走账户通道', () => {
@@ -57,7 +70,6 @@ it('未实现的任务页仍保留设计登记，但不进菜单', () => {
     expect(page.workflow).toHaveLength(3);
   }
 });
-
 it('账户页面不被任何业务系统解析认领', () => {
   for (const page of ACCOUNT_TASKS) {
     const system = resolveSystemFromPath(page.href);
