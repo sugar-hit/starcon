@@ -2,20 +2,26 @@
 
 <div align="center">
 
-<img src="apps/web/public/logo-mark-brand.svg" alt="starcon logo" width="88" height="88">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="apps/web/public/logo-app-icon-light.svg">
+  <source media="(prefers-color-scheme: light)" srcset="apps/web/public/logo-app-icon-dark.svg">
+  <img src="apps/web/public/logo-app-icon-dark.svg" alt="starcon 应用图标" width="96" height="96">
+</picture>
 
 # starcon
 
-### 让跨境电商的商品、订单与库存，在同一个业务系统中协同。
+### 跨境电商的共同业务操作系统。
 
-面向多平台经营企业的 SaaS ERP · 9 个 Java 微服务 · PostgreSQL 行级安全
+一套贯穿商品、渠道、订单、库存、履约、财务、增长与客服的多租户业务底座。
 
 [![License: PolyForm Noncommercial](docs/design/readme/license.svg)](LICENSE)
 [![Java 21](docs/design/readme/java.svg)](backend/pom.xml)
-[![Next.js](docs/design/readme/next.svg)](apps/web/package.json)
+[![Spring Boot 3.5](docs/design/readme/spring-boot.svg)](backend/pom.xml)
+[![Next.js 15](docs/design/readme/next.svg)](apps/web/package.json)
 [![TypeScript](docs/design/readme/typescript.svg)](apps/web/tsconfig.json)
+[![PostgreSQL 16](docs/design/readme/postgresql.svg)](deploy/docker/docker-compose.catalog.yml)
 
-[快速体验](#快速体验) · [项目亮点](#项目亮点) · [实现进度](#实现进度) · [系统架构](#系统架构) · [使用许可](#使用许可)
+[为什么做 starcon](#为什么做-starcon) · [项目亮点](#项目亮点) · [实现进度](#实现进度) · [快速体验](#快速体验) · [系统架构](#系统架构) · [使用许可](#使用许可)
 
 </div>
 
@@ -23,28 +29,28 @@
 
 ## 为什么做 starcon
 
-跨境电商的业务分散在店铺后台、商品资料表、仓库系统、结算报表、广告后台与客服工单里。同一个 SKU 在不同平台的标识不一致，订单与库存难以协同，组织扩张后又会遇到权限和数据隔离问题。
+做跨境电商，往往意味着同时应付一堆互相对不上的系统：店铺后台、商品资料表、仓库系统、结算报表、广告后台、客服工单。同一个商品在每个平台各有一个编号，订单和库存越走越偏；团队一大，谁能看到哪位客户的数据反而说不清了。
 
-**starcon 希望建立一套贯穿商品、渠道、订单、库存、履约、财务、增长与客服的业务底座**：商品有统一档案，库存变化有可追溯流水，业务操作有明确权限，跨服务协作有清晰边界。
+starcon 用一套业务底座替掉这堆拼装。商品档案只有一个家，库存每一次变动都留痕，每一个操作都绑着明确的权限，每一个领域只拥有一份事实。跨平台协作于是从「对账」变回「日常」。
 
-项目面向 Amazon、Shopify、eBay、TikTok Shop、Temu、Lazada、Shopee、Walmart 等多平台经营场景。渠道服务已实现上述平台的 OAuth 授权适配器；订单接入、刊登同步、广告数据等实网业务接口仍需按验收记录逐项确认。
+项目面向 Amazon、Shopify、eBay、TikTok Shop、Temu、Lazada、Shopee、Walmart 等平台。渠道服务已实现这些平台的 OAuth 授权适配器；订单接入、刊登同步、广告数据等实网业务接口仍待按验收记录逐项确认。
 
 ## 项目亮点
 
-- **一条商品主线贯穿全链路**：SPU / SKU 支持规格组合、属性继承与覆写，品牌、单位、套装 BOM 与商品资料和刊登、定价、采购记录同源管理。
-- **把数据隔离落实到数据库**：认证成员关系解析租户，业务表使用 `tenant_id NOT NULL` 与 PostgreSQL RLS；角色操作权限和数据范围共同决定访问边界，父子租户关系不自动授予业务访问权。
-- **九个服务，一张事实表只有一个主人**：identity、catalog、channel、trade、warehouse、crm、finance、reporting、platform 各自拥有数据库与 Flyway 迁移；跨域协作走授权 API 或事件，不做跨服务 SQL、跨库外键或共享视图。
-- **功能蓝图已全覆盖**：18 个业务系统、465 个 L4 模块，每个模块在交付台账里都对应迁移、接口、页面与测试证据。
-- **财务与分析是一等公民**：应收应付、收付款、凭证、对账、成本、递延结算、利润报表、自定义看板与 SKU 级利润，金额一律 `BigDecimal` 落到 `NUMERIC` 列。
-- **自动化与 AI 长在平台服务里**：智能查询、AI 诊断与预测、带效果评估的自动化规则、API 网关、事件订阅与外部集成。
-- **前后端围绕契约协作**：后端 OpenAPI 生成 TypeScript 契约；CI 按服务跑 PostgreSQL 集成测试，再叠加前端单元测试、浏览器测试与蓝图台账一致性校验。
-- **设计与交付证据可追溯**：四级功能蓝图、架构决策、模块进度台账和会话验收记录均保存在仓库中，方便评审从需求追踪到实现。
+- **一条商品主线贯穿全链路**：SPU 与 SKU 承载规格组合、属性继承与显式覆写；品牌、单位、套装 BOM 与商品资料和刊登、定价、采购记录放在一起，而不是散在另一张表里。
+- **隔离由数据库保证，不靠约定**：租户上下文来自已认证的成员关系；业务表带 `tenant_id NOT NULL` 并启用行级安全；页面权限与数据范围在同一个角色里一起授予。父租户不会因为层级关系就看见子租户的数据。
+- **九个服务，一份事实只有一个主人**：identity、catalog、channel、trade、warehouse、crm、finance、reporting、platform 各自拥有数据库与 Flyway 迁移；跨域协作走授权 API 与事件——没有跨服务 SQL，没有跨库外键，也没有共享视图。
+- **功能蓝图已全覆盖**：18 个业务系统的 465 个 L4 模块全部登记在交付台账里，每个都附上迁移、接口、页面与测试作为证据。
+- **财务与分析是内建的，不是后补的**：应收应付、收付款、凭证、对账、成本、递延结算、利润报表、自定义看板与 SKU 级利润——金额用 `BigDecimal` 计算，落到 `NUMERIC` 列，从接口一直贯穿到账簿。
+- **自动化与 AI 属于平台本身**：智能查询、AI 诊断与预测、带效果度量的自动化规则、API 网关、事件订阅与外部集成，都是正式服务，而不是挂在页面上的脚本。
+- **契约让两侧都不跑偏**：后端 OpenAPI 生成 TypeScript 契约；CI 按服务跑 PostgreSQL 集成测试，再叠加前端单元测试、浏览器测试与蓝图台账一致性校验。
+- **证据与代码放在一起**：四级功能蓝图、架构决策记录、模块台账与逐会话的验收记录，让评审能把一条需求一路追到实现。
 
 ## 实现进度
 
-> 项目处于持续开发阶段。以下为 main 分支截至 **2026-11-04** 的实现概览，不代表全部功能已完成或已经生产上线。
+> 项目处于持续开发阶段。以下内容对齐 **2026-11-05** 的 `main` 分支，描述的是仓库里真实存在的东西，不代表已经可以生产上线。
 
-[交付台账](docs/product/capability-blueprint/module-progress.md)记录了 **465 个规划模块，465 个全部标记为已交付（100.0%）**。这里的模块是蓝图中的 L4 功能单元，只有迁移、接口、页面、测试四件齐全才算「已交付」——所以这个百分比衡量的是蓝图覆盖度，不是生产成熟度，也不是平台实网连通性。`pnpm progress:check` 负责保证台账与蓝图不漂移。
+[交付台账](docs/product/capability-blueprint/module-progress.md)记录了 **465 个规划模块，465 个全部标记为已交付（100.0%）**。模块只有迁移、接口、页面、测试四件齐全才算「已交付」，所以这个数字衡量的是**蓝图覆盖度**——不是生产成熟度，也不是与任何平台的实网连通性。`pnpm progress:check` 负责保证台账与蓝图不漂移。
 
 | 领域                 | 卷    | 模块数 | 当前已有实现                                                       | 继续推进的方向              |
 | -------------------- | ----- | ------ | ------------------------------------------------------------------ | --------------------------- |
@@ -63,17 +69,17 @@
 | 组织权限与系统设置   | 17    | 29     | 成员、角色、页面权限、数据范围、部门、子租户与审批规则             | 正式身份提供方接入          |
 | 集成开放与智能自动化 | 18    | 24     | 智能查询、AI 诊断与预测、自动化规则、API 网关、事件订阅与效果评估  | 模型与外部系统实网验收      |
 
-页面入口、演示数据、配置记录或任务接口的存在，不等于外部平台已完成真实连接。详细范围和证据请查看[功能蓝图](docs/product/capability-blueprint/README.md)、[交付台账](docs/product/capability-blueprint/module-progress.md)与[会话验收记录](docs/sessions/2026-11/)。
+页面、配置记录或任务接口的存在，不等于外部平台已经跑通真实连接。范围与证据请查[功能蓝图](docs/product/capability-blueprint/README.md)、[交付台账](docs/product/capability-blueprint/module-progress.md)和[会话验收记录](docs/sessions/2026-11/)。项目的详细文档目前以中文为主。
 
 ## 快速体验
 
 ### 环境要求
 
-- Node.js **≥ 22.12.0**，pnpm **9**（仓库固定 `pnpm@9.0.0`）。
-- Docker Desktop 或可用的 Docker Engine + Compose，用于运行 PostgreSQL 和后端服务。
-- 仅在宿主机直接构建后端时需要 **JDK 21**；容器启动方式自带 Java 工具链。
+- **Node.js ≥ 22.12.0** 与 **pnpm 9**——仓库固定 `pnpm@9.0.0`。
+- Docker Desktop，或带 Compose 的 Docker Engine，用于跑 PostgreSQL 和后端服务。
+- **JDK 21**，且只在宿主机直接构建后端时才需要；容器镜像自带 Java 工具链。
 
-### 启动
+### 本地启动
 
 ```bash
 git clone https://github.com/sugar-hit/starcon.git
@@ -90,9 +96,9 @@ pnpm dev:backend
 pnpm --filter @starcon/web dev
 ```
 
-打开 [http://localhost:3000/products](http://localhost:3000/products)。首次后端构建需要下载依赖，服务启动后请等待接口就绪。
+打开 [http://localhost:3000/products](http://localhost:3000/products)。首次后端构建要下载依赖，等服务就绪后再登录。
 
-首次启动会自动生成 `deploy/.env.catalog.local`。本地账号为 `local-admin`，密码读取该文件的 `LOCAL_ADMIN_PASSWORD`；不要提交或公开此文件。初次引导创建开发租户和 Owner 成员，不自动填充演示商品。详细说明见[本地开发指南](docs/operations/catalog-local-development.md)。
+首次启动会生成 `deploy/.env.catalog.local`。本地账号是 `local-admin`，密码取该文件的 `LOCAL_ADMIN_PASSWORD`；这个文件请留在本地，不要提交、不要外传。初次引导会建好开发租户和 Owner 成员，但不预置演示商品。细节见[本地开发指南](docs/operations/catalog-local-development.md)。
 
 | 服务       | 本地端口 | 职责                  |
 | ---------- | -------- | --------------------- |
@@ -110,22 +116,22 @@ pnpm --filter @starcon/web dev
 
 服务端口绑定配置以 [`docker-compose.catalog.yml`](deploy/docker/docker-compose.catalog.yml) 为准。
 
-### 建议演示路线
+### 值得走一遍的演示路线
 
-1. **从工作台开始**：看待办入口、指标卡与店铺概览，建立整体感。
-2. **商品建档**：登录商品中心，创建 SPU、配置属性与规格，再建立 SKU，展示公共值继承与独立覆写。
-3. **组织权限**：创建角色和成员，配置页面操作与数据范围，使用受限成员验证可见范围；展示父子租户的独立数据边界。
-4. **串起作业与履约**：从库存预占走到拣货、打包与发货交接，再看订单进入售后流程。
-5. **闭环到财务**：查看凭证、对账任务与结算记录，再读基于这些数据的利润报表。
-6. **试用自动化层**：跑一次智能查询、一次 AI 诊断，再执行一条自动化规则并查看效果评估。
+1. **从工作台开始**：待办入口、指标卡与店铺概览，先看清业务的形状。
+2. **建一份商品档案**：创建 SPU、配置属性与规格轴、建立 SKU，看清属性怎么继承、怎么覆写。
+3. **划一条权限边界**：配置角色与成员，验证受限成员的可见范围，再看子租户如何看不见父租户。
+4. **跟着实物走一圈**：从库存预占到拣货、打包、发货交接，再走进一次退货。
+5. **把财务闭环合上**：读懂利润报表背后的凭证、对账任务与结算记录。
+6. **试试自动化层**：跑一次智能查询、一次 AI 诊断，再执行一条自动化规则并查看效果评估。
 
-后三步需要先准备上游业务数据和权限。具体页面的前置条件及当前限制见[模块台账](docs/product/capability-blueprint/module-progress.md)所链接的验收记录。
+后三步需要先备好上游业务数据与对应权限。各页面的前置条件和当前限制，见[模块台账](docs/product/capability-blueprint/module-progress.md)所链接的验收记录。
 
 ## 系统架构
 
 ![starcon service architecture](docs/design/readme/architecture.svg)
 
-图中展示当前服务与数据所有权。业务服务还通过授权接口核验身份和权限；跨服务调用不直接读写对方数据库。完整边界见 [ADR-0004](docs/decisions/0004-java-spring-boot-microservices.md)，更完整的视图见[架构总览](docs/architecture/overview.md)。
+图中展示当前服务与数据所有权。业务服务还通过授权接口核验身份与权限；跨服务调用不直接读写对方数据库。服务边界见 [ADR-0004](docs/decisions/0004-java-spring-boot-microservices.md)，更完整的视图见[架构总览](docs/architecture/overview.md)。
 
 | 层次 | 技术选择                                                          |
 | ---- | ----------------------------------------------------------------- |
@@ -136,7 +142,7 @@ pnpm --filter @starcon/web dev
 | 验证 | Vitest、Playwright、JUnit 5、AssertJ、Testcontainers PostgreSQL   |
 | 工程 | pnpm workspaces、Turborepo、Docker Compose、GitHub Actions        |
 
-云原生部署和事件协作按阶段推进；不将规划中的中间件或基础设施视为当前运行依赖。
+云原生部署与事件协作按阶段推进；规划中的中间件与基础设施不作为当前运行依赖。
 
 ## 仓库结构
 
@@ -176,7 +182,7 @@ pnpm db:generate             # 从已迁移数据库生成 jOOQ 代码
 pnpm progress:check          # 校验蓝图与台账同步
 ```
 
-宿主机使用 JDK 21 时，可在 `backend/` 执行 `./mvnw verify`。数据库变更使用新增 Flyway 迁移；前端契约由后端 OpenAPI 生成，不手工修改生成物。
+宿主机使用 JDK 21 时，可在 `backend/` 执行 `./mvnw verify`。数据库变更一律新增 Flyway 迁移；前端契约由后端 OpenAPI 生成，不手工修改生成物。
 
 ## 文档导航
 
@@ -201,3 +207,7 @@ pnpm progress:check          # 校验蓝图与台账同步
 将本项目用于企业经营、收费 SaaS、销售衍生产品或商业交付等用途，不能仅凭仓库公开或 fork 权限取得商业许可。请通过[仓库维护者主页](https://github.com/sugar-hit)联系，或在 [Issues](https://github.com/sugar-hit/starcon/issues) 中提出不含敏感信息的授权咨询；咨询本身不构成授权。
 
 完整权利、义务及标准协议中的例外以 [`LICENSE`](LICENSE) 为准；中英文说明、第三方素材与商业授权流程见 [`LICENSING.md`](LICENSING.md)。分发时须保留许可证和 [`NOTICE`](NOTICE) 中的 Required Notice。
+
+---
+
+<sub>最后更新：**2026-11-05**（内容对齐 `main` 分支）· <a href="https://github.com/sugar-hit/starcon/commits/main">提交历史</a> · <a href="https://github.com/sugar-hit/starcon/graphs/contributors">贡献者</a> · <a href="https://github.com/sugar-hit/starcon/issues">Issues</a></sub>
