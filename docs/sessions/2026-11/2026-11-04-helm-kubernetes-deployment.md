@@ -291,3 +291,17 @@ ADR-0004 换成 Java 微服务之后，`apps/api` 与 `apps/worker` 都成了**�
       并确认平台侧应用的 `redirect_uri` 已登记
 - [ ] **reporting 的 `REPORTING_PDF_FONT_PATH`** —— 默认内置字体，部分 CJK 字形会缺，
       需要完整字形时得挂字体卷
+- [ ] **channel 的 `verify` 单跑 40 分钟** —— 它是后端 9 路矩阵的关键路径，
+      每个 PR 的 CI 墙钟都由它决定。取证与可查方向见
+      [`docs/backlog/2026-11/2026-11-05-channel-verify-40min-matrix-critical-path.md`](../../backlog/2026-11/2026-11-05-channel-verify-40min-matrix-critical-path.md)
+- [ ] **GitHub Actions 作业「步骤全绿却不落账」** —— 本轮 PR #76 的第一轮 CI 撞上了：
+      channel 作业所有步骤（含 `Complete job`）都是 success，GitHub 侧却一直
+      `in_progress` / `completed_at=null`，把 Quality Gate 卡住，且
+      `gh run rerun --job` 拒绝重跑。辨法与处置见同一条 backlog。
+      顺带说明：同步 main 触发干净的新 run 实测有效。
+
+## PR 落点
+
+- PR #76 → 已由 sugar-hit 于 2026-11-04T18:13:16Z 合并（merge commit `19fbe465`）
+- 合并前把 main（已含 PR #77）同步进分支，零冲突
+- 合并后从 main 干净检出复验：`helm lint` 双绿、`helm template` 双绿
