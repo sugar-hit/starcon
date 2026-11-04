@@ -134,6 +134,28 @@ ServiceAccount 名
 {{- end }}
 
 {{/*
+前端公开地址（web.publicUrl）。
+
+🔴 这里**拒绝示例值**：values.yaml 里的 `http://starcon.example.com` 是占位符，
+   不是可用的地址。带着它装上去，channel 的渠道 OAuth 授权完成会把浏览器送去
+   一个不存在的域名 —— 而且安装过程一声不响，排查成本极高。
+   与 postgres.host 一样，宁可在渲染期炸掉，也不要等到线上才发现。
+
+入参：dict "ctx" $
+*/}}
+{{- define "starcon-backend.publicUrl" -}}
+{{- $ctx := .ctx -}}
+{{- $url := $ctx.Values.web.publicUrl | toString -}}
+{{- if not $url -}}
+{{- fail "starcon-backend: web.publicUrl 必须填写（前端 Ingress 的真实地址）" -}}
+{{- end -}}
+{{- if or (eq $url "http://starcon.example.com") (eq $url "https://starcon.example.com") -}}
+{{- fail "starcon-backend: web.publicUrl 仍是示例值 starcon.example.com，必须填前端 Ingress 的真实地址（--set web.publicUrl=https://erp.你的域名）" -}}
+{{- end -}}
+{{- trimSuffix "/" $url -}}
+{{- end }}
+
+{{/*
 密钥 Secret 名。
 入参：dict "ctx" $ "name" "identity"
 services.<名>.secret.existingSecret 非空时复用已有 Secret，不再创建 ExternalSecret。
@@ -217,7 +239,7 @@ services.<名>.secret.existingSecret 非空时复用已有 Secret，不再创建
   value: {{ $publicBase | quote }}
 {{- $uiReturn := $svc.oauth.uiReturnUrl }}
 {{- if not $uiReturn }}
-{{- $uiReturn = printf "%s/channels" (trimSuffix "/" $ctx.Values.web.publicUrl) }}
+{{- $uiReturn = printf "%s/channels" (include "starcon-backend.publicUrl" (dict "ctx" $ctx)) }}
 {{- end }}
 - name: CHANNEL_OAUTH_UI_RETURN_URL
   value: {{ $uiReturn | quote }}

@@ -14,6 +14,17 @@ Ingress —— 前端对外入口
 {{- range .Values.ingress.extraHosts }}
 {{- $hosts = append $hosts . }}
 {{- end }}
+{{/*
+🔴 拒绝示例主机名：values.yaml 里的 `starcon.example.com` 是占位符，不是可用的地址。
+   带着它装上去，Ingress 会把全部流量送进一个不存在的域名 ——
+   而且安装过程一声不响。后端 chart 的 services.<名>.ingress.host 早就用 required() 守着了，
+   这里不能比它松。
+*/}}
+{{- range $hosts }}
+{{- if eq . "starcon.example.com" }}
+{{- fail "starcon-web: ingress.host 仍是示例值 starcon.example.com，必须填真实主机名（--set ingress.host=erp.你的域名）" }}
+{{- end }}
+{{- end }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
