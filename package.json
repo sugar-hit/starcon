@@ -24,6 +24,7 @@
     "db:migrate": "./deploy/scripts/catalog-db-sync.sh",
     "db:generate": "./deploy/scripts/catalog-db-generate.sh",
     "cli": "pnpm --filter @starcon/cli start",
+    "branch:new": "node tools/scripts/new-branch.mjs",
     "release": "changeset publish",
     "prepare": "husky install || true",
     "test:unit": "vitest run",
