@@ -115,11 +115,18 @@ starcon 是 SaaS，**所有业务表必须带 `tenant_id` NOT NULL**，DB 层启
 
 ## PR & commit 规范
 
-- 分支: `<type>/<ticket-id>-<short-desc>`，从 `main` 切
-- Conventional Commits: `feat:` `fix:` `refactor:` `docs:` `test:` `chore:` `perf:`
+- **每个新需求先切独立分支**：从 `main` 切，不在 `main` 或别的功能分支上直接改
+- 分支名: `<type>/<short-desc>`，type 取 `feat` `fix` `refactor` `docs` `test` `chore` `perf`
+- 短名用 kebab-case 英文短语，必须说清楚「这里改了什么」，可带工单号前缀（如 `feat/star-123-invoice-export`）
+- **禁止纯数字或无语义命名**：`123` / `1` / `task-2` / `wip` 这类名字一律不合格
+- 分支重名时追加时间戳 `<type>/<short-desc>-YYYYMMDD-HHMM`，**既有分支一律不覆盖**
+- 建分支用 `pnpm branch:new <type> <short-desc>`：自动校验 type 与短名语义，自动查本地与远端重名并加时间戳
+- Conventional Commits: `feat:` `fix:` `refactor:` `docs:` `test:` `chore:` `perf:`（与分支 type 保持一致）
 - 一个 atomic 改动 = 一个 commit（不堆积）
 - PR 必须有 description + 影响面 + 测试说明 + 截图（UI 改动）
 - 必跑 CI: lint / typecheck / unit / build，**全绿才能合**
+
+> 流水线车道分支（`feat/<模块ID>`）由 `tools/module-progress/lane.mjs` 生成，不受上面的手工命名约束。
 
 ## 安全
 
